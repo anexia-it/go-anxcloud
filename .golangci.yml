@@ -1,0 +1,63 @@
+linters:
+  disable-all: true
+  enable:
+  - asciicheck
+  - bodyclose
+  - deadcode
+  - dogsled
+  - dupl
+  - depguard
+  - errcheck
+  - exhaustive
+  - exportloopref
+  - funlen
+  - gci
+  - goconst
+  - gocognit
+  - gocritic
+  - gocyclo
+  - godox
+  - gofmt
+  - gofumpt
+  - goimports
+  - golint
+  - gomnd
+  - goprintffuncname
+  - gosec
+  - gosimple
+  - govet
+  - ineffassign
+  - interfacer
+  - misspell
+  - nakedret
+  - nestif
+  - nlreturn
+  - noctx
+  - prealloc
+  - rowserrcheck
+  - scopelint
+  - staticcheck
+  - structcheck
+  - stylecheck
+  - typecheck
+  - unconvert
+  - unused
+  - unparam
+  - varcheck
+  - whitespace
+  - nolintlint
+  - goerr113
+  - godot
+issues:
+  include:
+  - EXC0001
+  - EXC0002
+  - EXC0003
+  - EXC0004
+  - EXC0005
+  - EXC0009
+  - EXC0010
+linters-settings:
+  nolintlint:
+    require-explanation: true
+    require-specific: true
