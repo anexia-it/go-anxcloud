@@ -3,6 +3,7 @@ package client_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/client"
 )
@@ -15,6 +16,6 @@ func TestEchoWithToken(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	if err := client.ExecuteEcho(ctx, c); err != nil {
-		t.Fatalf("echo test failed: %v", err)
+		t.Fatalf("[%s] echo test failed: %v", time.Now(), err)
 	}
 }
