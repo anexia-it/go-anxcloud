@@ -20,10 +20,10 @@ func TestVMProvisioningDeprovisioning(t *testing.T) {
 	ips, err := vm.GetFreeIPs(ctx, location, vlan, c)
 	defer cancel()
 	if err != nil {
-		t.Fatalf("provisioning vm failed: %v", err)
+		t.Fatalf("[%s] provisioning vm failed: %v", time.Now(), err)
 	}
 	if len(ips) < 1 {
-		t.Fatalf("no IPs left for testing in vlan")
+		t.Fatalf("[%s] no IPs left for testing in vlan", time.Now())
 	}
 
 	networkInterfaces := []vm.Network{{
@@ -37,15 +37,15 @@ func TestVMProvisioningDeprovisioning(t *testing.T) {
 
 	provisionResponse, err := vm.ProvisionVM(ctx, definition, c)
 	if err != nil {
-		t.Fatalf("provisioning vm failed: %v", err)
+		t.Fatalf("[%s] provisioning vm failed: %v", time.Now(), err)
 	}
 
 	vmID, err := vm.AwaitProvisioning(ctx, provisionResponse.Identifier, c)
 	if err != nil {
-		t.Fatalf("waiting for VM provisioning failed: %v", err)
+		t.Fatalf("[%s] waiting for VM provisioning failed: %v", time.Now(), err)
 	}
 
 	if err = vm.DeprovisionVM(ctx, vmID, false, c); err != nil {
-		t.Fatalf(fmt.Sprintf("could not deprovision VM: %v", err))
+		t.Fatalf(fmt.Sprintf("[%s] could not deprovision VM: %v", time.Now(), err))
 	}
 }
