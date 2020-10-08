@@ -152,7 +152,7 @@ type ProvisioningResponse struct {
 // ctx is attached to the request and will cancel it on cancelation.
 // It does not affect the provisioning request after it was issued.
 // definition contains the definition of the VM to be created.
-// client is the HTTP to be used for the request.
+// c is the HTTP to be used for the request.
 //
 // If the API returns errors, they are raised as ResponseError error.
 // The returned ProvisioningResponse is still valid in this case.
