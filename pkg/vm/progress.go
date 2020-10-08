@@ -3,14 +3,18 @@ package vm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/client"
 )
 
 const (
-	progressPathPrefix = "/api/vsphere/v1/provisioning/progress.json"
+	progressPathPrefix                = "/api/vsphere/v1/provisioning/progress.json"
+	provisionPollInterval             = 5 * time.Second
+	provisioningProgressCompleteValue = 100
 )
 
 // ProgressResponse contains information regarding the provisioning of a VM returned by the API .
@@ -66,4 +70,35 @@ func GetProvisioningProgress(ctx context.Context, identifier string, c client.Cl
 	}
 
 	return responsePayload, err
+}
+
+// AwaitProvisioning polls the status of a started provisioning request and blocks until it is done.
+//
+// ctx will be checked for cancellation and the method returns immidiatly if so.
+// progressID identifies the running provisioning task and is contained within ProvisioningResponse.
+// c is the HTTP to be used for polling requests.
+//
+// Returned will be the VM ID and an error if polling or ProvisioningError if provisioning failed.
+func AwaitProvisioning(ctx context.Context, progressID string, c client.Client) (string, error) {
+	ticker := time.NewTicker(provisionPollInterval)
+	defer ticker.Stop()
+	var responseError *client.ResponseError
+	for {
+		select {
+		case <-ticker.C:
+			progressResponse, err := GetProvisioningProgress(ctx, progressID, c)
+			isProvisioningError := errors.As(err, &responseError)
+			switch {
+			case isProvisioningError && responseError.Response.StatusCode == 404:
+			case err == nil:
+				if progressResponse.Progress == provisioningProgressCompleteValue {
+					return progressResponse.VMIdentifier, nil
+				}
+			default:
+				return "", fmt.Errorf("could not query provision progress: %w", err)
+			}
+		case <-ctx.Done():
+			return "", fmt.Errorf("vm did not get ready in time: %w", ctx.Err())
+		}
+	}
 }

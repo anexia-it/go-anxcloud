@@ -2,7 +2,6 @@ package vm_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -41,32 +40,12 @@ func TestVMProvisioningDeprovisioning(t *testing.T) {
 		t.Fatalf("provisioning vm failed: %v", err)
 	}
 
-	progressID := provisionResponse.Identifier
-	progressResponse := vm.ProgressResponse{}
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-	isDone := false
-	var responseError *client.ResponseError
-	for !isDone {
-		select {
-		case <-ticker.C:
-			progressResponse, err := vm.GetProvisioningProgress(ctx, progressID, c)
-			isProvisioningError := errors.As(err, &responseError)
-			switch {
-			case isProvisioningError && responseError.Response.StatusCode == 404:
-			case err == nil:
-				if progressResponse.Progress == 100 {
-					isDone = true
-				}
-			default:
-				t.Fatalf(fmt.Sprintf("could not query provision progress: %v", err))
-			}
-		case <-ctx.Done():
-			t.Fatalf("vm did not get ready in time: %+v, %+v, %+v", progressResponse, *responseError, progressID)
-		}
+	vmID, err := vm.AwaitProvisioning(ctx, provisionResponse.Identifier, c)
+	if err != nil {
+		t.Fatalf("waiting for VM provisioning failed: %v", err)
 	}
 
-	if err = vm.DeprovisionVM(ctx, progressResponse.VMIdentifier, false, c); err == nil {
-		t.Fatalf(fmt.Sprintf("could not deprovision progress: %v", err))
+	if err = vm.DeprovisionVM(ctx, vmID, false, c); err != nil {
+		t.Fatalf(fmt.Sprintf("could not deprovision VM: %v", err))
 	}
 }
