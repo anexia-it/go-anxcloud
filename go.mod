@@ -1,4 +1,4 @@
-module anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud
+module github.com/anexia-it/go-anxcloud
 
 go 1.15
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 // DeprovisionVM issues a request to deprovision an existing VM using.

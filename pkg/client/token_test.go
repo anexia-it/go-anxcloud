@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 func TestEchoWithToken(t *testing.T) {
