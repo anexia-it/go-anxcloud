@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/client"
-	"anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud/pkg/vm"
+	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/vm"
 )
 
 func TestGetIPs(t *testing.T) {

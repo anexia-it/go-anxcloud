@@ -1,6 +1,6 @@
 GITTAG ?= $(shell git describe --tags --always)
 GITCOMMIT ?= $(shell git log -1 --pretty=format:"%H")
-GOLDFLAGS ?= -s -w -extldflags '-zrelro -znow' -X anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud.version=$(GITTAG) -X anxkube-gitlab-dev.se.anx.io/anxkube/go-anxcloud.commit=$(GITCOMMIT)
+GOLDFLAGS ?= -s -w -extldflags '-zrelro -znow' -X github.com/anexia-it/go-anxcloud.version=$(GITTAG) -X github.com/anexia-it/go-anxcloud.commit=$(GITCOMMIT)
 GOFLAGS ?= -trimpath
 CGO_ENABLED ?= 0
 
