@@ -2,6 +2,7 @@
 package client
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -81,4 +82,19 @@ func NewAnyClientFromEnvs(unset bool, httpClient *http.Client) (Client, error) {
 	default:
 		return nil, fmt.Errorf("%w: either %s and %s must be set or %s", ErrEnvMissing, KeyIDEnvName, KeySecretEnvName, TokenEnvName)
 	}
+}
+
+func handleRequest(c *http.Client, req *http.Request) (*http.Response, error) {
+	response, err := c.Do(req)
+
+	if err == nil && response.StatusCode != http.StatusOK {
+		errResponse := ResponseError{Request: req, Response: response}
+		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
+			return response, fmt.Errorf("could not decode error response: %w", decodeErr)
+		}
+
+		return response, &errResponse
+	}
+
+	return response, err
 }

@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -69,17 +68,7 @@ func (s signingClient) Do(req *http.Request) (*http.Response, error) {
 	sig := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 	req.Header.Set("Authorization", fmt.Sprintf(`Signature keyId="%s",algorithm="hmac-sha512",signature="%s",headers="%s"`, s.keyID, sig, headerSet))
 
-	response, err := s.httpClient.Do(req)
-	if err == nil && response.StatusCode != http.StatusOK {
-		errResponse := ResponseError{Request: req, Response: response}
-		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
-			return response, fmt.Errorf("could not decode error response: %w. Original error was: %v", decodeErr, err)
-		}
-
-		return response, &errResponse
-	}
-
-	return response, err
+	return handleRequest(s.httpClient, req)
 }
 
 // NewSigningClient creates a new signing client for the anxcloud that uses HTTP Signature Authentication.
