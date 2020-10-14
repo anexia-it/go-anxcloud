@@ -20,6 +20,8 @@ const (
 	LocationEnvName = "ANXCLOUD_LOCATION"
 	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
 	VLANEnvName = "ANXCLOUD_VLAN"
+	// IntegrationTestEnvName is the name of the environment variable that enables integration tests if present.
+	IntegrationTestEnvName = "ANXCLOUD_INTEGRATION_TESTS_ON"
 	// DefaultBaseURL is the default base URL used for requests.
 	DefaultBaseURL = "https://engine.anexia-it.com"
 	// EchoPath can be used to test connectivity with the API.
