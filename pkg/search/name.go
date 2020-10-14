@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
@@ -39,11 +40,13 @@ type response struct {
 // name is the name search string. It may contain wildcards as stated in the API docs.
 // client is the HTTP to be used for the request.
 func ByName(ctx context.Context, name string, c client.Client) ([]VM, error) {
+	params := url.Values{}
+	params.Add("name", name)
 	url := fmt.Sprintf(
-		"%s%s/%s",
+		"%s%s?%s",
 		c.BaseURL(),
 		pathPrefix,
-		name,
+		params.Encode(),
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
