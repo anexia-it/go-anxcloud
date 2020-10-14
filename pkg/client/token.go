@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,18 +18,7 @@ func (t tokenClient) BaseURL() string {
 func (t tokenClient) Do(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Token %v", t.token))
 
-	response, err := t.httpClient.Do(req)
-
-	if err == nil && response.StatusCode != http.StatusOK {
-		errResponse := ResponseError{Request: req, Response: response}
-		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
-			return response, fmt.Errorf("could not decode error response: %w. Original error was: %v", decodeErr, err)
-		}
-
-		return response, &errResponse
-	}
-
-	return response, err
+	return handleRequest(t.httpClient, req)
 }
 
 // NewTokenClient creates a new token client for the anxcloud that uses tokens.

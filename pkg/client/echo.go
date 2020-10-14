@@ -13,8 +13,8 @@ type echoRequest struct {
 	Value string `json:"value"`
 }
 
-// ExecuteEcho to test connectivity with the API.
-func ExecuteEcho(ctx context.Context, c Client) error {
+// Echo to test connectivity with the API.
+func Echo(ctx context.Context, c Client) error {
 	value := fmt.Sprintf("%v", rand.Int()) //nolint: gosec // No secure generator required.
 	requestPayload := echoRequest{value}
 
@@ -27,7 +27,7 @@ func ExecuteEcho(ctx context.Context, c Client) error {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &buf)
 	if err != nil {
-		return fmt.Errorf("could not create echo request: %w", err)
+		panic(fmt.Sprintf("could not create echo request: %v", err))
 	}
 
 	httpResponse, err := c.Do(req)
