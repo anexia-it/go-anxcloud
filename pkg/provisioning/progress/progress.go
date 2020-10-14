@@ -47,8 +47,8 @@ var ErrProgress = errors.New("progress response contains errors")
 // The returned progress response is still valid in this case.
 func Get(ctx context.Context, identifier string, c client.Client) (Progress, error) {
 	url := fmt.Sprintf(
-		"https://%s%s/%s",
-		client.DefaultHost,
+		"%s%s/%s",
+		c.BaseURL(),
 		pathPrefix,
 		identifier,
 	)

@@ -29,8 +29,8 @@ type response struct {
 // GetFree returns information about the free IPs on a VLAN.
 func GetFree(ctx context.Context, location, vlan string, c client.Client) ([]IP, error) {
 	url := fmt.Sprintf(
-		"https://%s%s/%s/%s",
-		client.DefaultHost,
+		"%s%s/%s/%s",
+		c.BaseURL(),
 		pathPrefix,
 		location,
 		vlan,

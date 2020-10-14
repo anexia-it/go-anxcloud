@@ -20,8 +20,8 @@ import (
 // If the API returns errors, they are raised as ResponseError error.
 func Deprovision(ctx context.Context, identifier string, delayed bool, c client.Client) error {
 	url := fmt.Sprintf(
-		"https://%s%s/%s?delayed=%t",
-		client.DefaultHost,
+		"%s%s/%s?delayed=%t",
+		c.BaseURL(),
 		pathPrefix,
 		identifier,
 		delayed,

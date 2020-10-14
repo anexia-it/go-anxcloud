@@ -38,8 +38,8 @@ func Provision(ctx context.Context, definition Definition, c client.Client) (Pro
 	}
 
 	url := fmt.Sprintf(
-		"https://%s%s/%s/%s/%s",
-		client.DefaultHost,
+		"%s%s/%s/%s/%s",
+		c.BaseURL(),
 		pathPrefix,
 		definition.Location,
 		definition.TemplateType,

@@ -25,6 +25,10 @@ type signingClient struct {
 	httpClient *http.Client
 }
 
+func (s signingClient) BaseURL() string {
+	return DefaultBaseURL
+}
+
 func (s signingClient) Do(req *http.Request) (*http.Response, error) {
 	headers := []string{fmt.Sprintf("(request-target): %s %s", strings.ToLower(req.Method), req.URL.RequestURI())}
 	req.Header.Set("host", req.Host)

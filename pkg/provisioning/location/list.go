@@ -36,8 +36,8 @@ type response struct {
 // definition contains the definition of the VM to be created.
 func All(ctx context.Context, c client.Client) ([]Location, error) {
 	url := fmt.Sprintf(
-		"https://%s%s",
-		client.DefaultHost,
+		"%s%s",
+		c.BaseURL(),
 		pathPrefix,
 	)
 

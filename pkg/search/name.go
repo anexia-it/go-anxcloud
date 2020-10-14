@@ -40,8 +40,8 @@ type response struct {
 // client is the HTTP to be used for the request.
 func ByName(ctx context.Context, name string, c client.Client) ([]VM, error) {
 	url := fmt.Sprintf(
-		"https://%s%s/%s",
-		client.DefaultHost,
+		"%s%s/%s",
+		c.BaseURL(),
 		pathPrefix,
 		name,
 	)
