@@ -11,12 +11,17 @@ import (
 )
 
 var (
-	location = ""
-	vlan     = ""
+	location        = ""
+	vlan            = ""
+	skipIntegration = true
 )
 
 func init() {
 	var set bool
+	if _, set = os.LookupEnv(client.IntegrationTestEnvName); !set {
+		return
+	}
+	skipIntegration = false
 	if location, set = os.LookupEnv(client.LocationEnvName); !set {
 		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.LocationEnvName))
 	}
@@ -26,6 +31,9 @@ func init() {
 }
 
 func TestGetFree(t *testing.T) {
+	if skipIntegration {
+		t.Skip("integration tests disabled")
+	}
 	c, err := client.NewAnyClientFromEnvs(false, nil)
 	if err != nil {
 		t.Fatalf("could not create client: %v", err)
