@@ -23,7 +23,7 @@ func ExecuteEcho(ctx context.Context, c Client) error {
 		panic(fmt.Sprintf("could not encode definition: %v", err))
 	}
 
-	url := fmt.Sprintf("https://%s%s", DefaultHost, EchoPath)
+	url := fmt.Sprintf("%s%s", c.BaseURL(), EchoPath)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &buf)
 	if err != nil {

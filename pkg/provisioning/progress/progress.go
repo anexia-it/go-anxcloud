@@ -1,4 +1,6 @@
-package vm
+// Package progress implements API functions residing under /provisioning/progress.
+// This path contains methods for querying the status of VM provisioning tasks.
+package progress
 
 import (
 	"context"
@@ -12,13 +14,13 @@ import (
 )
 
 const (
-	progressPathPrefix                = "/api/vsphere/v1/provisioning/progress.json"
-	provisionPollInterval             = 5 * time.Second
-	provisioningProgressCompleteValue = 100
+	pathPrefix            = "/api/vsphere/v1/provisioning/progress.json"
+	pollInterval          = 5 * time.Second
+	progressCompleteValue = 100
 )
 
-// ProgressResponse contains information regarding the provisioning of a VM returned by the API .
-type ProgressResponse struct {
+// Progress contains information regarding the provisioning of a VM returned by the API .
+type Progress struct {
 	// TaskIdentifier is the identifier of the provisioning task.
 	TaskIdentifier string `json:"identifier"`
 	// Queued indicated that the task is waiting to be started-
@@ -31,67 +33,70 @@ type ProgressResponse struct {
 	Errors []string `json:"errors"`
 }
 
-// GetProvisioningProgress queries the current progress of the provisioning of a VM.
+// ErrProgress is raised if a poll request completes but the result contains errors.
+var ErrProgress = errors.New("progress response contains errors")
+
+// Get queries the current progress of the provisioning of a VM.
 //
 // ctx is attached to the request and will cancel it on cancelation.
-// It does not affect the provisioning request after it was issued.
 // identifier is the ID of the provisioning task to query. This is returned when
 // provisioning the VM.
 // client is the HTTP to be used for the request.
 //
-// If the API returns errors, they are raised as ResponseError error.
-func GetProvisioningProgress(ctx context.Context, identifier string, c client.Client) (ProgressResponse, error) {
+// If the API call returns errors, they are raised as ErrProgress.
+// The returned progress response is still valid in this case.
+func Get(ctx context.Context, identifier string, c client.Client) (Progress, error) {
 	url := fmt.Sprintf(
-		"https://%s%s/%s",
-		client.DefaultHost,
-		progressPathPrefix,
+		"%s%s/%s",
+		c.BaseURL(),
+		pathPrefix,
 		identifier,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return ProgressResponse{}, fmt.Errorf("could not create progress get request: %w", err)
+		return Progress{}, fmt.Errorf("could not create progress get request: %w", err)
 	}
 
 	httpResponse, err := c.Do(req)
 	if err != nil {
-		return ProgressResponse{}, fmt.Errorf("could not execute progress get request: %w", err)
+		return Progress{}, fmt.Errorf("could not execute progress get request: %w", err)
 	}
-	var responsePayload ProgressResponse
+	var responsePayload Progress
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 
 	if err != nil {
-		return ProgressResponse{}, fmt.Errorf("could not decode progress get response: %w", err)
+		return Progress{}, fmt.Errorf("could not decode progress get response: %w", err)
 	}
 
 	if len(responsePayload.Errors) != 0 {
-		err = &ProvisioningError{responsePayload.Errors}
+		err = fmt.Errorf("%w: %v", ErrProgress, responsePayload.Errors)
 	}
 
 	return responsePayload, err
 }
 
-// AwaitProvisioning polls the status of a started provisioning request and blocks until it is done.
+// AwaitCompletion polls the status of a started provisioning request and blocks until it is done.
 //
 // ctx will be checked for cancellation and the method returns immidiatly if so.
 // progressID identifies the running provisioning task and is contained within ProvisioningResponse.
 // c is the HTTP to be used for polling requests.
 //
 // Returned will be the VM ID and an error if polling or ProvisioningError if provisioning failed.
-func AwaitProvisioning(ctx context.Context, progressID string, c client.Client) (string, error) {
-	ticker := time.NewTicker(provisionPollInterval)
+func AwaitCompletion(ctx context.Context, progressID string, c client.Client) (string, error) {
+	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
 	var responseError *client.ResponseError
 	for {
 		select {
 		case <-ticker.C:
-			progressResponse, err := GetProvisioningProgress(ctx, progressID, c)
+			progressResponse, err := Get(ctx, progressID, c)
 			isProvisioningError := errors.As(err, &responseError)
 			switch {
 			case isProvisioningError && responseError.Response.StatusCode == 404:
 			case err == nil:
-				if progressResponse.Progress == provisioningProgressCompleteValue {
+				if progressResponse.Progress == progressCompleteValue {
 					return progressResponse.VMIdentifier, nil
 				}
 			default:

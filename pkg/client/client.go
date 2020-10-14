@@ -16,8 +16,12 @@ const (
 	KeyIDEnvName = "ANXCLOUD_KEY_ID"
 	// TokenEnvName is the name of the environment variable that should contain the API token.
 	TokenEnvName = "ANXCLOUD_TOKEN" //nolint:gosec // This is a name, not a secret.
-	// DefaultHost is the default host used for request.
-	DefaultHost = "engine.anexia-it.com"
+	// LocationEnvName is the name of the environment variable that should contain the location of VMs to manage.
+	LocationEnvName = "ANXCLOUD_LOCATION"
+	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
+	VLANEnvName = "ANXCLOUD_VLAN"
+	// DefaultBaseURL is the default base URL used for requests.
+	DefaultBaseURL = "https://engine.anexia-it.com"
 	// EchoPath can be used to test connectivity with the API.
 	EchoPath = "/api/v1/test/echo.json"
 	// DefaultRequestTimeout is a suggested timeout for API calls.
@@ -36,6 +40,7 @@ type Client interface {
 	// This method behaves as http.Client.Do, but signs the request prior to sending it out
 	// and returns an error is the response status is not OK.
 	Do(req *http.Request) (*http.Response, error)
+	BaseURL() string
 }
 
 // ResponseError is a response from the API that indicates an error.

@@ -1,4 +1,6 @@
-package vm
+// Package ips implements API functions residing under /provisioning/ips.
+// This path contains methods for querying ips in a VLAN.
+package ips
 
 import (
 	"context"
@@ -10,7 +12,7 @@ import (
 )
 
 const (
-	ipPathPrefix = "/api/vsphere/v1/provisioning/ips.json"
+	pathPrefix = "/api/vsphere/v1/provisioning/ips.json"
 )
 
 // IP defines informationen corresponding to the IP of a VLAN.
@@ -20,17 +22,16 @@ type IP struct {
 	Prefix     string `json:"prefix"`
 }
 
-// IPResponse is the response from the API regarding IP queries.
-type IPResponse struct {
+type response struct {
 	Data []IP `json:"data"`
 }
 
-// GetFreeIPs returns the freen IPs on a VLAN.
-func GetFreeIPs(ctx context.Context, location, vlan string, c client.Client) ([]IP, error) {
+// GetFree returns information about the free IPs on a VLAN.
+func GetFree(ctx context.Context, location, vlan string, c client.Client) ([]IP, error) {
 	url := fmt.Sprintf(
-		"https://%s%s/%s/%s",
-		client.DefaultHost,
-		ipPathPrefix,
+		"%s%s/%s/%s",
+		c.BaseURL(),
+		pathPrefix,
 		location,
 		vlan,
 	)
@@ -44,7 +45,7 @@ func GetFreeIPs(ctx context.Context, location, vlan string, c client.Client) ([]
 		return nil, fmt.Errorf("could not get ips: %w", err)
 	}
 
-	responsePayload := IPResponse{}
+	responsePayload := response{}
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 

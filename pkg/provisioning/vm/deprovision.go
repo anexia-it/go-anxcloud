@@ -8,7 +8,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
-// DeprovisionVM issues a request to deprovision an existing VM using.
+// Deprovision issues a request to deprovision an existing VM using.
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // It does not affect the provisioning request after it was issued.
@@ -18,11 +18,11 @@ import (
 // client is the HTTP to be used for the request.
 //
 // If the API returns errors, they are raised as ResponseError error.
-func DeprovisionVM(ctx context.Context, identifier string, delayed bool, c client.Client) error {
+func Deprovision(ctx context.Context, identifier string, delayed bool, c client.Client) error {
 	url := fmt.Sprintf(
-		"https://%s%s/%s?delayed=%t",
-		client.DefaultHost,
-		provisioningPathPrefix,
+		"%s%s/%s?delayed=%t",
+		c.BaseURL(),
+		pathPrefix,
 		identifier,
 		delayed,
 	)
