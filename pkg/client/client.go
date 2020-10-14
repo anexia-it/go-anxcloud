@@ -16,6 +16,10 @@ const (
 	KeyIDEnvName = "ANXCLOUD_KEY_ID"
 	// TokenEnvName is the name of the environment variable that should contain the API token.
 	TokenEnvName = "ANXCLOUD_TOKEN" //nolint:gosec // This is a name, not a secret.
+	// LocationEnvName is the name of the environment variable that should contain the location of VMs to manage.
+	LocationEnvName = "ANXCLOUD_LOCATION"
+	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
+	VLANEnvName = "ANXCLOUD_VLAN"
 	// DefaultHost is the default host used for request.
 	DefaultHost = "engine.anexia-it.com"
 	// EchoPath can be used to test connectivity with the API.
