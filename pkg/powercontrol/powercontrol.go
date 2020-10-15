@@ -29,9 +29,9 @@ var (
 
 	// OnRequest indicates that the VM shall be on.
 	OnRequest Request = "on"
-	// HardRebootRequest indicates that the VM shall be rebooted without involving the OS.
+	// HardRebootRequest indicates that the VM shall be rebooted without involving the OS. - Currently broken in API
 	HardRebootRequest Request = "hard_reboot"
-	// HardShutdownRequest indicates that the VM shall shut down without involving the OS.
+	// HardShutdownRequest indicates that the VM shall shut down without involving the OS. - Currently broken in API
 	HardShutdownRequest Request = "hard_shutdown"
 	// RebootRequest indicates that the VM shall be rebooted.
 	RebootRequest Request = "reboot"
