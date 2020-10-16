@@ -31,7 +31,7 @@ type Info struct {
 	CPU              int    `json:"cpu"`
 	Cores            int    `json:"cores"`
 	Disks            int    `json:"disks"`
-	DiskInfo         struct {
+	DiskInfo         []struct {
 		DiskType     string `json:"disk_type"`
 		StorageType  string `json:"storage_type"`
 		BusType      string `json:"bus_type"`
@@ -58,7 +58,7 @@ type Info struct {
 // client is the HTTP to be used for the request.
 func Get(ctx context.Context, identifier string, c client.Client) (Info, error) {
 	url := fmt.Sprintf(
-		"%s%s?%s",
+		"%s%s/%s/info",
 		c.BaseURL(),
 		pathPrefix,
 		identifier,
