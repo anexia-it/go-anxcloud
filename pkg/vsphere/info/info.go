@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 const (
@@ -55,11 +53,10 @@ type Info struct {
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // identifier is the ID of the VM to query.
-// client is the HTTP to be used for the request.
-func Get(ctx context.Context, identifier string, c client.Client) (Info, error) {
+func (a api) Get(ctx context.Context, identifier string) (Info, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/info",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		identifier,
 	)
@@ -69,7 +66,7 @@ func Get(ctx context.Context, identifier string, c client.Client) (Info, error) 
 		return Info{}, fmt.Errorf("could not create VM info request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute VM info request: %w", err)
 	}

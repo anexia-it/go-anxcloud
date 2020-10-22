@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 const (
@@ -34,10 +32,10 @@ type response struct {
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // definition contains the definition of the VM to be created.
-func All(ctx context.Context, c client.Client) ([]Location, error) {
+func (a api) All(ctx context.Context) ([]Location, error) {
 	url := fmt.Sprintf(
 		"%s%s",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 	)
 
@@ -46,7 +44,7 @@ func All(ctx context.Context, c client.Client) ([]Location, error) {
 		return nil, fmt.Errorf("could not create location list request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not execute location list request: %w", err)
 	}

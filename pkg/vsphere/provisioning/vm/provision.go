@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 // ProvisioningResponse contains information returned by the API regarding a newly created VM.
@@ -27,11 +25,10 @@ var ErrProvisioning = errors.New("ProvisioningResponse contains errors")
 // ctx is attached to the request and will cancel it on cancelation.
 // It does not affect the provisioning request after it was issued.
 // definition contains the definition of the VM to be created.
-// c is the HTTP to be used for the request.
 //
 // If the API call returns errors, they are raised as ErrProvisioning.
 // The returned ProvisioningResponse is still valid in this case.
-func Provision(ctx context.Context, definition Definition, c client.Client) (ProvisioningResponse, error) {
+func (a api) Provision(ctx context.Context, definition Definition) (ProvisioningResponse, error) {
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(&definition); err != nil {
 		panic(fmt.Sprintf("could not encode definition: %v", err))
@@ -39,7 +36,7 @@ func Provision(ctx context.Context, definition Definition, c client.Client) (Pro
 
 	url := fmt.Sprintf(
 		"%s%s/%s/%s/%s",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		definition.Location,
 		definition.TemplateType,
@@ -51,7 +48,7 @@ func Provision(ctx context.Context, definition Definition, c client.Client) (Pro
 		return ProvisioningResponse{}, fmt.Errorf("could not create VM provisioning request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return ProvisioningResponse{}, fmt.Errorf("could not execute VM provisioning request: %w", err)
 	}

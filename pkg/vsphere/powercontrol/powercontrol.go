@@ -80,11 +80,10 @@ func Set(ctx context.Context, identifier string, request Request, c client.Clien
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // identifier is the ID of the VM to query.
-// client is the HTTP to be used for the request.
-func Get(ctx context.Context, identifier string, c client.Client) (State, error) {
+func (a api) Get(ctx context.Context, identifier string) (State, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/info",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		identifier,
 	)
@@ -94,7 +93,7 @@ func Get(ctx context.Context, identifier string, c client.Client) (State, error)
 		return "", fmt.Errorf("could not create powercontrol get request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("could not execute powercontrol get request: %w", err)
 	}

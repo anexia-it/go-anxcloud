@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 const (
@@ -38,13 +36,12 @@ type response struct {
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // name is the name search string. It may contain wildcards as stated in the API docs.
-// client is the HTTP to be used for the request.
-func ByName(ctx context.Context, name string, c client.Client) ([]VM, error) {
+func (a api) ByName(ctx context.Context, name string) ([]VM, error) {
 	params := url.Values{}
 	params.Add("name", name)
 	url := fmt.Sprintf(
 		"%s%s?%s",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		params.Encode(),
 	)
@@ -54,7 +51,7 @@ func ByName(ctx context.Context, name string, c client.Client) ([]VM, error) {
 		return nil, fmt.Errorf("could not create VM search request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not execute VM search request: %w", err)
 	}
