@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/provisioning/ips"
-	"github.com/anexia-it/go-anxcloud/pkg/provisioning/progress"
-	"github.com/anexia-it/go-anxcloud/pkg/provisioning/vm"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -80,7 +80,7 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	ips, err := ips.GetFree(ctx, location, vlan, c)
+	ips, err := ips.NewAPI(c).GetFree(ctx, location, vlan)
 	defer cancel()
 	if err != nil {
 		t.Fatalf("provisioning vm failed: %v", err)
@@ -95,20 +95,22 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 		VLAN:    vlan,
 	}}
 
-	definition := vm.NewDefinition(location, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
+	api := vm.NewAPI(c)
+
+	definition := api.NewDefinition(location, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
 	definition.SSH = randomPublicSSHKey()
 
-	provisionResponse, err := vm.Provision(ctx, definition, c)
+	provisionResponse, err := api.Provision(ctx, definition)
 	if err != nil {
 		t.Fatalf("provisioning vm failed: %v", err)
 	}
 
-	vmID, err := progress.AwaitCompletion(ctx, provisionResponse.Identifier, c)
+	vmID, err := progress.NewAPI(c).AwaitCompletion(ctx, provisionResponse.Identifier)
 	if err != nil {
 		t.Fatalf("waiting for VM provisioning failed: %v", err)
 	}
 
-	if err = vm.Deprovision(ctx, vmID, false, c); err != nil {
+	if err = api.Deprovision(ctx, vmID, false); err != nil {
 		t.Fatalf(fmt.Sprintf("could not deprovision VM: %v", err))
 	}
 }

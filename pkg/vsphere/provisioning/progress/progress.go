@@ -41,14 +41,13 @@ var ErrProgress = errors.New("progress response contains errors")
 // ctx is attached to the request and will cancel it on cancelation.
 // identifier is the ID of the provisioning task to query. This is returned when
 // provisioning the VM.
-// client is the HTTP to be used for the request.
 //
 // If the API call returns errors, they are raised as ErrProgress.
 // The returned progress response is still valid in this case.
-func Get(ctx context.Context, identifier string, c client.Client) (Progress, error) {
+func (a api) Get(ctx context.Context, identifier string) (Progress, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		identifier,
 	)
@@ -58,7 +57,7 @@ func Get(ctx context.Context, identifier string, c client.Client) (Progress, err
 		return Progress{}, fmt.Errorf("could not create progress get request: %w", err)
 	}
 
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return Progress{}, fmt.Errorf("could not execute progress get request: %w", err)
 	}
@@ -81,17 +80,16 @@ func Get(ctx context.Context, identifier string, c client.Client) (Progress, err
 //
 // ctx will be checked for cancellation and the method returns immidiatly if so.
 // progressID identifies the running provisioning task and is contained within ProvisioningResponse.
-// c is the HTTP to be used for polling requests.
 //
 // Returned will be the VM ID and an error if polling or ProvisioningError if provisioning failed.
-func AwaitCompletion(ctx context.Context, progressID string, c client.Client) (string, error) {
+func (a api) AwaitCompletion(ctx context.Context, progressID string) (string, error) {
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
 	var responseError *client.ResponseError
 	for {
 		select {
 		case <-ticker.C:
-			progressResponse, err := Get(ctx, progressID, c)
+			progressResponse, err := a.Get(ctx, progressID)
 			isProvisioningError := errors.As(err, &responseError)
 			switch {
 			case isProvisioningError && responseError.Response.StatusCode == 404:

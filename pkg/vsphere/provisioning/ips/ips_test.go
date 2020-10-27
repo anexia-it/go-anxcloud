@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/provisioning/ips"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 )
 
 var (
@@ -41,7 +41,7 @@ func TestGetFree(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 
-	_, err = ips.GetFree(ctx, location, vlan, c)
+	_, err = ips.NewAPI(c).GetFree(ctx, location, vlan)
 	if err != nil {
 		t.Fatalf("could not get free ips: %v", err)
 	}

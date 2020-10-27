@@ -18,9 +18,9 @@ const (
 	// TokenEnvName is the name of the environment variable that should contain the API token.
 	TokenEnvName = "ANXCLOUD_TOKEN" //nolint:gosec // This is a name, not a secret.
 	// LocationEnvName is the name of the environment variable that should contain the location of VMs to manage.
-	LocationEnvName = "ANXCLOUD_LOCATION"
+	LocationEnvName = "ANXCLOUD_LOCATION_ID"
 	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
-	VLANEnvName = "ANXCLOUD_VLAN"
+	VLANEnvName = "ANXCLOUD_VLAN_ID"
 	// IntegrationTestEnvName is the name of the environment variable that enables integration tests if present.
 	IntegrationTestEnvName = "ANXCLOUD_INTEGRATION_TESTS_ON"
 	// DefaultBaseURL is the default base URL used for requests.

@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 const (
@@ -27,10 +25,10 @@ type response struct {
 }
 
 // GetFree returns information about the free IPs on a VLAN.
-func GetFree(ctx context.Context, location, vlan string, c client.Client) ([]IP, error) {
+func (a api) GetFree(ctx context.Context, location, vlan string) ([]IP, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/%s",
-		c.BaseURL(),
+		a.client.BaseURL(),
 		pathPrefix,
 		location,
 		vlan,
@@ -40,7 +38,7 @@ func GetFree(ctx context.Context, location, vlan string, c client.Client) ([]IP,
 	if err != nil {
 		return nil, fmt.Errorf("could not create ips request: %w", err)
 	}
-	httpResponse, err := c.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not get ips: %w", err)
 	}

@@ -104,7 +104,7 @@ type Network struct {
 }
 
 // NewDefinition create a VM definition with the mandatory values set.
-func NewDefinition(location, templateType, templateID, hostname string, cpus, memory, disk int, network []Network) Definition {
+func (a api) NewDefinition(location, templateType, templateID, hostname string, cpus, memory, disk int, network []Network) Definition {
 	return Definition{
 		Location:           location,
 		TemplateType:       templateType,
