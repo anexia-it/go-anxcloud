@@ -74,7 +74,7 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 	if skipIntegration {
 		t.Skip("integration tests disabled")
 	}
-	c, err := client.NewAnyClientFromEnvs(false, nil)
+	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
 		t.Fatalf("could not create client: %v", err)
 	}

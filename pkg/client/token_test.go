@@ -9,13 +9,17 @@ import (
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/test/echo"
 )
 
 func TestTokenClient(t *testing.T) {
 	dummyToken := "ie7dois8Ooquoo1ieB9kae8Od9ooshee3nejuach4inae3gai0Re0Shaipeihail" //nolint:gosec // Not a real token.
-	c := client.NewTokenClient(dummyToken, &http.Client{})
+	c, err := client.New(client.TokenFromString(dummyToken))
+	if err != nil {
+		t.Fatalf("could not create client: %v", err)
+	}
 	expectedAuthorizationHeader := fmt.Sprintf("Token %s", dummyToken)
-	echoHandler := echoTestHandler(t)
+	echoHandler := echo.TestMock(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != expectedAuthorizationHeader {
@@ -29,7 +33,7 @@ func TestTokenClient(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
-	if err := client.Echo(ctx, cw); err != nil {
+	if err := echo.NewAPI(cw).Echo(ctx); err != nil {
 		t.Fatalf("echo test failed: %v", err)
 	}
 }
@@ -39,13 +43,13 @@ func TestTokenClientIntegration(t *testing.T) {
 	if _, set = os.LookupEnv(client.IntegrationTestEnvName); !set {
 		t.Skip("integration tests disabled")
 	}
-	c, err := client.NewAnyClientFromEnvs(false, nil)
+	c, err := client.New(client.TokenFromEnv(false))
 	if err != nil {
 		t.Fatalf("could not create client: %v", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
-	if err := client.Echo(ctx, c); err != nil {
+	if err := echo.NewAPI(c).Echo(ctx); err != nil {
 		t.Fatalf("[%s] echo test failed: %v", time.Now(), err)
 	}
 }

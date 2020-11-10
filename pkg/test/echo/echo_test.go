@@ -1,4 +1,4 @@
-package client_test
+package echo_test
 
 import (
 	"context"
@@ -9,31 +9,16 @@ import (
 	"testing"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/test/echo"
 )
 
-func echoTestHandler(t *testing.T) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != client.EchoPath {
-			t.Fatalf("not using the correct echo path but: %s", r.URL.Path)
-		}
-		payload := map[string]string{}
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			t.Fatalf("echo payload could not be decoded: %v", err)
-		}
-		if err := r.Body.Close(); err != nil {
-			panic(err)
-		}
-		fmt.Fprintf(w, "\"%s\"\n", payload["value"])
-	})
-}
-
 func TestEcho(t *testing.T) {
-	c, server := client.NewTestClient(nil, echoTestHandler(t))
+	c, server := client.NewTestClient(nil, echo.TestMock(t))
 	defer server.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
-	if err := client.Echo(ctx, c); err != nil {
+	if err := echo.NewAPI(c).Echo(ctx); err != nil {
 		t.Fatalf("echo request failed: %v", err)
 	}
 }
@@ -53,7 +38,7 @@ func TestEchoInvalidStatusCode(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	var responseError *client.ResponseError
-	if err := client.Echo(ctx, c); !errors.As(err, &responseError) {
+	if err := echo.NewAPI(c).Echo(ctx); !errors.As(err, &responseError) {
 		t.Fatalf("expected client.ResponseError but got %v", err)
 	}
 }
@@ -74,7 +59,7 @@ func TestEchoInvalidResponseEncoding(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	var syntaxError *json.SyntaxError
-	if err := client.Echo(ctx, c); !errors.As(err, &syntaxError) {
+	if err := echo.NewAPI(c).Echo(ctx); !errors.As(err, &syntaxError) {
 		t.Fatalf("expected json.SyntaxError but got %v", err)
 	}
 }
@@ -87,7 +72,7 @@ func TestEchoOtherValue(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
-	if err := client.Echo(ctx, c); !errors.Is(err, client.ErrInvalidEchoResponse) {
+	if err := echo.NewAPI(c).Echo(ctx); !errors.Is(err, echo.ErrInvalidEchoResponse) {
 		t.Fatalf("expected ErrInvalidEchoResponse but got %v", err)
 	}
 }
