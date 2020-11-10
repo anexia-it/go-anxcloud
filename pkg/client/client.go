@@ -13,13 +13,13 @@ import (
 
 const (
 	// TokenEnvName is the name of the environment variable that should contain the API token.
-	TokenEnvName = "ANXCLOUD_TOKEN" //nolint:gosec // This is a name, not a secret.
+	TokenEnvName = "ANEXIA_TOKEN" //nolint:gosec // This is a name, not a secret.
 	// LocationEnvName is the name of the environment variable that should contain the location of VMs to manage.
-	LocationEnvName = "ANXCLOUD_LOCATION_ID"
+	LocationEnvName = "ANEXIA_LOCATION_ID"
 	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
-	VLANEnvName = "ANXCLOUD_VLAN_ID"
+	VLANEnvName = "ANEXIA_VLAN_ID"
 	// IntegrationTestEnvName is the name of the environment variable that enables integration tests if present.
-	IntegrationTestEnvName = "ANXCLOUD_INTEGRATION_TESTS_ON"
+	IntegrationTestEnvName = "ANEXIA_INTEGRATION_TESTS_ON"
 	// DefaultBaseURL is the default base URL used for requests.
 	DefaultBaseURL = "https://engine.anexia-it.com"
 	// DefaultRequestTimeout is a suggested timeout for API calls.
