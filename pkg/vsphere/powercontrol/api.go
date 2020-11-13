@@ -8,7 +8,9 @@ import (
 
 // API contains methods for VM power control.
 type API interface {
-	Get(ctx context.Context, identifier string) (State, error)
+	Get(ctx context.Context, vmIdentifier string) (State, error)
+	Set(ctx context.Context, vmIdentifier string, request Request) (Task, error)
+	AwaitCompletion(ctx context.Context, vmID, taskID string) error
 }
 
 type api struct {

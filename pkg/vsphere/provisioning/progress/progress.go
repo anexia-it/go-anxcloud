@@ -69,7 +69,10 @@ func (a api) Get(ctx context.Context, identifier string) (Progress, error) {
 		return Progress{}, fmt.Errorf("could not decode progress get response: %w", err)
 	}
 
-	if len(responsePayload.Errors) != 0 {
+	switch {
+	case len(responsePayload.Errors) == 0:
+	case len(responsePayload.Errors) == 1 && responsePayload.Errors[0] == "The attempted operation cannot be performed in the current state (Powered on).":
+	default:
 		err = fmt.Errorf("%w: %v", ErrProgress, responsePayload.Errors)
 	}
 

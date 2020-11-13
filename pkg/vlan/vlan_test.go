@@ -45,6 +45,7 @@ func TestList(t *testing.T) {
 }
 
 func TestCreateDelete(t *testing.T) {
+	t.Parallel()
 	if skipIntegration {
 		t.Skip("integration tests disabled")
 	}
@@ -55,16 +56,15 @@ func TestCreateDelete(t *testing.T) {
 
 	api := vlan.NewAPI(c)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
 	summary, err := api.Create(ctx, vlan.CreateDefinition{Location: location})
-	cancel()
 	if err != nil {
 		t.Fatalf("could not create vlan: %v", err)
 	}
+
 	for {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		info, err := api.Get(ctx, summary.Identifier)
-		cancel()
 		if err != nil {
 			t.Fatalf("could not get vlan: %v", err)
 		}
@@ -74,9 +74,7 @@ func TestCreateDelete(t *testing.T) {
 		time.Sleep(3 * time.Second)
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	err = api.Delete(ctx, summary.Identifier)
-	cancel()
 	if err != nil {
 		t.Fatalf("could not delete vlan: %v", err)
 	}
