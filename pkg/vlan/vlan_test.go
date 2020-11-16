@@ -21,13 +21,13 @@ func init() {
 	if _, set = os.LookupEnv(client.IntegrationTestEnvName); !set {
 		return
 	}
-	if location, set = os.LookupEnv(client.LocationEnvName); !set {
-		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.LocationEnvName))
+	if location, set = os.LookupEnv(client.CoreLocationEnvName); !set || location == "" {
+		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.CoreLocationEnvName))
 	}
 	skipIntegration = false
 }
 
-func TestAll(t *testing.T) {
+func TestList(t *testing.T) {
 	if skipIntegration {
 		t.Skip("integration tests disabled")
 	}
@@ -37,14 +37,14 @@ func TestAll(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	_, err = vlan.NewAPI(c).All(ctx)
+	_, err = vlan.NewAPI(c).List(ctx, 1, 1000)
 	if err != nil {
-		t.Fatalf("could not list VLANSt: %v", err)
+		t.Fatalf("could not list VLAN: %v", err)
 	}
 	cancel()
 }
 
-func TestCreateetDelete(t *testing.T) {
+func TestCreateDelete(t *testing.T) {
 	if skipIntegration {
 		t.Skip("integration tests disabled")
 	}

@@ -8,7 +8,7 @@ import (
 
 // API contains methods for VLAN control.
 type API interface {
-	All(ctx context.Context) ([]Summary, error)
+	List(ctx context.Context, page, limit int) ([]Summary, error)
 	Get(ctx context.Context, identifier string) (Info, error)
 	Create(ctx context.Context, createDefinition CreateDefinition) (Summary, error)
 	Delete(ctx context.Context, identifier string) error

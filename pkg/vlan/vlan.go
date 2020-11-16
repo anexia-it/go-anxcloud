@@ -21,6 +21,17 @@ type Summary struct {
 	CustomerDescription string `json:"description_customer"`
 }
 
+// Location is the metadata of a single location.
+type Location struct {
+	Identifier  string `json:"identifier"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	CountryCode string `json:"country"`
+	Latitude    string `json:"lat"`
+	Longitude   string `json:"lon"`
+	CityCode    string `json:"city_code"`
+}
+
 // Info describes all attributes of a VLAN.
 type Info struct {
 	Identifier          string `json:"identifier"`
@@ -29,15 +40,7 @@ type Info struct {
 	InternalDescription string `json:"description_internal"`
 	Role                string `json:"role_text"`
 	Status              string `json:"status"`
-	Locations           []struct {
-		Identifier  string `json:"identifier"`
-		Name        string `json:"name"`
-		Code        string `json:"code"`
-		CountryCode string `json:"country"`
-		Latitude    string `json:"lat"`
-		Longitude   string `json:"lon"`
-		CityCode    string `json:"city_code"`
-	}
+	Locations           []Location
 }
 
 // CreateDefinition contains information required to create a VLAN.
@@ -52,34 +55,34 @@ type UpdateDefinition struct {
 	CustomerDescription string `json:"customerDescription,omitempty"`
 }
 
-type allResponse struct {
+type listResponse struct {
 	Data struct {
 		Data []Summary `json:"data"`
 	} `json:"data"`
 }
 
-func (a api) All(ctx context.Context) ([]Summary, error) {
+func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
 	url := fmt.Sprintf(
-		"%s%s?limit=1000",
+		"%s%s?page=%v&limit=%v",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathPrefix, page, limit,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not create vlan get all request: %w", err)
+		return nil, fmt.Errorf("could not create vlan list request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("could not execute vlan get all request: %w", err)
+		return nil, fmt.Errorf("could not execute vlan list request: %w", err)
 	}
 
-	var responsePayload allResponse
+	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("could not decode vlan get all response: %w", err)
+		return nil, fmt.Errorf("could not decode vlan list response: %w", err)
 	}
 
 	return responsePayload.Data.Data, nil
