@@ -29,24 +29,30 @@ type Info struct {
 	CPU              int    `json:"cpu"`
 	Cores            int    `json:"cores"`
 	Disks            int    `json:"disks"`
-	DiskInfo         []struct {
-		DiskType     string `json:"disk_type"`
-		StorageType  string `json:"storage_type"`
-		BusType      string `json:"bus_type"`
-		BusTypeLabel string `json:"bus_type_label"`
-		DiskGB       int    `json:"disk_gb"`
-		DiskID       int    `json:"disk_id"`
-		IOPS         int    `json:"iops"`
-		Latency      int    `json:"latence"`
-	} `json:"disk_info"`
-	Network []struct {
-		NIC        int      `json:"nic"`
-		ID         int      `json:"id"`
-		VLAN       string   `json:"vlan"`
-		MACAddress string   `json:"mac_address"`
-		IPv4       []string `json:"ips_v4"`
-		IPv6       []string `json:"ips_v6"`
-	} `json:"network"`
+	DiskInfo         `json:"disk_info"`
+	Network          `json:"network"`
+}
+
+// DiskInfo contains meta information of attached disks to a VM.
+type DiskInfo []struct {
+	DiskType     string `json:"disk_type"`
+	StorageType  string `json:"storage_type"`
+	BusType      string `json:"bus_type"`
+	BusTypeLabel string `json:"bus_type_label"`
+	DiskGB       int    `json:"disk_gb"`
+	DiskID       int    `json:"disk_id"`
+	IOPS         int    `json:"iops"`
+	Latency      int    `json:"latence"`
+}
+
+// Network contains meta information of attached NICs to a VM.
+type Network []struct {
+	NIC        int      `json:"nic"`
+	ID         int      `json:"id"`
+	VLAN       string   `json:"vlan"`
+	MACAddress string   `json:"mac_address"`
+	IPv4       []string `json:"ips_v4"`
+	IPv6       []string `json:"ips_v6"`
 }
 
 // Get returns additional information to a given VM identifier.
