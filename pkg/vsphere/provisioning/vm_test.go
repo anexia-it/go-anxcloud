@@ -1,4 +1,4 @@
-package vm_test
+package provisioning_test
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/powercontrol"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
@@ -70,7 +71,9 @@ func randomHostname() string {
 	return fmt.Sprintf("go-test-%s", strings.Join(hostnameSuffix, ""))
 }
 
-func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
+func TestVMProvisioningDeprovisioningIntegration(t *testing.T) { //nolint:funlen // Flake prevention needs space.
+	t.Parallel()
+
 	if skipIntegration {
 		t.Skip("integration tests disabled")
 	}
@@ -79,7 +82,7 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 		t.Fatalf("could not create client: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	ips, err := ips.NewAPI(c).GetFree(ctx, location, vlan)
 	defer cancel()
 	if err != nil {
@@ -89,18 +92,11 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 		t.Fatalf("no IPs left for testing in vlan")
 	}
 
-	networkInterfaces := []vm.Network{{
-		NICType: "vmxnet3",
-		IPs:     []string{ips[0].Identifier},
-		VLAN:    vlan,
-	}}
-
-	api := vm.NewAPI(c)
-
-	definition := api.NewDefinition(location, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
+	networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{ips[0].Identifier}, VLAN: vlan}}
+	definition := vm.NewAPI(c).NewDefinition(location, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
 	definition.SSH = randomPublicSSHKey()
 
-	provisionResponse, err := api.Provision(ctx, definition)
+	provisionResponse, err := vm.NewAPI(c).Provision(ctx, definition)
 	if err != nil {
 		t.Fatalf("provisioning vm failed: %v", err)
 	}
@@ -110,7 +106,22 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) {
 		t.Fatalf("waiting for VM provisioning failed: %v", err)
 	}
 
-	if err = api.Deprovision(ctx, vmID, false); err != nil {
+	time.Sleep(10 * time.Second)
+
+	task, err := powercontrol.NewAPI(c).Set(ctx, vmID, powercontrol.RebootRequest)
+	if err != nil {
+		t.Fatalf(fmt.Sprintf("could not set power: %v", err))
+	}
+
+	if err = powercontrol.NewAPI(c).AwaitCompletion(ctx, vmID, task.TaskIdentifier); err != nil {
+		t.Fatalf("could not await power state change of created VM: %v", err)
+	}
+
+	if _, err = powercontrol.NewAPI(c).Get(ctx, vmID); err != nil {
+		t.Fatalf("could not get power state of created VM: %v", err)
+	}
+
+	if err = vm.NewAPI(c).Deprovision(ctx, vmID, false); err != nil {
 		t.Fatalf(fmt.Sprintf("could not deprovision VM: %v", err))
 	}
 }

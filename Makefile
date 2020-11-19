@@ -21,7 +21,11 @@ benchmark:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -timeout 5m -race ./...
+	CGO_ENABLED=1 go test -cover -timeout 0 -race ./...
+
+.PHONY: reflake
+reflake:
+	go clean -testcache
 
 .PHONY: lint
 lint:
