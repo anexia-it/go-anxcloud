@@ -14,8 +14,10 @@ import (
 const (
 	// TokenEnvName is the name of the environment variable that should contain the API token.
 	TokenEnvName = "ANEXIA_TOKEN" //nolint:gosec // This is a name, not a secret.
-	// LocationEnvName is the name of the environment variable that should contain the location of VMs to manage.
-	LocationEnvName = "ANEXIA_LOCATION_ID"
+	// VsphereLocationEnvName is the name of the environment variable that should contain a test location for paths that need a provisioning location.
+	VsphereLocationEnvName = "ANEXIA_VSPHERE_LOCATION_ID"
+	// CoreLocationEnvName is the name of the environment variable that should contain a test location for paths that need a core location.
+	CoreLocationEnvName = "ANEXIA_CORE_LOCATION_ID"
 	// VLANEnvName is the name of the environment variable that should contain the VLAN of VMs to manage.
 	VLANEnvName = "ANEXIA_VLAN_ID"
 	// IntegrationTestEnvName is the name of the environment variable that enables integration tests if present.

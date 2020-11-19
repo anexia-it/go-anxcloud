@@ -39,8 +39,8 @@ func init() {
 		return
 	}
 	skipIntegration = false
-	if location, set = os.LookupEnv(client.LocationEnvName); !set {
-		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.LocationEnvName))
+	if location, set = os.LookupEnv(client.VsphereLocationEnvName); !set || location == "" {
+		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.VsphereLocationEnvName))
 	}
 	if vlan, set = os.LookupEnv(client.VLANEnvName); !set {
 		panic(fmt.Sprintf("could not find environment variable %s, which is required for testing", client.VLANEnvName))
