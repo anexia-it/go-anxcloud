@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"time"
 )
@@ -59,13 +58,6 @@ func (r ResponseError) Error() string {
 }
 
 func handleRequest(c *http.Client, req *http.Request) (*http.Response, error) {
-	reqBytes, err := httputil.DumpRequestOut(req, true)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not dump req: %+v", err)
-	} else {
-		fmt.Println(string(reqBytes))
-	}
-
 	response, err := c.Do(req)
 	if err == nil && response.StatusCode != http.StatusOK {
 		errResponse := ResponseError{Request: req, Response: response}
