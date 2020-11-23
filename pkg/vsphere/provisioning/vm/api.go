@@ -11,6 +11,7 @@ type API interface {
 	NewDefinition(location, templateType, templateID, hostname string, cpus, memory, disk int, network []Network) Definition
 	Deprovision(ctx context.Context, identifier string, delayed bool) error
 	Provision(ctx context.Context, definition Definition) (ProvisioningResponse, error)
+	Update(ctx context.Context, vmID string, change Change) (ProvisioningResponse, error)
 }
 
 type api struct {
