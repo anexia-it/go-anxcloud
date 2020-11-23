@@ -24,6 +24,7 @@ const (
 	templateType    = "templates"
 	templateID      = "44b38284-6adb-430e-b4a4-1553e29f352f"
 	cpus            = 2
+	changedMemory   = 4096
 	memory          = 2048
 	disk            = 10
 )
@@ -104,6 +105,21 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) { //nolint:funlen
 	vmID, err := progress.NewAPI(c).AwaitCompletion(ctx, provisionResponse.Identifier)
 	if err != nil {
 		t.Fatalf("waiting for VM provisioning failed: %v", err)
+	}
+
+	change := vm.NewChange()
+	change.MemoryMBs = changedMemory
+	updateResponse, err := vm.NewAPI(c).Update(ctx, vmID, change)
+	if err != nil {
+		t.Fatalf("update vm failed: %v", err)
+	}
+
+	newVMID, err := progress.NewAPI(c).AwaitCompletion(ctx, updateResponse.Identifier)
+	if err != nil {
+		t.Fatalf("waiting for VM update failed: %v", err)
+	}
+	if newVMID != vmID {
+		t.Fatalf("VM change resulted in a new ID: %v->%v", vmID, newVMID)
 	}
 
 	time.Sleep(10 * time.Second)

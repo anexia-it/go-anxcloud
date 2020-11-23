@@ -118,3 +118,34 @@ func (a api) NewDefinition(location, templateType, templateID, hostname string, 
 		DiskType:           DefaultDiskType,
 	}
 }
+
+// Disk represents a disk of a VM.
+type Disk struct {
+	ID      int    `json:"disk_id,omitempty"`
+	Type    string `json:"disk_type"`
+	SizeGBs int    `json:"disk_gb"`
+}
+
+// Change contains information about requested VM change request.
+type Change struct {
+	MemoryMBs          int       `json:"memory_mb,omitempty"`
+	CPUs               int       `json:"cpus,omitempty"`
+	CPUSockets         int       `json:"sockets,omitempty"`
+	CPUPerformanceType string    `json:"cpu_performance_type,omitempty"`
+	DeleteDiskIDs      []int     `json:"disk_to_delete,omitempty"`
+	AddDisks           []Disk    `json:"disk_to_add,omitempty"`
+	ChangeDisks        []Disk    `json:"disk_to_change,omitempty"`
+	AddNICs            []Network `json:"network_to_add,omitempty"`
+	BootDelaySecs      int       `json:"boot_delay,omitempty"`
+	EnterBIOSSetup     bool      `json:"enter_bios_setup,omitempty"`
+	Reboot             bool      `json:"force_restart_if_needed,omitempty"`
+	EnableDangerous    bool      `json:"critical_operation_confirmed,omitempty"`
+}
+
+// NewChange create a VM change request with default values.
+func NewChange() Change {
+	return Change{
+		Reboot:          true,
+		EnableDangerous: true,
+	}
+}
