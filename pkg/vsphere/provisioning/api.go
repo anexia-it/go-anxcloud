@@ -3,6 +3,7 @@ package provisioning
 
 import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
@@ -11,6 +12,7 @@ import (
 
 // API contains methods for VM provisioning.
 type API interface {
+	DiskType() disktype.API
 	IPs() ips.API
 	Location() location.API
 	Progress() progress.API
@@ -18,10 +20,15 @@ type API interface {
 }
 
 type api struct {
+	diskType disktype.API
 	ips      ips.API
 	location location.API
 	progress progress.API
 	vm       vm.API
+}
+
+func (a api) DiskType() disktype.API {
+	return a.diskType
 }
 
 func (a api) IPs() ips.API {
@@ -43,6 +50,7 @@ func (a api) VM() vm.API {
 // NewAPI creates a new provisioning API instance with the given client.
 func NewAPI(c client.Client) API {
 	return api{
+		disktype.NewAPI(c),
 		ips.NewAPI(c),
 		location.NewAPI(c),
 		progress.NewAPI(c),
