@@ -46,13 +46,13 @@ type Info struct {
 // CreateDefinition contains information required to create a VLAN.
 type CreateDefinition struct {
 	Location            string `json:"location"`
-	VMProvisioning      string `json:"vm_provisioning,omitempty"`
-	CustomerDescription string `json:"customerDescription,omitempty"`
+	VMProvisioning      bool   `json:"vm_provisioning,omitempty"`
+	CustomerDescription string `json:"description_customer,omitempty"`
 }
 
 // UpdateDefinition contains information required to update a VLAN.
 type UpdateDefinition struct {
-	CustomerDescription string `json:"customerDescription,omitempty"`
+	CustomerDescription string `json:"description_customer,omitempty"`
 }
 
 type listResponse struct {
