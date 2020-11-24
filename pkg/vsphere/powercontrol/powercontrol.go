@@ -57,13 +57,7 @@ var (
 	OffState State = "VM_POWER_STATE_POWERED_OFF"
 )
 
-// Set issues a request change the power state of a given VM..
-//
-// ctx is attached to the request and will cancel it on cancelation.
-// It does not affect the provisioning request after it was issued.
-// identifier is the ID of the VM to change.
-// request is the desired operation to perform.
-// c is the HTTP to be used for the request.
+// Do not use this, its broken.
 func (a api) Set(ctx context.Context, identifier string, request Request) (Task, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/%s",

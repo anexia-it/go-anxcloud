@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/powercontrol"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
@@ -120,21 +119,6 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) { //nolint:funlen
 	}
 	if newVMID != vmID {
 		t.Fatalf("VM change resulted in a new ID: %v->%v", vmID, newVMID)
-	}
-
-	time.Sleep(10 * time.Second)
-
-	task, err := powercontrol.NewAPI(c).Set(ctx, vmID, powercontrol.RebootRequest)
-	if err != nil {
-		t.Fatalf(fmt.Sprintf("could not set power: %v", err))
-	}
-
-	if err = powercontrol.NewAPI(c).AwaitCompletion(ctx, vmID, task.TaskIdentifier); err != nil {
-		t.Fatalf("could not await power state change of created VM: %v", err)
-	}
-
-	if _, err = powercontrol.NewAPI(c).Get(ctx, vmID); err != nil {
-		t.Fatalf("could not get power state of created VM: %v", err)
 	}
 
 	if err = vm.NewAPI(c).Deprovision(ctx, vmID, false); err != nil {

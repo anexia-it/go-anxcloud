@@ -9,6 +9,7 @@ import (
 // API contains methods for VM power control.
 type API interface {
 	Get(ctx context.Context, vmIdentifier string) (State, error)
+	// Do not use this, its broken.
 	Set(ctx context.Context, vmIdentifier string, request Request) (Task, error)
 	AwaitCompletion(ctx context.Context, vmID, taskID string) error
 }
