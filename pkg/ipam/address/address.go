@@ -3,6 +3,7 @@
 package address
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,7 @@ import (
 )
 
 const (
-	pathPrefix = "/api/vsphere/v1/address.json"
+	pathPrefix = "/api/ipam/v1/address.json"
 )
 
 // Address contains all the information about a specific address.
@@ -34,15 +35,42 @@ type Summary struct {
 	Role                string `json:"role"`
 }
 
-type allResponse struct {
-	Data []Summary `json:"data"`
+// Update contains fields to change on a prefix.
+type Update struct {
+	Name                string `json:"name,omitempty"`
+	DescriptionCustomer string `json:"description_customer,omitempty"`
+	Role                string `json:"role,omitempty"`
 }
 
-func (a api) All(ctx context.Context) ([]Summary, error) {
+// Create defines meta data of an address to create.
+type Create struct {
+	PrefixID            string `json:"prefix"`
+	Address             string `json:"name"`
+	DescriptionCustomer string `json:"description_customer"`
+	Role                string `json:"role"`
+	Organization        string `json:"organization"`
+}
+
+type listResponse struct {
+	Data struct {
+		Data []Summary `json:"data"`
+	} `json:"data"`
+}
+
+// NewCreate creates a new address definition with required vlaues.
+func NewCreate(prefixID string, address string) Create {
+	return Create{
+		PrefixID: prefixID,
+		Address:  address,
+		Role:     "Default",
+	}
+}
+
+func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
 	url := fmt.Sprintf(
-		"%s%s",
+		"%s%s?page=%v&limit=%v",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathPrefix, page, limit,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -54,7 +82,7 @@ func (a api) All(ctx context.Context) ([]Summary, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute address list request: %w", err)
 	}
-	var responsePayload allResponse
+	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 
@@ -62,7 +90,7 @@ func (a api) All(ctx context.Context) ([]Summary, error) {
 		return nil, fmt.Errorf("could not decode address list response: %w", err)
 	}
 
-	return responsePayload.Data, err
+	return responsePayload.Data.Data, err
 }
 
 func (a api) Get(ctx context.Context, id string) (Address, error) {
@@ -112,4 +140,66 @@ func (a api) Delete(ctx context.Context, id string) error {
 	}
 
 	return httpResponse.Body.Close()
+}
+
+func (a api) Create(ctx context.Context, create Create) (Summary, error) {
+	url := fmt.Sprintf(
+		"%s%s",
+		a.client.BaseURL(),
+		pathPrefix,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(create); err != nil {
+		panic(fmt.Sprintf("could not create request data for vlan creation: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
+	if err != nil {
+		return Summary{}, fmt.Errorf("could not create vlan post request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
+	}
+	var summary Summary
+	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return Summary{}, fmt.Errorf("could not decode vlan post response: %w", err)
+	}
+
+	return summary, nil
+}
+
+func (a api) Update(ctx context.Context, id string, update Update) (Summary, error) {
+	url := fmt.Sprintf(
+		"%s%s/%s",
+		a.client.BaseURL(),
+		pathPrefix, id,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(update); err != nil {
+		panic(fmt.Sprintf("could not create request data for vlan update: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &requestData)
+	if err != nil {
+		return Summary{}, fmt.Errorf("could not create vlan update request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return Summary{}, fmt.Errorf("could not execute vlan update request: %w", err)
+	}
+	var summary Summary
+	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return summary, fmt.Errorf("could not decode vlan update response: %w", err)
+	}
+
+	return summary, err
 }
