@@ -1,4 +1,4 @@
-package address
+package prefix
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 // API contains methods for IP manipulation.
 type API interface {
 	List(ctx context.Context, page, limit int) ([]Summary, error)
-	Get(ctx context.Context, id string) (Address, error)
+	Get(ctx context.Context, id string) (Info, error)
 	Delete(ctx context.Context, id string) error
 	Create(ctx context.Context, create Create) (Summary, error)
 	Update(ctx context.Context, id string, update Update) (Summary, error)
