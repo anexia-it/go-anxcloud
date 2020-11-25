@@ -7,6 +7,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/templates"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
 )
 
@@ -16,15 +17,17 @@ type API interface {
 	IPs() ips.API
 	Location() location.API
 	Progress() progress.API
+	Templates() templates.API
 	VM() vm.API
 }
 
 type api struct {
-	diskType disktype.API
-	ips      ips.API
-	location location.API
-	progress progress.API
-	vm       vm.API
+	diskType  disktype.API
+	ips       ips.API
+	location  location.API
+	progress  progress.API
+	templates templates.API
+	vm        vm.API
 }
 
 func (a api) DiskType() disktype.API {
@@ -43,6 +46,10 @@ func (a api) Progress() progress.API {
 	return a.progress
 }
 
+func (a api) Templates() templates.API {
+	return a.templates
+}
+
 func (a api) VM() vm.API {
 	return a.vm
 }
@@ -54,6 +61,7 @@ func NewAPI(c client.Client) API {
 		ips.NewAPI(c),
 		location.NewAPI(c),
 		progress.NewAPI(c),
+		templates.NewAPI(c),
 		vm.NewAPI(c),
 	}
 }
