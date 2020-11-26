@@ -15,26 +15,26 @@ const (
 
 // Info contains meta information of a VM.
 type Info struct {
-	Name             string `json:"name"`
-	CustomName       string `json:"custom_name"`
-	Identifier       string `json:"identifier"`
-	GuestOS          string `json:"guest_os"`
-	LocationCode     string `json:"location_code"`
-	LocationCountry  string `json:"location_country"`
-	LocationName     string `json:"location_name"`
-	Status           string `json:"status"`
-	VersionTools     string `json:"version_tools"`
-	GuestToolsStatus string `json:"guest_tools_status"`
-	RAM              int    `json:"ram"`
-	CPU              int    `json:"cpu"`
-	Cores            int    `json:"cores"`
-	Disks            int    `json:"disks"`
-	DiskInfo         `json:"disk_info"`
-	Network          `json:"network"`
+	Name             string     `json:"name"`
+	CustomName       string     `json:"custom_name"`
+	Identifier       string     `json:"identifier"`
+	GuestOS          string     `json:"guest_os"`
+	LocationCode     string     `json:"location_code"`
+	LocationCountry  string     `json:"location_country"`
+	LocationName     string     `json:"location_name"`
+	Status           string     `json:"status"`
+	VersionTools     string     `json:"version_tools"`
+	GuestToolsStatus string     `json:"guest_tools_status"`
+	RAM              int        `json:"ram"`
+	CPU              int        `json:"cpu"`
+	Cores            int        `json:"cores"`
+	Disks            int        `json:"disks"`
+	DiskInfo         []DiskInfo `json:"disk_info"`
+	Network          []Network  `json:"network"`
 }
 
 // DiskInfo contains meta information of attached disks to a VM.
-type DiskInfo []struct {
+type DiskInfo struct {
 	DiskType     string `json:"disk_type"`
 	StorageType  string `json:"storage_type"`
 	BusType      string `json:"bus_type"`
@@ -46,7 +46,7 @@ type DiskInfo []struct {
 }
 
 // Network contains meta information of attached NICs to a VM.
-type Network []struct {
+type Network struct {
 	NIC        int      `json:"nic"`
 	ID         int      `json:"id"`
 	VLAN       string   `json:"vlan"`
