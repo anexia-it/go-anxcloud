@@ -11,21 +11,20 @@ import (
 )
 
 // Type defines the type of a prefix.
-type Type int
 
 const (
 	pathPrefix string = "/api/ipam/v1/prefix.json"
 	// TypePublic means the prefix is globally routable.
-	TypePublic Type = 0
+	TypePublic int = 0
 	// TypePrivate means the prefix is scoped to a private network.
-	TypePrivate Type = 1
+	TypePrivate int = 1
 )
 
 // Create defines meta data of a prefix to create.
 type Create struct {
 	Location    string `json:"location"`
 	IPVersion   int    `json:"version"`
-	Type        Type   `json:"type"`
+	Type        int    `json:"type"`
 	NetworkMask int    `json:"netmask"`
 
 	CreateVLAN              bool   `json:"new_vlan,omitempty"`
@@ -38,7 +37,7 @@ type Create struct {
 }
 
 // NewCreate creates a new prefix definition with required vlaues.
-func NewCreate(location, vlan string, ipVersion int, prefixType Type, networkMask int) Create {
+func NewCreate(location, vlan string, ipVersion int, prefixType int, networkMask int) Create {
 	return Create{
 		Location:    location,
 		IPVersion:   ipVersion,
@@ -75,7 +74,7 @@ type Info struct {
 // Update contains fields to change on a prefix.
 type Update struct {
 	Name                string `json:"name,omitempty"`
-	CustomerDescription string `json:"description_custome,omitempty"`
+	CustomerDescription string `json:"description_customer,omitempty"`
 }
 
 // Summary contains a abbreviated information set about a prefix.
