@@ -10,7 +10,7 @@ import (
 
 // API contains methods for disk_type querying.
 type API interface {
-	List(ctx context.Context, locationID string) ([]DiskType, error)
+	List(ctx context.Context, locationID string, page, limit int) ([]DiskType, error)
 }
 
 type api struct {
