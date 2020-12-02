@@ -58,7 +58,7 @@ func TestCreateDelete(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	summary, err := api.Create(ctx, vlan.CreateDefinition{Location: location})
+	summary, err := api.Create(ctx, vlan.CreateDefinition{Location: location, CustomerDescription: "go SDK integration test"})
 	if err != nil {
 		t.Fatalf("could not create vlan: %v", err)
 	}
