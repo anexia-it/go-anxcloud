@@ -19,7 +19,7 @@ func TestEcho(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	if err := echo.NewAPI(c).Echo(ctx); err != nil {
-		t.Fatalf("echo request failed: %v", err)
+		t.Errorf("echo request failed: %v", err)
 	}
 }
 
@@ -30,7 +30,7 @@ func TestEchoInvalidStatusCode(t *testing.T) {
 		resp.ErrorData.Message = "testerror"
 		w.WriteHeader(http.StatusInternalServerError)
 		if err := json.NewEncoder(w).Encode(&resp); err != nil {
-			t.Fatalf("echo response could not be encoded: %v", err)
+			t.Errorf("echo response could not be encoded: %v", err)
 		}
 	}))
 	defer server.Close()
@@ -39,7 +39,7 @@ func TestEchoInvalidStatusCode(t *testing.T) {
 	defer cancel()
 	var responseError *client.ResponseError
 	if err := echo.NewAPI(c).Echo(ctx); !errors.As(err, &responseError) {
-		t.Fatalf("expected client.ResponseError but got %v", err)
+		t.Errorf("expected client.ResponseError but got %v", err)
 	}
 }
 
@@ -47,7 +47,7 @@ func TestEchoInvalidResponseEncoding(t *testing.T) {
 	c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		payload := map[string]string{}
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			t.Fatalf("echo payload could not be decoded: %v", err)
+			t.Errorf("echo payload could not be decoded: %v", err)
 		}
 		if err := r.Body.Close(); err != nil {
 			panic(err)
@@ -60,7 +60,7 @@ func TestEchoInvalidResponseEncoding(t *testing.T) {
 	defer cancel()
 	var syntaxError *json.SyntaxError
 	if err := echo.NewAPI(c).Echo(ctx); !errors.As(err, &syntaxError) {
-		t.Fatalf("expected json.SyntaxError but got %v", err)
+		t.Errorf("expected json.SyntaxError but got %v", err)
 	}
 }
 
@@ -73,6 +73,6 @@ func TestEchoOtherValue(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	if err := echo.NewAPI(c).Echo(ctx); !errors.Is(err, echo.ErrInvalidEchoResponse) {
-		t.Fatalf("expected ErrInvalidEchoResponse but got %v", err)
+		t.Errorf("expected ErrInvalidEchoResponse but got %v", err)
 	}
 }

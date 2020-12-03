@@ -26,13 +26,13 @@ func TestList(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	_, err = service.NewAPI(c).List(ctx, 1, 1000)
 	cancel()
 	if err != nil {
-		t.Fatalf("could not list services: %v", err)
+		t.Errorf("could not list services: %v", err)
 	}
 }

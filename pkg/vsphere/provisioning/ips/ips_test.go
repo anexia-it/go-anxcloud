@@ -36,13 +36,13 @@ func TestGetFree(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 
 	_, err = ips.NewAPI(c).GetFree(ctx, location, vlan)
 	if err != nil {
-		t.Fatalf("could not get free ips: %v", err)
+		t.Errorf("could not get free ips: %v", err)
 	}
 }

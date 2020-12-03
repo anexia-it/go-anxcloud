@@ -32,13 +32,13 @@ func TestList(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 
 	_, err = disktype.NewAPI(c).List(ctx, location)
 	if err != nil {
-		t.Fatalf("could not get templates: %v", err)
+		t.Errorf("could not get templates: %v", err)
 	}
 }

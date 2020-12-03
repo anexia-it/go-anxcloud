@@ -16,14 +16,14 @@ func TestTokenClient(t *testing.T) {
 	dummyToken := "ie7dois8Ooquoo1ieB9kae8Od9ooshee3nejuach4inae3gai0Re0Shaipeihail" //nolint:gosec // Not a real token.
 	c, err := client.New(client.TokenFromString(dummyToken))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 	expectedAuthorizationHeader := fmt.Sprintf("Token %s", dummyToken)
 	echoHandler := echo.TestMock(t)
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != expectedAuthorizationHeader {
-			t.Fatalf("token client did not add expected header Authorization. Was %s", r.Header.Get("Authorization"))
+			t.Errorf("token client did not add expected header Authorization. Was %s", r.Header.Get("Authorization"))
 		}
 		echoHandler.ServeHTTP(w, r)
 	})
@@ -34,7 +34,7 @@ func TestTokenClient(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	if err := echo.NewAPI(cw).Echo(ctx); err != nil {
-		t.Fatalf("echo test failed: %v", err)
+		t.Errorf("echo test failed: %v", err)
 	}
 }
 
@@ -45,11 +45,11 @@ func TestTokenClientIntegration(t *testing.T) {
 	}
 	c, err := client.New(client.TokenFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 	if err := echo.NewAPI(c).Echo(ctx); err != nil {
-		t.Fatalf("[%s] echo test failed: %v", time.Now(), err)
+		t.Errorf("[%s] echo test failed: %v", time.Now(), err)
 	}
 }

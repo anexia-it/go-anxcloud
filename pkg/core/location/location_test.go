@@ -26,13 +26,13 @@ func TestList(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	_, err = location.NewAPI(c).List(ctx, 1, 1000)
 	if err != nil {
-		t.Fatalf("could not list VLAN: %v", err)
+		t.Errorf("could not list VLAN: %v", err)
 	}
 	cancel()
 }

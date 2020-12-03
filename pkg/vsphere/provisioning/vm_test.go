@@ -79,17 +79,17 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) { //nolint:funlen
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	ips, err := ips.NewAPI(c).GetFree(ctx, location, vlan)
 	defer cancel()
 	if err != nil {
-		t.Fatalf("provisioning vm failed: %v", err)
+		t.Errorf("provisioning vm failed: %v", err)
 	}
 	if len(ips) < 1 {
-		t.Fatalf("no IPs left for testing in vlan")
+		t.Errorf("no IPs left for testing in vlan")
 	}
 
 	networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{ips[0].Identifier}, VLAN: vlan}}
@@ -98,30 +98,30 @@ func TestVMProvisioningDeprovisioningIntegration(t *testing.T) { //nolint:funlen
 
 	provisionResponse, err := vm.NewAPI(c).Provision(ctx, definition)
 	if err != nil {
-		t.Fatalf("provisioning vm failed: %v", err)
+		t.Errorf("provisioning vm failed: %v", err)
 	}
 
 	vmID, err := progress.NewAPI(c).AwaitCompletion(ctx, provisionResponse.Identifier)
 	if err != nil {
-		t.Fatalf("waiting for VM provisioning failed: %v", err)
+		t.Errorf("waiting for VM provisioning failed: %v", err)
 	}
 
 	change := vm.NewChange()
 	change.MemoryMBs = changedMemory
 	updateResponse, err := vm.NewAPI(c).Update(ctx, vmID, change)
 	if err != nil {
-		t.Fatalf("update vm failed: %v", err)
+		t.Errorf("update vm failed: %v", err)
 	}
 
 	newVMID, err := progress.NewAPI(c).AwaitCompletion(ctx, updateResponse.Identifier)
 	if err != nil {
-		t.Fatalf("waiting for VM update failed: %v", err)
+		t.Errorf("waiting for VM update failed: %v", err)
 	}
 	if newVMID != vmID {
-		t.Fatalf("VM change resulted in a new ID: %v->%v", vmID, newVMID)
+		t.Errorf("VM change resulted in a new ID: %v->%v", vmID, newVMID)
 	}
 
 	if err = vm.NewAPI(c).Deprovision(ctx, vmID, false); err != nil {
-		t.Fatalf(fmt.Sprintf("could not deprovision VM: %v", err))
+		t.Errorf(fmt.Sprintf("could not deprovision VM: %v", err))
 	}
 }
