@@ -37,13 +37,13 @@ func TestList(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	_, err = prefix.NewAPI(c).List(ctx, 1, 1000)
 	if err != nil {
-		t.Fatalf("could not list prefix: %v", err)
+		t.Errorf("could not list prefix: %v", err)
 	}
 	cancel()
 }
@@ -55,7 +55,7 @@ func TestCreateDelete(t *testing.T) {
 	}
 	c, err := client.New(client.AuthFromEnv(false))
 	if err != nil {
-		t.Fatalf("could not create client: %v", err)
+		t.Errorf("could not create client: %v", err)
 	}
 
 	api := prefix.NewAPI(c)
@@ -64,7 +64,7 @@ func TestCreateDelete(t *testing.T) {
 	defer cancel()
 	summary, err := api.Create(ctx, prefix.NewCreate(location, vlan, 4, prefix.TypePrivate, 24))
 	if err != nil {
-		t.Fatalf("could not create prefix: %v", err)
+		t.Errorf("could not create prefix: %v", err)
 	}
 
 	ticker := time.NewTicker(3 * time.Second)
@@ -72,7 +72,7 @@ func TestCreateDelete(t *testing.T) {
 	for {
 		info, err := api.Get(ctx, summary.ID)
 		if err != nil {
-			t.Fatalf("could not get vlan: %v", err)
+			t.Errorf("could not get vlan: %v", err)
 		}
 		if info.Status == "Active" {
 			break
@@ -80,17 +80,17 @@ func TestCreateDelete(t *testing.T) {
 		select {
 		case <-ticker.C:
 		case <-ctx.Done():
-			t.Fatalf(ctx.Err().Error())
+			t.Errorf(ctx.Err().Error())
 		}
 	}
 
 	_, err = api.Update(ctx, summary.ID, prefix.Update{CustomerDescription: "something else"})
 	if err != nil {
-		t.Fatalf("could not update vlan: %v", err)
+		t.Errorf("could not update vlan: %v", err)
 	}
 
 	err = api.Delete(ctx, summary.ID)
 	if err != nil {
-		t.Fatalf("could not delete vlan: %v", err)
+		t.Errorf("could not delete vlan: %v", err)
 	}
 }
