@@ -19,11 +19,11 @@ const (
 	pathPrefix = "/api/vsphere/v1/provisioning/disk_type.json"
 )
 
-func (a api) List(ctx context.Context, locationID string) ([]DiskType, error) {
+func (a api) List(ctx context.Context, locationID string, page, limit int) ([]DiskType, error) {
 	url := fmt.Sprintf(
-		"%s%s/%s",
+		"%s%s/%s?page=%v&limit=%v",
 		a.client.BaseURL(),
-		pathPrefix, locationID,
+		pathPrefix, locationID, page, limit,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

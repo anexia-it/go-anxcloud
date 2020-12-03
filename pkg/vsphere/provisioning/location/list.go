@@ -32,11 +32,11 @@ type response struct {
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // definition contains the definition of the VM to be created.
-func (a api) All(ctx context.Context) ([]Location, error) {
+func (a api) All(ctx context.Context, page, limit int) ([]Location, error) {
 	url := fmt.Sprintf(
-		"%s%s",
+		"%s%s?page=%v&limit=%v",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathPrefix, page, limit,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

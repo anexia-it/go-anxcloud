@@ -37,7 +37,7 @@ func TestList(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 	defer cancel()
 
-	_, err = disktype.NewAPI(c).List(ctx, location)
+	_, err = disktype.NewAPI(c).List(ctx, location, 1, 1000)
 	if err != nil {
 		t.Errorf("could not get templates: %v", err)
 	}
