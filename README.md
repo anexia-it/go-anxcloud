@@ -10,7 +10,7 @@ To use the SDK, just add `github.com/anexia-it/go-anxcloud <version>` to your Go
 
 ## Getting started
 
-Before using the SDK you should familiarize yourself with the API. See [here](https://engine.anexia-it.com/api/core/doc/) for more info.
+Before using the SDK you should familiarize yourself with the API. See [here](https://engine.anexia-it.com/docs/) for more info.
 I you crave for an example, take a look at [the terraform provider for this project](https://github.com/anexia-it/terraform-provider-anxcloud)
 
 ## Example 
