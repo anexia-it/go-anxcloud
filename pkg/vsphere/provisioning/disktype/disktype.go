@@ -12,6 +12,7 @@ type DiskType struct {
 	ID          string `json:"id"`
 	StorageType string `json:"storage_type"`
 	Bandwidth   int    `json:"bandwidth"`
+	IOPS        int    `json:"iops"`
 	Latency     int    `json:"latency"`
 }
 
