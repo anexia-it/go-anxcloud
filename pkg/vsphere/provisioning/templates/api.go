@@ -8,7 +8,7 @@ import (
 
 // API contains methods for template querying.
 type API interface {
-	List(ctx context.Context, locationID string, templateType TemplateType, page, limit int) ([]Template, error)
+	List(ctx context.Context, locationID string, templateType string, page, limit int) ([]Template, error)
 }
 
 type api struct {
