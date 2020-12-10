@@ -10,8 +10,8 @@ import (
 type API interface {
 	List(ctx context.Context, page, limit int) ([]Summary, error)
 	Get(ctx context.Context, id string) (Info, error)
-	AttachTag(ctx context.Context, name, serviceID string) ([]Summary, error)
-	DetachTag(ctx context.Context, resourceID, tagID string) error
+	AttachTag(ctx context.Context, resourceID, tagName string) ([]Summary, error)
+	DetachTag(ctx context.Context, resourceID, tagName string) error
 }
 
 type api struct {

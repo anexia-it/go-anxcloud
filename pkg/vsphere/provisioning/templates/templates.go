@@ -36,7 +36,7 @@ type IntParameter struct {
 type NIC struct {
 	ID      int    `json:"id"`
 	Name    string `json:"name"`
-	Default string `json:"default"`
+	Default bool   `json:"default"`
 }
 
 // NICParameter is a network interface card parameter for a template.
@@ -59,6 +59,7 @@ type Parameters struct {
 	DNS3             StringParameter `json:"dns3"`
 	NICs             NICParameter    `json:"nics"`
 	VLAN             StringParameter `json:"vlan"`
+	IPs              StringParameter `json:"ips"`
 	BootDelaySeconds IntParameter    `json:"bootDelaySeconds"`
 	EnterBIOSSetup   BoolParameter   `json:"enterBIOSSetup"`
 	Password         StringParameter `json:"password"`

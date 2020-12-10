@@ -35,7 +35,7 @@ type Service struct {
 
 // Customer is part of Organisation.
 type Customer struct {
-	ID         string `json:"customer_id"`
+	CustomerID string `json:"customer_id"`
 	Demo       bool   `json:"demo"`
 	Name       string `json:"name"`
 	Identifier string `json:"identifier"`
@@ -154,12 +154,12 @@ func (a api) Delete(ctx context.Context, tagID, serviceID string) error {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
-		return fmt.Errorf("could not create vlan delete request: %w", err)
+		return fmt.Errorf("could not create tag delete request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("could not execute vlan delete request: %w", err)
+		return fmt.Errorf("could not execute tag delete request: %w", err)
 	}
 
 	return httpResponse.Body.Close()

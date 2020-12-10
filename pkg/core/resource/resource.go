@@ -89,11 +89,11 @@ func (a api) Get(ctx context.Context, id string) (Info, error) {
 	return info, nil
 }
 
-func (a api) AttachTag(ctx context.Context, id, tagName string) ([]Summary, error) {
+func (a api) AttachTag(ctx context.Context, resourceID, tagName string) ([]Summary, error) {
 	url := fmt.Sprintf(
-		"%s%s?resource_identifier=%v&tag_name=%v",
+		"%s%s/%v/tags/%v",
 		a.client.BaseURL(),
-		pathPrefix, id, tagName,
+		pathPrefix, resourceID, tagName,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
@@ -115,11 +115,11 @@ func (a api) AttachTag(ctx context.Context, id, tagName string) ([]Summary, erro
 	return summary, nil
 }
 
-func (a api) DetachTag(ctx context.Context, resourceID, tagID string) error {
+func (a api) DetachTag(ctx context.Context, resourceID, tagName string) error {
 	url := fmt.Sprintf(
 		"%s%s/%v/tags/%v",
 		a.client.BaseURL(),
-		pathPrefix, resourceID, tagID,
+		pathPrefix, resourceID, tagName,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
