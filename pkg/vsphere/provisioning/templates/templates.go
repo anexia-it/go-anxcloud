@@ -9,12 +9,73 @@ import (
 	"net/http"
 )
 
+// StringParameter is a string parameter for a template.
+type StringParameter struct {
+	Required bool   `json:"required"`
+	Label    string `json:"label"`
+	Default  string `json:"defaultValue"`
+}
+
+// BoolParameter is a bool parameter for a template.
+type BoolParameter struct {
+	Required bool   `json:"required"`
+	Label    string `json:"label"`
+	Default  bool   `json:"defaultValue"`
+}
+
+// IntParameter is an int parameter for a template.
+type IntParameter struct {
+	Minimum  int    `json:"minValue"`
+	Maximum  int    `json:"maxValue"`
+	Required bool   `json:"required"`
+	Label    string `json:"label"`
+	Default  int    `json:"defaultValue"`
+}
+
+// NIC is a single NIC in NICParameter.
+type NIC struct {
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Default string `json:"default"`
+}
+
+// NICParameter is a network interface card parameter for a template.
+type NICParameter struct {
+	Required bool   `json:"required"`
+	Label    string `json:"label"`
+	Default  int    `json:"defaultValue"`
+	NICs     []NIC  `json:"data"`
+}
+
+// Parameters set of a VM.
+type Parameters struct {
+	Hostname         StringParameter `json:"hostname"`
+	CPUs             IntParameter    `json:"cpus"`
+	MemoryMB         IntParameter    `json:"memoryMB"`
+	DiskGB           IntParameter    `json:"diskGB"`
+	DNS0             StringParameter `json:"dns0"`
+	DNS1             StringParameter `json:"dns1"`
+	DNS2             StringParameter `json:"dns2"`
+	DNS3             StringParameter `json:"dns3"`
+	NICs             NICParameter    `json:"nics"`
+	VLAN             StringParameter `json:"vlan"`
+	BootDelaySeconds IntParameter    `json:"bootDelaySeconds"`
+	EnterBIOSSetup   BoolParameter   `json:"enterBIOSSetup"`
+	Password         StringParameter `json:"password"`
+	User             StringParameter `json:"user"`
+	DiskType         StringParameter `json:"disk_type"`
+}
+
+// TemplateType defines which type of template is selected.
+type TemplateType string
+
 // Template contains a summary about the state of a template.
 type Template struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	WordSize string `json:"bit"`
-	Build    string `json:"build"`
+	ID         string     `json:"id"`
+	Name       string     `json:"name"`
+	WordSize   string     `json:"bit"`
+	Build      string     `json:"build"`
+	Parameters Parameters `json:"params"`
 }
 
 const (
