@@ -13,6 +13,7 @@ type API interface {
 	Delete(ctx context.Context, id string) error
 	Create(ctx context.Context, create Create) (Summary, error)
 	Update(ctx context.Context, id string, update Update) (Summary, error)
+	ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveRandomSummary, error)
 }
 
 type api struct {
