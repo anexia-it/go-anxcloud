@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	pathPrefix = "/api/ipam/v1/address.json"
+	pathAddressPrefix        = "/api/ipam/v1/address.json"
+	pathReserveAddressPrefix = "/api/ipam/v1/address/reserve/ip/count.json"
 )
 
 // Address contains all the information about a specific address.
@@ -51,6 +52,29 @@ type Create struct {
 	Organization        string `json:"organization"`
 }
 
+// ReserveRandom defines metadata of addresses to reserve randomly.
+type ReserveRandom struct {
+	LocationID string `json:"location_identifier"`
+	VlanID     string `json:"vlan_identifier"`
+	Count      int    `json:"count"`
+}
+
+// ReserveRandomSummary is the reserved IPs information returned by list request.
+type ReserveRandomSummary struct {
+	Limit      int          `json:"limit"`
+	Page       int          `json:"page"`
+	TotalItems int          `json:"total_items"`
+	TotalPages int          `json:"total_pages"`
+	Data       []ReservedIP `json:"data"`
+}
+
+// ReservedIP returns details about reserved ip.
+type ReservedIP struct {
+	ID      string `json:"identifier"`
+	Address string `json:"text"`
+	Prefix  string `json:"prefix"`
+}
+
 type listResponse struct {
 	Data struct {
 		Data []Summary `json:"data"`
@@ -70,7 +94,7 @@ func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
 	url := fmt.Sprintf(
 		"%s%s?page=%v&limit=%v",
 		a.client.BaseURL(),
-		pathPrefix, page, limit,
+		pathAddressPrefix, page, limit,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -97,7 +121,7 @@ func (a api) Get(ctx context.Context, id string) (Address, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathAddressPrefix,
 		id,
 	)
 
@@ -125,7 +149,7 @@ func (a api) Delete(ctx context.Context, id string) error {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathAddressPrefix,
 		id,
 	)
 
@@ -146,7 +170,7 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 	url := fmt.Sprintf(
 		"%s%s",
 		a.client.BaseURL(),
-		pathPrefix,
+		pathAddressPrefix,
 	)
 
 	requestData := bytes.Buffer{}
@@ -177,7 +201,7 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
-		pathPrefix, id,
+		pathAddressPrefix, id,
 	)
 
 	requestData := bytes.Buffer{}
@@ -202,4 +226,35 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 	}
 
 	return summary, err
+}
+
+func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveRandomSummary, error) {
+	url := fmt.Sprintf(
+		"%s%s",
+		a.client.BaseURL(),
+		pathReserveAddressPrefix,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(reserve); err != nil {
+		panic(fmt.Sprintf("could not create request data for IP address reservation: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
+	if err != nil {
+		return ReserveRandomSummary{}, fmt.Errorf("could not create IP address reserve random post request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return ReserveRandomSummary{}, fmt.Errorf("could not execute IP address reserve random post request: %w", err)
+	}
+	var summary ReserveRandomSummary
+	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return ReserveRandomSummary{}, fmt.Errorf("could not decode IP address reserve random post response: %w", err)
+	}
+
+	return summary, nil
 }
