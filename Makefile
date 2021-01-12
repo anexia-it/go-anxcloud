@@ -15,13 +15,24 @@ build: fmtcheck go-lint
 generate:
 	go generate ./...
 
+.PHONY: depscheck
+depscheck:
+	@echo "==> Checking source code dependencies..."
+	@go mod tidy
+	@git diff --exit-code -- go.mod go.sum || \
+		(echo; echo "Found differences in go.mod/go.sum files. Run 'go mod tidy' or revert go.mod/go.sum changes."; exit 1)
+
 .PHONY: benchmark
 benchmark:
 	go test -bench=. -benchmem ./...
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -timeout 0 -race ./...
+	CGO_ENABLED=1 go test -cover -timeout 0 -race ./pkg/...
+
+.PHONY: func-test
+func-test:
+	CGO_ENABLED=1 go test -cover ./tests/...
 
 .PHONY: go-lint
 go-lint:

@@ -17,7 +17,7 @@ jobs:
       - name: run integration tests
         env:
           ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
-        run: make testacc
+        run: make func-test
 
   # Repo owner has commented /ok-to-test on a (fork-based) pull request
   integration-fork:
@@ -34,7 +34,7 @@ jobs:
       - name: run integration tests
         env:
           ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
-        run: make testacc
+        run: make func-test
 
       # Update check run called "integration-fork"
       - uses: actions/github-script@v1
