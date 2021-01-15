@@ -33,7 +33,7 @@ type Summary struct {
 	ID                  string `json:"identifier"`
 	Name                string `json:"name"`
 	DescriptionCustomer string `json:"description_customer"`
-	Role                string `json:"role"`
+	Role                string `json:"role_text"`
 }
 
 // Update contains fields to change on a prefix.
@@ -90,11 +90,11 @@ func NewCreate(prefixID string, address string) Create {
 	}
 }
 
-func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
+func (a api) List(ctx context.Context, page, limit int, search string) ([]Summary, error) {
 	url := fmt.Sprintf(
-		"%s%s?page=%v&limit=%v",
+		"%s%s?page=%d&limit=%d&search=%s",
 		a.client.BaseURL(),
-		pathAddressPrefix, page, limit,
+		pathAddressPrefix, page, limit, search,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
