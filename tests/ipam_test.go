@@ -27,7 +27,7 @@ var _ = Describe("IPAM API endpoint tests", func() {
 		It("Should list all available addresses", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			_, err := address.NewAPI(cli).List(ctx, 1, 1000)
+			_, err := address.NewAPI(cli).List(ctx, 1, 1000, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 

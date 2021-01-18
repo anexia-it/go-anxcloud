@@ -8,7 +8,7 @@ import (
 
 // API contains methods for IP manipulation.
 type API interface {
-	List(ctx context.Context, page, limit int) ([]Summary, error)
+	List(ctx context.Context, page, limit int, search string) ([]Summary, error)
 	Get(ctx context.Context, id string) (Address, error)
 	Delete(ctx context.Context, id string) error
 	Create(ctx context.Context, create Create) (Summary, error)
