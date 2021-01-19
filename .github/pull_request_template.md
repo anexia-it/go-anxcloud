@@ -2,22 +2,6 @@
 
 <!--- Please leave a helpful description of the pull request here. --->
 
-### Acceptance tests
-- [ ] Have you added an acceptance test for the functionality being added?
-- [ ] Have you run the acceptance tests on this branch?
-
-Output from acceptance testing:
-
-<!--
-Replace TestAccXXX with a pattern that matches the tests affected by this PR.
-
-For more information on the `-run` flag, see the `go test` documentation at https://tip.golang.org/cmd/go/#hdr-Testing_flags.
--->
-```
-$ make testacc TESTARGS='-run=TestAccXXX'
-...
-```
-
 ### Release Note
 Release note for [CHANGELOG](https://github.com/anexia-it/go-anxcloud/blob/master/CHANGELOG.md):
 <!--
