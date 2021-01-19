@@ -16,8 +16,9 @@ const (
 // Location is the metadata of a single location.
 type Location struct {
 	Code        string `json:"code"`
+	CityCode    string `json:"city_code"`
 	Country     string `json:"country"`
-	ID          string `json:"id"`
+	ID          string `json:"identifier"`
 	Latitude    string `json:"lat"`
 	Longitude   string `json:"lon"`
 	Name        string `json:"name"`
@@ -30,11 +31,11 @@ type listResponse struct {
 	} `json:"data"`
 }
 
-func (a api) List(ctx context.Context, page, limit int) ([]Location, error) {
+func (a api) List(ctx context.Context, page, limit int, search string) ([]Location, error) {
 	url := fmt.Sprintf(
-		"%s%s?page=%v&limit=%v",
+		"%s%s?page=%d&limit=%d&search=%s",
 		a.client.BaseURL(),
-		pathPrefix, page, limit,
+		pathPrefix, page, limit, search,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
