@@ -32,7 +32,7 @@ test:
 
 .PHONY: func-test
 func-test:
-	CGO_ENABLED=1 go test -cover ./tests/...
+	CGO_ENABLED=1 go test -cover -timeout 180m ./tests/...
 
 .PHONY: go-lint
 go-lint:
