@@ -26,7 +26,7 @@ import (
 const (
 	hostnameCharset = "abcdefghijklmnopqrstuvwxyz"
 	templateType    = "templates"
-	templateID      = "44b38284-6adb-430e-b4a4-1553e29f352f"
+	templateID      = "12c28aa7-604d-47e9-83fb-5f1d1f1837b3"
 	cpus            = 2
 	changedMemory   = 4096
 	memory          = 2048
