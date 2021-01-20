@@ -62,7 +62,7 @@ var _ = Describe("Core API endpoint tests", func() {
 		It("Should list all created tags", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			_, err := tags.NewAPI(cli).List(ctx, 1, 1000)
+			_, err := tags.NewAPI(cli).List(ctx, 1, 1000, "", "", "", "", true)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
