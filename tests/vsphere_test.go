@@ -5,11 +5,13 @@ import (
 	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
 	"log"
 	"math/rand"
 	"strings"
 	"time"
+
+	cpuperformancetype "github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/cpuperformancetypes"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/ipam/address"
@@ -122,6 +124,17 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 				defer cancel()
 
 				_, err := disktype.NewAPI(cli).List(ctx, locationID, 1, 1000)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+		})
+
+		Context("CPU Performance Type endpoint", func() {
+
+			It("Should list all cpu performance types", func() {
+				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+				defer cancel()
+				_, err := cpuperformancetype.NewAPI(cli).List(ctx)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
