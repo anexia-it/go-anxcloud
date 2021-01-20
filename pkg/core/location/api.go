@@ -8,7 +8,7 @@ import (
 
 // API contains methods for location listing.
 type API interface {
-	List(ctx context.Context, page, limit int) ([]Location, error)
+	List(ctx context.Context, page, limit int, search string) ([]Location, error)
 }
 
 type api struct {
