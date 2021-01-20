@@ -26,7 +26,7 @@ var _ = Describe("VLAN API endpoint tests", func() {
 		It("Should list all available VLANs", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
-			_, err := vlan.NewAPI(cli).List(ctx, 1, 1000)
+			_, err := vlan.NewAPI(cli).List(ctx, 1, 1000, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
