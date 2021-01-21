@@ -12,6 +12,7 @@ import (
 
 	cpuperformancetype "github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/cpuperformancetypes"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/ipam/address"
@@ -136,6 +137,18 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 				defer cancel()
 				_, err := cpuperformancetype.NewAPI(cli).List(ctx)
 				Expect(err).NotTo(HaveOccurred())
+			})
+
+		})
+
+		Context("VSphere Location endpoint", func() {
+
+			It("Should list all VSPhere locations", func() {
+				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+				defer cancel()
+				locations, err := location.NewAPI(cli).List(ctx, 1, 50, "", "")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(locations)).To(BeNumerically(">", 0))
 			})
 
 		})
