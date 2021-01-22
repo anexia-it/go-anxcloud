@@ -68,7 +68,8 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 				definition.SSH = randomPublicSSHKey()
 
 				By("Creating a new VM")
-				provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition)
+				base64Encoding := true
+				provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
 				Expect(err).NotTo(HaveOccurred())
 
 				By("Waiting for the VM to be ready")
