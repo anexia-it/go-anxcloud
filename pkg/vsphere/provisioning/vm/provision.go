@@ -3,6 +3,7 @@ package vm
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,8 +29,13 @@ var ErrProvisioning = errors.New("ProvisioningResponse contains errors")
 //
 // If the API call returns errors, they are raised as ErrProvisioning.
 // The returned ProvisioningResponse is still valid in this case.
-func (a api) Provision(ctx context.Context, definition Definition) (ProvisioningResponse, error) {
+func (a api) Provision(ctx context.Context, definition Definition, scriptBase64Encoded bool) (ProvisioningResponse, error) {
 	buf := bytes.Buffer{}
+
+	if definition.Script != "" && scriptBase64Encoded {
+		definition.Script = base64.StdEncoding.EncodeToString([]byte(definition.Script))
+	}
+
 	if err := json.NewEncoder(&buf).Encode(&definition); err != nil {
 		panic(fmt.Sprintf("could not encode definition: %v", err))
 	}
