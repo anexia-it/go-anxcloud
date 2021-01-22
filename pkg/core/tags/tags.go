@@ -62,7 +62,6 @@ type listResponse struct {
 }
 
 func (a api) List(ctx context.Context, page, limit int, query, serviceIdentifier, organizationIdentifier, order string, sortAscending bool) ([]Summary, error) {
-	// &service_identifier=SI&organization_identifier=OI&order=ORDER&sort_descending=true
 	url := fmt.Sprintf(
 		"%s%s?page=%v&limit=%v&query=%s&service_identifier=%s&organization_identifier=%s&order=%s&sort_descending=%s",
 		a.client.BaseURL(), pathPrefix,

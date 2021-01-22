@@ -32,12 +32,23 @@ type response struct {
 //
 // ctx is attached to the request and will cancel it on cancelation.
 // definition contains the definition of the VM to be created.
-func (a api) All(ctx context.Context, page, limit int) ([]Location, error) {
+func (a api) List(ctx context.Context, page, limit int, locationCode, organization string) ([]Location, error) {
+
 	url := fmt.Sprintf(
 		"%s%s?page=%v&limit=%v",
 		a.client.BaseURL(),
 		pathPrefix, page, limit,
 	)
+
+	//TODO remove this after ANEXIA API has been fixed - as it looks the endpoint does not support empty strings
+	if len(locationCode) > 0 {
+		url = fmt.Sprintf("%s&%s=%s", url, "location_code", locationCode)
+	}
+
+	//TODO remove this after ANEXIA API has been fixed - as it looks the endpoint does not support empty strings
+	if len(organization) > 0 {
+		url = fmt.Sprintf("%s&%s=%s", url, "organization", organization)
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
