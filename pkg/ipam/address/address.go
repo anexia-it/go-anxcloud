@@ -21,7 +21,7 @@ type Address struct {
 	Name                string `json:"name"`
 	DescriptionCustomer string `json:"description_customer"`
 	DescriptionInternal string `json:"description_internal"`
-	Role                string `json:"role"`
+	Role                string `json:"role_text"`
 	Version             int    `json:"version"`
 	Status              string `json:"status"`
 	VLANID              string `json:"vlan"`

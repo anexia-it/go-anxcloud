@@ -40,6 +40,7 @@ type Info struct {
 	InternalDescription string `json:"description_internal"`
 	Role                string `json:"role_text"`
 	Status              string `json:"status"`
+	VMProvisioning      bool   `json:"vm_provisioning,omitempty"`
 	Locations           []Location
 }
 

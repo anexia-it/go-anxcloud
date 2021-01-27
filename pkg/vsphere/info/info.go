@@ -19,9 +19,12 @@ type Info struct {
 	CustomName       string     `json:"custom_name"`
 	Identifier       string     `json:"identifier"`
 	GuestOS          string     `json:"guest_os"`
+	LocationID       string     `json:"location_id"`
 	LocationCode     string     `json:"location_code"`
 	LocationCountry  string     `json:"location_country"`
 	LocationName     string     `json:"location_name"`
+	TemplateID       string     `json:"template_id"`
+	TemplateType     string     `json:"template_type"`
 	Status           string     `json:"status"`
 	VersionTools     string     `json:"version_tools"`
 	GuestToolsStatus string     `json:"guest_tools_status"`
