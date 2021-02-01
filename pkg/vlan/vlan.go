@@ -78,6 +78,9 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Summar
 	if err != nil {
 		return nil, fmt.Errorf("could not execute vlan list request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return nil, fmt.Errorf("could not execute vlan list request, got response %s", httpResponse.Status)
+	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
@@ -106,6 +109,10 @@ func (a api) Get(ctx context.Context, identifier string) (Info, error) {
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute vlan get request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Info{}, fmt.Errorf("could not execute vlan get request, got response %s", httpResponse.Status)
+	}
+
 	var info Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&info)
 	_ = httpResponse.Body.Close()
@@ -137,6 +144,10 @@ func (a api) Create(ctx context.Context, createDefinition CreateDefinition) (Sum
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
+	}
+
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	_ = httpResponse.Body.Close()
@@ -168,6 +179,10 @@ func (a api) Update(ctx context.Context, identifier string, updateDefinition Upd
 	if err != nil {
 		return fmt.Errorf("could not execute vlan update request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
+	}
+
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	_ = httpResponse.Body.Close()
@@ -193,6 +208,9 @@ func (a api) Delete(ctx context.Context, identifier string) error {
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("could not execute vlan delete request: %w", err)
+	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute vlan delete request, got response %s", httpResponse.Status)
 	}
 
 	return httpResponse.Body.Close()

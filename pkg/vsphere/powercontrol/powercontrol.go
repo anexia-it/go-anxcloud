@@ -75,13 +75,17 @@ func (a api) Set(ctx context.Context, identifier string, request Request) (Task,
 		return Task{}, fmt.Errorf("could not create powercontrol set request: %w", err)
 	}
 
-	resp, err := a.client.Do(req)
+	httpResponse, err := a.client.Do(req)
 	if err != nil {
 		return Task{}, fmt.Errorf("could not execute powercontrol set request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Task{}, fmt.Errorf("could not execute powercontrol set request, got response %s", httpResponse.Status)
+	}
+
 	var task Task
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	_ = resp.Body.Close()
+	err = json.NewDecoder(httpResponse.Body).Decode(&task)
+	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Task{}, fmt.Errorf("could not decode powercontrol set response: %w", err)
 	}
@@ -113,6 +117,10 @@ func (a api) Get(ctx context.Context, identifier string) (State, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not execute powercontrol get request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return "", fmt.Errorf("could not execute powercontrol get request, got response %s", httpResponse.Status)
+	}
+
 	var responsePayload State
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
@@ -149,6 +157,10 @@ func (a api) AwaitCompletion(ctx context.Context, vmID, taskID string) error {
 			if err != nil {
 				return fmt.Errorf("could not execute powercontrol task get request: %w", err)
 			}
+			if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+				return fmt.Errorf("could not execute powercontrol task get request, got response %s", httpResponse.Status)
+			}
+
 			var responseError *client.ResponseError
 			if errors.As(err, &responseError) && responseError.Response.StatusCode == 404 {
 				continue

@@ -106,6 +106,10 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Summar
 	if err != nil {
 		return nil, fmt.Errorf("could not execute address list request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return nil, fmt.Errorf("could not execute address list request, got response %s", httpResponse.Status)
+	}
+
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
@@ -134,6 +138,10 @@ func (a api) Get(ctx context.Context, id string) (Address, error) {
 	if err != nil {
 		return Address{}, fmt.Errorf("could not execute address get request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Address{}, fmt.Errorf("could not execute address get request, got response %s", httpResponse.Status)
+	}
+
 	var responsePayload Address
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
@@ -162,6 +170,9 @@ func (a api) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("could not execute address delete request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute address delete request, got response %s", httpResponse.Status)
+	}
 
 	return httpResponse.Body.Close()
 }
@@ -187,6 +198,10 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
+	}
+
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	_ = httpResponse.Body.Close()
@@ -218,6 +233,10 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan update request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Summary{}, fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
+	}
+
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	_ = httpResponse.Body.Close()
@@ -249,6 +268,10 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	if err != nil {
 		return ReserveRandomSummary{}, fmt.Errorf("could not execute IP address reserve random post request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return ReserveRandomSummary{}, fmt.Errorf("could not execute IP address reserve random post request, got response %s", httpResponse.Status)
+	}
+
 	var summary ReserveRandomSummary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	_ = httpResponse.Body.Close()
