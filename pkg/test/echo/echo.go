@@ -43,6 +43,9 @@ func (a api) Echo(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute echo request, got response %s", httpResponse.Status)
+	}
 
 	var responsePayload string
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
