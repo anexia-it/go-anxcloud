@@ -47,6 +47,9 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Locati
 	if err != nil {
 		return nil, fmt.Errorf("could not execute location list request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return nil, fmt.Errorf("could not execute location list request, got response %s", httpResponse.Status)
+	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)

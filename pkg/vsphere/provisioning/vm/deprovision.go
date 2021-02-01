@@ -33,6 +33,10 @@ func (a api) Deprovision(ctx context.Context, identifier string, delayed bool) e
 	if err != nil {
 		return fmt.Errorf("could not execute VM deprovisioning request: %w", err)
 	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute VM deprovisioning request, got response %s", httpResponse.Status)
+	}
+
 	_ = httpResponse.Body.Close()
 
 	if err != nil {
