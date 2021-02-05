@@ -3,6 +3,7 @@
 package zone
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 
 const (
 	pathPrefix string = "api/clouddns/v1/zone.json"
+	zoneDataPayloadKey string = "zoneData"
 )
 
 type listResponse struct {
@@ -49,6 +51,33 @@ type Zone struct {
 	TTL int `json:"ttl"`
 	ValidationLevel int `json:"validation_level"`
 	Revisions []Revision `json:"revisions"`
+}
+
+type ResourceRecord struct {
+	Name string `json:"name"`
+	Type string `json:"Type"`
+	Region string `json:"region"`
+	RData string `json:"rdata"`
+	TTL string `json:"ttl"`
+}
+
+type Changeset struct {
+	Create ResourceRecord `json:"create"`
+	Delete ResourceRecord `json:"delete"`
+}
+
+type Data struct {
+	ZoneData string `json:"zoneData"`
+}
+
+func NewResourceRecord(name, recordType, region, rdata, ttl string) ResourceRecord {
+	return ResourceRecord{
+		Name:   name,
+		Type:   recordType,
+		Region: region,
+		RData:  rdata,
+		TTL:    ttl,
+	}
 }
 
 // List Zones API method´
@@ -143,4 +172,63 @@ func (a api) Delete(ctx context.Context, name string) error {
 }
 
 // apply (changeset)
+func (a api) Apply(ctx context.Context, name string, changeset Changeset) error {
+	url := fmt.Sprintf(
+		"%s%s/%s/changeset",
+		a.client.BaseURL(),
+		pathPrefix,
+		name,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(changeset); err != nil {
+		panic(fmt.Sprintf("could not create request data for applying changeset: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
+	if err != nil {
+		return fmt.Errorf("could not create zone changeset request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not execute zone changeset request: %w", err)
+	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
+	}
+
+	// TODO correct to real response from server
+	return httpResponse.Body.Close()
+}
+
 // import
+func (a api) Import(ctx context.Context, name string, zoneData Data) error {
+	url := fmt.Sprintf(
+		"%s%s/%s/changeset",
+		a.client.BaseURL(),
+		pathPrefix,
+		name,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(zoneData); err != nil {
+		panic(fmt.Sprintf("could not create request data for import zone request: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
+	if err != nil {
+		return fmt.Errorf("could not create zone import request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not execute zone import request: %w", err)
+	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute zone import request, got response %s", httpResponse.Status)
+	}
+
+	// TODO correct to real response from server
+	return httpResponse.Body.Close()
+}

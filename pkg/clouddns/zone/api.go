@@ -14,8 +14,8 @@ type API interface {
 	Create()
 	Update()
 	Delete(ctx context.Context, name string) error
-	Apply()
-	Import()
+	Apply(ctx context.Context, name string, changeset Changeset)
+	Import(ctx context.Context, name string, zoneData string)
 	NewRecord()
 	UpdateRecord()
 	DeleteRecord()
@@ -30,14 +30,6 @@ func (a api) Create() {
 }
 
 func (a api) Update() {
-	panic("implement me")
-}
-
-func (a api) Apply() {
-	panic("implement me")
-}
-
-func (a api) Import() {
 	panic("implement me")
 }
 
