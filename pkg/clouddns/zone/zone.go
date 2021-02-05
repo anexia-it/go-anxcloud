@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	pathPrefix         string = "api/clouddns/v1/zone.json"
-	zoneDataPayloadKey string = "zoneData"
+	pathPrefix string = "api/clouddns/v1/zone.json"
 )
 
 type listResponse struct {
@@ -156,7 +155,7 @@ func (a api) List(ctx context.Context) ([]Response, error) {
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("could not decode zone list respone: %w", err)
+		return nil, fmt.Errorf("could not decode zone list response: %w", err)
 	}
 
 	return responsePayload.Results, nil
@@ -188,7 +187,7 @@ func (a api) Get(ctx context.Context, name string) (Response, error) {
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return Response{}, fmt.Errorf("could not decode zone get respone: %w", err)
+		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
 
 	return responsePayload, nil
@@ -197,7 +196,7 @@ func (a api) Get(ctx context.Context, name string) (Response, error) {
 // create
 func (a api) Create(ctx context.Context, create Definition) error {
 	url := fmt.Sprintf(
-		"%s%s/%s",
+		"%s%s",
 		a.client.BaseURL(),
 		pathPrefix,
 	)

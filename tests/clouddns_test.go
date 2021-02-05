@@ -21,7 +21,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 	})
 
 	Context("Definition List Endpoint", func() {
-		It("Should list all avaliable zones", func() {
+		It("Should list all available zones", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
 			_, err := zone.NewAPI(cli).List(ctx)
