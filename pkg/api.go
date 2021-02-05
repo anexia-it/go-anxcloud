@@ -3,6 +3,7 @@ package pkg
 
 import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/clouddns"
 	"github.com/anexia-it/go-anxcloud/pkg/ipam"
 	"github.com/anexia-it/go-anxcloud/pkg/test"
 	"github.com/anexia-it/go-anxcloud/pkg/vlan"
@@ -15,6 +16,7 @@ type API interface {
 	Test() test.API
 	VLAN() vlan.API
 	VSphere() vsphere.API
+	CloudDNS() clouddns.API
 }
 
 type api struct {
@@ -22,6 +24,7 @@ type api struct {
 	test    test.API
 	vlan    vlan.API
 	vsphere vsphere.API
+	clouddns clouddns.API
 }
 
 func (a api) IPAM() ipam.API {
@@ -40,6 +43,10 @@ func (a api) VSphere() vsphere.API {
 	return a.vsphere
 }
 
+func (a api) CloudDNS() clouddns.API {
+	return a.clouddns
+}
+
 // NewAPI creates a new API instance with the given client.
 func NewAPI(c client.Client) API {
 	return &api{
@@ -47,5 +54,6 @@ func NewAPI(c client.Client) API {
 		test.NewAPI(c),
 		vlan.NewAPI(c),
 		vsphere.NewAPI(c),
+		clouddns.NewAPI(c),
 	}
 }
