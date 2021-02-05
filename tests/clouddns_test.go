@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 	"time"
 )
+
 var _ = Describe("CloudDNS API endpoint tests", func() {
 	var cli client.Client
 

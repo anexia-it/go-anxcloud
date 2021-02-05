@@ -20,10 +20,10 @@ type API interface {
 }
 
 type api struct {
-	ipam    ipam.API
-	test    test.API
-	vlan    vlan.API
-	vsphere vsphere.API
+	ipam     ipam.API
+	test     test.API
+	vlan     vlan.API
+	vsphere  vsphere.API
 	clouddns clouddns.API
 }
 

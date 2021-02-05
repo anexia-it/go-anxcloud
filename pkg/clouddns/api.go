@@ -16,7 +16,6 @@ type API interface {
 	//Nameserverset()
 }
 
-
 type api struct {
 	zone zone.API
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	pathPrefix string = "api/clouddns/v1/zone.json"
+	pathPrefix         string = "api/clouddns/v1/zone.json"
 	zoneDataPayloadKey string = "zoneData"
 )
 
@@ -22,19 +22,19 @@ type listResponse struct {
 
 type Record struct {
 	Identifier string `json:"identifier"`
-	Immutable bool `json:"immutable"`
-	Name string `json:"name"`
-	RData string `json:"rdata"`
-	Region string `json:"region"`
-	TTL string `json:"ttl"`
-	Type string `json:"Type"`
+	Immutable  bool   `json:"immutable"`
+	Name       string `json:"name"`
+	RData      string `json:"rdata"`
+	Region     string `json:"region"`
+	TTL        string `json:"ttl"`
+	Type       string `json:"Type"`
 }
 
 type Revision struct {
-	CreatedAt time.Time `json:"created_at"`
-	Identifier string `json:"identifier"`
+	CreatedAt  time.Time `json:"created_at"`
+	Identifier string    `json:"identifier"`
 	ModifiedAt time.Time `json:"modified_at"`
-	Records []Record `json:"records"`
+	Records    []Record  `json:"records"`
 }
 
 type DNSServer struct {
@@ -90,27 +90,26 @@ type Definition struct {
 
 type Response struct {
 	*Definition
-	Customer string `json:"customer"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	PublishedAt time.Time `json:"published_at"`
-	IsEditable bool `json:"is_editable"`
-	ValidationLevel int `json:"validation_level"`
-	Revisions []Revision `json:"revisions"`
+	Customer        string     `json:"customer"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	PublishedAt     time.Time  `json:"published_at"`
+	IsEditable      bool       `json:"is_editable"`
+	ValidationLevel int        `json:"validation_level"`
+	Revisions       []Revision `json:"revisions"`
 }
 
 type ResourceRecord struct {
-	Name string `json:"name"`
-	Type string `json:"Type"`
+	Name   string `json:"name"`
+	Type   string `json:"Type"`
 	Region string `json:"region"`
-	RData string `json:"rdata"`
-	TTL string `json:"ttl"`
+	RData  string `json:"rdata"`
+	TTL    string `json:"ttl"`
 }
 
 type Create struct {
-	Name string `json:"zoneName"`
-	Master bool `json:"master"`
-
+	Name   string `json:"zoneName"`
+	Master bool   `json:"master"`
 }
 
 type ChangeSet struct {
