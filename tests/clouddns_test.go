@@ -19,7 +19,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("Zone List Endpoint", func() {
+	Context("Definition List Endpoint", func() {
 		It("Should list all avaliable zones", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
@@ -28,7 +28,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
-	Context("Zone Get Endpoint", func() {
+	Context("Definition Get Endpoint", func() {
 		It("Should return the zone", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
@@ -37,19 +37,19 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
-	Context("Zone Delete Endpoint", func() {
+	Context("Definition Delete Endpoint", func() {
 		It("Should delete the zone", func() {
 			// TODO
 		})
 	})
 
-	Context("Zone ChangeSet Endpoint", func() {
+	Context("Definition ChangeSet Endpoint", func() {
 		It("Should apply the changeset", func() {
 			// TODO
 		})
 	})
 
-	Context("Zone Import Endpoint", func() {
+	Context("Definition Import Endpoint", func() {
 		It("Should import the zone", func() {
 			// TODO
 		})

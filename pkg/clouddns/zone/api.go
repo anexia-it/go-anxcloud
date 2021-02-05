@@ -9,13 +9,13 @@ import (
 
 // API contains methods for zone and record management
 type API interface {
-	List(ctx context.Context) ([]Zone, error)
-	Get(ctx context.Context, name string) (Zone, error)
-	Create()
+	List(ctx context.Context) ([]Response, error)
+	Get(ctx context.Context, name string) (Response, error)
+	Create(ctx context.Context, create Definition) error
 	Update()
 	Delete(ctx context.Context, name string) error
 	Apply(ctx context.Context, name string, changeset ChangeSet) error
-	Import(ctx context.Context, name string, zoneData Data) error
+	Import(ctx context.Context, name string, zoneData Import) error
 	NewRecord()
 	UpdateRecord()
 	DeleteRecord()
@@ -23,10 +23,6 @@ type API interface {
 
 type api struct {
 	client client.Client
-}
-
-func (a api) Create() {
-	panic("implement me")
 }
 
 func (a api) Update() {
