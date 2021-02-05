@@ -43,4 +43,16 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
+	Context("Zone ChangeSet Endpoint", func() {
+		It("Should apply the changeset", func() {
+			// TODO
+		})
+	})
+
+	Context("Zone Import Endpoint", func() {
+		It("Should import the zone", func() {
+			// TODO
+		})
+	})
+
 })

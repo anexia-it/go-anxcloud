@@ -61,7 +61,7 @@ type ResourceRecord struct {
 	TTL string `json:"ttl"`
 }
 
-type Changeset struct {
+type ChangeSet struct {
 	Create ResourceRecord `json:"create"`
 	Delete ResourceRecord `json:"delete"`
 }
@@ -172,7 +172,7 @@ func (a api) Delete(ctx context.Context, name string) error {
 }
 
 // apply (changeset)
-func (a api) Apply(ctx context.Context, name string, changeset Changeset) error {
+func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) error {
 	url := fmt.Sprintf(
 		"%s%s/%s/changeset",
 		a.client.BaseURL(),

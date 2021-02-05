@@ -14,8 +14,8 @@ type API interface {
 	Create()
 	Update()
 	Delete(ctx context.Context, name string) error
-	Apply(ctx context.Context, name string, changeset Changeset)
-	Import(ctx context.Context, name string, zoneData string)
+	Apply(ctx context.Context, name string, changeset ChangeSet) error
+	Import(ctx context.Context, name string, zoneData Data) error
 	NewRecord()
 	UpdateRecord()
 	DeleteRecord()
