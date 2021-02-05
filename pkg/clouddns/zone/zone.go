@@ -83,35 +83,35 @@ func (a api) List(ctx context.Context) ([]Zone, error) {
 }
 
 // Get zone details API method
-func (a api) Get(ctx context.Context, id string) (*Zone, error) {
+func (a api) Get(ctx context.Context, name string) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
 		pathPrefix,
-		id,
+		name,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not create zone get request: %w", err)
+		return Zone{}, fmt.Errorf("could not create zone get request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("could not execute zone get request: %w", err)
+		return Zone{}, fmt.Errorf("could not execute zone get request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return nil, fmt.Errorf("could not execute zone get request, got response %s", httpResponse.Status)
+		return Zone{}, fmt.Errorf("could not execute zone get request, got response %s", httpResponse.Status)
 	}
 
-	var responsePayload listResponse
+	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return nil, fmt.Errorf("could not decode zone get respone: %w", err)
+		return Zone{}, fmt.Errorf("could not decode zone get respone: %w", err)
 	}
 
-	return responsePayload.Results, nil
+	return responsePayload, nil
 }
 
 // create
