@@ -117,5 +117,30 @@ func (a api) Get(ctx context.Context, name string) (Zone, error) {
 // create
 // update zone
 // delete zone
+
+func (a api) Delete(ctx context.Context, name string) error {
+	url := fmt.Sprintf(
+		"%s%s/%s",
+		a.client.BaseURL(),
+		pathPrefix,
+		name,
+	)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+	if err != nil {
+		return fmt.Errorf("could not create zone delete request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not execute zone delete request: %w", err)
+	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return fmt.Errorf("could not execute zone delete request, got response %s", httpResponse.Status)
+	}
+
+	return httpResponse.Body.Close()
+}
+
 // apply (changeset)
 // import

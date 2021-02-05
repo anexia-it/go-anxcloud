@@ -10,10 +10,10 @@ import (
 // API contains methods for zone and record management
 type API interface {
 	List(ctx context.Context) ([]Zone, error)
-	Get(ctx context.Context, identifier string) (Zone, error)
+	Get(ctx context.Context, name string) (Zone, error)
 	Create()
 	Update()
-	Delete()
+	Delete(ctx context.Context, name string) error
 	Apply()
 	Import()
 	NewRecord()
@@ -30,10 +30,6 @@ func (a api) Create() {
 }
 
 func (a api) Update() {
-	panic("implement me")
-}
-
-func (a api) Delete() {
 	panic("implement me")
 }
 

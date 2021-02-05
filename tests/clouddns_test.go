@@ -37,4 +37,10 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
+	Context("Zone Delete Endpoint", func() {
+		It("Should delete the zone", func() {
+			// TODO
+		})
+	})
+
 })
