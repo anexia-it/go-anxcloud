@@ -37,6 +37,33 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
+	Context("Definition Create Endpoint", func() {
+		It("Should create the zone", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			createDefinition := zone.Definition{
+				ZoneName:   "sdk-test.xocp.de",
+				IsMaster:   true,
+				DNSSecMode: "unvalidated",
+				AdminEmail: "amdin@xocp.de",
+				Refresh:    300,
+				Retry:      300,
+				Expire:     3600,
+				TTL:        300,
+			}
+			response, err := zone.NewAPI(cli).Create(ctx, createDefinition)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response).To(Not(BeNil()))
+			Expect(response).To(Not(BeNil()))
+			Expect(response.Name).To(Equal("sdk-test.xocp.de"))
+		})
+	})
+	Context("Definition Update Endpoint", func() {
+		It("Should update the zone", func() {
+			// TODO
+		})
+	})
 
 	Context("Definition Delete Endpoint", func() {
 		It("Should delete the zone", func() {

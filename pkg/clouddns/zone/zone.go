@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	pathPrefix string = "api/clouddns/v1/zone.json"
+	pathPrefix string = "/api/clouddns/v1/zone.json"
 )
 
 type listResponse struct {
@@ -25,7 +25,7 @@ type Record struct {
 	Name       string `json:"name"`
 	RData      string `json:"rdata"`
 	Region     string `json:"region"`
-	TTL        string `json:"ttl"`
+	TTL        *int   `json:"ttl"`
 	Type       string `json:"Type"`
 }
 
@@ -46,8 +46,12 @@ type DNSServer struct {
 
 type Definition struct {
 
-	// Required - Definition name
-	Name string `json:"name"`
+	// Zone name
+	Name string `json:"name,omitempty"`
+
+	// Required - Zone name parameter
+	// Parameter used for create/update/delete etc.
+	ZoneName string `json:"zoneName"`
 
 	// Required - Is master flag
 	// Flag designating if CloudDNS operates as master or slave.
@@ -71,20 +75,20 @@ type Definition struct {
 
 	// Required - Expire value
 	// Expire value used in SOA record.
-	Expire string `json:"expire"`
+	Expire int `json:"expire"`
 
 	// Required - Time to live
 	// Default TTL for NS records.
 	TTL int `json:"ttl"`
 
 	// Master Name Server
-	MasterNS string `json:"master_ns"`
+	MasterNS string `json:"master_ns,omitempty"`
 
 	// IP addresses allowed to initiate domain transfer (DNS NOTIFY).
-	NotifyAllowedIPs []string `json:"notify_allowed_ips"`
+	NotifyAllowedIPs []string `json:"notify_allowed_ips,omitempty"`
 
 	// Configured DNS servers (empty means default servers).
-	DNSServers []DNSServer `json:"dns_servers"`
+	DNSServers []DNSServer `json:"dns_servers,omitempty"`
 }
 
 type Response struct {
@@ -194,7 +198,7 @@ func (a api) Get(ctx context.Context, name string) (Response, error) {
 }
 
 // create
-func (a api) Create(ctx context.Context, create Definition) error {
+func (a api) Create(ctx context.Context, create Definition) (Response, error) {
 	url := fmt.Sprintf(
 		"%s%s",
 		a.client.BaseURL(),
@@ -208,24 +212,64 @@ func (a api) Create(ctx context.Context, create Definition) error {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return fmt.Errorf("could not create zone create request: %w", err)
+		return Response{}, fmt.Errorf("could not create zone create request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("could not execute zone create request: %w", err)
+		return Response{}, fmt.Errorf("could not execute zone create request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return fmt.Errorf("could not execute zone create request, got response %s", httpResponse.Status)
+		return Response{}, fmt.Errorf("could not execute zone create request, got response %s", httpResponse.Status)
 	}
 
-	// TODO correct to real response from server
-	return httpResponse.Body.Close()
+	var responsePayload Response
+	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+	}
+
+	return responsePayload, nil
 }
 
 // update zone
-// delete zone
+func (a api) Update(ctx context.Context, update Definition) (Response, error) {
+	url := fmt.Sprintf(
+		"%s%s",
+		a.client.BaseURL(),
+		pathPrefix,
+	)
 
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(update); err != nil {
+		panic(fmt.Sprintf("could not create request data for uppdate zone: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &requestData)
+	if err != nil {
+		return Response{}, fmt.Errorf("could not create zone update request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return Response{}, fmt.Errorf("could not execute zone update request: %w", err)
+	}
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Response{}, fmt.Errorf("could not execute zone update request, got response %s", httpResponse.Status)
+	}
+
+	var responsePayload Response
+	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+	}
+
+	return responsePayload, nil
+}
+
+// delete zone
 func (a api) Delete(ctx context.Context, name string) error {
 	url := fmt.Sprintf(
 		"%s%s/%s",
@@ -251,7 +295,7 @@ func (a api) Delete(ctx context.Context, name string) error {
 }
 
 // apply (changeset)
-func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) error {
+func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) (Response, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/changeset",
 		a.client.BaseURL(),
@@ -266,19 +310,25 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) error 
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return fmt.Errorf("could not create zone changeset request: %w", err)
+		return Response{}, fmt.Errorf("could not create zone changeset request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("could not execute zone changeset request: %w", err)
+		return Response{}, fmt.Errorf("could not execute zone changeset request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
+		return Response{}, fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
 	}
 
-	// TODO correct to real response from server
-	return httpResponse.Body.Close()
+	var responsePayload Response
+	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+	}
+
+	return responsePayload, nil
 }
 
 // import
