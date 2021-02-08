@@ -38,12 +38,20 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 	Context("Definition Create Endpoint", func() {
+		var createTestZoneName = "sdk-test.xocp.de"
+		AfterEach(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			var _ = zone.NewAPI(cli).Delete(ctx, createTestZoneName)
+		})
+
 		It("Should create the zone", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
 
 			createDefinition := zone.Definition{
-				ZoneName:   "sdk-test.xocp.de",
+				ZoneName:   createTestZoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
 				AdminEmail: "amdin@xocp.de",
