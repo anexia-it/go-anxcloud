@@ -6,6 +6,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"math/rand"
 	"time"
 )
 
@@ -38,7 +39,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 	Context("Definition Create Endpoint", func() {
-		var createTestZoneName = "sdk-test.xocp.de"
+		var createTestZoneName = "sdk-create-test.xocp.de"
 		AfterEach(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
@@ -54,7 +55,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				ZoneName:   createTestZoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
-				AdminEmail: "amdin@xocp.de",
+				AdminEmail: "admin@xocp.de",
 				Refresh:    300,
 				Retry:      300,
 				Expire:     3600,
@@ -64,12 +65,41 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
 			Expect(response).To(Not(BeNil()))
-			Expect(response.Name).To(Equal("sdk-test.xocp.de"))
+			Expect(response.Name).To(Equal(createTestZoneName))
+			Expect(response.AdminEmail).To(Equal("admin@xocp.de"))
 		})
 	})
+
 	Context("Definition Update Endpoint", func() {
+		updateTestZoneName := "sdk-update-test.xocp.de"
+
 		It("Should update the zone", func() {
-			// TODO
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			randRefresh := rand.Intn(10) * 100
+			randRetry := rand.Intn(10) * 100
+			randExpire := rand.Intn(10) * 1000
+			randTTL := rand.Intn(10) * 100
+			createDefinition := zone.Definition{
+				ZoneName:   updateTestZoneName,
+				IsMaster:   true,
+				DNSSecMode: "unvalidated",
+				AdminEmail: "test@xocp.de",
+				Refresh:    randRefresh,
+				Retry:      randRetry,
+				Expire:     randExpire,
+				TTL:        randTTL,
+			}
+			response, err := zone.NewAPI(cli).Update(ctx, createDefinition)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response).To(Not(BeNil()))
+			Expect(response).To(Not(BeNil()))
+			Expect(response.AdminEmail).To(Equal("test@xocp.de"))
+			Expect(response.Refresh).To(Equal(randRefresh))
+			Expect(response.Retry).To(Equal(randRetry))
+			Expect(response.Expire).To(Equal(randExpire))
+			Expect(response.TTL).To(Equal(randTTL))
 		})
 	})
 
