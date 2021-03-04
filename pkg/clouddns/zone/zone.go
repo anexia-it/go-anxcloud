@@ -234,9 +234,9 @@ func (a api) Create(ctx context.Context, create Definition) (Response, error) {
 }
 
 // update zone
-func (a api) Update(ctx context.Context, update Definition) (Response, error) {
+func (a api) Update(ctx context.Context, name string, update Definition) (Response, error) {
 	url := fmt.Sprintf(
-		"%s%s",
+		"%s%s/%s",
 		a.client.BaseURL(),
 		pathPrefix,
 	)

@@ -12,10 +12,11 @@ type API interface {
 	List(ctx context.Context) ([]Response, error)
 	Get(ctx context.Context, name string) (Response, error)
 	Create(ctx context.Context, create Definition) (Response, error)
-	Update(ctx context.Context, update Definition) (Response, error)
+	Update(ctx context.Context, name string, update Definition) (Response, error)
 	Delete(ctx context.Context, name string) error
 	Apply(ctx context.Context, name string, changeset ChangeSet) (Response, error)
 	Import(ctx context.Context, name string, zoneData Import) error
+	ListRecords(ctx context.Context, name string) ([]ResourceRecord, error)
 	NewRecord()
 	UpdateRecord()
 	DeleteRecord()
@@ -23,18 +24,6 @@ type API interface {
 
 type api struct {
 	client client.Client
-}
-
-func (a api) NewRecord() {
-	panic("implement me")
-}
-
-func (a api) UpdateRecord() {
-	panic("implement me")
-}
-
-func (a api) DeleteRecord() {
-	panic("implement me")
 }
 
 func NewAPI(c client.Client) API {
