@@ -91,7 +91,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				Expire:     randExpire,
 				TTL:        randTTL,
 			}
-			response, err := zone.NewAPI(cli).Update(ctx, createDefinition)
+			response, err := zone.NewAPI(cli).Update(ctx, updateTestZoneName, createDefinition)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
 			Expect(response).To(Not(BeNil()))
