@@ -16,12 +16,12 @@ type RecordRequest struct {
 	TTL    int    `json:"ttl,omitempty"`
 }
 
-func (a api) ListRecords(ctx context.Context, name string) ([]Record, error) {
+func (a api) ListRecords(ctx context.Context, zone string) ([]Record, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/records",
 		a.client.BaseURL(),
 		pathPrefix,
-		name,
+		zone,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

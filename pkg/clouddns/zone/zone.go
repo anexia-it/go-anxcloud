@@ -239,6 +239,7 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Respon
 		"%s%s/%s",
 		a.client.BaseURL(),
 		pathPrefix,
+		name,
 	)
 
 	requestData := bytes.Buffer{}

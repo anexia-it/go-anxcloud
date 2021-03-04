@@ -16,10 +16,10 @@ type API interface {
 	Delete(ctx context.Context, name string) error
 	Apply(ctx context.Context, name string, changeset ChangeSet) (Response, error)
 	Import(ctx context.Context, name string, zoneData Import) error
-	ListRecords(ctx context.Context, name string) ([]ResourceRecord, error)
-	NewRecord()
-	UpdateRecord()
-	DeleteRecord()
+	ListRecords(ctx context.Context, name string) ([]Record, error)
+	NewRecord(ctx context.Context, zone string, record RecordRequest) (Response, error)
+	UpdateRecord(ctx context.Context, zone string, id string, record RecordRequest) (Response, error)
+	DeleteRecord(ctx context.Context, zone string, id string) error
 }
 
 type api struct {
