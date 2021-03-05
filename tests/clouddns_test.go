@@ -121,4 +121,13 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
+	Context("Definition List Recoreds Endpoint", func() {
+		It("Should list all available records for the test zone", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+			_, err := zone.NewAPI(cli).ListRecords(ctx, TestZone)
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
 })
