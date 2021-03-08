@@ -225,16 +225,12 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				var request zone.Import
 				err := json.NewDecoder(r.Body).Decode(&request)
 				Expect(err).NotTo(HaveOccurred())
-				ttl := 300
-				resp := []zone.Record{{
-					Identifier: "",
-					Immutable:  false,
-					Name:       "test2",
-					RData:      "A",
-					Region:     "default",
-					TTL:        &ttl,
-					Type:       "A",
-				},
+				resp := zone.Revision{
+					CreatedAt:  time.Now(),
+					Identifier: "some-identifier",
+					ModifiedAt: time.Now(),
+					Serial:     1,
+					State:      "active",
 				}
 				err = json.NewEncoder(w).Encode(&resp)
 				Expect(err).NotTo(HaveOccurred())
@@ -248,8 +244,9 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 			defer cancel()
-			err := zone.NewAPI(c).Import(ctx, importZoneName, importZone)
+			resp, err := zone.NewAPI(c).Import(ctx, importZoneName, importZone)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(resp).NotTo(BeNil())
 		})
 	})
 
@@ -263,4 +260,59 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		})
 	})
 
+	Context("Definition Create Record Endpoint", func() {
+		recordZoneName := "sdk-record-test.xocp.de"
+
+		It("Should create the record", func() {
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.Definition
+				err := json.NewDecoder(r.Body).Decode(&request)
+				Expect(err).NotTo(HaveOccurred())
+				ttl := 300
+				resp := zone.Response{
+					Definition: &zone.Definition{
+						Name:       recordZoneName,
+						ZoneName:   recordZoneName,
+						IsMaster:   true,
+					},
+					Revisions: []zone.Revision{{
+						Identifier: "test-uuid",
+						Records:    []zone.Record{
+							{
+								Identifier: "record-identifier",
+								Immutable:  false,
+								Name:       "test1",
+								RData:      "test record",
+								Region:     "default",
+								TTL:        &ttl,
+								Type:       "TXT",
+							},
+						},
+						Serial:     0,
+						State:      "active",
+					}},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			record := zone.RecordRequest{
+				Name:   "test1",
+				Type:   "TXT",
+				RData:  "test record",
+				Region: "default",
+				TTL:    300,
+			}
+			response, err := zone.NewAPI(c).NewRecord(ctx, recordZoneName, record)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response).NotTo(BeNil())
+			Expect(response.Revisions).To(ContainElements())
+		})
+	})
 })
