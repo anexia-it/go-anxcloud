@@ -155,6 +155,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 	Context("Definition Delete Endpoint", func() {
 		It("Should delete the zone", func() {
 			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				Expect(r.Method).To(Equal(http.MethodDelete))
 				w.WriteHeader(http.StatusOK)
 			}))
 			defer server.Close()
@@ -313,6 +314,81 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).NotTo(BeNil())
 			Expect(response.Revisions).To(ContainElements())
+		})
+	})
+
+	Context("Definition Update Record Endpoint", func() {
+		recordZoneName := "sdk-record-test.xocp.de"
+
+		It("Should update the record", func() {
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.Definition
+				err := json.NewDecoder(r.Body).Decode(&request)
+				Expect(err).NotTo(HaveOccurred())
+				ttl := 300
+				resp := zone.Response{
+					Definition: &zone.Definition{
+						Name:       recordZoneName,
+						ZoneName:   recordZoneName,
+						IsMaster:   true,
+					},
+					Revisions: []zone.Revision{{
+						Identifier: "test-uuid",
+						Records:    []zone.Record{
+							{
+								Identifier: "record-identifier",
+								Immutable:  false,
+								Name:       "test1",
+								RData:      "test record",
+								Region:     "default",
+								TTL:        &ttl,
+								Type:       "TXT",
+							},
+						},
+						Serial:     0,
+						State:      "active",
+					}},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			record := zone.RecordRequest{
+				Name:   "test1",
+				Type:   "TXT",
+				RData:  "test record",
+				Region: "default",
+				TTL:    300,
+			}
+
+			response, err := zone.NewAPI(c).UpdateRecord(ctx, recordZoneName, "some=test-record-id", record)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response).NotTo(BeNil())
+			Expect(response.Revisions).To(ContainElements())
+		})
+	})
+
+	Context("Definition Delete Record Endpoint", func() {
+		recordZoneName := "sdk-record-test.xocp.de"
+
+		It("Should delete the record", func() {
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				Expect(r.Method).To(Equal(http.MethodDelete))
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			recordIdentifier := "some-test-record-id"
+			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+			defer cancel()
+			err := zone.NewAPI(c).DeleteRecord(ctx, recordZoneName, recordIdentifier)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })
