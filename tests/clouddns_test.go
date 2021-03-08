@@ -7,7 +7,6 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -107,7 +106,6 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				var request zone.Definition
 				err := json.NewDecoder(r.Body).Decode(&request)
-				log.Println("TestClient handles request")
 				Expect(err).NotTo(HaveOccurred())
 				resp := zone.Response{
 					Definition: &zone.Definition{
@@ -175,13 +173,17 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				var request zone.ChangeSet
 				err := json.NewDecoder(r.Body).Decode(&request)
-				log.Println("TestClient handles request")
 				Expect(err).NotTo(HaveOccurred())
-				resp := zone.Response{
-					Definition: &zone.Definition{
-						Name:       changesetZoneName,
-						ZoneName:   changesetZoneName,
-					},
+				ttl := 300
+				resp := []zone.Record{{
+					Identifier: "",
+					Immutable:  false,
+					Name:       "test2",
+					RData:      "A",
+					Region:     "default",
+					TTL:        &ttl,
+					Type:       "A",
+				},
 				}
 				err = json.NewEncoder(w).Encode(&resp)
 				Expect(err).NotTo(HaveOccurred())
@@ -194,38 +196,70 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			defer cancel()
 
 			changeset := zone.ChangeSet{
-				Delete: zone.ResourceRecord{
-					Name:   "",
-					Type:   "",
-					Region: "",
-					RData:  "",
-					TTL:    "",
-				},
-				Create: zone.ResourceRecord{
-					Name:   "",
-					Type:   "",
-					Region: "",
-					RData:  "",
-					TTL:    "",
-				},
+				Delete: []zone.ResourceRecord{{
+					Name:   "test1",
+					Type:   "A",
+					Region: "default",
+					RData:  "127.0.0.1",
+					TTL:    300,
+				}},
+				Create: []zone.ResourceRecord{{
+					Name:   "test2",
+					Type:   "A",
+					Region: "default",
+					RData:  "192.168.0.1",
+					TTL:    600,
+				}},
 			}
 			response, err := zone.NewAPI(c).Apply(ctx, changesetZoneName, changeset)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(response).NotTo(BeNil())
 		})
 	})
 
 	Context("Definition Import Endpoint", func() {
+		importZoneName := "sdk-import-test.xocp.de"
 		It("Should import the zone", func() {
-			// TODO
+
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.Import
+				err := json.NewDecoder(r.Body).Decode(&request)
+				Expect(err).NotTo(HaveOccurred())
+				ttl := 300
+				resp := []zone.Record{{
+					Identifier: "",
+					Immutable:  false,
+					Name:       "test2",
+					RData:      "A",
+					Region:     "default",
+					TTL:        &ttl,
+					Type:       "A",
+				},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			importZone := zone.Import{
+				ZoneData: "; Zone file for example.org. - region global\n$ORIGIN example.org.\n$TTL 600\n@ 600 IN NS acns01.local.\n@ 600 IN NS acns02.local.\n@ 600 IN SOA ns0.local. admin 7 3600 1800 604800 600\nwww 600 IN TXT \"2021-02-05 15:40:57.486411\"",
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+			defer cancel()
+			err := zone.NewAPI(c).Import(ctx, importZoneName, importZone)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
-	Context("Definition List Recoreds Endpoint", func() {
+	Context("Definition List Records Endpoint", func() {
 		It("Should list all available records for the test zone", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
-			_, err := zone.NewAPI(cli).ListRecords(ctx, TestZone)
+			records, err := zone.NewAPI(cli).ListRecords(ctx, TestZone)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(records).NotTo(BeNil())
 		})
 	})
 

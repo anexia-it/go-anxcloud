@@ -34,6 +34,8 @@ type Revision struct {
 	Identifier string    `json:"identifier"`
 	ModifiedAt time.Time `json:"modified_at"`
 	Records    []Record  `json:"records"`
+	Serial     int       `json:"serial"`
+	State      string    `json:"state"`
 }
 
 type DNSServer struct {
@@ -107,7 +109,7 @@ type ResourceRecord struct {
 	Type   string `json:"Type"`
 	Region string `json:"region"`
 	RData  string `json:"rdata"`
-	TTL    string `json:"ttl"`
+	TTL    int    `json:"ttl"`
 }
 
 type Create struct {
@@ -116,22 +118,12 @@ type Create struct {
 }
 
 type ChangeSet struct {
-	Create ResourceRecord `json:"create"`
-	Delete ResourceRecord `json:"delete"`
+	Create []ResourceRecord `json:"create"`
+	Delete []ResourceRecord `json:"delete"`
 }
 
 type Import struct {
 	ZoneData string `json:"zoneData"`
-}
-
-func NewResourceRecord(name, recordType, region, rdata, ttl string) ResourceRecord {
-	return ResourceRecord{
-		Name:   name,
-		Type:   recordType,
-		Region: region,
-		RData:  rdata,
-		TTL:    ttl,
-	}
 }
 
 // List Zones API method´
@@ -296,7 +288,7 @@ func (a api) Delete(ctx context.Context, name string) error {
 }
 
 // apply (changeset)
-func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) (Response, error) {
+func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Record, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/changeset",
 		a.client.BaseURL(),
@@ -311,29 +303,29 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) (Respo
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not create zone changeset request: %w", err)
+		return nil, fmt.Errorf("could not create zone changeset request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not execute zone changeset request: %w", err)
+		return nil, fmt.Errorf("could not execute zone changeset request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Response{}, fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
+		return nil, fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
 	}
 
-	var responsePayload Response
+	var responsePayload []Record
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+		return nil, fmt.Errorf("could not decode zone changeset response: %w", err)
 	}
 
 	return responsePayload, nil
 }
 
 // import
-func (a api) Import(ctx context.Context, name string, zoneData Import) error {
+func (a api) Import(ctx context.Context, name string, zoneData Import) (Revision, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/import",
 		a.client.BaseURL(),
@@ -348,17 +340,23 @@ func (a api) Import(ctx context.Context, name string, zoneData Import) error {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return fmt.Errorf("could not create zone import request: %w", err)
+		return Revision{}, fmt.Errorf("could not create zone import request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("could not execute zone import request: %w", err)
+		return Revision{}, fmt.Errorf("could not execute zone import request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return fmt.Errorf("could not execute zone import request, got response %s", httpResponse.Status)
+		return Revision{}, fmt.Errorf("could not execute zone import request, got response %s", httpResponse.Status)
 	}
 
-	// TODO correct to real response from server
-	return httpResponse.Body.Close()
+	var responsePayload Revision
+	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
+	_ = httpResponse.Body.Close()
+	if err != nil {
+		return Revision{}, fmt.Errorf("could not decode zone import response: %w", err)
+	}
+
+	return responsePayload, nil
 }
