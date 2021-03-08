@@ -2,11 +2,14 @@ package tests_test
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"log"
 	"math/rand"
+	"net/http"
 	"time"
 )
 
@@ -40,14 +43,36 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 	})
 	Context("Definition Create Endpoint", func() {
 		var createTestZoneName = "sdk-create-test.xocp.de"
-		AfterEach(func() {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
-
-			var _ = zone.NewAPI(cli).Delete(ctx, createTestZoneName)
-		})
 
 		It("Should create the zone", func() {
+			randRefresh := rand.Intn(10) * 100
+			randRetry := rand.Intn(10) * 100
+			randExpire := rand.Intn(10) * 1000
+			randTTL := rand.Intn(10) * 100
+
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.Definition
+				err := json.NewDecoder(r.Body).Decode(&request)
+				Expect(err).NotTo(HaveOccurred())
+				resp := zone.Response{
+					Definition: &zone.Definition{
+						Name:       createTestZoneName,
+						ZoneName:   createTestZoneName,
+						IsMaster:   true,
+						DNSSecMode: "unvalidated",
+						AdminEmail: "admin@xocp.de",
+						Refresh:    randRefresh,
+						Retry:      randRetry,
+						Expire:     randExpire,
+						TTL:        randTTL,
+					},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
 
@@ -61,7 +86,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				Expire:     3600,
 				TTL:        300,
 			}
-			response, err := zone.NewAPI(cli).Create(ctx, createDefinition)
+			response, err := zone.NewAPI(c).Create(ctx, createDefinition)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
 			Expect(response).To(Not(BeNil()))
@@ -74,13 +99,39 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		updateTestZoneName := "sdk-update-test.xocp.de"
 
 		It("Should update the zone", func() {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
-
 			randRefresh := rand.Intn(10) * 100
 			randRetry := rand.Intn(10) * 100
 			randExpire := rand.Intn(10) * 1000
 			randTTL := rand.Intn(10) * 100
+
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.Definition
+				err := json.NewDecoder(r.Body).Decode(&request)
+				log.Println("TestClient handles request")
+				Expect(err).NotTo(HaveOccurred())
+				resp := zone.Response{
+					Definition: &zone.Definition{
+						Name:       updateTestZoneName,
+						ZoneName:   updateTestZoneName,
+						IsMaster:   true,
+						DNSSecMode: "unvalidated",
+						AdminEmail: "test@xocp.de",
+						Refresh:    randRefresh,
+						Retry:      randRetry,
+						Expire:     randExpire,
+						TTL:        randTTL,
+					},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
 			createDefinition := zone.Definition{
 				ZoneName:   updateTestZoneName,
 				IsMaster:   true,
@@ -91,7 +142,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				Expire:     randExpire,
 				TTL:        randTTL,
 			}
-			response, err := zone.NewAPI(cli).Update(ctx, updateTestZoneName, createDefinition)
+			response, err := zone.NewAPI(c).Update(ctx, updateTestZoneName, createDefinition)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
 			Expect(response).To(Not(BeNil()))
@@ -105,13 +156,61 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 
 	Context("Definition Delete Endpoint", func() {
 		It("Should delete the zone", func() {
-			// TODO
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+			defer cancel()
+			err := zone.NewAPI(c).Delete(ctx, TestZone)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
 	Context("Definition ChangeSet Endpoint", func() {
+		changesetZoneName := "sdk-changeset-test.xocp.de"
+
 		It("Should apply the changeset", func() {
-			// TODO
+			c, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request zone.ChangeSet
+				err := json.NewDecoder(r.Body).Decode(&request)
+				log.Println("TestClient handles request")
+				Expect(err).NotTo(HaveOccurred())
+				resp := zone.Response{
+					Definition: &zone.Definition{
+						Name:       changesetZoneName,
+						ZoneName:   changesetZoneName,
+					},
+				}
+				err = json.NewEncoder(w).Encode(&resp)
+				Expect(err).NotTo(HaveOccurred())
+
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			changeset := zone.ChangeSet{
+				Delete: zone.ResourceRecord{
+					Name:   "",
+					Type:   "",
+					Region: "",
+					RData:  "",
+					TTL:    "",
+				},
+				Create: zone.ResourceRecord{
+					Name:   "",
+					Type:   "",
+					Region: "",
+					RData:  "",
+					TTL:    "",
+				},
+			}
+			response, err := zone.NewAPI(c).Apply(ctx, changesetZoneName, changeset)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
