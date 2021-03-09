@@ -17,7 +17,7 @@ const (
 )
 
 type listResponse struct {
-	Results []Response `json:"results"`
+	Results []Zone `json:"results"`
 }
 
 type Record struct {
@@ -94,7 +94,7 @@ type Definition struct {
 	DNSServers []DNSServer `json:"dns_servers,omitempty"`
 }
 
-type Response struct {
+type Zone struct {
 	*Definition
 	Customer        string     `json:"customer"`
 	CreatedAt       time.Time  `json:"created_at"`
@@ -128,7 +128,7 @@ type Import struct {
 }
 
 // List Zones API method´
-func (a api) List(ctx context.Context) ([]Response, error) {
+func (a api) List(ctx context.Context) ([]Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s",
 		a.client.BaseURL(),
@@ -159,7 +159,7 @@ func (a api) List(ctx context.Context) ([]Response, error) {
 }
 
 // Get zone details API method
-func (a api) Get(ctx context.Context, name string) (Response, error) {
+func (a api) Get(ctx context.Context, name string) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
@@ -169,29 +169,29 @@ func (a api) Get(ctx context.Context, name string) (Response, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not create zone get request: %w", err)
+		return Zone{}, fmt.Errorf("could not create zone get request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not execute zone get request: %w", err)
+		return Zone{}, fmt.Errorf("could not execute zone get request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Response{}, fmt.Errorf("could not execute zone get request, got response %s", httpResponse.Status)
+		return Zone{}, fmt.Errorf("could not execute zone get request, got response %s", httpResponse.Status)
 	}
 
-	var responsePayload Response
+	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
 
 	return responsePayload, nil
 }
 
 // create
-func (a api) Create(ctx context.Context, create Definition) (Response, error) {
+func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s",
 		a.client.BaseURL(),
@@ -205,29 +205,29 @@ func (a api) Create(ctx context.Context, create Definition) (Response, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not create zone create request: %w", err)
+		return Zone{}, fmt.Errorf("could not create zone create request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not execute zone create request: %w", err)
+		return Zone{}, fmt.Errorf("could not execute zone create request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Response{}, fmt.Errorf("could not execute zone create request, got response %s", httpResponse.Status)
+		return Zone{}, fmt.Errorf("could not execute zone create request, got response %s", httpResponse.Status)
 	}
 
-	var responsePayload Response
+	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
 
 	return responsePayload, nil
 }
 
 // update zone
-func (a api) Update(ctx context.Context, name string, update Definition) (Response, error) {
+func (a api) Update(ctx context.Context, name string, update Definition) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
@@ -242,22 +242,22 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Respon
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &requestData)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not create zone update request: %w", err)
+		return Zone{}, fmt.Errorf("could not create zone update request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Response{}, fmt.Errorf("could not execute zone update request: %w", err)
+		return Zone{}, fmt.Errorf("could not execute zone update request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Response{}, fmt.Errorf("could not execute zone update request, got response %s", httpResponse.Status)
+		return Zone{}, fmt.Errorf("could not execute zone update request, got response %s", httpResponse.Status)
 	}
 
-	var responsePayload Response
+	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	_ = httpResponse.Body.Close()
 	if err != nil {
-		return Response{}, fmt.Errorf("could not decode zone get response: %w", err)
+		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
 
 	return responsePayload, nil

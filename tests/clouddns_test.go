@@ -54,7 +54,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				var request zone.Definition
 				err := json.NewDecoder(r.Body).Decode(&request)
 				Expect(err).NotTo(HaveOccurred())
-				resp := zone.Response{
+				resp := zone.Zone{
 					Definition: &zone.Definition{
 						Name:       createTestZoneName,
 						ZoneName:   createTestZoneName,
@@ -108,7 +108,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				var request zone.Definition
 				err := json.NewDecoder(r.Body).Decode(&request)
 				Expect(err).NotTo(HaveOccurred())
-				resp := zone.Response{
+				resp := zone.Zone{
 					Definition: &zone.Definition{
 						Name:       updateTestZoneName,
 						ZoneName:   updateTestZoneName,
@@ -271,7 +271,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				Expect(err).NotTo(HaveOccurred())
 				ttl := 300
-				resp := zone.Response{
+				resp := zone.Zone{
 					Definition: &zone.Definition{
 						Name:       recordZoneName,
 						ZoneName:   recordZoneName,
@@ -327,7 +327,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				err := json.NewDecoder(r.Body).Decode(&request)
 				Expect(err).NotTo(HaveOccurred())
 				ttl := 300
-				resp := zone.Response{
+				resp := zone.Zone{
 					Definition: &zone.Definition{
 						Name:       recordZoneName,
 						ZoneName:   recordZoneName,
