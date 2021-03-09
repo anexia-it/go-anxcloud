@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 )
 
@@ -83,7 +84,7 @@ func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (
 	return responsePayload, nil
 }
 
-func (a api) UpdateRecord(ctx context.Context, zone string, id string, record RecordRequest) (Response, error) {
+func (a api) UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record RecordRequest) (Response, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/records/%s",
 		a.client.BaseURL(),
@@ -120,7 +121,7 @@ func (a api) UpdateRecord(ctx context.Context, zone string, id string, record Re
 	return responsePayload, nil
 }
 
-func (a api) DeleteRecord(ctx context.Context, zone string, id string) error {
+func (a api) DeleteRecord(ctx context.Context, zone string, id uuid.UUID) error {
 	url := fmt.Sprintf(
 		"%s%s/%s/records/%s",
 		a.client.BaseURL(),

@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"time"
 )
@@ -20,18 +21,18 @@ type listResponse struct {
 }
 
 type Record struct {
-	Identifier string `json:"identifier"`
-	Immutable  bool   `json:"immutable"`
-	Name       string `json:"name"`
-	RData      string `json:"rdata"`
-	Region     string `json:"region"`
-	TTL        *int   `json:"ttl"`
-	Type       string `json:"Type"`
+	Identifier uuid.UUID `json:"identifier"`
+	Immutable  bool      `json:"immutable"`
+	Name       string    `json:"name"`
+	RData      string    `json:"rdata"`
+	Region     string    `json:"region"`
+	TTL        *int      `json:"ttl"`
+	Type       string    `json:"Type"`
 }
 
 type Revision struct {
 	CreatedAt  time.Time `json:"created_at"`
-	Identifier string    `json:"identifier"`
+	Identifier uuid.UUID `json:"identifier"`
 	ModifiedAt time.Time `json:"modified_at"`
 	Records    []Record  `json:"records"`
 	Serial     int       `json:"serial"`

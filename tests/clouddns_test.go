@@ -7,6 +7,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	uuid "github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
 	"time"
@@ -177,7 +178,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				Expect(err).NotTo(HaveOccurred())
 				ttl := 300
 				resp := []zone.Record{{
-					Identifier: "",
+					Identifier: uuid.NewV4(),
 					Immutable:  false,
 					Name:       "test2",
 					RData:      "A",
@@ -228,7 +229,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				Expect(err).NotTo(HaveOccurred())
 				resp := zone.Revision{
 					CreatedAt:  time.Now(),
-					Identifier: "some-identifier",
+					Identifier: uuid.NewV4(),
 					ModifiedAt: time.Now(),
 					Serial:     1,
 					State:      "active",
@@ -277,10 +278,10 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 						IsMaster:   true,
 					},
 					Revisions: []zone.Revision{{
-						Identifier: "test-uuid",
+						Identifier: uuid.NewV4(),
 						Records:    []zone.Record{
 							{
-								Identifier: "record-identifier",
+								Identifier: uuid.NewV4(),
 								Immutable:  false,
 								Name:       "test1",
 								RData:      "test record",
@@ -333,10 +334,10 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 						IsMaster:   true,
 					},
 					Revisions: []zone.Revision{{
-						Identifier: "test-uuid",
+						Identifier: uuid.NewV4(),
 						Records:    []zone.Record{
 							{
-								Identifier: "record-identifier",
+								Identifier: uuid.NewV4(),
 								Immutable:  false,
 								Name:       "test1",
 								RData:      "test record",
@@ -367,7 +368,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				TTL:    300,
 			}
 
-			response, err := zone.NewAPI(c).UpdateRecord(ctx, recordZoneName, "some=test-record-id", record)
+			response, err := zone.NewAPI(c).UpdateRecord(ctx, recordZoneName, uuid.NewV4(), record)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).NotTo(BeNil())
 			Expect(response.Revisions).To(ContainElements())
@@ -384,10 +385,9 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			}))
 			defer server.Close()
 
-			recordIdentifier := "some-test-record-id"
 			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 			defer cancel()
-			err := zone.NewAPI(c).DeleteRecord(ctx, recordZoneName, recordIdentifier)
+			err := zone.NewAPI(c).DeleteRecord(ctx, recordZoneName, uuid.NewV4())
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})

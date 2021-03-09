@@ -5,6 +5,7 @@ package zone
 import (
 	"context"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	uuid "github.com/satori/go.uuid"
 )
 
 // API contains methods for zone and record management
@@ -18,8 +19,8 @@ type API interface {
 	Import(ctx context.Context, name string, zoneData Import) (Revision, error)
 	ListRecords(ctx context.Context, name string) ([]Record, error)
 	NewRecord(ctx context.Context, zone string, record RecordRequest) (Response, error)
-	UpdateRecord(ctx context.Context, zone string, id string, record RecordRequest) (Response, error)
-	DeleteRecord(ctx context.Context, zone string, id string) error
+	UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record RecordRequest) (Response, error)
+	DeleteRecord(ctx context.Context, zone string, id uuid.UUID) error
 }
 
 type api struct {
