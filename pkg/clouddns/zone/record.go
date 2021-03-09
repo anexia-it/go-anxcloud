@@ -129,7 +129,7 @@ func (a api) DeleteRecord(ctx context.Context, zone string, id string) error {
 		id,
 	)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
 		return fmt.Errorf("could not create record delete request: %w", err)
 	}
