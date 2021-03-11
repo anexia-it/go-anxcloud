@@ -25,5 +25,5 @@ func (a api) Zone() zone.API {
 }
 
 func NewAPI(c client.Client) API {
-	return &api{}
+	return &api{zone.NewAPI(c)}
 }
