@@ -229,10 +229,9 @@ func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 // update zone
 func (a api) Update(ctx context.Context, name string, update Definition) (Zone, error) {
 	url := fmt.Sprintf(
-		"%s%s/%s",
+		"%s%s",
 		a.client.BaseURL(),
 		pathPrefix,
-		name,
 	)
 
 	requestData := bytes.Buffer{}
@@ -278,7 +277,7 @@ func (a api) Delete(ctx context.Context, name string) error {
 	}
 
 	httpResponse, err := a.client.Do(req)
-	if err != nil {
+	if err != nil && httpResponse.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("could not execute zone delete request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {

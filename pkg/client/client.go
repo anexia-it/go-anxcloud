@@ -59,7 +59,8 @@ func (r ResponseError) Error() string {
 
 func handleRequest(c *http.Client, req *http.Request) (*http.Response, error) {
 	response, err := c.Do(req)
-	if err == nil && response.StatusCode != http.StatusOK {
+	fmt.Println(response)
+	if err == nil && (response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices) {
 		errResponse := ResponseError{Request: req, Response: response}
 		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
 			return response, fmt.Errorf("could not decode error response: %w", decodeErr)
