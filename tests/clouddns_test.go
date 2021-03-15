@@ -2,7 +2,6 @@ package tests_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 	. "github.com/onsi/ginkgo"
@@ -447,8 +446,8 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 				}},
 				Delete: []zone.ResourceRecord{},
 			})
-			fmt.Println(err)
-			fmt.Println(records)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(records).To(HaveLen(1))
 
 			err = zoneAPI.Delete(ctx, z.Name)
 			Expect(err).NotTo(HaveOccurred())
@@ -481,6 +480,71 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		err = zoneAPI.Delete(ctx, z.Name)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("Should create update and delete a record", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout*3)
+		defer cancel()
+
+		zoneName := "sdk-record.test"
+		zoneAPI := zone.NewAPI(cli)
+		z, err := zoneAPI.Create(ctx, zone.Definition{
+			ZoneName:   zoneName,
+			IsMaster:   true,
+			DNSSecMode: "unvalidated",
+			AdminEmail: "test@" + TestZone,
+			Refresh:    100,
+			Retry:      100,
+			Expire:     600,
+			TTL:        300,
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		z, err = zoneAPI.NewRecord(ctx, z.Name, zone.RecordRequest{
+			Name:       "test1",
+			RData:      "test record",
+			TTL:        300,
+			Type:		"TXT",
+		})
+
+		zoneRecords, err := zoneAPI.ListRecords(ctx, z.Name)
+		Expect(err).NotTo(HaveOccurred())
+
+		var foundRecord bool
+		var record zone.Record
+		for _, r := range zoneRecords {
+			if r.Name == "test1" && r.Type == "TXT" {
+				foundRecord = true
+				record = r
+				break
+			}
+		}
+		Expect(foundRecord).To(BeTrue())
+
+		z, err = zoneAPI.UpdateRecord(ctx, z.Name, record.Identifier, zone.RecordRequest{
+			Name:   "test1-updated",
+			Type:   "TXT",
+			RData:  "updated test record",
+			TTL:    600,
+		})
+
+		zoneRecords, err = zoneAPI.ListRecords(ctx, z.Name)
+		Expect(err).NotTo(HaveOccurred())
+
+		for _, r := range zoneRecords {
+			if r.Name == "test1-updated" {
+				foundRecord = true
+				record = r
+				break
+			}
+		}
+		Expect(foundRecord).To(BeTrue())
+		Expect(record).NotTo(BeNil())
+		Expect(record.Type).To(Equal("TXT"))
+		Expect(record.RData).To(Equal("updated test record"))
+
+		err = zoneAPI.DeleteRecord(ctx, z.Name, record.Identifier)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
