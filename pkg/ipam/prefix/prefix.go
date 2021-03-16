@@ -60,8 +60,8 @@ type Location struct {
 
 // Vlan reference definition
 type Vlan struct {
-	ID string `json:"identifier"`
-	Name string `json:"name"`
+	ID                  string `json:"identifier"`
+	Name                string `json:"name"`
 	CustomerDescription string `json:"description_customer"`
 }
 
@@ -77,7 +77,7 @@ type Info struct {
 	Status              string     `json:"status"`
 	Locations           []Location `json:"locations"`
 	RouterRedundancy    bool       `json:"router_redundancy"`
-	vlans []Vlan `json:"vlans"`
+	vlans               []Vlan     `json:"vlans"`
 }
 
 // Update contains fields to change on a prefix.
