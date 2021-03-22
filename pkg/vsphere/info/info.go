@@ -19,7 +19,7 @@ type Info struct {
 	CustomName       string     `json:"custom_name"`
 	Identifier       string     `json:"identifier"`
 	GuestOS          string     `json:"guest_os"`
-	LocationID       string     `json:"location_id"`
+	LocationID       string     `json:"location_identifier"`
 	LocationCode     string     `json:"location_code"`
 	LocationCountry  string     `json:"location_country"`
 	LocationName     string     `json:"location_name"`
