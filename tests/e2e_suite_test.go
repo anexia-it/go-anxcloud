@@ -8,7 +8,7 @@ import (
 
 const (
 	locationID = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
-	vlanID     = "883003c636644f08a5356078b5fc189d"
+	vlanID     = "02f39d20ca0f4adfb5032f88dbc26c39"
 )
 
 func TestE2E(t *testing.T) {
