@@ -5,6 +5,7 @@ import (
 	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"fmt"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
 	"log"
 	"math/rand"
 	"strings"
@@ -154,6 +155,44 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 
 		})
 
+	})
+
+	Context("Info endpoint", func() {
+		It("Should create and retrieve a VM", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+			defer cancel()
+
+			By("Reserving a new IP address")
+			res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
+				LocationID: locationID,
+				VlanID:     vlanID,
+				Count:      1,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(len(res.Data)).To(Equal(1))
+
+			networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{res.Data[0].Address}, VLAN: vlanID}}
+			definition := vm.NewAPI(cli).NewDefinition(locationID, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
+			definition.SSH = randomPublicSSHKey()
+
+			By("Creating a new VM")
+			base64Encoding := true
+			provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Waiting for the VM to be ready")
+			vmID, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionResponse.Identifier)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Retrieving the VM")
+			vmInfo, err := info.NewAPI(cli).Get(ctx, vmID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(vmInfo).NotTo(BeNil())
+			Expect(vmInfo.Disks).To(Equal(1))
+			expectedDiskSize := float32(10)
+			Expect(vmInfo.DiskInfo[0].DiskGB).To(Equal(expectedDiskSize))
+
+		})
 	})
 
 })
