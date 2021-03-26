@@ -1,3 +1,10 @@
+## 0.3.19
+
+ENHANCEMENTS
+
+* vlan - added `vm_provisioning` flag to `UpdateDefinition`
+* vsphere/info - `DiskGB` attribute changed to floating point type
+
 ## 0.3.18
 
 BUGFIXES
