@@ -7,7 +7,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 const (
@@ -263,6 +265,10 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	if err != nil {
 		return ReserveRandomSummary{}, fmt.Errorf("could not create IP address reserve random post request: %w", err)
 	}
+
+	// Workaround to avoid race-conditions on IP reservations for the same VLAN
+	randomDelay := time.Duration(rand.Intn(1000))
+	time.Sleep(randomDelay*time.Millisecond)
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
