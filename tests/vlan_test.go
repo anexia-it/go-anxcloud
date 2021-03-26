@@ -53,7 +53,7 @@ var _ = Describe("VLAN API endpoint tests", func() {
 			By("Update the vlan")
 			err = v.Update(ctx, summary.Identifier, vlan.UpdateDefinition{
 				CustomerDescription: "go SDK integration test updated",
-				VMProvisioning: true,
+				VMProvisioning:      true,
 			})
 			Expect(err).NotTo(HaveOccurred())
 
@@ -62,7 +62,7 @@ var _ = Describe("VLAN API endpoint tests", func() {
 				vlanInfo, err := v.Get(ctx, summary.Identifier)
 				Expect(err).NotTo(HaveOccurred())
 				return vlanInfo.VMProvisioning
-			}, 5 * time.Minute, 3*time.Second).Should(BeTrue())
+			}, 5*time.Minute, 3*time.Second).Should(BeTrue())
 		})
 
 	})
