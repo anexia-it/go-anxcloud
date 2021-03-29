@@ -36,13 +36,24 @@ type Info struct {
 	Network          []Network  `json:"network"`
 }
 
+type DiskSize int
+
+func (d *DiskSize) UnmarshalJSON(bytes []byte) error {
+	var in float64
+	if err := json.Unmarshal(bytes, &in); err != nil {
+		return err
+	}
+	*d = DiskSize(in)
+	return nil
+}
+
 // DiskInfo contains meta information of attached disks to a VM.
 type DiskInfo struct {
 	DiskType     string  `json:"disk_type"`
 	StorageType  string  `json:"storage_type"`
 	BusType      string  `json:"bus_type"`
 	BusTypeLabel string  `json:"bus_type_label"`
-	DiskGB       float32 `json:"disk_gb"`
+	DiskGB       DiskSize `json:"disk_gb"`
 	DiskID       int     `json:"disk_id"`
 	IOPS         int     `json:"iops"`
 	Latency      int     `json:"latence"`
