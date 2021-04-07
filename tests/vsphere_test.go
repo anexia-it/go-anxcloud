@@ -189,7 +189,7 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(vmInfo).NotTo(BeNil())
 			Expect(vmInfo.Disks).To(Equal(1))
-			expectedDiskSize := float32(10)
+			expectedDiskSize := 10.00
 			Expect(vmInfo.DiskInfo[0].DiskGB).To(Equal(expectedDiskSize))
 
 		})

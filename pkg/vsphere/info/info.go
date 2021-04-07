@@ -42,7 +42,7 @@ type DiskInfo struct {
 	StorageType  string  `json:"storage_type"`
 	BusType      string  `json:"bus_type"`
 	BusTypeLabel string  `json:"bus_type_label"`
-	DiskGB       float32 `json:"disk_gb"`
+	DiskGB       float64 `json:"disk_gb"`
 	DiskID       int     `json:"disk_id"`
 	IOPS         int     `json:"iops"`
 	Latency      int     `json:"latence"`
