@@ -1,3 +1,9 @@
+## 0.3.20
+
+BUGFIXES
+
+* vsphere/info - `DiskGB` variable type changed from float32 to float64
+
 ## 0.3.19
 
 ENHANCEMENTS
