@@ -1,6 +1,8 @@
 package client
 
 import (
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 )
@@ -9,6 +11,7 @@ type testClient struct {
 	baseClient Client
 	baseURL    string
 	httpClient *http.Client
+	logWriter io.Writer
 }
 
 func (t testClient) BaseURL() string {
@@ -20,7 +23,7 @@ func (t testClient) Do(req *http.Request) (*http.Response, error) {
 		return t.baseClient.Do(req)
 	}
 
-	return handleRequest(t.httpClient, req)
+	return handleRequest(t.httpClient, req, t.logWriter)
 }
 
 // NewTestClient creates a new client for testing.
@@ -33,7 +36,7 @@ func (t testClient) Do(req *http.Request) (*http.Response, error) {
 // used httptest.Server that should be closed after test completion.
 func NewTestClient(c Client, handler http.Handler) (Client, *httptest.Server) {
 	server := httptest.NewServer(handler)
-	cw := testClient{c, server.URL, &http.Client{}}
+	cw := testClient{c, server.URL, &http.Client{}, log.Writer()}
 
 	return cw, server
 }
