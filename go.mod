@@ -1,6 +1,6 @@
 module github.com/anexia-it/go-anxcloud
 
-go 1.15
+go 1.14
 
 require (
 	github.com/onsi/ginkgo v1.12.1

@@ -11,7 +11,7 @@ type testClient struct {
 	baseClient Client
 	baseURL    string
 	httpClient *http.Client
-	logWriter io.Writer
+	logWriter  io.Writer
 }
 
 func (t testClient) BaseURL() string {

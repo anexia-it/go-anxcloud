@@ -90,7 +90,7 @@ func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*htt
 
 func dumpRequest(req *http.Request) ([]byte, error) {
 	clonedRequest := req.Clone(context.Background())
-	clonedRequest.Header.Set("Authorization","REDACTED")
+	clonedRequest.Header.Set("Authorization", "REDACTED")
 
 	return httputil.DumpRequestOut(req, true)
 }

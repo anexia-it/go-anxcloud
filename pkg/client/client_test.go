@@ -15,12 +15,13 @@ import (
 )
 
 func TestClient_handleRequest(t *testing.T) {
-	//log.SetOutput(ioutil.Discard)
+	log.SetOutput(ioutil.Discard)
 	t.Run("Success", func(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			formValue := r.FormValue("foo")
 			assert.EqualValues(t, "bar", formValue)
-			io.WriteString(w, formValue)
+			_, err := io.WriteString(w, formValue)
+			assert.NoError(t, err)
 		})
 
 		srv := httptest.NewServer(handler)
@@ -56,7 +57,7 @@ func TestClient_handleRequest(t *testing.T) {
 			}
 			encoder := json.NewEncoder(w)
 			w.WriteHeader(http.StatusBadRequest)
-			encoder.Encode(errorMsg)
+			assert.NoError(t, encoder.Encode(errorMsg))
 		})
 
 		srv := httptest.NewServer(handler)

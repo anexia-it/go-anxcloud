@@ -9,7 +9,7 @@ import (
 type tokenClient struct {
 	token      string
 	httpClient *http.Client
-	logWriter io.Writer
+	logWriter  io.Writer
 }
 
 func (t tokenClient) BaseURL() string {
