@@ -92,7 +92,7 @@ func dumpRequest(req *http.Request) ([]byte, error) {
 	clonedRequest := req.Clone(context.Background())
 	clonedRequest.Header.Set("Authorization", "REDACTED")
 
-	return httputil.DumpRequestOut(req, true)
+	return httputil.DumpRequestOut(clonedRequest, true)
 }
 
 type optionSet struct {
