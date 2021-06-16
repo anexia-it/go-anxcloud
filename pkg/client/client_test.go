@@ -1,12 +1,12 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,7 +15,6 @@ import (
 )
 
 func TestClient_handleRequest(t *testing.T) {
-	log.SetOutput(ioutil.Discard)
 	t.Run("Success", func(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			formValue := r.FormValue("foo")
@@ -38,13 +37,17 @@ func TestClient_handleRequest(t *testing.T) {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		req.Header.Set("Authorization", "sensible-value")
 
-		response, err := handleRequest(http.DefaultClient, req, log.Writer())
+		buffer := make([]byte, 0)
+		writeBuffer := bytes.NewBuffer(buffer)
+
+		response, err := handleRequest(http.DefaultClient, req, writeBuffer)
 		assert.NoError(t, err)
 		if assert.NotNil(t, response) {
 			body, err := ioutil.ReadAll(response.Body)
 			assert.NoError(t, err)
 			assert.EqualValues(t, "bar", body)
 		}
+		assert.True(t, strings.Contains(writeBuffer.String(), "Authorization: REDACTED"))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -74,10 +77,14 @@ func TestClient_handleRequest(t *testing.T) {
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		req.Header.Set("Authorization", "sensible-value")
 
-		response, err := handleRequest(http.DefaultClient, req, log.Writer())
+		buffer := make([]byte, 0)
+		writeBuffer := bytes.NewBuffer(buffer)
+
+		response, err := handleRequest(http.DefaultClient, req, writeBuffer)
 		assert.Error(t, err)
 		if assert.NotNil(t, response) {
 			assert.EqualValues(t, response.StatusCode, http.StatusBadRequest)
 		}
+		assert.True(t, strings.Contains(writeBuffer.String(), "Authorization: REDACTED"))
 	})
 }

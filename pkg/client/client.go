@@ -78,7 +78,7 @@ func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*htt
 		err = &errResponse
 	}
 
-	if logWriter != nil {
+	if logWriter != nil && response != nil {
 		respBytes, dumpErr := httputil.DumpResponse(response, err == nil)
 		if dumpErr == nil {
 			fmt.Fprintf(logWriter, "response: %s\n", string(respBytes))
@@ -91,8 +91,16 @@ func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*htt
 func dumpRequest(req *http.Request) ([]byte, error) {
 	clonedRequest := req.Clone(context.Background())
 	clonedRequest.Header.Set("Authorization", "REDACTED")
+	dumpedRequest, err := httputil.DumpRequestOut(clonedRequest, true)
+	if err != nil {
+		return nil, err
+	}
 
-	return httputil.DumpRequestOut(clonedRequest, true)
+	// Set original request body to the duplicate created by DumpRequestOut. The request body is not duplicated
+	// by .Clone() and instead just referenced, so it would be completely read otherwise.
+	req.Body = clonedRequest.Body
+
+	return dumpedRequest, nil
 }
 
 type optionSet struct {
