@@ -19,6 +19,8 @@ func TestClient_handleRequest(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			formValue := r.FormValue("foo")
 			assert.EqualValues(t, "bar", formValue)
+			assert.EqualValues(t, "sensible-value", r.Header.Get("Authorization"))
+
 			_, err := io.WriteString(w, formValue)
 			assert.NoError(t, err)
 		})
@@ -54,6 +56,7 @@ func TestClient_handleRequest(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			formValue := r.FormValue("foo")
 			assert.EqualValues(t, "bar", formValue)
+			assert.EqualValues(t, "sensible-value", r.Header.Get("Authorization"))
 
 			errorMsg := map[string]string{
 				"msg": "error message",
