@@ -1,3 +1,9 @@
+## 0.3.21
+
+ENHANCEMENTS
+
+* client - Add client option to provide an `io.Writer` to dump http request/response for debugging
+
 ## 0.3.20
 
 BUGFIXES
