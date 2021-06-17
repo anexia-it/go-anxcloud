@@ -2,10 +2,13 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 )
@@ -57,23 +60,53 @@ func (r ResponseError) Error() string {
 	return fmt.Sprintf("received error from api: %+v", r.ErrorData)
 }
 
-func handleRequest(c *http.Client, req *http.Request) (*http.Response, error) {
+func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*http.Response, error) {
+	if logWriter != nil {
+		reqBytes, dumpErr := dumpRequest(req)
+		if dumpErr == nil {
+			fmt.Fprintf(logWriter, "request: %s\n", string(reqBytes))
+		}
+	}
 	response, err := c.Do(req)
+
 	if err == nil && response.StatusCode != http.StatusOK {
 		errResponse := ResponseError{Request: req, Response: response}
 		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
 			return response, fmt.Errorf("could not decode error response: %w", decodeErr)
 		}
 
-		return response, &errResponse
+		err = &errResponse
+	}
+
+	if logWriter != nil && response != nil {
+		respBytes, dumpErr := httputil.DumpResponse(response, err == nil)
+		if dumpErr == nil {
+			fmt.Fprintf(logWriter, "response: %s\n", string(respBytes))
+		}
 	}
 
 	return response, err
 }
 
+func dumpRequest(req *http.Request) ([]byte, error) {
+	clonedRequest := req.Clone(context.Background())
+	clonedRequest.Header.Set("Authorization", "REDACTED")
+	dumpedRequest, err := httputil.DumpRequestOut(clonedRequest, true)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set original request body to the duplicate created by DumpRequestOut. The request body is not duplicated
+	// by .Clone() and instead just referenced, so it would be completely read otherwise.
+	req.Body = clonedRequest.Body
+
+	return dumpedRequest, nil
+}
+
 type optionSet struct {
 	httpClient *http.Client
 	token      string
+	logWriter  io.Writer
 }
 
 // Option is a optional parameter for the New method.
@@ -111,6 +144,15 @@ func TokenFromEnv(unset bool) Option {
 	}
 }
 
+// LogWriter configures the debug writer for logging requests and responses
+func LogWriter(w io.Writer) Option {
+	return func(o *optionSet) error {
+		o.logWriter = w
+
+		return nil
+	}
+}
+
 // HTTPClient lets the client use the given http.Client.
 func HTTPClient(c *http.Client) Option {
 	return func(o *optionSet) error {
@@ -139,7 +181,11 @@ func New(options ...Option) (Client, error) {
 	}
 
 	if optionSet.token != "" {
-		return &tokenClient{optionSet.token, optionSet.httpClient}, nil
+		return &tokenClient{
+			token:      optionSet.token,
+			httpClient: optionSet.httpClient,
+			logWriter:  optionSet.logWriter,
+		}, nil
 	}
 
 	return nil, fmt.Errorf("%w: token not set", ErrConfiguration)
