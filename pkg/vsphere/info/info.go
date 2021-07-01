@@ -19,7 +19,7 @@ type Info struct {
 	CustomName       string     `json:"custom_name"`
 	Identifier       string     `json:"identifier"`
 	GuestOS          string     `json:"guest_os"`
-	LocationID       string     `json:"location_id"`
+	LocationID       string     `json:"location_identifier"`
 	LocationCode     string     `json:"location_code"`
 	LocationCountry  string     `json:"location_country"`
 	LocationName     string     `json:"location_name"`
@@ -38,14 +38,14 @@ type Info struct {
 
 // DiskInfo contains meta information of attached disks to a VM.
 type DiskInfo struct {
-	DiskType     string `json:"disk_type"`
-	StorageType  string `json:"storage_type"`
-	BusType      string `json:"bus_type"`
-	BusTypeLabel string `json:"bus_type_label"`
-	DiskGB       int    `json:"disk_gb"`
-	DiskID       int    `json:"disk_id"`
-	IOPS         int    `json:"iops"`
-	Latency      int    `json:"latence"`
+	DiskType     string  `json:"disk_type"`
+	StorageType  string  `json:"storage_type"`
+	BusType      string  `json:"bus_type"`
+	BusTypeLabel string  `json:"bus_type_label"`
+	DiskGB       float64 `json:"disk_gb"`
+	DiskID       int     `json:"disk_id"`
+	IOPS         int     `json:"iops"`
+	Latency      int     `json:"latence"`
 }
 
 // Network contains meta information of attached NICs to a VM.

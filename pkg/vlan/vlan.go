@@ -54,6 +54,7 @@ type CreateDefinition struct {
 // UpdateDefinition contains information required to update a VLAN.
 type UpdateDefinition struct {
 	CustomerDescription string `json:"description_customer,omitempty"`
+	VMProvisioning      bool   `json:"vm_provisioning,omitempty"`
 }
 
 type listResponse struct {

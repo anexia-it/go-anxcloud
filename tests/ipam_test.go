@@ -53,12 +53,16 @@ var _ = Describe("IPAM API endpoint tests", func() {
 			summary, err := p.Create(ctx, prefix.NewCreate(locationID, vlanID, ipV4, prefix.TypePrivate, networkMask))
 			Expect(err).NotTo(HaveOccurred())
 
+			var info prefix.Info
 			By("Waiting for prefix to be 'Active'")
 			Eventually(func() string {
-				info, err := p.Get(ctx, summary.ID)
+				info, err = p.Get(ctx, summary.ID)
 				Expect(err).NotTo(HaveOccurred())
+				Expect(info.Vlans).NotTo(BeNil())
 				return info.Status
 			}, 15*time.Minute, 5*time.Second).Should(Equal("Active"))
+
+			Expect(info.Vlans[0].ID).To(Equal(vlanID))
 
 			By("Updating the prefix")
 			_, err = p.Update(ctx, summary.ID, prefix.Update{CustomerDescription: "something else"})
