@@ -21,6 +21,8 @@ type API interface {
 	NewRecord(ctx context.Context, zone string, record RecordRequest) (Zone, error)
 	UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record RecordRequest) (Zone, error)
 	DeleteRecord(ctx context.Context, zone string, id uuid.UUID) error
+	// Export zone
+	// Export zone for specific region
 }
 
 type api struct {
