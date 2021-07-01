@@ -506,11 +506,12 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		//Expect(err).NotTo(HaveOccurred())
 
 		z, err := zoneAPI.NewRecord(ctx, zoneName, zone.RecordRequest{
-			Name:       "test1",
-			RData:      "test record",
-			TTL:        300,
-			Type:		"TXT",
+			Name:  "test1",
+			RData: "test record",
+			TTL:   300,
+			Type:  "TXT",
 		})
+		Expect(err).NotTo(HaveOccurred())
 
 		zoneRecords, err := zoneAPI.ListRecords(ctx, z.Name)
 		Expect(err).NotTo(HaveOccurred())
@@ -527,10 +528,10 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		Expect(foundRecord).To(BeTrue())
 
 		z, err = zoneAPI.UpdateRecord(ctx, z.Name, record.Identifier, zone.RecordRequest{
-			Name:   "test1-updated",
-			Type:   "TXT",
-			RData:  "updated test record",
-			TTL:    600,
+			Name:  "test1-updated",
+			Type:  "TXT",
+			RData: "updated test record",
+			TTL:   600,
 		})
 		Expect(err).NotTo(HaveOccurred())
 
