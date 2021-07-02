@@ -89,7 +89,6 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			response, err := zone.NewAPI(c).Create(ctx, createDefinition)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
-			Expect(response).To(Not(BeNil()))
 			Expect(response.Name).To(Equal(createTestZoneName))
 			Expect(response.AdminEmail).To(Equal("admin@go-sdk.test"))
 		})
@@ -477,7 +476,13 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		zoneImport := zone.Import{
-			ZoneData: "; Zone file for sdk-import.test. - region global\n$ORIGIN sdk-import.test.\n$TTL 600\n@ 600 IN NS acns01.local.\n@ 600 IN NS acns02.local.\n@ 600 IN SOA ns0.local. admin 7 3600 1800 604800 600\ntest 600 IN TXT \"go-anxcloud integration test generated data\"",
+			ZoneData: `; Zone file for sdk-import.test. - region global
+$ORIGIN sdk-import.test.
+$TTL 600
+@ 600 IN NS acns01.local.
+@ 600 IN NS acns02.local.
+@ 600 IN SOA ns0.local. admin 7 3600 1800 604800 600
+test 600 IN TXT \"go-anxcloud integration test generated data\"`,
 		}
 
 		_, err = zoneAPI.Import(ctx, zoneName, zoneImport)
@@ -493,17 +498,6 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 
 		zoneName := "go-sdk.test"
 		zoneAPI := zone.NewAPI(cli)
-		//z, err := zoneAPI.Create(ctx, zone.Definition{
-		//	ZoneName:   zoneName,
-		//	IsMaster:   true,
-		//	DNSSecMode: "unvalidated",
-		//	AdminEmail: "test@" + TestZone,
-		//	Refresh:    100,
-		//	Retry:      100,
-		//	Expire:     600,
-		//	TTL:        300,
-		//})
-		//Expect(err).NotTo(HaveOccurred())
 
 		z, err := zoneAPI.NewRecord(ctx, zoneName, zone.RecordRequest{
 			Name:  "test1",
@@ -547,6 +541,7 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 		}
 		Expect(foundRecord).To(BeTrue())
 		Expect(record).NotTo(BeNil())
+		Expect(record.Identifier).NotTo(BeNil())
 		Expect(record.Type).To(Equal("TXT"))
 		Expect(record.RData).To(Equal("\"updated test record\""))
 

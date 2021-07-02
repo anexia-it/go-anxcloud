@@ -6,7 +6,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
 )
 
-// API contains methods for VMs.
+// API contains methods managing zones and records.
 type API interface {
 	//Countries()
 	//Regions()

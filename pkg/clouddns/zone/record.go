@@ -17,6 +17,7 @@ type RecordRequest struct {
 	TTL    int    `json:"ttl,omitempty"`
 }
 
+// ListRecords API method
 func (a api) ListRecords(ctx context.Context, zone string) ([]Record, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/records",
@@ -48,6 +49,7 @@ func (a api) ListRecords(ctx context.Context, zone string) ([]Record, error) {
 	return responsePayload, nil
 }
 
+// NewRecord new record API method
 func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/records",
@@ -84,6 +86,7 @@ func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (
 	return responsePayload, nil
 }
 
+// UpdateRecord record API method
 func (a api) UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record RecordRequest) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/records/%s",
@@ -121,6 +124,7 @@ func (a api) UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record
 	return responsePayload, nil
 }
 
+// DeleteRecord record API method
 func (a api) DeleteRecord(ctx context.Context, zone string, id uuid.UUID) error {
 	url := fmt.Sprintf(
 		"%s%s/%s/records/%s",

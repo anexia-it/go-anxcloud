@@ -190,7 +190,7 @@ func (a api) Get(ctx context.Context, name string) (Zone, error) {
 	return responsePayload, nil
 }
 
-// create
+// Create zone API method
 func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s",
@@ -226,7 +226,7 @@ func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 	return responsePayload, nil
 }
 
-// update zone
+// Update zone API method
 func (a api) Update(ctx context.Context, name string, update Definition) (Zone, error) {
 	url := fmt.Sprintf(
 		"%s%s",
@@ -262,7 +262,7 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Zone, 
 	return responsePayload, nil
 }
 
-// delete zone
+//Delete zone API method
 func (a api) Delete(ctx context.Context, name string) error {
 	url := fmt.Sprintf(
 		"%s%s/%s",
@@ -287,7 +287,7 @@ func (a api) Delete(ctx context.Context, name string) error {
 	return httpResponse.Body.Close()
 }
 
-// apply (changeset)
+// Apply changeset API method
 func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Record, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/changeset",
@@ -324,7 +324,7 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Rec
 	return responsePayload, nil
 }
 
-// import
+// Import zone API method
 func (a api) Import(ctx context.Context, name string, zoneData Import) (Revision, error) {
 	url := fmt.Sprintf(
 		"%s%s/%s/import",
