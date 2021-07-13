@@ -68,8 +68,7 @@ func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*htt
 		}
 	}
 	response, err := c.Do(req)
-
-	if err == nil && response.StatusCode != http.StatusOK {
+	if err == nil && (response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices) {
 		errResponse := ResponseError{Request: req, Response: response}
 		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
 			return response, fmt.Errorf("could not decode error response: %w", decodeErr)
