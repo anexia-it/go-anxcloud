@@ -108,7 +108,7 @@ type Zone struct {
 
 type ResourceRecord struct {
 	Name   string `json:"name"`
-	Type   string `json:"Type"`
+	Type   string `json:"type"`
 	Region string `json:"region"`
 	RData  string `json:"rdata"`
 	TTL    int    `json:"ttl"`

@@ -422,39 +422,39 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		//It("Should apply a changeset to a fresh zone", func() {
-		//	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout*3)
-		//	defer cancel()
-		//	zoneAPI := zone.NewAPI(cli)
-		//
-		//	z, err := zoneAPI.Create(ctx, zone.Definition{
-		//		ZoneName:   "sdk-apply.test",
-		//		IsMaster:   true,
-		//		DNSSecMode: "unvalidated",
-		//		AdminEmail: "test@" + TestZone,
-		//		Refresh:    100,
-		//		Retry:      100,
-		//		Expire:     600,
-		//		TTL:        300,
-		//	})
-		//	Expect(err).NotTo(HaveOccurred())
-		//
-		//	records, err := zoneAPI.Apply(ctx, z.Name, zone.ChangeSet{
-		//		Create: []zone.ResourceRecord{{
-		//			Name:   "test1",
-		//			Type:   "A",
-		//			Region: "default",
-		//			RData:  "127.0.0.1",
-		//			TTL:    300,
-		//		}},
-		//		Delete: []zone.ResourceRecord{},
-		//	})
-		//	Expect(err).NotTo(HaveOccurred())
-		//	Expect(records).To(HaveLen(1))
-		//
-		//	err = zoneAPI.Delete(ctx, z.Name)
-		//	Expect(err).NotTo(HaveOccurred())
-		//})
+		It("Should apply a changeset to a fresh zone", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout*3)
+			defer cancel()
+			zoneAPI := zone.NewAPI(cli)
+
+			z, err := zoneAPI.Create(ctx, zone.Definition{
+				ZoneName:   "sdk-apply.test",
+				IsMaster:   true,
+				DNSSecMode: "unvalidated",
+				AdminEmail: "test@" + TestZone,
+				Refresh:    100,
+				Retry:      100,
+				Expire:     600,
+				TTL:        300,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			records, err := zoneAPI.Apply(ctx, z.Name, zone.ChangeSet{
+				Create: []zone.ResourceRecord{{
+					Name:   "test1",
+					Type:   "A",
+					Region: "default",
+					RData:  "127.0.0.1",
+					TTL:    300,
+				}},
+				Delete: []zone.ResourceRecord{},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(records).To(HaveLen(7))
+
+			err = zoneAPI.Delete(ctx, z.Name)
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 
 	It("Should import a zone from zone data", func() {
