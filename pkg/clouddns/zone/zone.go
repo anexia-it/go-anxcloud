@@ -102,6 +102,7 @@ type Zone struct {
 	PublishedAt     time.Time  `json:"published_at"`
 	IsEditable      bool       `json:"is_editable"`
 	ValidationLevel int        `json:"validation_level"`
+	DeploymentLevel int        `json:"deployment_level"`
 	Revisions       []Revision `json:"revisions"`
 }
 

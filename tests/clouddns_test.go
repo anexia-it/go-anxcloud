@@ -520,8 +520,11 @@ test 600 IN TXT \"go-anxcloud integration test generated data\"`,
 			}
 		}
 		Expect(foundRecord).To(BeTrue())
+		foundRecord = false
 
-		z, err = zoneAPI.UpdateRecord(ctx, z.Name, record.Identifier, zone.RecordRequest{
+		upd8Ctx, upd8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
+		defer upd8Cancel()
+		z, err = zoneAPI.UpdateRecord(upd8Ctx, z.Name, record.Identifier, zone.RecordRequest{
 			Name:  "test1-updated",
 			Type:  "TXT",
 			RData: "updated test record",
@@ -529,7 +532,19 @@ test 600 IN TXT \"go-anxcloud integration test generated data\"`,
 		})
 		Expect(err).NotTo(HaveOccurred())
 
-		zoneRecords, err = zoneAPI.ListRecords(ctx, zoneName)
+		get8Ctx, get8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
+		defer get8Cancel()
+		zoneInfo, err := zoneAPI.Get(get8Ctx, zoneName)
+		Expect(err).NotTo(HaveOccurred())
+		for zoneInfo.DeploymentLevel < 100 {
+			time.Sleep(time.Second * 1)
+			zoneInfo, err = zoneAPI.Get(get8Ctx, zoneName)
+			Expect(err).NotTo(HaveOccurred())
+		}
+
+		listCtx, listCancel := context.WithTimeout(context.Background(), time.Minute*5)
+		defer listCancel()
+		zoneRecords, err = zoneAPI.ListRecords(listCtx, zoneName)
 		Expect(err).NotTo(HaveOccurred())
 
 		for _, r := range zoneRecords {
@@ -545,7 +560,9 @@ test 600 IN TXT \"go-anxcloud integration test generated data\"`,
 		Expect(record.Type).To(Equal("TXT"))
 		Expect(record.RData).To(Equal("\"updated test record\""))
 
-		err = zoneAPI.DeleteRecord(ctx, zoneName, record.Identifier)
+		deleteCtx, deleteCancel := context.WithTimeout(context.Background(), time.Minute*5)
+		defer deleteCancel()
+		err = zoneAPI.DeleteRecord(deleteCtx, zoneName, record.Identifier)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
