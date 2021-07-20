@@ -2,7 +2,6 @@ package client
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 )
@@ -36,7 +35,7 @@ func (t testClient) Do(req *http.Request) (*http.Response, error) {
 // used httptest.Server that should be closed after test completion.
 func NewTestClient(c Client, handler http.Handler) (Client, *httptest.Server) {
 	server := httptest.NewServer(handler)
-	cw := testClient{c, server.URL, &http.Client{}, log.Writer()}
+	cw := testClient{c, server.URL, &http.Client{}, nil}
 
 	return cw, server
 }
