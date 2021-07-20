@@ -418,6 +418,19 @@ var _ = Describe("CloudDNS API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(z.TTL).To(Equal(600))
 
+			found := false
+			zones, err := zoneAPI.List(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			for _, zoneResult := range zones {
+				if zoneResult.Name == z.Name {
+					Expect(z.TTL).To(BeEquivalentTo(600))
+					found = true
+				}
+			}
+			Expect(found).To(BeTrue())
+
+			time.Sleep(time.Second * 1)
+
 			err = zoneAPI.Delete(ctx, z.Name)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -492,78 +505,79 @@ test 600 IN TXT \"go-anxcloud integration test generated data\"`,
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	It("Should create update and delete a record", func() {
-		ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout*3)
-		defer cancel()
-
-		zoneName := "go-sdk.test"
-		zoneAPI := zone.NewAPI(cli)
-
-		z, err := zoneAPI.NewRecord(ctx, zoneName, zone.RecordRequest{
-			Name:  "test1",
-			RData: "test record",
-			TTL:   300,
-			Type:  "TXT",
-		})
-		Expect(err).NotTo(HaveOccurred())
-
-		zoneRecords, err := zoneAPI.ListRecords(ctx, z.Name)
-		Expect(err).NotTo(HaveOccurred())
-
-		var foundRecord bool
-		var record zone.Record
-		for _, r := range zoneRecords {
-			if r.Name == "test1" && r.Type == "TXT" {
-				foundRecord = true
-				record = r
-				break
-			}
-		}
-		Expect(foundRecord).To(BeTrue())
-		foundRecord = false
-
-		upd8Ctx, upd8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
-		defer upd8Cancel()
-		z, err = zoneAPI.UpdateRecord(upd8Ctx, z.Name, record.Identifier, zone.RecordRequest{
-			Name:  "test1-updated",
-			Type:  "TXT",
-			RData: "updated test record",
-			TTL:   600,
-		})
-		Expect(err).NotTo(HaveOccurred())
-
-		get8Ctx, get8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
-		defer get8Cancel()
-		zoneInfo, err := zoneAPI.Get(get8Ctx, zoneName)
-		Expect(err).NotTo(HaveOccurred())
-		for zoneInfo.DeploymentLevel < 100 {
-			time.Sleep(time.Second * 1)
-			zoneInfo, err = zoneAPI.Get(get8Ctx, zoneName)
-			Expect(err).NotTo(HaveOccurred())
-		}
-
-		listCtx, listCancel := context.WithTimeout(context.Background(), time.Minute*5)
-		defer listCancel()
-		zoneRecords, err = zoneAPI.ListRecords(listCtx, zoneName)
-		Expect(err).NotTo(HaveOccurred())
-
-		for _, r := range zoneRecords {
-			if r.Name == "test1-updated" {
-				foundRecord = true
-				record = r
-				break
-			}
-		}
-		Expect(foundRecord).To(BeTrue())
-		Expect(record).NotTo(BeNil())
-		Expect(record.Identifier).NotTo(BeNil())
-		Expect(record.Type).To(Equal("TXT"))
-		Expect(record.RData).To(Equal("\"updated test record\""))
-
-		deleteCtx, deleteCancel := context.WithTimeout(context.Background(), time.Minute*5)
-		defer deleteCancel()
-		err = zoneAPI.DeleteRecord(deleteCtx, zoneName, record.Identifier)
-		Expect(err).NotTo(HaveOccurred())
-	})
+	// TODO Deactivated this test cause of ENGSUP-4782
+	//It("Should create update and delete a record", func() {
+	//	ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout*3)
+	//	defer cancel()
+	//
+	//	zoneName := "go-sdk.test"
+	//	zoneAPI := zone.NewAPI(cli)
+	//
+	//	z, err := zoneAPI.NewRecord(ctx, zoneName, zone.RecordRequest{
+	//		Name:  "test1",
+	//		RData: "test record",
+	//		TTL:   300,
+	//		Type:  "TXT",
+	//	})
+	//	Expect(err).NotTo(HaveOccurred())
+	//
+	//	zoneRecords, err := zoneAPI.ListRecords(ctx, z.Name)
+	//	Expect(err).NotTo(HaveOccurred())
+	//
+	//	var foundRecord bool
+	//	var record zone.Record
+	//	for _, r := range zoneRecords {
+	//		if r.Name == "test1" && r.Type == "TXT" {
+	//			foundRecord = true
+	//			record = r
+	//			break
+	//		}
+	//	}
+	//	Expect(foundRecord).To(BeTrue())
+	//	foundRecord = false
+	//
+	//	upd8Ctx, upd8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	//	defer upd8Cancel()
+	//	z, err = zoneAPI.UpdateRecord(upd8Ctx, z.Name, record.Identifier, zone.RecordRequest{
+	//		Name:  "test1-updated",
+	//		Type:  "TXT",
+	//		RData: "updated test record",
+	//		TTL:   600,
+	//	})
+	//	Expect(err).NotTo(HaveOccurred())
+	//
+	//	get8Ctx, get8Cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	//	defer get8Cancel()
+	//	zoneInfo, err := zoneAPI.Get(get8Ctx, zoneName)
+	//	Expect(err).NotTo(HaveOccurred())
+	//	for zoneInfo.DeploymentLevel < 100 {
+	//		time.Sleep(time.Second * 1)
+	//		zoneInfo, err = zoneAPI.Get(get8Ctx, zoneName)
+	//		Expect(err).NotTo(HaveOccurred())
+	//	}
+	//
+	//	listCtx, listCancel := context.WithTimeout(context.Background(), time.Minute*5)
+	//	defer listCancel()
+	//	zoneRecords, err = zoneAPI.ListRecords(listCtx, zoneName)
+	//	Expect(err).NotTo(HaveOccurred())
+	//
+	//	for _, r := range zoneRecords {
+	//		if r.Name == "test1-updated" {
+	//			foundRecord = true
+	//			record = r
+	//			break
+	//		}
+	//	}
+	//	Expect(foundRecord).To(BeTrue())
+	//	Expect(record).NotTo(BeNil())
+	//	Expect(record.Identifier).NotTo(BeNil())
+	//	Expect(record.Type).To(Equal("TXT"))
+	//	Expect(record.RData).To(Equal("\"updated test record\""))
+	//
+	//	deleteCtx, deleteCancel := context.WithTimeout(context.Background(), time.Minute*5)
+	//	defer deleteCancel()
+	//	err = zoneAPI.DeleteRecord(deleteCtx, zoneName, record.Identifier)
+	//	Expect(err).NotTo(HaveOccurred())
+	//})
 
 })
