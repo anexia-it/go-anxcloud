@@ -1,3 +1,9 @@
+## 0.3.22
+
+ENHANCEMENTS
+
+* clouddns - Added CloudDNS API client
+
 ## 0.3.21
 
 ENHANCEMENTS
