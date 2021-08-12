@@ -1,3 +1,9 @@
+## 0.3.23
+
+ENHANCEMENTS
+
+* vmlist - Added VMList API client
+
 ## 0.3.22
 
 ENHANCEMENTS
