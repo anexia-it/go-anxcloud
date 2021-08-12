@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
 	"log"
 	"math/rand"
 	"strings"
@@ -45,6 +46,19 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 		var err error
 		cli, err = client.New(client.AuthFromEnv(false))
 		Expect(err).ToNot(HaveOccurred())
+	})
+
+	Context("VMList Endpoint", func() {
+		It("Should List VMs", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+			defer cancel()
+
+			vms, err := vmlist.NewAPI(cli).Get(ctx, 1, 1)
+			if err != nil {
+				return
+			}
+			Expect(vms).To(HaveLen(1))
+		})
 	})
 
 	Context("Provisioning endpoint", func() {
