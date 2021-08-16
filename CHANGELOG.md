@@ -1,3 +1,9 @@
+## 0.3.24
+
+ENHANCEMENTS
+
+* vsphere/progress Fix a bug where 404 from progress API results in a loop until timeout
+
 ## 0.3.23
 
 ENHANCEMENTS
