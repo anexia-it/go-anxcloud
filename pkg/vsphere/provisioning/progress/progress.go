@@ -100,6 +100,7 @@ func (a api) AwaitCompletion(ctx context.Context, progressID string) (string, er
 			isProvisioningError := errors.As(err, &responseError)
 			switch {
 			case isProvisioningError && responseError.Response.StatusCode == 404:
+				return "", fmt.Errorf("could not get progress. Endpoint returned 404: %w", err)
 			case err == nil:
 				if progressResponse.Progress == progressCompleteValue {
 					return progressResponse.VMIdentifier, nil

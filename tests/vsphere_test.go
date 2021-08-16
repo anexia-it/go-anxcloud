@@ -5,12 +5,13 @@ import (
 	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
 	"log"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
+	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
 
 	cpuperformancetype "github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/cpuperformancetypes"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
@@ -205,6 +206,18 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 			Expect(vmInfo.Disks).To(Equal(1))
 			expectedDiskSize := 10.00
 			Expect(vmInfo.DiskInfo[0].DiskGB).To(Equal(expectedDiskSize))
+
+		})
+	})
+
+	Context("Progress Endpoint", func() {
+		It("Should handle 404 correctly", func() {
+			By("using an identifiert which does not exist")
+			ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancelFunc()
+			progress, err := progress.NewAPI(cli).AwaitCompletion(ctx, "this-id-does-not-exist")
+			Expect(progress).To(BeEmpty())
+			Expect(err).NotTo(BeNil())
 
 		})
 	})
