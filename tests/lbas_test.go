@@ -150,14 +150,14 @@ var _ = Describe("LBaS Service Tests", func() {
 	Context("LBAS - Binds", func() {
 		It("Create Bind", func() {
 			ctx := context.Background()
-			defintion := &bind.Definition{
+			definition := &bind.Definition{
 				Name:     randomName(),
 				Frontend: createFrontend(ctx, cli, nil).Identifier,
 				State:    common.NewlyCreated,
 			}
-			createdBind := createBind(ctx, cli, defintion)
-			Expect(createdBind.Name).To(BeEquivalentTo(defintion.Name))
-			Expect(createdBind.Frontend.Identifier).To(BeEquivalentTo(defintion.Frontend))
+			createdBind := createBind(ctx, cli, definition)
+			Expect(createdBind.Name).To(BeEquivalentTo(definition.Name))
+			Expect(createdBind.Frontend.Identifier).To(BeEquivalentTo(definition.Frontend))
 		})
 		It("Get Binds", func() {
 			ctx := context.Background()
@@ -219,16 +219,16 @@ var _ = Describe("LBaS Service Tests", func() {
 	})
 })
 
-func createBind(ctx context.Context, cli client.Client, defintion *bind.Definition) bind.Bind {
+func createBind(ctx context.Context, cli client.Client, definition *bind.Definition) bind.Bind {
 	api := bind.NewAPI(cli)
-	if defintion == nil {
-		defintion = &bind.Definition{
+	if definition == nil {
+		definition = &bind.Definition{
 			Name:     randomName(),
 			State:    common.NewlyCreated,
 			Frontend: createFrontend(ctx, cli, nil).Identifier,
 		}
 	}
-	createdBind, err := api.Create(ctx, *defintion)
+	createdBind, err := api.Create(ctx, *definition)
 	Expect(err).To(BeNil())
 	cleanUpAfterTest(bindWithID(createdBind.Identifier))
 	return createdBind
