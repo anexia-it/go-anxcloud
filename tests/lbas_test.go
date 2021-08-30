@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/backend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/bind"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/frontend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/loadbalancer"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/server"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/bind"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/server"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"math/rand"
@@ -20,7 +20,7 @@ type CleanUpHandler = func() error
 
 var cleanupHandlers []CleanUpHandler
 
-var _ = Describe("LBaS Service Tests", func() {
+var _ = Describe("LBaaS Service Tests", func() {
 	var cli client.Client
 
 	BeforeEach(func() {
@@ -44,7 +44,7 @@ var _ = Describe("LBaS Service Tests", func() {
 		It("Get load balancers", func() {
 			ctx := context.Background()
 
-			loadBalancers, err := lbas.NewAPI(cli).LoadBalancer().Get(ctx, 1, 50)
+			loadBalancers, err := lbaas.NewAPI(cli).LoadBalancer().Get(ctx, 1, 50)
 
 			Expect(err).To(BeNil())
 			Expect(loadBalancers).NotTo(BeNil())
@@ -53,7 +53,7 @@ var _ = Describe("LBaS Service Tests", func() {
 
 		It("Get a specific load balancer", func() {
 			ctx := context.Background()
-			api := lbas.NewAPI(cli).LoadBalancer()
+			api := lbaas.NewAPI(cli).LoadBalancer()
 
 			loadBalancers, err := api.Get(ctx, 1, 50)
 
@@ -200,7 +200,7 @@ var _ = Describe("LBaS Service Tests", func() {
 			ctx := context.Background()
 			createFrontend(ctx, cli, nil)
 
-			frontends, err := lbas.NewAPI(cli).Frontend().Get(ctx, 1, 50)
+			frontends, err := lbaas.NewAPI(cli).Frontend().Get(ctx, 1, 50)
 
 			Expect(err).To(BeNil())
 			Expect(frontends).ToNot(BeEmpty())
@@ -208,7 +208,7 @@ var _ = Describe("LBaS Service Tests", func() {
 
 		It("Get a specific frontend", func() {
 			ctx := context.Background()
-			api := lbas.NewAPI(cli).Frontend()
+			api := lbaas.NewAPI(cli).Frontend()
 			createdFrontend := createFrontend(ctx, cli, nil)
 
 			fetchedFrontend, err := api.GetByID(ctx, createdFrontend.Identifier)
@@ -288,7 +288,7 @@ func createFrontend(ctx context.Context, cli client.Client, definition *frontend
 }
 
 func getFirstLB(ctx context.Context, cli client.Client) loadbalancer.Loadbalancer {
-	api := lbas.NewAPI(cli).LoadBalancer()
+	api := lbaas.NewAPI(cli).LoadBalancer()
 	loadBalancers, err := api.Get(ctx, 1, 50)
 	Expect(err).To(BeNil())
 	Expect(loadBalancers).ToNot(BeEmpty())
@@ -314,7 +314,7 @@ func frontendWithID(identifier string) CleanUpHandler {
 		if err != nil {
 			return err
 		}
-		return lbas.NewAPI(cli).Frontend().DeleteByID(context.Background(), identifier)
+		return lbaas.NewAPI(cli).Frontend().DeleteByID(context.Background(), identifier)
 	}
 }
 
@@ -324,7 +324,7 @@ func backendWithID(identifier string) CleanUpHandler {
 		if err != nil {
 			return err
 		}
-		return lbas.NewAPI(cli).Backend().DeleteByID(context.Background(), identifier)
+		return lbaas.NewAPI(cli).Backend().DeleteByID(context.Background(), identifier)
 	}
 }
 
@@ -334,7 +334,7 @@ func bindWithID(identifier string) CleanUpHandler {
 		if err != nil {
 			return err
 		}
-		return lbas.NewAPI(cli).Bind().DeleteByID(context.Background(), identifier)
+		return lbaas.NewAPI(cli).Bind().DeleteByID(context.Background(), identifier)
 	}
 }
 
@@ -344,6 +344,6 @@ func serverWithID(identifier string) CleanUpHandler {
 		if err != nil {
 			return err
 		}
-		return lbas.NewAPI(cli).Server().DeleteByID(context.Background(), identifier)
+		return lbaas.NewAPI(cli).Server().DeleteByID(context.Background(), identifier)
 	}
 }

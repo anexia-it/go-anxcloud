@@ -1,4 +1,4 @@
-package server
+package bind
 
 import (
 	"bytes"
@@ -10,32 +10,32 @@ import (
 	utils "path"
 	"strconv"
 
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
 )
 
 const (
-	path = "/api/LBaaS/v1/server.json"
+	path = "api/LBaaS/v1/bind.json"
 )
 
-// ServerInfo holds the identifier and the name of a load balancer backend.
-type ServerInfo struct {
+// BindInfo holds the identifier and the name of a load balancer frontend bind.
+type BindInfo struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
 }
 
-// Server holds the information of a load balancers backend server
-type Server struct {
-	CustomerIdentifier string              `json:"customer_identifier"`
-	ResellerIdentifier string              `json:"reseller_identifier"`
-	Identifier         string              `json:"identifier"`
-	Name               string              `json:"name"`
-	IP                 string              `json:"ip"`
-	Port               int                 `json:"port"`
-	Backend            backend.BackendInfo `json:"backend"`
-	Check              string              `json:"check"`
+type Bind struct {
+	CustomerIdentifier string                `json:"customer_identifier"`
+	ResellerIdentifier string                `json:"reseller_identifier"`
+	Identifier         string                `json:"identifier"`
+	Name               string                `json:"name"`
+	Frontend           frontend.FrontendInfo `json:"frontend"`
+	Address            string                `json:"address"`
+	Port               int                   `json:"port"`
+	SSL                bool                  `json:"ssl"`
+	SslCertificatePath string                `json:"ssl_certificate_path"`
 }
 
-func (a api) Get(ctx context.Context, page, limit int) ([]ServerInfo, error) {
+func (a api) Get(ctx context.Context, page, limit int) ([]BindInfo, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
@@ -58,88 +58,88 @@ func (a api) Get(ctx context.Context, page, limit int) ([]ServerInfo, error) {
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return nil, fmt.Errorf("could not get load balancer backend servers %s", response.Status)
+		return nil, fmt.Errorf("could not get frontend binds %s", response.Status)
 	}
 
 	payload := struct {
 		Data struct {
-			Data []ServerInfo `json:"data"`
-		}
+			Data []BindInfo `json:"data"`
+		} `json:"data"`
 	}{}
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse load balancer backend server list response: %w", err)
+		return nil, fmt.Errorf("could not parse frontend binds list response: %w", err)
 	}
 
 	return payload.Data.Data, nil
 }
 
-func (a api) GetByID(ctx context.Context, identifier string) (Server, error) {
+func (a api) GetByID(ctx context.Context, identifier string) (Bind, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
-		return Server{}, fmt.Errorf("could not parse URL: %w", err)
+		return Bind{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
 	endpoint.Path = utils.Join(path, identifier)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
-		return Server{}, fmt.Errorf("could not create request object: %w", err)
+		return Bind{}, fmt.Errorf("could not create request object: %w", err)
 	}
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return Server{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
+		return Bind{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Server{}, fmt.Errorf("could not execute get load balancer backend server request for '%s': %s", identifier,
+		return Bind{}, fmt.Errorf("could not execute get frontend binds request for '%s': %s", identifier,
 			response.Status)
 	}
 
-	var payload Server
+	var payload Bind
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
-		return Server{}, fmt.Errorf("could not parse load balancer backend server response for '%s' : %w", identifier, err)
+		return Bind{}, fmt.Errorf("could not parse frontend binds response for '%s' : %w", identifier, err)
 	}
 
 	return payload, nil
 }
 
-func (a api) Create(ctx context.Context, definition Definition) (Server, error) {
+func (a api) Create(ctx context.Context, definition Definition) (Bind, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
-		return Server{}, fmt.Errorf("could not parse URL: %w", err)
+		return Bind{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
 	endpoint.Path = path
 
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
-		return Server{}, err
+		return Bind{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.String(), &buf)
 	if err != nil {
-		return Server{}, fmt.Errorf("could not create request object: %w", err)
+		return Bind{}, fmt.Errorf("could not create request object: %w", err)
 	}
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return Server{}, fmt.Errorf("error when creating a LBaS server for backend '%s': %w",
-			definition.Backend, err)
+		return Bind{}, fmt.Errorf("error when creating a frontend bind for frontend '%s': %w",
+			definition.Frontend, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Server{}, fmt.Errorf("could not create LBaS server for backend '%s': %s",
-			definition.Backend, response.Status)
+		return Bind{}, fmt.Errorf("could not create frontend bind for frontend '%s': %s",
+			definition.Frontend, response.Status)
 	}
 
-	var payload Server
+	var payload Bind
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
-		return Server{}, fmt.Errorf("could not parse loadbalancer server creation response: %w", err)
+		return Bind{}, fmt.Errorf("could not parse frontend bind creation response: %w", err)
 	}
 
 	return payload, nil
@@ -159,12 +159,12 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error when deleting a LBaS server '%s': %w",
+		return fmt.Errorf("error when deleting a LBaaS frontend bind '%s': %w",
 			identifier, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return fmt.Errorf("could not delete LBaS server '%s': %s",
+		return fmt.Errorf("could not delete LBaaS frontend bind '%s': %s",
 			identifier, response.Status)
 	}
 

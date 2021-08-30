@@ -1,12 +1,12 @@
-package lbas
+package lbaas
 
 import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/backend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/bind"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/frontend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/loadbalancer"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/server"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/bind"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/server"
 )
 
 type API interface {

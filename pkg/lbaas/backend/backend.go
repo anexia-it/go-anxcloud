@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/loadbalancer"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 	"net/http"
 	"net/url"
 	utils "path"
@@ -160,12 +160,12 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error when deleting a LBaS backend '%s': %w",
+		return fmt.Errorf("error when deleting a LBaaS backend '%s': %w",
 			identifier, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return fmt.Errorf("could not delete LBaS backend '%s': %s",
+		return fmt.Errorf("could not delete LBaaS backend '%s': %s",
 			identifier, response.Status)
 	}
 	return nil

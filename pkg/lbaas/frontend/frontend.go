@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/backend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbas/loadbalancer"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 	"net/http"
 	"net/url"
 	utils "path"
@@ -21,7 +21,7 @@ type FrontendInfo struct {
 	Name       string `json:"name"`
 }
 
-// Frontend represents a LBaS Frontend.
+// Frontend represents a LBaaS Frontend.
 type Frontend struct {
 	CustomerIdentifier string                         `json:"customer_identifier"`
 	ResellerIdentifier string                         `json:"reseller_identifier"`
@@ -125,12 +125,12 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return Frontend{}, fmt.Errorf("error when creating a LBaS frontend for load balancer '%s': %w",
+		return Frontend{}, fmt.Errorf("error when creating a LBaaS frontend for load balancer '%s': %w",
 			definition.LoadBalancer, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Frontend{}, fmt.Errorf("could not create LBaS frontend for load balancer '%s': %s",
+		return Frontend{}, fmt.Errorf("could not create LBaaS frontend for load balancer '%s': %s",
 			definition.LoadBalancer, response.Status)
 	}
 
@@ -157,12 +157,12 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 
 	response, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error when deleting a LBaS frontend '%s': %w",
+		return fmt.Errorf("error when deleting a LBaaS frontend '%s': %w",
 			identifier, err)
 	}
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return fmt.Errorf("could not delete LBaS frontend '%s': %s",
+		return fmt.Errorf("could not delete LBaaS frontend '%s': %s",
 			identifier, response.Status)
 	}
 

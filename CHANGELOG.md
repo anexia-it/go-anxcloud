@@ -2,7 +2,7 @@
 
 ENHANCEMENTS
 
-* lbas - add load balancer as a service endpoints
+* lbaas - add load balancer as a service endpoints
 
 ## 0.3.24
 

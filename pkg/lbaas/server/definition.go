@@ -1,6 +1,6 @@
 package server
 
-import "github.com/anexia-it/go-anxcloud/pkg/lbas/common"
+import "github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
 
 // Definition describes how a server resource should look like
 type Definition struct {
