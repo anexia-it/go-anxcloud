@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
 	"net/http"
 	"net/url"
 	utils "path"
@@ -20,16 +21,16 @@ type ACLInfo struct {
 }
 
 type ACL struct {
-	CustomerIdentifier string              `json:"customer_identifier"`
-	ResellerIdentifier string              `json:"reseller_identifier"`
-	Identifier         string              `json:"identifier"`
-	Name               string              `json:"name"`
-	ParentType         string              `json:"parent_type"`
-	Frontend           interface{}         `json:"frontend"`
-	Backend            backend.BackendInfo `json:"backend"`
-	Criterion          string              `json:"criterion"`
-	Index              int                 `json:"index"`
-	Value              string              `json:"value"`
+	CustomerIdentifier string                 `json:"customer_identifier"`
+	ResellerIdentifier string                 `json:"reseller_identifier"`
+	Identifier         string                 `json:"identifier"`
+	Name               string                 `json:"name"`
+	ParentType         string                 `json:"parent_type"`
+	Frontend           *frontend.FrontendInfo `json:"frontend"`
+	Backend            *backend.BackendInfo   `json:"backend"`
+	Criterion          string                 `json:"criterion"`
+	Index              int                    `json:"index"`
+	Value              string                 `json:"value"`
 }
 
 func (a api) Get(ctx context.Context, page, limit int) ([]ACLInfo, error) {

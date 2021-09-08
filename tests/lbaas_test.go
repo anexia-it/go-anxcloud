@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/acl"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/bind"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
@@ -20,7 +21,7 @@ type CleanUpHandler = func() error
 
 var cleanupHandlers []CleanUpHandler
 
-var _ = Describe("LBaaS Service Tests", func() {
+var _ = FDescribe("LBaaS Service Tests", func() {
 	var cli client.Client
 
 	BeforeEach(func() {
@@ -40,7 +41,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 		cleanupHandlers = []CleanUpHandler{}
 	})
 
-	Context("LBAS - Loadbalancers", func() {
+	Context("LBAAS - Loadbalancers", func() {
 		It("Get load balancers", func() {
 			ctx := context.Background()
 
@@ -69,7 +70,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAS - Backend", func() {
+	Context("LBAAS - Backend", func() {
 		It("Create a Backend", func() {
 			ctx := context.Background()
 			definition := &backend.Definition{
@@ -108,7 +109,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAS - Servers", func() {
+	Context("LBAAS - Servers", func() {
 		It("Create server", func() {
 			ctx := context.Background()
 
@@ -147,7 +148,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAS - Binds", func() {
+	Context("LBAAS - Binds", func() {
 		It("Create Bind", func() {
 			ctx := context.Background()
 			definition := &bind.Definition{
@@ -177,7 +178,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAS - Frontends", func() {
+	Context("LBAAS - Frontends", func() {
 		It("Create frontend", func() {
 			ctx := context.Background()
 			backend := createBackend(ctx, cli, nil)
@@ -215,6 +216,51 @@ var _ = Describe("LBaaS Service Tests", func() {
 
 			Expect(err).To(BeNil())
 			Expect(fetchedFrontend).To(BeEquivalentTo(createdFrontend))
+		})
+	})
+
+	Context("LBAAS - ACLs", func() {
+		It("Create ACL", func() {
+			ctx := context.Background()
+			backend := createBackend(ctx, cli, nil)
+			definition := &acl.Definition{
+				Name:       randomName(),
+				State:      common.NewlyCreated,
+				ParentType: "backend",
+				Criterion:  "src",
+				Index:      rand.Intn(100),
+				Value:      "10.0.0.0/4",
+				Backend:    &backend.Identifier,
+			}
+
+			createdACL := createACL(ctx, cli, definition)
+
+			Expect(createdACL.Name).To(BeEquivalentTo(definition.Name))
+			Expect(createdACL.ParentType).To(BeEquivalentTo(definition.ParentType))
+			Expect(createdACL.Index).To(BeEquivalentTo(definition.Index))
+			Expect(createdACL.Value).To(BeEquivalentTo(definition.Value))
+			Expect(createdACL.Backend.Identifier).To(BeEquivalentTo(*definition.Backend))
+			Expect(createdACL.Criterion).To(BeEquivalentTo(definition.Criterion))
+		})
+
+		It("Get ACLs", func() {
+			ctx := context.Background()
+			createACL(ctx, cli, nil)
+			api := acl.NewAPI(cli)
+
+			acls, err := api.Get(ctx, 1, 5)
+			Expect(err).To(BeNil())
+			Expect(acls).NotTo(BeEmpty())
+		})
+
+		It("Get specific ACL", func() {
+			ctx := context.Background()
+			createdACL := createACL(ctx, cli, nil)
+			api := acl.NewAPI(cli)
+
+			fetchedACL, err := api.GetByID(ctx, createdACL.Identifier)
+			Expect(err).To(BeNil())
+			Expect(fetchedACL).To(BeEquivalentTo(createdACL))
 		})
 	})
 })
@@ -266,6 +312,26 @@ func createServer(ctx context.Context, cli client.Client, definition *server.Def
 	Expect(err).To(BeNil())
 	cleanUpAfterTest(serverWithID(createdServer.Identifier))
 	return createdServer
+}
+
+func createACL(ctx context.Context, cli client.Client, definition *acl.Definition) acl.ACL {
+	api := acl.NewAPI(cli)
+	if definition == nil {
+		backend := createBackend(ctx, cli, nil)
+		definition = &acl.Definition{
+			Name:       randomName(),
+			State:      common.NewlyCreated,
+			ParentType: "backend",
+			Criterion:  "src",
+			Index:      rand.Intn(100),
+			Value:      "10.0.0.0/4",
+			Backend:    &backend.Identifier,
+		}
+	}
+	acl, err := api.Create(ctx, *definition)
+	Expect(err).To(BeNil())
+	cleanUpAfterTest(aclWithID(acl.Identifier))
+	return acl
 }
 
 func createFrontend(ctx context.Context, cli client.Client, definition *frontend.Definition) frontend.Frontend {
@@ -335,6 +401,16 @@ func bindWithID(identifier string) CleanUpHandler {
 			return err
 		}
 		return lbaas.NewAPI(cli).Bind().DeleteByID(context.Background(), identifier)
+	}
+}
+
+func aclWithID(identifier string) CleanUpHandler {
+	return func() error {
+		cli, err := client.New(client.AuthFromEnv(false))
+		if err != nil {
+			return err
+		}
+		return lbaas.NewAPI(cli).ACL().DeleteByID(context.Background(), identifier)
 	}
 }
 

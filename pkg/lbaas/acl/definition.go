@@ -8,6 +8,8 @@ type Definition struct {
 	State      common.State `json:"state"`
 	ParentType string       `json:"parent_type"`
 	Criterion  string       `json:"criterion"`
-	Index      string       `json:"index"`
+	Index      int          `json:"index"`
 	Value      string       `json:"value"`
+	Frontend   *string      `json:"frontend,omitempty"`
+	Backend    *string      `json:"backend,omitempty"`
 }

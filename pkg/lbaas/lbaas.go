@@ -2,6 +2,7 @@ package lbaas
 
 import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/acl"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/bind"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
@@ -15,6 +16,7 @@ type API interface {
 	Backend() backend.API
 	Server() server.API
 	Bind() bind.API
+	ACL() acl.API
 }
 
 type api struct {
@@ -23,6 +25,11 @@ type api struct {
 	backend      backend.API
 	server       server.API
 	bind         bind.API
+	acl          acl.API
+}
+
+func (a api) ACL() acl.API {
+	return a.acl
 }
 
 func (a api) Bind() bind.API {
@@ -54,5 +61,6 @@ func NewAPI(c client.Client) API {
 		backend:      backend.NewAPI(c),
 		server:       server.NewAPI(c),
 		bind:         bind.NewAPI(c),
+		acl:          acl.NewAPI(c),
 	}
 }
