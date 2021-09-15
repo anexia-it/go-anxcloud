@@ -2,12 +2,14 @@ package loadbalancer
 
 import (
 	"context"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 // API contains load balancer actions.
 type API interface {
+	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, error)
 	GetByID(ctx context.Context, identifier string) (Loadbalancer, error)
 }

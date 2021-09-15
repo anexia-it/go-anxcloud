@@ -2,12 +2,14 @@ package frontend
 
 import (
 	"context"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 // API contains methods for load balancer frontend management.
 type API interface {
+	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]FrontendInfo, error)
 	GetByID(ctx context.Context, identifier string) (Frontend, error)
 	Create(ctx context.Context, definition Definition) (Frontend, error)

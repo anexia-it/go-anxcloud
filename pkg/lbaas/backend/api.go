@@ -3,10 +3,12 @@ package backend
 import (
 	"context"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
 )
 
 // API contains methods for load balancer backend management.
 type API interface {
+	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]BackendInfo, error)
 	GetByID(ctx context.Context, identifier string) (Backend, error)
 	Create(ctx context.Context, definition Definition) (Backend, error)

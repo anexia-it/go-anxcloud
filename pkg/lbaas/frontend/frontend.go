@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 	"net/http"
 	"net/url"
@@ -29,7 +30,7 @@ type Frontend struct {
 	Name               string                         `json:"name"`
 	LoadBalancer       *loadbalancer.LoadBalancerInfo `json:"load_balancer,omitempty"`
 	DefaultBackend     *backend.BackendInfo           `json:"default_backend,omitempty"`
-	Mode               string                         `json:"mode"`
+	Mode               common.Mode                    `json:"mode"`
 	ClientTimeout      string                         `json:"client_timeout"`
 }
 
