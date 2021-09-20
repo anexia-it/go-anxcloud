@@ -21,7 +21,7 @@ type CleanUpHandler = func() error
 
 var cleanupHandlers []CleanUpHandler
 
-var _ = FDescribe("LBaaS Service Tests", func() {
+var _ = Describe("LBaaS Service Tests", func() {
 	var cli client.Client
 
 	BeforeEach(func() {
