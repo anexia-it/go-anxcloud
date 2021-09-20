@@ -41,7 +41,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		cleanupHandlers = []CleanUpHandler{}
 	})
 
-	Context("LBAAS - Loadbalancers", func() {
+	Context("LBaaS - Loadbalancers", func() {
 		It("Get load balancers", func() {
 			ctx := context.Background()
 
@@ -70,7 +70,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAAS - Backend", func() {
+	Context("LBaaS - Backend", func() {
 		It("Create a Backend", func() {
 			ctx := context.Background()
 			definition := &backend.Definition{
@@ -109,7 +109,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAAS - Servers", func() {
+	Context("LBaaS - Servers", func() {
 		It("Create server", func() {
 			ctx := context.Background()
 
@@ -148,7 +148,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAAS - Binds", func() {
+	Context("LBaaS - Binds", func() {
 		It("Create Bind", func() {
 			ctx := context.Background()
 			definition := &bind.Definition{
@@ -178,7 +178,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAAS - Frontends", func() {
+	Context("LBaaS - Frontends", func() {
 		It("Create frontend", func() {
 			ctx := context.Background()
 			backend := createBackend(ctx, cli, nil)
@@ -219,7 +219,7 @@ var _ = FDescribe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("LBAAS - ACLs", func() {
+	Context("LBaaS - ACLs", func() {
 		It("Create ACL", func() {
 			ctx := context.Background()
 			backend := createBackend(ctx, cli, nil)
