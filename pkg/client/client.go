@@ -37,9 +37,6 @@ var ErrEnvMissing = errors.New("environment variable missing")
 var (
 	// Version gets set by linker at build time
 	version = "snapshot"
-
-	// Commit gets set by linker at build time
-	commit = "deadbeef"
 )
 
 // Client interacts with the anxcloud API.
@@ -197,7 +194,7 @@ func New(options ...Option) (Client, error) {
 	}
 
 	if optionSet.userAgent == "" {
-		optionSet.userAgent = fmt.Sprintf("go-anxcloud / %s-%s (%s)", version, commit, runtime.GOOS)
+		optionSet.userAgent = fmt.Sprintf("go-anxcloud / %s (%s)", version, runtime.GOOS)
 	}
 
 	if optionSet.token != "" {
