@@ -194,7 +194,7 @@ func New(options ...Option) (Client, error) {
 	}
 
 	if optionSet.userAgent == "" {
-		optionSet.userAgent = fmt.Sprintf("go-anxcloud / %s (%s)", version, runtime.GOOS)
+		optionSet.userAgent = fmt.Sprintf("go-anxcloud/%s (%s)", version, runtime.GOOS)
 	}
 
 	if optionSet.token != "" {

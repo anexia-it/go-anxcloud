@@ -38,7 +38,7 @@ func TestWithNoAgent(t *testing.T) {
 
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedAgent := r.Header.Get("User-Agent")
-		require.Equal(t, fmt.Sprintf("go-anxcloud / %s (%s)", "snapshot", runtime.GOOS), receivedAgent)
+		require.Equal(t, fmt.Sprintf("go-anxcloud/%s (%s)", "snapshot", runtime.GOOS), receivedAgent)
 		echo.TestMock(t).ServeHTTP(w, r)
 	})
 
