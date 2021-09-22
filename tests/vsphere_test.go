@@ -106,8 +106,12 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 				}
 
 				By("Deleting the VM")
-				err = vm.NewAPI(cli).Deprovision(ctx, vmID, false)
+				response, err := vm.NewAPI(cli).Deprovision(ctx, vmID, false)
 				Expect(err).NotTo(HaveOccurred())
+				Expect(response.Identifier).ToNot(BeEmpty())
+				returnedIdent, err := progress.NewAPI(cli).AwaitCompletion(ctx, response.Identifier)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(returnedIdent).To(BeEquivalentTo(vmID))
 			})
 		})
 
