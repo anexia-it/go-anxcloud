@@ -3,6 +3,8 @@
 ENHANCEMENTS
 
 * lbaas - add load balancer as a service endpoints
+* lbaas - add acl endpoints
+* client - allow to specify a user agent option
 
 ## 0.3.24
 
