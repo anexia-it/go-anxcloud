@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -32,6 +33,11 @@ const (
 
 // ErrEnvMissing indicates an environment variable is missing.
 var ErrEnvMissing = errors.New("environment variable missing")
+
+var (
+	// Version gets set by linker at build time
+	version = "snapshot"
+)
 
 // Client interacts with the anxcloud API.
 type Client interface {
@@ -106,6 +112,7 @@ type optionSet struct {
 	httpClient *http.Client
 	token      string
 	logWriter  io.Writer
+	userAgent  string
 }
 
 // Option is a optional parameter for the New method.
@@ -121,6 +128,13 @@ func TokenFromString(token string) Option {
 	return func(o *optionSet) error {
 		o.token = token
 
+		return nil
+	}
+}
+
+func UserAgent(userAgent string) Option {
+	return func(o *optionSet) error {
+		o.userAgent = userAgent
 		return nil
 	}
 }
@@ -179,11 +193,16 @@ func New(options ...Option) (Client, error) {
 		optionSet.httpClient = http.DefaultClient
 	}
 
+	if optionSet.userAgent == "" {
+		optionSet.userAgent = fmt.Sprintf("go-anxcloud/%s (%s)", version, runtime.GOOS)
+	}
+
 	if optionSet.token != "" {
 		return &tokenClient{
 			token:      optionSet.token,
 			httpClient: optionSet.httpClient,
 			logWriter:  optionSet.logWriter,
+			userAgent:  optionSet.userAgent,
 		}, nil
 	}
 
