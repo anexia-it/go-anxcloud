@@ -1,3 +1,9 @@
+## 0.3.26
+
+ENHANCEMENTS
+
+*  vsphere - Deprovision now returns progress identifier
+
 ## 0.3.25
 
 ENHANCEMENTS
