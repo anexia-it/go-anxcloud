@@ -1,3 +1,9 @@
+## 0.3.27
+
+ENHANCEMENTS
+
+*  ipam/prefix - Prefix Type is now available in Info
+
 ## 0.3.26
 
 ENHANCEMENTS
