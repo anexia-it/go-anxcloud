@@ -59,6 +59,7 @@ var _ = Describe("IPAM API endpoint tests", func() {
 				info, err = p.Get(ctx, summary.ID)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(info.Vlans).NotTo(BeNil())
+				Expect(info.PrefixType).To(BeEquivalentTo(prefix.TypePrivate))
 				return info.Status
 			}, 15*time.Minute, 5*time.Second).Should(Equal("Active"))
 

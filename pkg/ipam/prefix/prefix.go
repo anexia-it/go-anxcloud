@@ -78,6 +78,7 @@ type Info struct {
 	Locations           []Location `json:"locations"`
 	RouterRedundancy    bool       `json:"router_redundancy"`
 	Vlans               []Vlan     `json:"vlans"`
+	PrefixType          int        `json:"type"`
 }
 
 // Update contains fields to change on a prefix.
