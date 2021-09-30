@@ -28,6 +28,7 @@ type Create struct {
 	NetworkMask int    `json:"netmask"`
 
 	CreateVLAN              bool   `json:"new_vlan,omitempty"`
+	CreateEmpty             bool   `json:"create_empty"`
 	VLANID                  string `json:"vlan,omitempty"`
 	EnableRedundancy        bool   `json:"router_redundancy,omitempty"`
 	EnableVMProvisioning    bool   `json:"vm_provisioning,omitempty"`
