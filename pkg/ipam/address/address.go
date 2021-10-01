@@ -7,14 +7,29 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
 const (
-	pathAddressPrefix        = "/api/ipam/v1/address.json"
-	pathReserveAddressPrefix = "/api/ipam/v1/address/reserve/ip/count.json"
+	pathAddressPrefix         = "/api/ipam/v1/address.json"
+	pathReserveAddressPrefix  = "/api/ipam/v1/address/reserve/ip/count.json"
+	pathFilteredAddressPrefix = "/api/ipam/v1/address/filtered.json"
+)
+
+// Filters that can be applied to the GetFiltered request
+var (
+	PrefixFilter       = param.ParameterBuilder("prefix")
+	VlanFilter         = param.ParameterBuilder("vlan")
+	VersionFilter      = param.ParameterBuilder("version")
+	RoleTextFilter     = param.ParameterBuilder("role_text")
+	StatusFilter       = param.ParameterBuilder("status")
+	LocationFilter     = param.ParameterBuilder("location")
+	OrganizationFilter = param.ParameterBuilder("organization_identifier")
 )
 
 // Address contains all the information about a specific address.
@@ -286,4 +301,44 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	}
 
 	return summary, nil
+}
+
+func (a api) GetFiltered(ctx context.Context, page, limit int, filters ...param.Parameter) ([]Summary, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return nil, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = pathFilteredAddressPrefix
+	query := endpoint.Query()
+	query.Set("page", strconv.Itoa(page))
+	query.Set("limit", strconv.Itoa(limit))
+	for _, filter := range filters {
+		filter(query)
+	}
+
+	endpoint.RawQuery = query.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error when executing request: %w", err)
+	}
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return nil, fmt.Errorf("could not get filtered addresses %s", response.Status)
+	}
+
+	var payload struct {
+		Data struct {
+			Data []Summary `json:"data"`
+		} `json:"data"`
+	}
+
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	return payload.Data.Data, err
 }

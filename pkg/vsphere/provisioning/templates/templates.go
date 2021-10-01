@@ -76,7 +76,7 @@ type Template struct {
 	Name       string     `json:"name"`
 	WordSize   string     `json:"bit"`
 	Build      string     `json:"build"`
-	Parameters Parameters `json:"params"`
+	Parameters Parameters `json:"param"`
 }
 
 const (

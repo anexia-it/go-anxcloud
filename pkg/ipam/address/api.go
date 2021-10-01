@@ -2,14 +2,15 @@ package address
 
 import (
 	"context"
-
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 )
 
 // API contains methods for IP manipulation.
 type API interface {
 	List(ctx context.Context, page, limit int, search string) ([]Summary, error)
 	Get(ctx context.Context, id string) (Address, error)
+	GetFiltered(ctx context.Context, page, limit int, filters ...param.Parameter) ([]Summary, error)
 	Delete(ctx context.Context, id string) error
 	Create(ctx context.Context, create Create) (Summary, error)
 	Update(ctx context.Context, id string, update Update) (Summary, error)
