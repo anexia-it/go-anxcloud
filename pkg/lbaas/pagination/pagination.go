@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 	"reflect"
 )
 
@@ -15,40 +16,13 @@ type Page interface {
 	Num() int
 	Size() int
 	Total() int
-	Options() []Option
+	Options() []param.Parameter
 	Content() interface{}
-}
-
-type Option struct {
-	Name  string
-	Value string
-}
-
-// GetOption searches in the given options for an Option with the given name and returns a pointer to it or
-// nil if no Option name matched.
-func GetOption(opts []Option, name string) *Option {
-	for _, opt := range opts {
-		if opt.Name == name {
-			return &opt
-		}
-	}
-	return nil
-}
-
-// DelOption deletes the Option With the given name from the given Option slice and returns a new one.
-func DelOption(opts []Option, name string) []Option {
-	var newOpts []Option
-	for _, opt := range opts {
-		if opt.Name != name {
-			newOpts = append(newOpts, opt)
-		}
-	}
-	return newOpts
 }
 
 // Pageable should be implemented by evey struct that supports pagination.
 type Pageable interface {
-	GetPage(ctx context.Context, page, limit int, opts ...Option) (Page, error)
+	GetPage(ctx context.Context, page, limit int, opts ...param.Parameter) (Page, error)
 	NextPage(ctx context.Context, page Page) (Page, error)
 }
 
@@ -60,7 +34,7 @@ func HasNext(page Page) bool {
 type UntilTrueFunc func(interface{}) (bool, error)
 
 // LoopUntil takes a pageable and loops over it until untilFunc returns true or an error.
-func LoopUntil(ctx context.Context, pageable Pageable, untilFunc UntilTrueFunc, opts ...Option) error {
+func LoopUntil(ctx context.Context, pageable Pageable, untilFunc UntilTrueFunc, opts ...param.Parameter) error {
 	page, err := pageable.GetPage(ctx, 1, 10, opts...)
 	if err != nil {
 		return err
@@ -96,7 +70,7 @@ type CancelFunc func()
 
 // AsChan takes a Pageable and returns its Pageable.Content via a channel until there are no more pages or
 // CancelFunc gets called by the consumer.
-func AsChan(ctx context.Context, pageable Pageable, opts ...Option) (chan interface{}, CancelFunc) {
+func AsChan(ctx context.Context, pageable Pageable, opts ...param.Parameter) (chan interface{}, CancelFunc) {
 	consumer := make(chan interface{})
 	done := make(chan interface{})
 	cancel := func() {

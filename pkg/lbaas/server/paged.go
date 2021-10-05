@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
+	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -17,10 +17,10 @@ type ServerPage struct {
 	TotalPages  int          `json:"total_pages"`
 	Limit       int          `json:"limit"`
 	Data        []ServerInfo `json:"data"`
-	pageOptions []pagination.Option
+	pageOptions []param.Parameter
 }
 
-func (f ServerPage) Options() []pagination.Option {
+func (f ServerPage) Options() []param.Parameter {
 	return f.pageOptions
 }
 
@@ -36,7 +36,7 @@ func (f ServerPage) Total() int {
 	return f.TotalPages
 }
 
-func (a api) GetPage(ctx context.Context, page, limit int, opts ...pagination.Option) (pagination.Page, error) {
+func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.Parameter) (pagination.Page, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
@@ -46,12 +46,8 @@ func (a api) GetPage(ctx context.Context, page, limit int, opts ...pagination.Op
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))
-
-	if option := pagination.GetOption(opts, common.OptNameSearch); option != nil {
-		query.Set("search", option.Value)
-	}
-	if option := pagination.GetOption(opts, common.OptNameFilter); option != nil {
-		query.Set("filter", option.Value)
+	for _, parameter := range parameters {
+		parameter(query)
 	}
 
 	endpoint.RawQuery = query.Encode()
@@ -79,7 +75,7 @@ func (a api) GetPage(ctx context.Context, page, limit int, opts ...pagination.Op
 		return nil, fmt.Errorf("could not parse load balancer frontend list response: %w", err)
 	}
 
-	payload.Page.pageOptions = opts
+	payload.Page.pageOptions = parameters
 	return payload.Page, nil
 }
 
