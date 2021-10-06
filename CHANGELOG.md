@@ -1,3 +1,10 @@
+## 0.3.28
+
+ENHANCEMENTS
+
+* ipam/prefix - allow to create empty prefixes
+* ipam/address - allow to retrieve addresses with given filters
+
 ## 0.3.27
 
 ENHANCEMENTS
