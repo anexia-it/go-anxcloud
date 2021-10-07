@@ -119,6 +119,7 @@ func (a api) Get(ctx context.Context, identifier string) (State, error) {
 		return "", fmt.Errorf("could not execute powercontrol get request: %w", err)
 	}
 	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return "", fmt.Errorf("could not execute powercontrol get request, got response %s", httpResponse.Status)
 	}

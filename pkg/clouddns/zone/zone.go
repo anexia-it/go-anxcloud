@@ -316,6 +316,7 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Rec
 		return nil, fmt.Errorf("could not execute zone changeset request: %w", err)
 	}
 	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
 	}
