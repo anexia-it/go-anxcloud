@@ -65,6 +65,7 @@ func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.P
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancer frontends %s", response.Status)
