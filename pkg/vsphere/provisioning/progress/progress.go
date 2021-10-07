@@ -61,13 +61,14 @@ func (a api) Get(ctx context.Context, identifier string) (Progress, error) {
 	if err != nil {
 		return Progress{}, fmt.Errorf("could not execute progress get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Progress{}, fmt.Errorf("could not execute progress get request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Progress
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return Progress{}, fmt.Errorf("could not decode progress get response: %w", err)

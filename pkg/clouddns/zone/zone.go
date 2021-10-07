@@ -145,13 +145,14 @@ func (a api) List(ctx context.Context) ([]Zone, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute zone list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute zone list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode zone list response: %w", err)
 	}
@@ -177,13 +178,14 @@ func (a api) Get(ctx context.Context, name string) (Zone, error) {
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not execute zone get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Zone{}, fmt.Errorf("could not execute zone get request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
@@ -213,13 +215,14 @@ func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not execute zone create request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Zone{}, fmt.Errorf("could not execute zone create request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
@@ -249,13 +252,14 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Zone, 
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not execute zone update request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Zone{}, fmt.Errorf("could not execute zone update request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not decode zone get response: %w", err)
 	}
@@ -311,13 +315,13 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Rec
 	if err != nil {
 		return nil, fmt.Errorf("could not execute zone changeset request: %w", err)
 	}
+	defer httpResponse.Body.Close()
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute zone changeset request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload []Record
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode zone changeset response: %w", err)
 	}
@@ -348,13 +352,14 @@ func (a api) Import(ctx context.Context, name string, zoneData Import) (Revision
 	if err != nil {
 		return Revision{}, fmt.Errorf("could not execute zone import request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Revision{}, fmt.Errorf("could not execute zone import request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Revision
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Revision{}, fmt.Errorf("could not decode zone import response: %w", err)
 	}
