@@ -172,7 +172,7 @@ func (a api) Get(ctx context.Context, id string) (Address, error) {
 	return responsePayload, err
 }
 
-func (a api) Delete(ctx context.Context, id string) (err error) {
+func (a api) Delete(ctx context.Context, id string) error {
 	url := fmt.Sprintf(
 		"%s%s/%s",
 		a.client.BaseURL(),
@@ -189,9 +189,7 @@ func (a api) Delete(ctx context.Context, id string) (err error) {
 	if err != nil {
 		return fmt.Errorf("could not execute address delete request: %w", err)
 	}
-	defer func() {
-		err = httpResponse.Body.Close()
-	}()
+	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return fmt.Errorf("could not execute address delete request, got response %s", httpResponse.Status)
