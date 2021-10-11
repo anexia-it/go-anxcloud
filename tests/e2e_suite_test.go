@@ -3,7 +3,9 @@ package tests_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 const (
@@ -13,5 +15,6 @@ const (
 
 func TestE2E(t *testing.T) {
 	RegisterFailHandler(Fail)
+	rand.Seed(time.Now().Unix())
 	RunSpecs(t, "Tests suite")
 }
