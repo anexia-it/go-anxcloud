@@ -79,13 +79,14 @@ func (a api) Get(ctx context.Context, identifier string) (Info, error) {
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute VM info request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Info{}, fmt.Errorf("could not execute VM info request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return Info{}, fmt.Errorf("could not decode VM info response: %w", err)

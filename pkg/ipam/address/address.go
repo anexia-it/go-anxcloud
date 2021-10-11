@@ -123,13 +123,14 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Summar
 	if err != nil {
 		return nil, fmt.Errorf("could not execute address list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute address list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode address list response: %w", err)
@@ -155,13 +156,14 @@ func (a api) Get(ctx context.Context, id string) (Address, error) {
 	if err != nil {
 		return Address{}, fmt.Errorf("could not execute address get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Address{}, fmt.Errorf("could not execute address get request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Address
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return Address{}, fmt.Errorf("could not decode address get response: %w", err)
@@ -187,11 +189,13 @@ func (a api) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("could not execute address delete request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return fmt.Errorf("could not execute address delete request, got response %s", httpResponse.Status)
 	}
 
-	return httpResponse.Body.Close()
+	return nil
 }
 
 func (a api) Create(ctx context.Context, create Create) (Summary, error) {
@@ -215,13 +219,14 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not decode vlan post response: %w", err)
 	}
@@ -250,13 +255,14 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan update request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Summary{}, fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return summary, fmt.Errorf("could not decode vlan update response: %w", err)
 	}
@@ -289,13 +295,14 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	if err != nil {
 		return ReserveRandomSummary{}, fmt.Errorf("could not execute IP address reserve random post request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return ReserveRandomSummary{}, fmt.Errorf("could not execute IP address reserve random post request, got response %s", httpResponse.Status)
 	}
 
 	var summary ReserveRandomSummary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return ReserveRandomSummary{}, fmt.Errorf("could not decode IP address reserve random post response: %w", err)
 	}
@@ -328,7 +335,7 @@ func (a api) GetFiltered(ctx context.Context, page, limit int, filters ...param.
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
-
+	defer response.Body.Close()
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get filtered addresses %s", response.Status)
 	}

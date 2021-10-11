@@ -58,13 +58,14 @@ func (a api) Provision(ctx context.Context, definition Definition, scriptBase64E
 	if err != nil {
 		return ProvisioningResponse{}, fmt.Errorf("could not execute VM provisioning request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return ProvisioningResponse{}, fmt.Errorf("could not execute VM provisioning request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload ProvisioningResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return ProvisioningResponse{}, fmt.Errorf("could not decode VM provisioning response: %w", err)

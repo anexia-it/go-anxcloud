@@ -37,13 +37,14 @@ func (a api) List(ctx context.Context) ([]CPUPerformanceType, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute cpu performance type list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute cpu performance type list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload []CPUPerformanceType
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode cpu performance type list response: %w", err)

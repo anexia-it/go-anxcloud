@@ -42,13 +42,14 @@ func (a api) GetFree(ctx context.Context, location, vlan string) ([]IP, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not get ips: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute ip get request, got response %s", httpResponse.Status)
 	}
 
 	responsePayload := response{}
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode ip get response: %w", err)
