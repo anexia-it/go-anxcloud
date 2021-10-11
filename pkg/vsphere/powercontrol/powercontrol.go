@@ -79,13 +79,14 @@ func (a api) Set(ctx context.Context, identifier string, request Request) (Task,
 	if err != nil {
 		return Task{}, fmt.Errorf("could not execute powercontrol set request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Task{}, fmt.Errorf("could not execute powercontrol set request, got response %s", httpResponse.Status)
 	}
 
 	var task Task
 	err = json.NewDecoder(httpResponse.Body).Decode(&task)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Task{}, fmt.Errorf("could not decode powercontrol set response: %w", err)
 	}
@@ -117,13 +118,14 @@ func (a api) Get(ctx context.Context, identifier string) (State, error) {
 	if err != nil {
 		return "", fmt.Errorf("could not execute powercontrol get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return "", fmt.Errorf("could not execute powercontrol get request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload State
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return "", fmt.Errorf("could not decode powercontrol get response: %w", err)
 	}

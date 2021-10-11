@@ -51,13 +51,14 @@ func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute resource list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute resource list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode resource list response: %w", err)
 	}
@@ -82,13 +83,14 @@ func (a api) Get(ctx context.Context, id string) (Info, error) {
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute resource get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Info{}, fmt.Errorf("could not execute resource get request, got response %s", httpResponse.Status)
 	}
 
 	var info Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&info)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Info{}, fmt.Errorf("could not decode resource get response: %w", err)
 	}
@@ -112,13 +114,14 @@ func (a api) AttachTag(ctx context.Context, resourceID, tagName string) ([]Summa
 	if err != nil {
 		return nil, fmt.Errorf("could not execute attach tag request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute attach tag request, got response %s", httpResponse.Status)
 	}
 
 	var summary []Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode attach tag response: %w", err)
 	}

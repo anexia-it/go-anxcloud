@@ -79,13 +79,14 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Summar
 	if err != nil {
 		return nil, fmt.Errorf("could not execute vlan list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute vlan list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode vlan list response: %w", err)
 	}
@@ -110,13 +111,14 @@ func (a api) Get(ctx context.Context, identifier string) (Info, error) {
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute vlan get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Info{}, fmt.Errorf("could not execute vlan get request, got response %s", httpResponse.Status)
 	}
 
 	var info Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&info)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Info{}, fmt.Errorf("could not decode vlan get response: %w", err)
 	}
@@ -145,13 +147,14 @@ func (a api) Create(ctx context.Context, createDefinition CreateDefinition) (Sum
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not decode vlan post response: %w", err)
 	}
@@ -180,13 +183,14 @@ func (a api) Update(ctx context.Context, identifier string, updateDefinition Upd
 	if err != nil {
 		return fmt.Errorf("could not execute vlan update request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return fmt.Errorf("could not decode vlan update response: %w", err)
 	}

@@ -103,13 +103,14 @@ func (a api) List(ctx context.Context, locationID string, templateType string, p
 	if err != nil {
 		return nil, fmt.Errorf("could not execute template list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute template list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload []Template
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode template list response: %w", err)

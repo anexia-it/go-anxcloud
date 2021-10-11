@@ -77,13 +77,14 @@ func (a api) List(ctx context.Context, page, limit int, query, serviceIdentifier
 	if err != nil {
 		return nil, fmt.Errorf("could not execute tags list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute tags list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode tags list response: %w", err)
 	}
@@ -108,13 +109,14 @@ func (a api) Get(ctx context.Context, identifier string) (Info, error) {
 	if err != nil {
 		return Info{}, fmt.Errorf("could not execute tags get request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Info{}, fmt.Errorf("could not execute tags get request, got response %s", httpResponse.Status)
 	}
 
 	var info Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&info)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Info{}, fmt.Errorf("could not decode tags get response: %w", err)
 	}
@@ -143,13 +145,14 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not execute tag post request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Summary{}, fmt.Errorf("could not execute tag post request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Summary{}, fmt.Errorf("could not decode tag post response: %w", err)
 	}

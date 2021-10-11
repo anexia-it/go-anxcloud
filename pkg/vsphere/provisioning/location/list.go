@@ -59,13 +59,14 @@ func (a api) List(ctx context.Context, page, limit int, locationCode, organizati
 	if err != nil {
 		return nil, fmt.Errorf("could not execute location list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute location list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload response
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode location list response: %w", err)

@@ -55,13 +55,14 @@ func (a api) ByName(ctx context.Context, name string) ([]VM, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute VM search request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute VM search request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload response
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return nil, fmt.Errorf("could not decode VM search response: %w", err)

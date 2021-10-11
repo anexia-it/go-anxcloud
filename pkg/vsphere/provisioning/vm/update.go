@@ -30,13 +30,14 @@ func (a api) Update(ctx context.Context, identifier string, change Change) (Prov
 	if err != nil {
 		return ProvisioningResponse{}, fmt.Errorf("could not execute VM update request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return ProvisioningResponse{}, fmt.Errorf("could not execute VM update request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload ProvisioningResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 
 	if err != nil {
 		return ProvisioningResponse{}, fmt.Errorf("could not decode VM update response: %w", err)

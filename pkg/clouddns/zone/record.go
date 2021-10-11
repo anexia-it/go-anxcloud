@@ -35,13 +35,14 @@ func (a api) ListRecords(ctx context.Context, zone string) ([]Record, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not execute record list request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute record list request, got response %s", httpResponse.Status)
 	}
 
 	responsePayload := make([]Record, 0)
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("could not decode zone list response: %w", err)
 	}
@@ -72,13 +73,14 @@ func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not execute record create request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Zone{}, fmt.Errorf("could not execute record create request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not decode record create response: %w", err)
 	}
@@ -110,13 +112,14 @@ func (a api) UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not execute record update request: %w", err)
 	}
+	defer httpResponse.Body.Close()
+
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
 		return Zone{}, fmt.Errorf("could not execute record update request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload Zone
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
-	_ = httpResponse.Body.Close()
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not decode record update response: %w", err)
 	}
