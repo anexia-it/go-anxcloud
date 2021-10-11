@@ -8,8 +8,8 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/bind"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/server"
+	"github.com/anexia-it/go-anxcloud/pkg/pagination"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

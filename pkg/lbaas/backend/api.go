@@ -3,7 +3,7 @@ package backend
 import (
 	"context"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
+	"github.com/anexia-it/go-anxcloud/pkg/pagination"
 )
 
 // API contains methods for load balancer backend management.

@@ -2,7 +2,7 @@ package loadbalancer
 
 import (
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
+	"github.com/anexia-it/go-anxcloud/pkg/pagination"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )

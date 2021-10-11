@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/pagination"
+	"github.com/anexia-it/go-anxcloud/pkg/pagination"
 	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 	"net/http"
 	"net/url"
