@@ -3,16 +3,16 @@ package client_test
 import (
 	"context"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/test/echo"
-	"log"
 	"net/http"
 	"testing"
+
+	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"github.com/anexia-it/go-anxcloud/pkg/test/echo"
 )
 
 func TestTokenClient(t *testing.T) {
 	dummyToken := "ie7dois8Ooquoo1ieB9kae8Od9ooshee3nejuach4inae3gai0Re0Shaipeihail" //nolint:gosec // Not a real token.
-	c, err := client.New(client.TokenFromString(dummyToken), client.LogWriter(log.Writer()))
+	c, err := client.New(client.TokenFromString(dummyToken))
 	if err != nil {
 		t.Errorf("could not create client: %v", err)
 	}
