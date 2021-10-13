@@ -132,6 +132,7 @@ func TokenFromString(token string) Option {
 	}
 }
 
+// UserAgent configures the user agent string to send with every HTTP request.
 func UserAgent(userAgent string) Option {
 	return func(o *optionSet) error {
 		o.userAgent = userAgent
