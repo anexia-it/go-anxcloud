@@ -2,16 +2,16 @@
 package client
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/go-logr/logr"
 )
 
 const (
@@ -66,13 +66,9 @@ func (r ResponseError) Error() string {
 	return fmt.Sprintf("received error from api: %+v", r.ErrorData)
 }
 
-func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*http.Response, error) {
-	if logWriter != nil {
-		reqBytes, dumpErr := dumpRequest(req)
-		if dumpErr == nil {
-			fmt.Fprintf(logWriter, "request: %s\n", string(reqBytes))
-		}
-	}
+func handleRequest(c *http.Client, req *http.Request, logger logr.Logger) (*http.Response, error) {
+	logRequest(req, logger)
+
 	response, err := c.Do(req)
 	if err == nil && (response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices) {
 		errResponse := ResponseError{Request: req, Response: response}
@@ -83,35 +79,15 @@ func handleRequest(c *http.Client, req *http.Request, logWriter io.Writer) (*htt
 		err = &errResponse
 	}
 
-	if logWriter != nil && response != nil {
-		respBytes, dumpErr := httputil.DumpResponse(response, err == nil)
-		if dumpErr == nil {
-			fmt.Fprintf(logWriter, "response: %s\n", string(respBytes))
-		}
-	}
+	logResponse(response, logger)
 
 	return response, err
-}
-
-func dumpRequest(req *http.Request) ([]byte, error) {
-	clonedRequest := req.Clone(context.Background())
-	clonedRequest.Header.Set("Authorization", "REDACTED")
-	dumpedRequest, err := httputil.DumpRequestOut(clonedRequest, true)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set original request body to the duplicate created by DumpRequestOut. The request body is not duplicated
-	// by .Clone() and instead just referenced, so it would be completely read otherwise.
-	req.Body = clonedRequest.Body
-
-	return dumpedRequest, nil
 }
 
 type optionSet struct {
 	httpClient *http.Client
 	token      string
-	logWriter  io.Writer
+	logger     *logr.Logger
 	userAgent  string
 }
 
@@ -158,11 +134,23 @@ func TokenFromEnv(unset bool) Option {
 	}
 }
 
-// LogWriter configures the debug writer for logging requests and responses
+// LogWriter configures the debug writer for logging requests and responses. Deprecated, use Logger instead.
 func LogWriter(w io.Writer) Option {
 	return func(o *optionSet) error {
-		o.logWriter = w
+		l := ioLogger(w)
+		o.logger = &l
 
+		l.Info("The LogWriter option of github.com/anexia-it/go-anxcloud/pkg/client is deprecated.")
+
+		return nil
+	}
+}
+
+// Logger configures where the client logs. Requests and responses are logged with verbosity LogVerbosityRequests
+// on a logger derived from the one passed here with name LogNameTrace, replacing the previous LogWriter option.
+func Logger(l logr.Logger) Option {
+	return func(o *optionSet) error {
+		o.logger = &l
 		return nil
 	}
 }
@@ -198,11 +186,16 @@ func New(options ...Option) (Client, error) {
 		optionSet.userAgent = fmt.Sprintf("go-anxcloud/%s (%s)", version, runtime.GOOS)
 	}
 
+	if optionSet.logger == nil {
+		logger := logr.Discard()
+		optionSet.logger = &logger
+	}
+
 	if optionSet.token != "" {
 		return &tokenClient{
 			token:      optionSet.token,
 			httpClient: optionSet.httpClient,
-			logWriter:  optionSet.logWriter,
+			logger:     *optionSet.logger,
 			userAgent:  optionSet.userAgent,
 		}, nil
 	}
