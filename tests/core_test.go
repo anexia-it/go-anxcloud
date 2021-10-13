@@ -26,13 +26,33 @@ var _ = Describe("Core API endpoint tests", func() {
 
 	Context("Location endpoint", func() {
 
-		It("Should list all available locations", func() {
+		It("Should list all available locations, and get the first entry by ID and code", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("Should get the first location entry by ID", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+			defer cancel()
+			list, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
+			Expect(err).NotTo(HaveOccurred())
+			l, err := location.NewAPI(cli).Get(ctx, list[0].ID)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(l).To(Equal(list[0]))
+		})
+
+		It("Should get the first location entry by code", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+			defer cancel()
+			list, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
+			Expect(err).NotTo(HaveOccurred())
+
+			l, err := location.NewAPI(cli).GetByCode(ctx, list[0].Code)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(l).To(Equal(list[0]))
+		})
 	})
 
 	Context("Resource endpoint", func() {

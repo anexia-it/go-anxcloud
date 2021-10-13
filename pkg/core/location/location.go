@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	pathPrefix = "/api/core/v1/location.json"
+	pathPrefix = "/api/core/v1/location"
 )
 
 // Location is the metadata of a single location.
@@ -33,7 +33,7 @@ type listResponse struct {
 
 func (a api) List(ctx context.Context, page, limit int, search string) ([]Location, error) {
 	url := fmt.Sprintf(
-		"%s%s?page=%d&limit=%d&search=%s",
+		"%s%s.json?page=%d&limit=%d&search=%s",
 		a.client.BaseURL(),
 		pathPrefix, page, limit, search,
 	)
@@ -60,4 +60,68 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Locati
 	}
 
 	return responsePayload.Data.Data, nil
+}
+
+func (a api) Get(ctx context.Context, identifier string) (Location, error) {
+	url := fmt.Sprintf(
+		"%s%s.json/%s",
+		a.client.BaseURL(),
+		pathPrefix,
+		identifier,
+	)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not create location get request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not execute location get request: %w", err)
+	}
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Location{}, fmt.Errorf("could not execute location get request, got response %s", httpResponse.Status)
+	}
+
+	var location Location
+	err = json.NewDecoder(httpResponse.Body).Decode(&location)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not decode location get response: %w", err)
+	}
+
+	return location, nil
+}
+
+func (a api) GetByCode(ctx context.Context, code string) (Location, error) {
+	url := fmt.Sprintf(
+		"%s%s/by-code.json/%s",
+		a.client.BaseURL(),
+		pathPrefix,
+		code,
+	)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not create location get-by-code request: %w", err)
+	}
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not execute location get-by-code request: %w", err)
+	}
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return Location{}, fmt.Errorf("could not execute location get-by-code request, got response %s", httpResponse.Status)
+	}
+
+	var location Location
+	err = json.NewDecoder(httpResponse.Body).Decode(&location)
+	if err != nil {
+		return Location{}, fmt.Errorf("could not decode location get-by-code response: %w", err)
+	}
+
+	return location, nil
 }
