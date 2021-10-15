@@ -31,6 +31,21 @@ var _ = Describe("IPAM API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("Should paginate correctly", func() {
+			ctx := context.Background()
+
+			api := address.NewAPI(cli)
+			page, err := api.GetPage(ctx, 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">", 1))
+
+			for i := 2; i < 5; i++ {
+				page, err = api.NextPage(ctx, page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
+		})
 	})
 
 	Context("Prefix endpoint", func() {
@@ -40,6 +55,22 @@ var _ = Describe("IPAM API endpoint tests", func() {
 			defer cancel()
 			_, err := prefix.NewAPI(cli).List(ctx, 1, 1000)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("Should paginate correctly", func() {
+			ctx := context.Background()
+
+			api := prefix.NewAPI(cli)
+			page, err := api.GetPage(ctx, 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">", 1))
+
+			for i := 2; i < 5; i++ {
+				page, err = api.NextPage(ctx, page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 
 		It("Should create a new prefix and delete it later", func() {
