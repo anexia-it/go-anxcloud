@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
+
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
+	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 )
 
 const (
@@ -19,14 +20,14 @@ const (
 
 // BackendInfo holds the identifier and the name of a load balancer backend.
 type BackendInfo struct {
-	Identifier string `json:"identifier"`
+	Identifier string `json:"identifier" anxcloud:"identifier"`
 	Name       string `json:"name"`
 }
 
 type Backend struct {
 	CustomerIdentifier string                        `json:"customer_identifier"`
 	ResellerIdentifier string                        `json:"reseller_identifier"`
-	Identifier         string                        `json:"identifier"`
+	Identifier         string                        `json:"identifier" anxcloud:"identifier"`
 	Name               string                        `json:"name"`
 	LoadBalancer       loadbalancer.LoadBalancerInfo `json:"load_balancer"`
 	HealthCheck        string                        `json:"health_check"`
