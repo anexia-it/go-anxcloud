@@ -16,13 +16,13 @@ const (
 
 // LoadBalancerInfo holds the identifier and the name of a load balancer
 type LoadBalancerInfo struct {
-	Identifier string `json:"identifier"`
+	Identifier string `json:"identifier" anxcloud:"identifier"`
 	Name       string `json:"name"`
 }
 
 // RuleInfo holds the name and identifier of a rule.
 type RuleInfo struct {
-	Identifier string `json:"identifier"`
+	Identifier string `json:"identifier" anxcloud:"identifier"`
 	Name       string `json:"name"`
 }
 
@@ -30,7 +30,7 @@ type RuleInfo struct {
 type Loadbalancer struct {
 	CustomerIdentifier string     `json:"customer_identifier"`
 	ResellerIdentifier string     `json:"reseller_identifier"`
-	Identifier         string     `json:"identifier"`
+	Identifier         string     `json:"identifier" anxcloud:"identifier"`
 	Name               string     `json:"name"`
 	IpAddress          string     `json:"ip_address"`
 	AutomationRules    []RuleInfo `json:"automation_rules"`
