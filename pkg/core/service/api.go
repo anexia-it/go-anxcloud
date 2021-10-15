@@ -4,12 +4,14 @@ package service
 
 import (
 	"context"
+	"github.com/anexia-it/go-anxcloud/pkg/pagination"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
 // API contains methods for listing services.
 type API interface {
+	pagination.Pageable
 	List(ctx context.Context, page, limit int) ([]Service, error)
 }
 

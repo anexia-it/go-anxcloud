@@ -33,6 +33,22 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("Should paginate correctly", func() {
+			ctx := context.Background()
+
+			api := location.NewAPI(cli)
+			page, err := api.GetPage(ctx, 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">", 1))
+
+			for i := 2; i < 5; i++ {
+				page, err = api.NextPage(ctx, page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
+		})
+
 		It("Should get the first location entry by ID", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
@@ -64,6 +80,22 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("Should paginate correctly", func() {
+			ctx := context.Background()
+
+			api := resource.NewAPI(cli)
+			page, err := api.GetPage(ctx, 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">", 1))
+
+			for i := 2; i < 5; i++ {
+				page, err = api.NextPage(ctx, page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
+		})
+
 	})
 
 	Context("Service endpoint", func() {
@@ -73,6 +105,22 @@ var _ = Describe("Core API endpoint tests", func() {
 			defer cancel()
 			_, err := service.NewAPI(cli).List(ctx, 1, 1000)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("Should paginate correctly", func() {
+			ctx := context.Background()
+
+			api := service.NewAPI(cli)
+			page, err := api.GetPage(ctx, 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">", 1))
+
+			for i := 2; i < 5; i++ {
+				page, err = api.NextPage(ctx, page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 
 	})
