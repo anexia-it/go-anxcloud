@@ -92,7 +92,7 @@ func logResponse(res *http.Response, logger logr.Logger) {
 }
 
 func stringifyBody(body *io.ReadCloser, log logr.Logger) *string {
-	if body != nil {
+	if body != nil && *body != nil {
 		b, err := ioutil.ReadAll(*body)
 		if err != nil {
 			log.Error(err, "Error while preparing to log body, not logging it")
