@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type RecordRequest struct {
@@ -68,6 +69,7 @@ func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not create record create request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
@@ -107,6 +109,7 @@ func (a api) UpdateRecord(ctx context.Context, zone string, id uuid.UUID, record
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not create record update request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {

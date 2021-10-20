@@ -7,9 +7,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -210,6 +211,7 @@ func (a api) Create(ctx context.Context, create Definition) (Zone, error) {
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not create zone create request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
@@ -247,6 +249,7 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Zone, 
 	if err != nil {
 		return Zone{}, fmt.Errorf("could not create zone update request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
@@ -310,6 +313,7 @@ func (a api) Apply(ctx context.Context, name string, changeset ChangeSet) ([]Rec
 	if err != nil {
 		return nil, fmt.Errorf("could not create zone changeset request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
@@ -348,6 +352,7 @@ func (a api) Import(ctx context.Context, name string, zoneData Import) (Revision
 	if err != nil {
 		return Revision{}, fmt.Errorf("could not create zone import request: %w", err)
 	}
+	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
