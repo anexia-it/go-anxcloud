@@ -25,10 +25,11 @@ const (
 	VLANEnvName = "ANEXIA_VLAN_ID"
 	// IntegrationTestEnvName is the name of the environment variable that enables integration tests if present.
 	IntegrationTestEnvName = "ANEXIA_INTEGRATION_TESTS_ON"
-	// DefaultBaseURL is the default base URL used for requests.
-	DefaultBaseURL = "https://engine.anexia-it.com"
 	// DefaultRequestTimeout is a suggested timeout for API calls.
 	DefaultRequestTimeout = 10 * time.Second
+
+	// defaultBaseURL is the default base URL used for requests.
+	defaultBaseURL = "https://engine.anexia-it.com"
 )
 
 // ErrEnvMissing indicates an environment variable is missing.
@@ -89,6 +90,7 @@ type optionSet struct {
 	token      string
 	logger     *logr.Logger
 	userAgent  string
+	baseURL    string
 }
 
 // Option is a optional parameter for the New method.
@@ -164,6 +166,13 @@ func HTTPClient(c *http.Client) Option {
 	}
 }
 
+func BaseURL(baseURL string) Option {
+	return func(o *optionSet) error {
+		o.baseURL = baseURL
+		return nil
+	}
+}
+
 // ErrConfiguration is raised when the given configuration is insufficient or erroneous.
 var ErrConfiguration = errors.New("could not configure client")
 
@@ -191,12 +200,17 @@ func New(options ...Option) (Client, error) {
 		optionSet.logger = &logger
 	}
 
+	if optionSet.baseURL == "" {
+		optionSet.baseURL = defaultBaseURL
+	}
+
 	if optionSet.token != "" {
 		return &tokenClient{
 			token:      optionSet.token,
 			httpClient: optionSet.httpClient,
 			logger:     *optionSet.logger,
 			userAgent:  optionSet.userAgent,
+			baseURL:    optionSet.baseURL,
 		}, nil
 	}
 
