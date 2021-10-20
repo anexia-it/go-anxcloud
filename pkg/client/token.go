@@ -12,10 +12,11 @@ type tokenClient struct {
 	httpClient *http.Client
 	logger     logr.Logger
 	userAgent  string
+	baseURL    string
 }
 
 func (t tokenClient) BaseURL() string {
-	return DefaultBaseURL
+	return t.baseURL
 }
 
 func (t tokenClient) Do(req *http.Request) (*http.Response, error) {
