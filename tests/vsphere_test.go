@@ -34,6 +34,7 @@ const (
 	templateType    = "templates"
 	templateID      = "12c28aa7-604d-47e9-83fb-5f1d1f1837b3"
 	cpus            = 2
+	sockets         = 1
 	changedMemory   = 4096
 	memory          = 2048
 	disk            = 10
@@ -81,6 +82,7 @@ var _ = Describe("Vsphere API endpoint tests", func() {
 
 				networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{res.Data[0].Address}, VLAN: vlanID}}
 				definition := vm.NewAPI(cli).NewDefinition(locationID, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
+				definition.Sockets = sockets
 				definition.SSH = randomPublicSSHKey()
 
 				By("Creating a new VM")
