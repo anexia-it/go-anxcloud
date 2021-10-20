@@ -6,8 +6,6 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
-	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
@@ -24,20 +22,21 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/templates"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
 
+	testUtils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"golang.org/x/crypto/ssh"
 )
 
 const (
-	hostnameCharset = "abcdefghijklmnopqrstuvwxyz"
-	templateType    = "templates"
-	templateID      = "12c28aa7-604d-47e9-83fb-5f1d1f1837b3"
-	cpus            = 2
-	sockets         = 1
-	changedMemory   = 4096
-	memory          = 2048
-	disk            = 10
+	templateType  = "templates"
+	templateID    = "12c28aa7-604d-47e9-83fb-5f1d1f1837b3"
+	cpus          = 2
+	sockets       = 1
+	changedMemory = 4096
+	memory        = 2048
+	disk          = 10
 )
 
 var _ = Describe("Vsphere API endpoint tests", func() {
@@ -241,11 +240,5 @@ func randomPublicSSHKey() string {
 }
 
 func randomHostname() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec // No crypto needed here.
-	hostnameSuffix := make([]string, 8)
-	for i := range hostnameSuffix {
-		hostnameSuffix[i] = string(hostnameCharset[r.Intn(len(hostnameCharset))])
-	}
-
-	return fmt.Sprintf("go-test-%s", strings.Join(hostnameSuffix, ""))
+	return fmt.Sprintf("go-test-%s", testUtils.RandomHostname())
 }
