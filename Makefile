@@ -28,11 +28,11 @@ benchmark:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -cover -timeout 0 -race ./pkg/...
+	CGO_ENABLED=1 go test -coverpkg ./pkg/... -coverprofile coverage.out -timeout 0 -race ./pkg/...
 
 .PHONY: func-test
 func-test:
-	CGO_ENABLED=1 go test -cover -timeout 180m ./tests/...
+	CGO_ENABLED=1 go test -coverpkg ./pkg/... -coverprofile coverage.out -timeout 180m ./tests/...
 
 .PHONY: go-lint
 go-lint:

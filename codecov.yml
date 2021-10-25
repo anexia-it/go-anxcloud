@@ -1,0 +1,4 @@
+comment:
+  # we upload two reports per commit: unittests and integration, comment only when
+  # both arrived to reduce confusion over incomplete reports.
+  after_n_builds: 2
