@@ -29,6 +29,7 @@ benchmark:
 .PHONY: test
 test:
 	CGO_ENABLED=1 go test -coverpkg ./pkg/... -coverprofile coverage.out -timeout 0 -race ./pkg/...
+	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
 func-test:
