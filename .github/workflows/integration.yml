@@ -1,5 +1,8 @@
 # Run secret-dependent integration tests only after /ok-to-test approval
 on:
+  push:
+    branches:
+      - main
   pull_request:
   repository_dispatch:
     types: [ok-to-test-command]
@@ -10,7 +13,9 @@ jobs:
   # Branch-based pull request
   integration-trusted:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: >
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+      || github.event_name == 'push' 
     steps:
       - name: Branch based PR checkout
         uses: actions/checkout@v2
