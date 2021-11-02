@@ -2,7 +2,6 @@
 package client
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -48,24 +47,6 @@ type Client interface {
 	// and returns an error is the response status is not OK.
 	Do(req *http.Request) (*http.Response, error)
 	BaseURL() string
-}
-
-// ResponseError is a response from the API that indicates an error.
-type ResponseError struct {
-	Request   *http.Request  `json:"-"`
-	Response  *http.Response `json:"-"`
-	ErrorData struct {
-		Code       int               `json:"code"`
-		Message    string            `json:"message"`
-		Validation map[string]string `json:"validation"`
-	} `json:"error"`
-	Debug struct {
-		Source string `json:"source"`
-	} `json:"debug"`
-}
-
-func (r ResponseError) Error() string {
-	return fmt.Sprintf("received error from api: %+v", r.ErrorData)
 }
 
 type client struct {
@@ -262,16 +243,15 @@ func (c client) handleRequest(req *http.Request) (*http.Response, error) {
 
 	response, err := c.httpClient.Do(req)
 
-	// TODO: we should probably handle redirects here. The Engine might not use them im Responses right now, but
+	// TODO: we should probably handle redirects here. The Engine might not use them in Responses right now, but
 	// it's a common HTTP future and the Engine might use them in the future.
 
-	if c.parseEngineErrors && err == nil && (response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices) {
-		errResponse := ResponseError{Request: req, Response: response}
-		if decodeErr := json.NewDecoder(response.Body).Decode(&errResponse); decodeErr != nil {
-			return response, fmt.Errorf("could not decode error response: %w", decodeErr)
-		}
+	if c.parseEngineErrors && err == nil {
+		err = parseEngineError(req, response)
+	}
 
-		err = &errResponse
+	if err != nil {
+		return response, err
 	}
 
 	logResponse(response, c.logger)
