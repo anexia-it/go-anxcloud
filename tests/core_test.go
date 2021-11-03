@@ -2,6 +2,9 @@ package tests_test
 
 import (
 	"context"
+	"fmt"
+	"github.com/anexia-it/go-anxcloud/pkg/api"
+	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
@@ -22,6 +25,17 @@ var _ = Describe("Core API endpoint tests", func() {
 		var err error
 		cli, err = client.New(client.AuthFromEnv(false))
 		Expect(err).ToNot(HaveOccurred())
+	})
+
+	AfterEach(func() {
+		for _, handler := range cleanupHandlers {
+			err := handler()
+			if err != nil {
+				_, _ = fmt.Fprintf(GinkgoWriter, "error when cleaning up tests: %s", err.Error())
+			}
+		}
+
+		cleanupHandlers = []CleanUpHandler{}
 	})
 
 	Context("Location endpoint", func() {
@@ -64,21 +78,43 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("It should list resource using generic API client", func() {
+			// make sure at least one resource exists
+			ctx := context.Background()
+			createBackend(ctx, cli, nil)
+
+			genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
+			Expect(err).ToNot(HaveOccurred())
+			var pageIter types.PageInfo
+			genericAPI.List(ctx, &resource.Info{}, api.Paged(1, 100, &pageIter))
+			var resInfo []resource.Info
+			Expect(pageIter.Next(&resInfo)).To(BeTrue())
+			Expect(resInfo).ToNot(BeEmpty())
+			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
+		})
+
+		FIt("It should throw an error for unsupported operations for the genric API client", func() {
+			// make sure at least one resource exists
+			ctx := context.Background()
+			createBackend(ctx, cli, nil)
+
+			genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
+			Expect(err).ToNot(HaveOccurred())
+			err = genericAPI.Create(ctx, &resource.Info{})
+			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+		})
 	})
 
 	Context("Service endpoint", func() {
-
 		It("Should list all created services", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := service.NewAPI(cli).List(ctx, 1, 1000)
 			Expect(err).NotTo(HaveOccurred())
 		})
-
 	})
 
 	Context("Tags endpoint", func() {
-
 		It("Should list all created tags", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
