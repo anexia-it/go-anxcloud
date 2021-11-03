@@ -56,6 +56,7 @@ type client struct {
 	userAgent         string
 	baseURL           string
 	parseEngineErrors bool
+	metricReceiver    MetricReceiver
 }
 
 type clientOptions struct {
@@ -168,6 +169,13 @@ func IgnoreMissingToken() Option {
 	}
 }
 
+func WithMetricReceiver(r MetricReceiver) Option {
+	return func(o *clientOptions) error {
+		o.metricReceiver = r
+		return nil
+	}
+}
+
 // ErrConfiguration is raised when the given configuration is insufficient or erroneous.
 var ErrConfiguration = errors.New("could not configure client")
 
@@ -241,10 +249,16 @@ func (c client) Do(req *http.Request) (*http.Response, error) {
 func (c client) handleRequest(req *http.Request) (*http.Response, error) {
 	logRequest(req, c.logger)
 
-	response, err := c.httpClient.Do(req)
+	client := c.httpClient
+
+	if c.metricReceiver != nil {
+		client = wrapClientForMetrics(client, c.metricReceiver)
+	}
+
+	response, err := client.Do(req)
 
 	// TODO: we should probably handle redirects here. The Engine might not use them in Responses right now, but
-	// it's a common HTTP future and the Engine might use them in the future.
+	// it's a common HTTP feature and the Engine might use them in the future.
 
 	if c.parseEngineErrors && err == nil {
 		err = parseEngineError(req, response)
