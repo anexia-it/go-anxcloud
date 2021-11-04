@@ -120,13 +120,15 @@ func ExampleAPI_listPaged() {
 	// list all backends, with 10 entries per page and starting on first page.
 	b := backend.Backend{}
 	var pageIter types.PageInfo
-	if err := apiClient.List(context.TODO(), &b, Paged(0, 10, &pageIter)); err != nil {
+	if err := apiClient.List(context.TODO(), &b, Paged(1, 10, &pageIter)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
 	} else {
 		var backends []backend.Backend
 		for pageIter.Next(&backends) {
+			fmt.Printf("Listing entries on page %v\n", pageIter.CurrentPage())
+
 			for _, backend := range backends {
-				fmt.Printf("Got backend named \"%v\"\n", backend.Name)
+				fmt.Printf("  Got backend named \"%v\"\n", backend.Name)
 			}
 		}
 
@@ -135,11 +137,15 @@ func ExampleAPI_listPaged() {
 			// Errors will prevent pageIter.Next() to continue, you can call pageIter.ResetError() to resume.
 			fmt.Printf("Error while iterating pages of backends: %v\n", err)
 		}
+
+		fmt.Printf("Last page listed was page %v, which returned %v entries\n", pageIter.CurrentPage(), len(backends))
 	}
 
 	// Output:
-	// Got backend named "Example-Backend"
-	// Got backend named "backend-01"
+	// Listing entries on page 1
+	//   Got backend named "Example-Backend"
+	//   Got backend named "backend-01"
+	// Last page listed was page 2, which returned 0 entries
 }
 
 func ExampleAPI_listChannel() {
