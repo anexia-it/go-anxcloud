@@ -398,7 +398,14 @@ var _ = Describe("creating API with different options", func() {
 	})
 
 	It("handles users trying to list page 0", func() {
-		server.AppendHandlers(ghttp.RespondWithJSONEncoded(200, []string{}))
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.RespondWithJSONEncoded(200, []string{}),
+				func(res http.ResponseWriter, req *http.Request) {
+					Expect(req.URL.Query().Get("page")).To(Equal("1"))
+				},
+			),
+		)
 
 		log := strings.Builder{}
 

@@ -95,16 +95,14 @@ func (p *pageIter) Next(objects interface{}) bool {
 		return false
 	}
 
-	p.currentPage++
-
-	pageData, err := p.pageFetcher(p.currentPage)
+	pageData, err := p.pageFetcher(p.currentPage + 1)
 	if err != nil {
 		p.errRetryCounter++
 		p.err = err
 		return false
 	}
 
-	_, _, _, _, data, err := decodePaginationResponseBody(pageData, types.ListOptions{Page: p.currentPage, EntriesPerPage: p.itemsPerPage})
+	_, _, _, _, data, err := decodePaginationResponseBody(pageData, types.ListOptions{Page: p.currentPage + 1, EntriesPerPage: p.itemsPerPage})
 	if err != nil {
 		p.errRetryCounter++
 		p.err = err
@@ -130,6 +128,7 @@ func (p *pageIter) Next(objects interface{}) bool {
 	}
 
 	p.errRetryCounter = 0
+	p.currentPage++
 
 	return retrievedElements > 0
 }
@@ -146,7 +145,6 @@ func (p *pageIter) Error() error {
 // you have to check for this.
 func (p *pageIter) ResetError() {
 	if p.errRetryCounter < maxPageFetchRetry {
-		p.currentPage--
 		p.err = nil
 	}
 }
@@ -163,6 +161,10 @@ func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.L
 	currentPage, limit, totalPages, totalItems, data, err := decodePaginationResponseBody(responseBody, opts)
 	if err != nil {
 		return nil, err
+	}
+
+	if currentPage == 1 {
+		currentPage = 0
 	}
 
 	ret.currentPage = currentPage

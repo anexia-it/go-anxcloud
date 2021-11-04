@@ -29,7 +29,10 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 	JustBeforeEach(func() {
 		returnedErrors := 0
 
+		expectedPage := 2
 		fetcher := func(page uint) (json.RawMessage, error) {
+			Expect(page).To(BeEquivalentTo(expectedPage))
+
 			if page > uint(len(responses)) {
 				return json.RawMessage("[]"), nil
 			}
@@ -45,8 +48,11 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 				case 3:
 					return json.RawMessage(`[{ "error": "random garbage data returned" }]`), nil
 				case 4:
+					expectedPage++
 					return afterErrorResponse, nil
 				}
+			} else {
+				expectedPage++
 			}
 
 			return responses[page-1], nil
@@ -77,6 +83,7 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 
 			Expect(ok).To(BeFalse())
 			Expect(err).To(MatchError(ErrTypeNotSupported))
+			Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 		})
 
 		It("iterates through the pages until first error", func() {
@@ -91,7 +98,9 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 			}
 
 			Expect(page).To(BeEquivalentTo(1))
-			Expect(pi.CurrentPage()).To(BeEquivalentTo(2))
+
+			// pi still reports page 1 because that's the data in out
+			Expect(pi.CurrentPage()).To(BeEquivalentTo(1))
 
 			// This is the data of the first page. With the fetcher returning an error, this data
 			// is not overwritten even though we already are on second page. We can use this behavior

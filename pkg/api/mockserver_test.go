@@ -59,6 +59,32 @@ func newMockServer() *ghttp.Server {
 			Identifier: "bogus identifier 3",
 			Mode:       lbaasCommon.TCP,
 		},
+		{
+			Name:       "test-backend-01",
+			Identifier: "test identifier 1",
+			Mode:       lbaasCommon.TCP,
+		},
+		{
+			Name:       "test-backend-02",
+			Identifier: "test identifier 2",
+			Mode:       lbaasCommon.TCP,
+			LoadBalancer: loadbalancer.LoadBalancerInfo{
+				Identifier: "bogus identifier 2",
+			},
+		},
+		{
+			Name:       "test-backend-03",
+			Identifier: "test identifier 3",
+			Mode:       lbaasCommon.TCP,
+		},
+		{
+			Name:       "test-backend-04",
+			Identifier: "test identifier 4",
+			Mode:       lbaasCommon.TCP,
+			LoadBalancer: loadbalancer.LoadBalancerInfo{
+				Identifier: "bogus identifier 2",
+			},
+		},
 	}
 
 	const backendBasePath = "/api/LBaaS/v1/backend.json"
@@ -107,13 +133,11 @@ func newMockServer() *ghttp.Server {
 
 		if limit > 0 {
 			idxStart := (page - 1) * limit
+			idxEnd := idxStart + limit
 
 			if idxStart >= len(ret) {
 				ret = make([]backend.Backend, 0)
 			} else {
-
-				idxEnd := idxStart + limit
-
 				if idxEnd > len(ret) {
 					idxEnd = len(ret)
 				}
