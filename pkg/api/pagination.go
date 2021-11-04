@@ -28,7 +28,8 @@ type pageIter struct {
 
 	pageFetcher pageFetcher
 
-	ctx context.Context
+	singlePageMode bool
+	ctx            context.Context
 }
 
 // CurrentPage returns the page number the last Next call processed.
@@ -58,6 +59,10 @@ func (p *pageIter) ItemsPerPage() uint {
 // calling PageInfo.Error().
 func (p *pageIter) Next(objects interface{}) bool {
 	if p.err != nil {
+		return false
+	}
+
+	if p.currentPage == 1 && p.singlePageMode {
 		return false
 	}
 
@@ -149,13 +154,14 @@ func (p *pageIter) ResetError() {
 	}
 }
 
-func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.ListOptions, fetcher pageFetcher) (types.PageInfo, error) {
+func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.ListOptions, fetcher pageFetcher, singlePageMode bool) (types.PageInfo, error) {
 	if logger, err := logr.FromContext(ctx); err == nil {
 		ctx = logr.NewContext(ctx, logger.WithName("pagination"))
 	}
 
 	ret := pageIter{
-		ctx: ctx,
+		ctx:            ctx,
+		singlePageMode: singlePageMode,
 	}
 
 	currentPage, limit, totalPages, totalItems, data, err := decodePaginationResponseBody(responseBody, opts)

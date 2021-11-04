@@ -43,3 +43,10 @@ type ResponseFilterHook interface {
 	// FilterAPIResponse is called after a response from the engine regarding this object is received. Instead of the original response, the one returned by this function is decoded.
 	FilterAPIResponse(op Operation, options Options, res *http.Response) (*http.Response, error)
 }
+
+// PaginationSupportHook is an interface Objects can optionally implement to enable or disable pagination support for List operations.
+type PaginationSupportHook interface {
+	// Returns if the API supports pagination for List operations. Mind optionally supported filters in EndpointURL, which may go to different API endpoints which independently might
+	// or might not support pagination.
+	HasPagination(ctx context.Context, options Options) (bool, error)
+}
