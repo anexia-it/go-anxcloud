@@ -145,7 +145,14 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	if options.Paged {
-		addPaginationQueryParameters(ctx, req, options)
+		if options.Page == 0 {
+			log := logr.FromContextOrDiscard(ctx)
+			log.V(1).Info("List called requesting page 0, fixing to page 1")
+
+			options.Page = 1
+		}
+
+		addPaginationQueryParameters(req, options)
 	}
 
 	result := json.RawMessage{}
@@ -407,14 +414,7 @@ func getResponseType(res *http.Response) (string, error) {
 	return "application/json", nil
 }
 
-func addPaginationQueryParameters(ctx context.Context, req *http.Request, opts types.ListOptions) {
-	if opts.Page == 0 {
-		log := logr.FromContextOrDiscard(ctx)
-		log.V(1).Info("List called requesting page 0, fixing to page 1")
-
-		opts.Page = 1
-	}
-
+func addPaginationQueryParameters(req *http.Request, opts types.ListOptions) {
 	query := req.URL.Query()
 	query.Add("page", strconv.FormatUint(uint64(opts.Page), 10))
 	query.Add("limit", strconv.FormatUint(uint64(opts.EntriesPerPage), 10))
