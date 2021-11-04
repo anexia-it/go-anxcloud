@@ -93,7 +93,7 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
 		})
 
-		FIt("It should throw an error for unsupported operations for the genric API client", func() {
+		It("It should throw an error for unsupported operations for the genric API client", func() {
 			// make sure at least one resource exists
 			ctx := context.Background()
 			createBackend(ctx, cli, nil)
