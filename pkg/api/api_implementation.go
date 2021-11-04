@@ -144,6 +144,16 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 		return ErrCannotListChannelAndPaged
 	}
 
+	singlePageMode := false
+
+	if psh, ok := o.(types.PaginationSupportHook); ok {
+		if v, err := psh.HasPagination(ctx, &options); err != nil {
+			return err
+		} else {
+			singlePageMode = !v
+		}
+	}
+
 	if options.Paged {
 		if options.Page == 0 {
 			log := logr.FromContextOrDiscard(ctx)
@@ -152,7 +162,9 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			options.Page = 1
 		}
 
-		addPaginationQueryParameters(req, options)
+		if !singlePageMode {
+			addPaginationQueryParameters(req, options)
+		}
 	}
 
 	result := json.RawMessage{}
@@ -165,10 +177,12 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 		fetcher := func(page uint) (json.RawMessage, error) {
 			req := req.Clone(ctx)
 
-			query := req.URL.Query()
-			query.Set("page", strconv.FormatUint(uint64(page), 10))
+			if !singlePageMode {
+				query := req.URL.Query()
+				query.Set("page", strconv.FormatUint(uint64(page), 10))
 
-			req.URL.RawQuery = query.Encode()
+				req.URL.RawQuery = query.Encode()
+			}
 
 			var response json.RawMessage
 			err := a.doRequest(req, o, &response, &options, types.OperationList)
@@ -179,7 +193,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			return response, nil
 		}
 
-		iter, err := newPageIter(ctx, result, options, fetcher)
+		iter, err := newPageIter(ctx, result, options, fetcher, singlePageMode)
 		if err != nil {
 			return err
 		}

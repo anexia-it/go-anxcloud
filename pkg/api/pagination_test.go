@@ -68,7 +68,7 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 			EntriesPerPage: 2,
 		}
 
-		pi, piCreateError = newPageIter(context.TODO(), responseBody, opts, fetcher)
+		pi, piCreateError = newPageIter(context.TODO(), responseBody, opts, fetcher, false)
 	})
 
 	AssertCommonBehavior := func() {

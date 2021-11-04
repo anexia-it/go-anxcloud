@@ -141,6 +141,14 @@ func (o *api_test_object) FilterAPIRequestBody(op types.Operation, opts types.Op
 	return o, nil
 }
 
+func (o *api_test_object) HasPagination(ctx context.Context, opts types.Options) (bool, error) {
+	if o.Val == "failing_has_pagination" {
+		return false, api_test_error
+	}
+
+	return o.Val != "no_pagination", nil
+}
+
 type api_test_error_roundtripper bool
 
 func (rt api_test_error_roundtripper) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -433,6 +441,50 @@ var _ = Describe("creating API with different options", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(log.String()).To(ContainSubstring("requesting page 0, fixing to page 1"))
+	})
+
+	It("handles the Object returning an error on HasPagination", func() {
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"failing_has_pagination"}
+		err = api.List(context.TODO(), &o, Paged(1, 10, nil))
+		Expect(err).To(MatchError(api_test_error))
+	})
+
+	It("handles the Object not being able to be Listed with pagination", func() {
+		server.AppendHandlers(
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"no_pagination"}
+
+		var pi types.PageInfo
+		err = api.List(context.TODO(), &o, Paged(1, 10, &pi))
+		Expect(err).NotTo(HaveOccurred())
+
+		var os []api_test_object
+		Expect(pi.Next(&os)).To(BeTrue())
+		Expect(os).To(HaveLen(2))
+
+		Expect(pi.Next(&os)).To(BeFalse())
+
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
 	})
 
 	It("handles http.Client.Do() returning an error", func() {
