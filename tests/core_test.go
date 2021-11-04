@@ -86,7 +86,8 @@ var _ = Describe("Core API endpoint tests", func() {
 			genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
 			Expect(err).ToNot(HaveOccurred())
 			var pageIter types.PageInfo
-			genericAPI.List(ctx, &resource.Info{}, api.Paged(1, 100, &pageIter))
+			err = genericAPI.List(ctx, &resource.Info{}, api.Paged(1, 100, &pageIter))
+			Expect(err).ToNot(HaveOccurred())
 			var resInfo []resource.Info
 			Expect(pageIter.Next(&resInfo)).To(BeTrue())
 			Expect(resInfo).ToNot(BeEmpty())
