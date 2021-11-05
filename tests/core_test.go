@@ -70,39 +70,41 @@ var _ = Describe("core API endpoint tests", func() {
 	})
 
 	Context("resource endpoint", func() {
-
 		It("should list all created resources", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
+
 			_, err := resource.NewAPI(cli).List(ctx, 1, 1000)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("it should list resource using generic API client", func() {
-			// make sure at least one resource exists
-			ctx := context.Background()
-			createBackend(ctx, cli, nil)
+		Context("with at least one resource existing", func() {
+			var ctx context.Context
+			JustBeforeEach(func() {
+				ctx = context.Background()
+				createBackend(ctx, cli, nil)
+			})
 
-			genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
-			Expect(err).ToNot(HaveOccurred())
-			var pageIter types.PageInfo
-			err = genericAPI.List(ctx, &resource.Info{}, api.Paged(1, 100, &pageIter))
-			Expect(err).ToNot(HaveOccurred())
-			var resInfo []resource.Info
-			Expect(pageIter.Next(&resInfo)).To(BeTrue())
-			Expect(resInfo).ToNot(BeEmpty())
-			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
-		})
+			It("should list resource using generic API client", func() {
+				genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
+				Expect(err).ToNot(HaveOccurred())
 
-		It("it should throw an error for unsupported operations for the genric API client", func() {
-			// make sure at least one resource exists
-			ctx := context.Background()
-			createBackend(ctx, cli, nil)
+				var pageIter types.PageInfo
+				err = genericAPI.List(ctx, &resource.Info{}, api.Paged(1, 100, &pageIter))
+				Expect(err).ToNot(HaveOccurred())
 
-			genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
-			Expect(err).ToNot(HaveOccurred())
-			err = genericAPI.Create(ctx, &resource.Info{})
-			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+				var resInfo []resource.Info
+				Expect(pageIter.Next(&resInfo)).To(BeTrue())
+				Expect(resInfo).ToNot(BeEmpty())
+				Expect(resInfo[0].Identifier).ToNot(BeEmpty())
+			})
+
+			It("should throw an error for unsupported operations for the genric API client", func() {
+				genericAPI, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
+				Expect(err).ToNot(HaveOccurred())
+				err = genericAPI.Create(ctx, &resource.Info{})
+				Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+			})
 		})
 	})
 
