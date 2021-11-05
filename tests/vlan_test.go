@@ -23,21 +23,21 @@ var _ = Describe("VLAN API endpoint tests", func() {
 
 	Context("VLAN endpoint", func() {
 
-		It("Should list all available VLANs", func() {
+		It("should list all available VLANs", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := vlan.NewAPI(cli).List(ctx, 1, 1000, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Should create a VLAN, update it and delete it later", func() {
+		It("should create a VLAN, update it and delete it later", func() {
 			v := vlan.NewAPI(cli)
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 			defer cancel()
 			summary, err := v.Create(ctx, vlan.CreateDefinition{Location: locationID, VMProvisioning: false, CustomerDescription: "go SDK integration test"})
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Waiting for vlan to be 'Active'")
+			By("waiting for vlan to be 'Active'")
 			Eventually(func() string {
 				info, err := v.Get(ctx, summary.Identifier)
 				Expect(err).NotTo(HaveOccurred())
@@ -45,19 +45,19 @@ var _ = Describe("VLAN API endpoint tests", func() {
 			}, 15*time.Minute, 5*time.Second).Should(Equal("Active"))
 
 			defer func() {
-				By("Deleting the vlan")
+				By("deleting the vlan")
 				err = v.Delete(ctx, summary.Identifier)
 				Expect(err).NotTo(HaveOccurred())
 			}()
 
-			By("Update the vlan")
+			By("update the vlan")
 			err = v.Update(ctx, summary.Identifier, vlan.UpdateDefinition{
 				CustomerDescription: "go SDK integration test updated",
 				VMProvisioning:      true,
 			})
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Fetching the vlan again")
+			By("fetching the vlan again")
 			Eventually(func() bool {
 				vlanInfo, err := v.Get(ctx, summary.Identifier)
 				Expect(err).NotTo(HaveOccurred())

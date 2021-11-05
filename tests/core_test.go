@@ -17,7 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Core API endpoint tests", func() {
+var _ = Describe("core API endpoint tests", func() {
 
 	var cli client.Client
 
@@ -38,16 +38,16 @@ var _ = Describe("Core API endpoint tests", func() {
 		cleanupHandlers = []CleanUpHandler{}
 	})
 
-	Context("Location endpoint", func() {
+	Context("location endpoint", func() {
 
-		It("Should list all available locations, and get the first entry by ID and code", func() {
+		It("should list all available locations, and get the first entry by ID and code", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Should get the first location entry by ID", func() {
+		It("should get the first location entry by ID", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			list, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
@@ -57,7 +57,7 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(l).To(Equal(list[0]))
 		})
 
-		It("Should get the first location entry by code", func() {
+		It("should get the first location entry by code", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			list, err := location.NewAPI(cli).List(ctx, 1, 1000, "")
@@ -69,16 +69,16 @@ var _ = Describe("Core API endpoint tests", func() {
 		})
 	})
 
-	Context("Resource endpoint", func() {
+	Context("resource endpoint", func() {
 
-		It("Should list all created resources", func() {
+		It("should list all created resources", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := resource.NewAPI(cli).List(ctx, 1, 1000)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("It should list resource using generic API client", func() {
+		It("it should list resource using generic API client", func() {
 			// make sure at least one resource exists
 			ctx := context.Background()
 			createBackend(ctx, cli, nil)
@@ -94,7 +94,7 @@ var _ = Describe("Core API endpoint tests", func() {
 			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
 		})
 
-		It("It should throw an error for unsupported operations for the genric API client", func() {
+		It("it should throw an error for unsupported operations for the genric API client", func() {
 			// make sure at least one resource exists
 			ctx := context.Background()
 			createBackend(ctx, cli, nil)
@@ -106,8 +106,8 @@ var _ = Describe("Core API endpoint tests", func() {
 		})
 	})
 
-	Context("Service endpoint", func() {
-		It("Should list all created services", func() {
+	Context("service endpoint", func() {
+		It("should list all created services", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := service.NewAPI(cli).List(ctx, 1, 1000)
@@ -115,8 +115,8 @@ var _ = Describe("Core API endpoint tests", func() {
 		})
 	})
 
-	Context("Tags endpoint", func() {
-		It("Should list all created tags", func() {
+	Context("tags endpoint", func() {
+		It("should list all created tags", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			_, err := tags.NewAPI(cli).List(ctx, 1, 1000, "", "", "", "", true)

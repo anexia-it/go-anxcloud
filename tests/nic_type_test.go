@@ -23,7 +23,7 @@ var _ = Describe("NIC type API endpoint tests", func() {
 
 	Context("NIC type endpoint", func() {
 
-		It("Should list all available NIC types", func() {
+		It("should list all available NIC types", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
 			nicTypes, err := nictype.NewAPI(cli).List(ctx)

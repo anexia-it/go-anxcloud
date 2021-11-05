@@ -7,8 +7,8 @@ import (
 	"net/url"
 )
 
-var _ = Describe("Parameter Builder Tests", func() {
-	It("Should Create Parameter", func() {
+var _ = Describe("parameter Builder Tests", func() {
+	It("should Create Parameter", func() {
 		const testKey = "testKey"
 		const testValue = "testValue"
 		builder := param.ParameterBuilder(testKey)

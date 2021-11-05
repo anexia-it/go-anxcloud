@@ -25,6 +25,8 @@ type api struct {
 func (i Info) EndpointURL(ctx context.Context, op types.Operation, options types.Options) (*url.URL, error) {
 	u, err := url.ParseRequestURI(pathPrefix)
 
+	// OperationCreate is not supported because the API does not exist in the engine.
+	// OperationDestroy and OperationUpdate is not yet implemented
 	switch op {
 	case types.OperationCreate, types.OperationDestroy, types.OperationUpdate:
 		return nil, genericAPI.ErrOperationNotSupported
