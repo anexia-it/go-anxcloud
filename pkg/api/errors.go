@@ -26,6 +26,15 @@ var (
 	// ErrTypeNotSupported is returned when an argument is of type interface{}, manual type checking via reflection is done and the given arguments type cannot be used.
 	ErrTypeNotSupported = errors.New("the given type cannot be used for the requested operation")
 
+	// ErrObjectWithoutIdentifier is a specialized ErrTypeNotSupport for Objects not having a fields tagged with `anxcloud:"identifier"`.
+	ErrObjectWithoutIdentifier = fmt.Errorf("%w: Object lacks identifier field", ErrTypeNotSupported)
+
+	// ErrObjectWithMultipleIdentifier is a specialized ErrTypeNotSupport for Objects having multiple fields tagged with `anxcloud:"identifier"`.
+	ErrObjectWithMultipleIdentifier = fmt.Errorf("%w: Object has multiple fields tagged as identifier", ErrTypeNotSupported)
+
+	// ErrObjectIdentifierTypeNotSupported is a specialized ErrTypeNotSupport for Objects having a field tagged with `anxcloud:"identifier"` with an unsupported type.
+	ErrObjectIdentifierTypeNotSupported = fmt.Errorf("%w: Objects identifier field has an unsupported type", ErrTypeNotSupported)
+
 	// ErrContextRequired is returned when a nil context was passed as argument.
 	ErrContextRequired = errors.New("no context given")
 )

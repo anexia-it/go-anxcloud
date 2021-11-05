@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -45,8 +46,10 @@ fields:
 					if returnIdentifier == nil {
 						returnIdentifier = &ret
 					} else {
-						return "", fmt.Errorf("%w: Objects need to have exactly one identifier (type %v has multiple fields tagged as identifier)", ErrTypeNotSupported, t)
+						return "", fmt.Errorf("%w (type %v has multiple fields tagged as identifier)", ErrObjectWithMultipleIdentifier, t)
 					}
+				} else if errors.Is(err, ErrObjectWithMultipleIdentifier) || errors.Is(err, ErrObjectIdentifierTypeNotSupported) {
+					return "", err
 				}
 			}
 
@@ -77,12 +80,12 @@ fields:
 
 							continue fields
 						} else {
-							return "", fmt.Errorf("%w: Objects need to have exactly one identifier (type %v has multiple fields tagged as identifier)", ErrTypeNotSupported, t)
+							return "", fmt.Errorf("%w (type %v has multiple fields tagged as identifier)", ErrObjectWithMultipleIdentifier, t)
 						}
 					}
 				}
 
-				return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, t, field.Type)
+				return "", fmt.Errorf("%w (type %v has an identifier of type %v)", ErrObjectIdentifierTypeNotSupported, t, field.Type)
 			}
 		}
 	}
@@ -91,5 +94,5 @@ fields:
 		return *returnIdentifier, nil
 	}
 
-	return "", fmt.Errorf("%w: Object lacks identifier field (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrTypeNotSupported, t)
+	return "", fmt.Errorf("%w (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrObjectWithoutIdentifier, t)
 }

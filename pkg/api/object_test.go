@@ -70,6 +70,23 @@ func (o api_test_multiident_object) EndpointURL(ctx context.Context, op types.Op
 	return url.Parse("/resource/v1")
 }
 
+type api_test_embeddedmultiident_object struct {
+	api_test_multiident_object
+}
+
+func (o api_test_embeddedmultiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+	return url.Parse("/resource/v1")
+}
+
+type api_test_multiembeddedmultiident_object struct {
+	api_test_object
+	api_test_uuidident_object
+}
+
+func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+	return url.Parse("/resource/v1")
+}
+
 var _ = Describe("getObjectIdentifier function", func() {
 	It("errors out on invalid Object types", func() {
 		nso := api_test_nonstruct_object(false)
@@ -86,20 +103,27 @@ var _ = Describe("getObjectIdentifier function", func() {
 
 		nio := api_test_noident_object{"invalid"}
 		identifier, err = getObjectIdentifier(&nio, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("lacks identifier field"))
+		Expect(err).To(MatchError(ErrObjectWithoutIdentifier))
 		Expect(identifier).To(BeEmpty())
 
 		iio := api_test_invalidident_object{32}
 		identifier, err = getObjectIdentifier(&iio, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("identifier field has an unsupported type"))
+		Expect(err).To(MatchError(ErrObjectIdentifierTypeNotSupported))
 		Expect(identifier).To(BeEmpty())
 
 		mio := api_test_multiident_object{"identifier", "identifier2"}
 		identifier, err = getObjectIdentifier(&mio, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("api_test_multiident_object has multiple fields tagged as identifier"))
+		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
+		Expect(identifier).To(BeEmpty())
+
+		emio := api_test_embeddedmultiident_object{api_test_multiident_object{"identifier", "identifier2"}}
+		identifier, err = getObjectIdentifier(&emio, false)
+		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
+		Expect(identifier).To(BeEmpty())
+
+		memio := api_test_multiembeddedmultiident_object{api_test_object{"identifier"}, api_test_uuidident_object{uuid.NewV4()}}
+		identifier, err = getObjectIdentifier(&memio, false)
+		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 	})
 
