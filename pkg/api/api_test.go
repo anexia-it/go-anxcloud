@@ -147,34 +147,6 @@ func (rt api_test_error_roundtripper) RoundTrip(req *http.Request) (*http.Respon
 	return nil, api_test_error
 }
 
-type api_test_nonstruct_object bool
-
-func (o *api_test_nonstruct_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type api_test_nonpointer_object bool
-
-func (o api_test_nonpointer_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type api_test_noident_object struct {
-	Value string `json:"value"`
-}
-
-func (o api_test_noident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type api_test_invalidident_object struct {
-	Value int `json:"value" anxcloud:"identifier"`
-}
-
-func (o api_test_invalidident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
 var _ = Describe("creating API with different options", func() {
 	var server *ghttp.Server
 
@@ -542,50 +514,6 @@ var _ = Describe("creating API with different options", func() {
 
 		err = api.Destroy(ctx, &o, opt)
 		Expect(err).NotTo(HaveOccurred())
-	})
-})
-
-var _ = Describe("getObjectIdentifier function", func() {
-	It("errors out on invalid Object types", func() {
-		nso := api_test_nonstruct_object(false)
-		identifier, err := getObjectIdentifier(&nso, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("must be implemented as structs"))
-		Expect(identifier).To(BeEmpty())
-
-		npo := api_test_nonpointer_object(false)
-		identifier, err = getObjectIdentifier(npo, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("must be implemented on a pointer to struct"))
-		Expect(identifier).To(BeEmpty())
-
-		nio := api_test_noident_object{"invalid"}
-		identifier, err = getObjectIdentifier(&nio, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("lacks identifier field"))
-		Expect(identifier).To(BeEmpty())
-
-		iio := api_test_invalidident_object{32}
-		identifier, err = getObjectIdentifier(&iio, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("identifier field has an unsupported type"))
-		Expect(identifier).To(BeEmpty())
-	})
-
-	Context("when doing an operation on a specific object", func() {
-		It("errors out on valid Object type but empty identifier", func() {
-			o := api_test_object{""}
-			identifier, err := getObjectIdentifier(&o, true)
-			Expect(err).To(MatchError(ErrUnidentifiedObject))
-			Expect(identifier).To(BeEmpty())
-		})
-
-		It("returns the correct identifier", func() {
-			o := api_test_object{"test"}
-			identifier, err := getObjectIdentifier(&o, true)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(identifier).To(Equal("test"))
-		})
 	})
 })
 
