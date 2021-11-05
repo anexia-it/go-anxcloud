@@ -48,6 +48,19 @@ func (o api_test_uuidident_object) EndpointURL(ctx context.Context, op types.Ope
 	return url.Parse("/invalid_anyway")
 }
 
+type api_test_embeddedident_object struct {
+	api_test_object
+}
+
+type api_test_ptrembeddedident_object struct {
+	*api_test_object
+}
+
+type api_test_multiembeddedident_object struct {
+	uuid.UUID
+	api_test_object
+}
+
 var _ = Describe("getObjectIdentifier function", func() {
 	It("errors out on invalid Object types", func() {
 		nso := api_test_nonstruct_object(false)
@@ -85,6 +98,23 @@ var _ = Describe("getObjectIdentifier function", func() {
 		identifier, err = getObjectIdentifier(&uio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("6010622e-3e14-11ec-a5c3-0f457821b3ba"))
+	})
+
+	It("accepts valid Object types where the identifier is in embedded fields", func() {
+		eio := api_test_embeddedident_object{api_test_object{"identifier"}}
+		identifier, err := getObjectIdentifier(&eio, true)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(identifier).To(Equal("identifier"))
+
+		peio := api_test_ptrembeddedident_object{&api_test_object{"identifier"}}
+		identifier, err = getObjectIdentifier(&peio, true)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(identifier).To(Equal("identifier"))
+
+		meio := api_test_multiembeddedident_object{uuid.NewV4(), api_test_object{"identifier"}}
+		identifier, err = getObjectIdentifier(&meio, true)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(identifier).To(Equal("identifier"))
 	})
 
 	Context("when doing an operation on a specific object", func() {

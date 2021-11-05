@@ -18,19 +18,41 @@ func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, 
 	}
 
 	objectStructType := objectType.Elem()
-	numFields := objectStructType.NumField()
+	return findIdentifierInStruct(objectStructType, reflect.ValueOf(obj).Elem(), singleObjectOperation)
+}
+
+func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool) (string, error) {
+	numFields := t.NumField()
 
 	for i := 0; i < numFields; i++ {
-		field := objectStructType.Field(i)
+		field := t.Field(i)
+
+		if field.Anonymous {
+			embeddedType := field.Type
+			embeddedValue := v.Field(i)
+
+			for embeddedType.Kind() == reflect.Ptr {
+				embeddedType = embeddedType.Elem()
+				embeddedValue = embeddedValue.Elem()
+			}
+
+			if embeddedType.Kind() == reflect.Struct {
+				if ret, err := findIdentifierInStruct(embeddedType, embeddedValue, singleObjectOp); err == nil {
+					return ret, nil
+				}
+			}
+
+			continue
+		}
 
 		if val, ok := field.Tag.Lookup("anxcloud"); ok {
 			if val == "identifier" {
-				identifierValue := reflect.ValueOf(obj).Elem().Field(i)
+				identifierValue := v.Field(i)
 
 				// We check on the value to have a type-independent zero check, in case we later allow other
 				// types for identifier. A int identifier is zero with value 0, which encoded to string "0",
 				// so a later identifier == "" check would not work.
-				if singleObjectOperation && identifierValue.IsZero() {
+				if singleObjectOp && identifierValue.IsZero() {
 					return "", ErrUnidentifiedObject
 				}
 
@@ -45,10 +67,10 @@ func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, 
 					}
 				}
 
-				return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, objectStructType, field.Type)
+				return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, t, field.Type)
 			}
 		}
 	}
 
-	return "", fmt.Errorf("%w: Object lacks identifier field (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrTypeNotSupported, objectStructType)
+	return "", fmt.Errorf("%w: Object lacks identifier field (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrTypeNotSupported, t)
 }
