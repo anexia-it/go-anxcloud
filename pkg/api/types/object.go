@@ -9,7 +9,8 @@ import (
 // Object is the interface all objects to be retrieved by the generic API client are required to implement.
 //
 // On top of implementing this interface, an Object is always implemented as a struct, the pointer to it is what is passed to the generic API client.
-// These Object structs need to have a string member with `anxcloud:"identifier"` tag on it.
+// These Object structs need to have a member with `anxcloud:"identifier"` tag on it. Only strings and "github.com/satori/go.uuid".UUID identifiers
+// are supported for now (look in pkg/api/object.go_getObjectIdentifier for code specifying the allowed types).
 type Object interface {
 	// Returns the URL to retrieve resources of the given type from or an error.
 	// The request URL is formed of `client.BaseURL() + first return value of this function`, requests for a single object get
