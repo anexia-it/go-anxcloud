@@ -22,8 +22,12 @@ func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, 
 }
 
 func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool) (string, error) {
+	// we also use this to track if we found an identifier already
+	var returnIdentifier *string
+
 	numFields := t.NumField()
 
+fields:
 	for i := 0; i < numFields; i++ {
 		field := t.Field(i)
 
@@ -38,7 +42,11 @@ func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool
 
 			if embeddedType.Kind() == reflect.Struct {
 				if ret, err := findIdentifierInStruct(embeddedType, embeddedValue, singleObjectOp); err == nil {
-					return ret, nil
+					if returnIdentifier == nil {
+						returnIdentifier = &ret
+					} else {
+						return "", fmt.Errorf("%w: Objects need to have exactly one identifier (type %v has multiple fields tagged as identifier)", ErrTypeNotSupported, t)
+					}
 				}
 			}
 
@@ -61,15 +69,26 @@ func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool
 					reflect.TypeOf(uuid.Nil): func(v interface{}) string { return v.(uuid.UUID).String() },
 				}
 
-				for t, vf := range allowedIdentifierTypes {
-					if identifierValue.Type() == t {
-						return vf(identifierValue.Interface()), nil
+				for ft, vf := range allowedIdentifierTypes {
+					if identifierValue.Type() == ft {
+						if returnIdentifier == nil {
+							val := vf(identifierValue.Interface())
+							returnIdentifier = &val
+
+							continue fields
+						} else {
+							return "", fmt.Errorf("%w: Objects need to have exactly one identifier (type %v has multiple fields tagged as identifier)", ErrTypeNotSupported, t)
+						}
 					}
 				}
 
 				return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, t, field.Type)
 			}
 		}
+	}
+
+	if returnIdentifier != nil {
+		return *returnIdentifier, nil
 	}
 
 	return "", fmt.Errorf("%w: Object lacks identifier field (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrTypeNotSupported, t)

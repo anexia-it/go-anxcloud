@@ -61,6 +61,15 @@ type api_test_multiembeddedident_object struct {
 	api_test_object
 }
 
+type api_test_multiident_object struct {
+	Identifier  string `json:"identifier" anxcloud:"identifier"`
+	Identifier2 string `json:"identifier2" anxcloud:"identifier"`
+}
+
+func (o api_test_multiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+	return url.Parse("/resource/v1")
+}
+
 var _ = Describe("getObjectIdentifier function", func() {
 	It("errors out on invalid Object types", func() {
 		nso := api_test_nonstruct_object(false)
@@ -85,6 +94,12 @@ var _ = Describe("getObjectIdentifier function", func() {
 		identifier, err = getObjectIdentifier(&iio, false)
 		Expect(err).To(MatchError(ErrTypeNotSupported))
 		Expect(err.Error()).To(ContainSubstring("identifier field has an unsupported type"))
+		Expect(identifier).To(BeEmpty())
+
+		mio := api_test_multiident_object{"identifier", "identifier2"}
+		identifier, err = getObjectIdentifier(&mio, false)
+		Expect(err).To(MatchError(ErrTypeNotSupported))
+		Expect(err.Error()).To(ContainSubstring("api_test_multiident_object has multiple fields tagged as identifier"))
 		Expect(identifier).To(BeEmpty())
 	})
 
