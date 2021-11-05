@@ -193,8 +193,12 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 
 			for pi.Next(&pageData) {
 				for _, o := range pageData {
+					// since we are in a goroutine, we might already be in the next iteration of this loop
+					// at the time the receiving end of this channel calls the closure. Having a loop-body
+					// scoped variables makes the data for the closure perfectly identified.
+					closureData := o
 					c <- func(out types.Object) error {
-						return json.Unmarshal(o, out)
+						return json.Unmarshal(closureData, out)
 					}
 				}
 			}
