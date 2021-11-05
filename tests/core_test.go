@@ -38,7 +38,7 @@ var _ = Describe("core API endpoint tests", func() {
 		cleanupHandlers = []CleanUpHandler{}
 	})
 
-	Context("location endpoint", func() {
+	Describe("location endpoint", func() {
 
 		It("should list all available locations, and get the first entry by ID and code", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
@@ -69,7 +69,7 @@ var _ = Describe("core API endpoint tests", func() {
 		})
 	})
 
-	Context("resource endpoint", func() {
+	Describe("resource endpoint", func() {
 		It("should list all created resources", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
@@ -108,7 +108,7 @@ var _ = Describe("core API endpoint tests", func() {
 		})
 	})
 
-	Context("service endpoint", func() {
+	Describe("service endpoint", func() {
 		It("should list all created services", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
@@ -117,7 +117,7 @@ var _ = Describe("core API endpoint tests", func() {
 		})
 	})
 
-	Context("tags endpoint", func() {
+	Describe("tags endpoint", func() {
 		It("should list all created tags", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 			defer cancel()
