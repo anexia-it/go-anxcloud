@@ -149,6 +149,14 @@ func (o *api_test_object) HasPagination(ctx context.Context, opts types.Options)
 	return o.Val != "no_pagination", nil
 }
 
+func (o *api_test_object) DecodeAPIResponse(data *json.RawMessage, url *url.URL, op types.Operation, opts types.Options) error {
+	if o.Val == "failing_decode_response" {
+		return api_test_error
+	}
+
+	return json.Unmarshal(*data, o)
+}
+
 type api_test_error_roundtripper bool
 
 func (rt api_test_error_roundtripper) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -329,6 +337,24 @@ var _ = Describe("creating API with different options", func() {
 
 		o := api_test_object{"failing_filter_response"}
 		err = api.Create(context.TODO(), &o)
+		Expect(err).To(MatchError(api_test_error))
+	})
+
+	It("handles the Object returning an error on DecodeAPIResponse", func() {
+		server.AppendHandlers(
+			ghttp.RespondWithJSONEncoded(200, api_test_object{"indentifier"}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"failing_decode_response"}
+		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(api_test_error))
 	})
 

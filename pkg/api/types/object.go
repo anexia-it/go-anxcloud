@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 )
@@ -49,4 +50,8 @@ type PaginationSupportHook interface {
 	// Returns if the API supports pagination for List operations. Mind optionally supported filters in EndpointURL, which may go to different API endpoints which independently might
 	// or might not support pagination.
 	HasPagination(ctx context.Context, options Options) (bool, error)
+}
+
+type ResponseDecodeHook interface {
+	DecodeAPIResponse(data *json.RawMessage, url *url.URL, op Operation, options Options) error
 }

@@ -117,6 +117,7 @@ func (p *pageIter) Next(objects interface{}) bool {
 	d := json.NewDecoder(bytes.NewBuffer(data))
 	d.DisallowUnknownFields()
 
+	// TODO: The DecodeAPIResponse hook needs to be applied to the single Objects
 	if err := d.Decode(objects); err != nil {
 		p.errRetryCounter++
 		p.err = err
