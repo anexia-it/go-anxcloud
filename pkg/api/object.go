@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	uuid "github.com/satori/go.uuid"
 )
 
 func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, error) {
@@ -33,13 +34,18 @@ func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, 
 					return "", ErrUnidentifiedObject
 				}
 
-				// TODO: maybe we need to support other types, too - any scalar, string-convertable type should do just fine
-				switch identifierValue.Kind() {
-				case reflect.String:
-					return identifierValue.String(), nil
-				default:
-					return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, objectStructType, field.Type)
+				allowedIdentifierTypes := map[reflect.Type]func(interface{}) string{
+					reflect.TypeOf(""):       func(v interface{}) string { return v.(string) },
+					reflect.TypeOf(uuid.Nil): func(v interface{}) string { return v.(uuid.UUID).String() },
 				}
+
+				for t, vf := range allowedIdentifierTypes {
+					if identifierValue.Type() == t {
+						return vf(identifierValue.Interface()), nil
+					}
+				}
+
+				return "", fmt.Errorf("%w: Objects identifier field has an unsupported type (type %v has an identifier of type %v)", ErrTypeNotSupported, objectStructType, field.Type)
 			}
 		}
 	}
