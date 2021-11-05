@@ -211,6 +211,10 @@ func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) 
 	// First dataData then data is important since we switch over the index of the decoded message,
 	// set data from dataData and fallthrough.
 	// The entries have to be pointers, else every entry matches every data - since it is an interface{} then.
+	//
+	// TODO(@LittleFox94): are there actually paginated APIs returning only an Array without any page metadata?
+	// I was sure there was one, but cannot find one right now and maybe "plain array returned" is already the
+	// info "don't even try to get the next page".
 	responseTypes := []interface{}{&dataDataResponse{}, &dataResponse{}, &[]json.RawMessage{}}
 	actualResponse := -1
 
