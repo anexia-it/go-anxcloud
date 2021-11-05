@@ -25,18 +25,20 @@ type api struct {
 func (i Info) EndpointURL(ctx context.Context, op types.Operation, options types.Options) (*url.URL, error) {
 	u, err := url.ParseRequestURI(pathPrefix)
 
+	switch op {
 	// OperationCreate is not supported because the API does not exist in the engine.
 	// OperationDestroy and OperationUpdate is not yet implemented
-	switch op {
 	case types.OperationCreate, types.OperationDestroy, types.OperationUpdate:
 		return nil, genericAPI.ErrOperationNotSupported
 	}
 
 	if op == types.OperationList {
 		query := u.Query()
+
 		if len(i.Tags) > 1 {
 			logr.FromContextOrDiscard(ctx).Info("Listing with multiple tags isn't supported. Only first one used")
 		}
+
 		if len(i.Tags) > 0 {
 			query.Add("tag_name", i.Tags[0])
 		}
