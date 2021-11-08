@@ -18,6 +18,8 @@ const (
 func init() {
 	test.RunAsIntegrationTest = true
 	test.InitFlags()
+
+	vsphereTestInit()
 }
 
 func TestE2E(t *testing.T) {
