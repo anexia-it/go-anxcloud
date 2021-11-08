@@ -6,6 +6,8 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
@@ -31,13 +33,45 @@ import (
 
 const (
 	templateType  = "templates"
-	templateID    = "12c28aa7-604d-47e9-83fb-5f1d1f1837b3"
+	templateName  = "Flatcar Linux Stable"
 	cpus          = 2
 	sockets       = 1
 	changedMemory = 4096
 	memory        = 2048
 	disk          = 10
 )
+
+var templateID string
+
+func vsphereTestInit() {
+	cli, err := client.New(client.AuthFromEnv(false))
+
+	if err != nil {
+		log.Fatalf("Error creating client for retrieving template ID: %v\n", err)
+	}
+
+	tplAPI := templates.NewAPI(cli)
+	tpls, err := tplAPI.List(context.TODO(), locationID, templates.TemplateTypeTemplates, 1, 500)
+
+	if err != nil {
+		log.Fatalf("Error retrieving templates: %v\n", err)
+	}
+
+	selected := make([]templates.Template, 0, 1)
+	for _, tpl := range tpls {
+		if tpl.Name == templateName {
+			selected = append(selected, tpl)
+		}
+	}
+
+	sort.Slice(selected, func(i, j int) bool {
+		return strings.Compare(selected[i].Build, selected[j].Build) > 0
+	})
+
+	log.Printf("VSphere: selected template %v (build %v, ID %v)\n", selected[0].Name, selected[0].Build, selected[0].ID)
+
+	templateID = selected[0].ID
+}
 
 var _ = Describe("Vsphere API endpoint tests", func() {
 
