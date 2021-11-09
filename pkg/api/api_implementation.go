@@ -124,7 +124,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	var err error
-	ctx, err = a.contextPrepare(ctx, o, types.OperationList)
+	ctx, err = a.contextPrepare(ctx, o, types.OperationList, &options)
 
 	if err != nil {
 		return err
@@ -134,6 +134,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	if err != nil {
 		return err
 	}
+	ctx = req.Context() // makeRequest extends the context
 
 	var channelPageIterator types.PageInfo
 	if options.ObjectChannel != nil && !options.Paged {
@@ -243,6 +244,8 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 	if err != nil {
 		return nil, err
 	}
+
+	ctx = contextWithURL(ctx, *resourceURL)
 
 	baseURL, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -366,8 +369,6 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 
 	if mediaType, err := getResponseType(response); err == nil {
 		if mediaType == "application/json" {
-
-			// For List the decoding hook is applied elsewhere on the separate Objects within a response
 			if op != types.OperationList {
 				if decodeResponse, ok := obj.(types.ResponseDecodeHook); ok {
 					readBody, err := ioutil.ReadAll(response.Body)
@@ -383,6 +384,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 					return nil
 				}
 			}
+
 			return json.NewDecoder(response.Body).Decode(body)
 		}
 
@@ -393,10 +395,13 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	}
 }
 
-func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation) (context.Context, error) {
+func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation, opts types.Options) (context.Context, error) {
 	if ctx == nil {
 		return nil, ErrContextRequired
 	}
+
+	ctx = contextWithOperation(ctx, op)
+	ctx = contextWithOptions(ctx, opts)
 
 	objectType := reflect.TypeOf(o)
 	for objectType.Kind() == reflect.Ptr {
@@ -418,7 +423,7 @@ func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types
 
 func (a defaultAPI) do(ctx context.Context, obj types.Object, body interface{}, opts types.Options, op types.Operation) error {
 	var err error
-	ctx, err = a.contextPrepare(ctx, obj, types.OperationList)
+	ctx, err = a.contextPrepare(ctx, obj, op, opts)
 
 	if err != nil {
 		return err
