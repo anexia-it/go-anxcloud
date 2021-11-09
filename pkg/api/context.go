@@ -52,7 +52,7 @@ func OptionsFromContext(ctx context.Context) (types.Options, error) {
 // This is set on every context passed by the generic client to Object functions _after_ the
 // call to EndpointURL.
 func URLFromContext(ctx context.Context) (url.URL, error) {
-	if op, ok := ctx.Value(contextKeyOperation).(url.URL); ok {
+	if op, ok := ctx.Value(contextKeyURL).(url.URL); ok {
 		return op, nil
 	}
 
