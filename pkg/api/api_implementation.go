@@ -213,11 +213,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 					// scoped variables makes the data for the closure perfectly identified.
 					closureData := o
 					c <- func(out types.Object) error {
-						if decodeResponse, ok := out.(types.ResponseDecodeHook); ok {
-							return decodeResponse.DecodeAPIResponse(ctx, bytes.NewReader(closureData))
-						}
-
-						return json.Unmarshal(closureData, out)
+						return decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
 					}
 				}
 			}
@@ -367,22 +363,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	}
 
 	if mediaType, err := getResponseType(response); err == nil {
-		if mediaType == "application/json" {
-			if op != types.OperationList {
-				if decodeResponse, ok := obj.(types.ResponseDecodeHook); ok {
-					if err := decodeResponse.DecodeAPIResponse(req.Context(), response.Body); err != nil {
-						return err
-					}
-
-					return nil
-				}
-			}
-
-			return json.NewDecoder(response.Body).Decode(body)
-		}
-
-		// unreachable, getResponseType() already checks for supported types
-		return ErrUnsupportedResponseFormat
+		return decodeResponse(req.Context(), mediaType, response.Body, body)
 	} else {
 		return err
 	}
@@ -458,4 +439,24 @@ func addPaginationQueryParameters(req *http.Request, opts types.ListOptions) {
 	query.Add("limit", strconv.FormatUint(uint64(opts.EntriesPerPage), 10))
 
 	req.URL.RawQuery = query.Encode()
+}
+
+func decodeResponse(ctx context.Context, mediaType string, data io.Reader, res interface{}) error {
+	if mediaType == "application/json" {
+		if decodeResponse, ok := res.(types.ResponseDecodeHook); ok {
+			if err := decodeResponse.DecodeAPIResponse(ctx, data); err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		d := json.NewDecoder(data)
+		// we have to disallow unknown fields since golangs json decoder does not have a way to specify required
+		// fields, meaning any json object can be decoded into any go struct.
+		d.DisallowUnknownFields()
+		return d.Decode(res)
+	}
+
+	return fmt.Errorf("%w: no idea how to handle media type %v", ErrUnsupportedResponseFormat, mediaType)
 }
