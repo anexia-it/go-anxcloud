@@ -2,7 +2,7 @@ package types
 
 import (
 	"context"
-	"encoding/json"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -53,5 +53,5 @@ type PaginationSupportHook interface {
 }
 
 type ResponseDecodeHook interface {
-	DecodeAPIResponse(data *json.RawMessage, url *url.URL, op Operation, options Options) error
+	DecodeAPIResponse(ctx context.Context, data io.Reader) error
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"mime"
 	"net/http"
 	"net/http/httptest"
@@ -149,12 +150,12 @@ func (o *api_test_object) HasPagination(ctx context.Context, opts types.Options)
 	return o.Val != "no_pagination", nil
 }
 
-func (o *api_test_object) DecodeAPIResponse(data *json.RawMessage, url *url.URL, op types.Operation, opts types.Options) error {
+func (o *api_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 	if o.Val == "failing_decode_response" {
 		return api_test_error
 	}
 
-	return json.Unmarshal(*data, o)
+	return json.NewDecoder(data).Decode(o)
 }
 
 type api_test_error_roundtripper bool

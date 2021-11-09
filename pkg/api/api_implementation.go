@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"net/url"
@@ -215,7 +214,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 					closureData := o
 					c <- func(out types.Object) error {
 						if decodeResponse, ok := out.(types.ResponseDecodeHook); ok {
-							return decodeResponse.DecodeAPIResponse(&closureData, req.URL, types.OperationList, &options)
+							return decodeResponse.DecodeAPIResponse(ctx, bytes.NewReader(closureData))
 						}
 
 						return json.Unmarshal(closureData, out)
@@ -371,13 +370,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 		if mediaType == "application/json" {
 			if op != types.OperationList {
 				if decodeResponse, ok := obj.(types.ResponseDecodeHook); ok {
-					readBody, err := ioutil.ReadAll(response.Body)
-					if err != nil {
-						return err
-					}
-
-					rawBody := json.RawMessage(readBody)
-					if err := decodeResponse.DecodeAPIResponse(&rawBody, req.URL, op, opts); err != nil {
+					if err := decodeResponse.DecodeAPIResponse(req.Context(), response.Body); err != nil {
 						return err
 					}
 
