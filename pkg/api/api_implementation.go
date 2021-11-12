@@ -362,11 +362,15 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 		return err
 	}
 
-	if mediaType, err := getResponseType(response); err == nil {
-		return decodeResponse(req.Context(), mediaType, response.Body, body)
-	} else {
-		return err
+	if response.StatusCode != http.StatusNoContent {
+		if mediaType, err := getResponseType(response); err == nil {
+			return decodeResponse(req.Context(), mediaType, response.Body, body)
+		} else {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation, opts types.Options) (context.Context, error) {
