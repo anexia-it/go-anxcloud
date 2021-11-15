@@ -14,6 +14,7 @@ type API interface {
 	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, error)
 	GetByID(ctx context.Context, identifier string) (Loadbalancer, error)
+
 }
 
 type api struct {

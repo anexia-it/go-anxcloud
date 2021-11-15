@@ -35,6 +35,7 @@ type Backend struct {
 	ServerTimeout      int                           `json:"server_timeout"`
 }
 
+
 func (a api) Get(ctx context.Context, page, limit int) ([]BackendInfo, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -146,6 +147,48 @@ func (a api) Create(ctx context.Context, definition Definition) (Backend, error)
 
 	return payload, nil
 }
+
+func (a api) Update(ctx context.Context, identifier string, definition Definition) (Backend, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return Backend{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(path, identifier)
+
+	requestBody := bytes.Buffer{}
+	if err := json.NewEncoder(&requestBody).Encode(definition); err != nil {
+		return Backend{}, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &requestBody)
+	if err != nil {
+		return Backend{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return Backend{}, fmt.Errorf("error when updating backend '%s': %w", definition.Name, err)
+	}
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return Backend{}, fmt.Errorf("could not update load balancer backend '%s': %s", definition.Name,
+			response.Status)
+	}
+
+	var payload Backend
+
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return Backend{}, fmt.Errorf("could not parse load balancer backend updating response for '%s' : %w",
+			definition.Name, err)
+	}
+
+	return payload, nil
+}
+
+
+
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())

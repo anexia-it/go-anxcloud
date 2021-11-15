@@ -145,6 +145,44 @@ func (a api) Create(ctx context.Context, definition Definition) (Server, error) 
 	return payload, nil
 }
 
+
+func (a api) Update(ctx context.Context, identifier string, definition Definition) (Server, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return Server{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(path, identifier)
+
+	buf := bytes.Buffer{}
+	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
+		return Server{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &buf)
+	if err != nil {
+		return Server{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return Server{}, fmt.Errorf("error when updating a LBaaS server for backend '%s': %w",
+			definition.Backend, err)
+	}
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return Server{}, fmt.Errorf("could not update LBaaS server for backend '%s': %s",
+			definition.Backend, response.Status)
+	}
+
+	var payload Server
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return Server{}, fmt.Errorf("could not parse loadbalancer server updating response: %w", err)
+	}
+
+	return payload, nil
+}
+
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {

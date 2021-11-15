@@ -10,6 +10,7 @@ type API interface {
 	Get(ctx context.Context, page, limit int) ([]ACLInfo, error)
 	GetByID(ctx context.Context, identifier string) (ACL, error)
 	Create(ctx context.Context, definition Definition) (ACL, error)
+	Update(ctx context.Context, identifier string, definition Definition) (ACL, error)
 	DeleteByID(ctx context.Context, identifier string) error
 }
 

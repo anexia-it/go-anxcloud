@@ -147,6 +147,46 @@ func (a api) Create(ctx context.Context, definition Definition) (ACL, error) {
 	return payload, nil
 }
 
+
+func (a api) Update(ctx context.Context, identifier string, definition Definition) (ACL, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return ACL{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(path, identifier)
+
+	requestBody := bytes.Buffer{}
+	if err := json.NewEncoder(&requestBody).Encode(definition); err != nil {
+		return ACL{}, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &requestBody)
+	if err != nil {
+		return ACL{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return ACL{}, fmt.Errorf("error when updating ACL '%s': %w", definition.Name, err)
+	}
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return ACL{}, fmt.Errorf("could not update load balancer ACL '%s': %s", definition.Name,
+			response.Status)
+	}
+
+	var payload ACL
+
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return ACL{}, fmt.Errorf("could not parse load balancer ACL updating response for '%s' : %w",
+			definition.Name, err)
+	}
+
+	return payload, nil
+}
+
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {

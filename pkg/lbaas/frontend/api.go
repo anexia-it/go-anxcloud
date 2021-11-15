@@ -15,6 +15,7 @@ type API interface {
 	Get(ctx context.Context, page, limit int) ([]FrontendInfo, error)
 	GetByID(ctx context.Context, identifier string) (Frontend, error)
 	Create(ctx context.Context, definition Definition) (Frontend, error)
+	Update(ctx context.Context, identifier string, definition Definition) (Frontend, error)
 	DeleteByID(ctx context.Context, identifier string) error
 }
 

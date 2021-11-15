@@ -13,6 +13,7 @@ type API interface {
 	Get(ctx context.Context, page, limit int) ([]ServerInfo, error)
 	GetByID(ctx context.Context, identifier string) (Server, error)
 	Create(ctx context.Context, definition Definition) (Server, error)
+	Update(ctx context.Context, identifier string, definition Definition) (Server, error)
 	DeleteByID(ctx context.Context, identifier string) error
 }
 
