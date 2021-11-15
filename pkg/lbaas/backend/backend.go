@@ -35,7 +35,6 @@ type Backend struct {
 	ServerTimeout      int                           `json:"server_timeout"`
 }
 
-
 func (a api) Get(ctx context.Context, page, limit int) ([]BackendInfo, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -186,9 +185,6 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 
 	return payload, nil
 }
-
-
-
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())

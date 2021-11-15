@@ -145,7 +145,6 @@ func (a api) Create(ctx context.Context, definition Definition) (Bind, error) {
 	return payload, nil
 }
 
-
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (Bind, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -182,7 +181,6 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 
 	return payload, nil
 }
-
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())

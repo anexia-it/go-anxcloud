@@ -145,7 +145,6 @@ func (a api) Create(ctx context.Context, definition Definition) (Server, error) 
 	return payload, nil
 }
 
-
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (Server, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
