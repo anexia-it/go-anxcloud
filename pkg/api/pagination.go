@@ -114,14 +114,21 @@ func (p *pageIter) Next(objects interface{}) bool {
 		return false
 	}
 
-	d := json.NewDecoder(bytes.NewBuffer(data))
-	d.DisallowUnknownFields()
+	newVal := reflect.MakeSlice(val.Type().Elem(), len(data), len(data))
 
-	if err := d.Decode(objects); err != nil {
-		p.errRetryCounter++
-		p.err = err
-		return false
+	for i, e := range data {
+		decodeInto := newVal.Index(i).Addr().Interface()
+
+		err = decodeResponse(p.ctx, "application/json", bytes.NewBuffer(e), decodeInto)
+
+		if err != nil {
+			p.errRetryCounter++
+			p.err = err
+			return false
+		}
 	}
+
+	val.Elem().Set(newVal)
 
 	log := logr.FromContextOrDiscard(p.ctx)
 
@@ -164,7 +171,7 @@ func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.L
 		singlePageMode: singlePageMode,
 	}
 
-	currentPage, limit, totalPages, totalItems, data, err := decodePaginationResponseBody(responseBody, opts)
+	currentPage, limit, totalPages, totalItems, _, err := decodePaginationResponseBody(responseBody, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -182,18 +189,17 @@ func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.L
 	// use the pageFetcher provided as argument
 	ret.pageFetcher = func(page uint) (json.RawMessage, error) {
 		ret.pageFetcher = fetcher
-		return data, nil
+		return responseBody, nil
 	}
 
 	return &ret, nil
 }
 
-func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) (page, limit, totalPages, totalItems uint, ret json.RawMessage, err error) {
+func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) (page, limit, totalPages, totalItems uint, ret []json.RawMessage, err error) {
 	page = 0
 	limit = 0
 	totalPages = 0
 	totalItems = 0
-	ret = json.RawMessage{}
 
 	// TODO(LittleFox94): this is not the same for every API and we need a way to override this or
 	// find the X ways it's done and have options for that. Currently we support those two types and
@@ -205,7 +211,7 @@ func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) 
 		TotalItems     uint `json:"total_items"`
 		EntriesPerPage uint `json:"limit"`
 
-		Data json.RawMessage `json:"data"`
+		Data []json.RawMessage `json:"data"`
 	}
 
 	type dataDataResponse struct {
@@ -248,7 +254,7 @@ func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) 
 		fallthrough
 	case 1:
 		data := responseTypes[1].(*dataResponse)
-		page = data.CurrentPage - 1 // Next increments the page before trying to retrieve it
+		page = data.CurrentPage
 		limit = data.EntriesPerPage
 		totalPages = data.TotalPages
 		totalItems = data.TotalItems
@@ -257,7 +263,7 @@ func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) 
 		page = opts.Page
 		limit = opts.EntriesPerPage
 
-		ret, err = json.Marshal(responseTypes[2])
+		ret = *(responseTypes[2].(*[]json.RawMessage))
 	}
 
 	return page, limit, totalPages, totalItems, ret, err
