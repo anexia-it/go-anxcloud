@@ -134,7 +134,6 @@ func (a api) Create(ctx context.Context, definition Definition) (Bind, error) {
 	}
 	defer response.Body.Close()
 
-
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Bind{}, fmt.Errorf("could not create frontend bind for frontend '%s': %s",
 			definition.Frontend, response.Status)
