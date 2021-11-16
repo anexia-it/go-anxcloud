@@ -123,7 +123,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	var err error
-	ctx, err = a.contextPrepare(ctx, o, types.OperationList)
+	ctx, err = a.contextPrepare(ctx, o, types.OperationList, &options)
 
 	if err != nil {
 		return err
@@ -133,6 +133,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	if err != nil {
 		return err
 	}
+	ctx = req.Context() // makeRequest extends the context
 
 	var channelPageIterator types.PageInfo
 	if options.ObjectChannel != nil && !options.Paged {
@@ -212,7 +213,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 					// scoped variables makes the data for the closure perfectly identified.
 					closureData := o
 					c <- func(out types.Object) error {
-						return json.Unmarshal(closureData, out)
+						return decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
 					}
 				}
 			}
@@ -238,6 +239,8 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 	if err != nil {
 		return nil, err
 	}
+
+	ctx = contextWithURL(ctx, *resourceURL)
 
 	baseURL, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -360,21 +363,19 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	}
 
 	if mediaType, err := getResponseType(response); err == nil {
-		if mediaType == "application/json" {
-			return json.NewDecoder(response.Body).Decode(body)
-		}
-
-		// unreachable, getResponseType() already checks for supported types
-		return ErrUnsupportedResponseFormat
+		return decodeResponse(req.Context(), mediaType, response.Body, body)
 	} else {
 		return err
 	}
 }
 
-func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation) (context.Context, error) {
+func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation, opts types.Options) (context.Context, error) {
 	if ctx == nil {
 		return nil, ErrContextRequired
 	}
+
+	ctx = contextWithOperation(ctx, op)
+	ctx = contextWithOptions(ctx, opts)
 
 	objectType := reflect.TypeOf(o)
 	for objectType.Kind() == reflect.Ptr {
@@ -396,7 +397,7 @@ func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types
 
 func (a defaultAPI) do(ctx context.Context, obj types.Object, body interface{}, opts types.Options, op types.Operation) error {
 	var err error
-	ctx, err = a.contextPrepare(ctx, obj, types.OperationList)
+	ctx, err = a.contextPrepare(ctx, obj, op, opts)
 
 	if err != nil {
 		return err
@@ -438,4 +439,24 @@ func addPaginationQueryParameters(req *http.Request, opts types.ListOptions) {
 	query.Add("limit", strconv.FormatUint(uint64(opts.EntriesPerPage), 10))
 
 	req.URL.RawQuery = query.Encode()
+}
+
+func decodeResponse(ctx context.Context, mediaType string, data io.Reader, res interface{}) error {
+	if mediaType == "application/json" {
+		if decodeResponse, ok := res.(types.ResponseDecodeHook); ok {
+			if err := decodeResponse.DecodeAPIResponse(ctx, data); err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		d := json.NewDecoder(data)
+		// we have to disallow unknown fields since golangs json decoder does not have a way to specify required
+		// fields, meaning any json object can be decoded into any go struct.
+		d.DisallowUnknownFields()
+		return d.Decode(res)
+	}
+
+	return fmt.Errorf("%w: no idea how to handle media type %v", ErrUnsupportedResponseFormat, mediaType)
 }

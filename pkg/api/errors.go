@@ -37,6 +37,9 @@ var (
 
 	// ErrContextRequired is returned when a nil context was passed as argument.
 	ErrContextRequired = errors.New("no context given")
+
+	// ErrContextKeyNotSet is returned when trying to retrieve an unset value from a context.
+	ErrContextKeyNotSet = errors.New("requested context key is not set")
 )
 
 // EngineError is the base type for all errors returned by the engine.

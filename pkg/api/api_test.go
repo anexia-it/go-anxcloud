@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"mime"
 	"net/http"
 	"net/http/httptest"
@@ -149,11 +151,59 @@ func (o *api_test_object) HasPagination(ctx context.Context, opts types.Options)
 	return o.Val != "no_pagination", nil
 }
 
+func (o *api_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
+	if o.Val == "failing_decode_response" {
+		return api_test_error
+	} else if o.Val == "success_decode_response" {
+		o.Val = "Decode hook called!"
+		return nil
+	}
+
+	return json.NewDecoder(data).Decode(o)
+}
+
 type api_test_error_roundtripper bool
 
 func (rt api_test_error_roundtripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return nil, api_test_error
 }
+
+var _ = Describe("decodeResponse function", func() {
+	var ctx context.Context
+
+	JustBeforeEach(func() {
+		ctx = contextWithOptions(
+			contextWithOperation(
+				contextWithURL(
+					context.TODO(),
+					url.URL{Path: "/"},
+				),
+				types.OperationGet,
+			),
+			&types.GetOptions{},
+		)
+	})
+
+	It("fails on media types other than application/json", func() {
+		var out json.RawMessage
+		err := decodeResponse(ctx, "foo/bar", &bytes.Buffer{}, &out)
+		Expect(err).To(MatchError(ErrUnsupportedResponseFormat))
+	})
+
+	It("decodes json message into []json.RawMessage", func() {
+		var out []json.RawMessage
+		err := decodeResponse(ctx, "application/json", bytes.NewReader([]byte(`[{},{}]`)), &out)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(out).To(HaveLen(2))
+	})
+
+	It("decodes json message using the Objects response decode hook", func() {
+		obj := api_test_object{"success_decode_response"}
+		err := decodeResponse(ctx, "application/json", bytes.NewReader([]byte(`{"value": "decode hook not called :("}`)), &obj)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(obj.Val).To(Equal("Decode hook called!"))
+	})
+})
 
 var _ = Describe("creating API with different options", func() {
 	var server *ghttp.Server
@@ -329,6 +379,24 @@ var _ = Describe("creating API with different options", func() {
 
 		o := api_test_object{"failing_filter_response"}
 		err = api.Create(context.TODO(), &o)
+		Expect(err).To(MatchError(api_test_error))
+	})
+
+	It("handles the Object returning an error on DecodeAPIResponse", func() {
+		server.AppendHandlers(
+			ghttp.RespondWithJSONEncoded(200, api_test_object{"indentifier"}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"failing_decode_response"}
+		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(api_test_error))
 	})
 
