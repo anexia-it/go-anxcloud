@@ -401,7 +401,7 @@ var _ = Describe("creating API with different options", func() {
 	})
 
 	It("handles the Engine returning a weird response content-type", func() {
-		server.AppendHandlers(ghttp.RespondWith(200, nil, http.Header{"Content-Type": []string{"application/octet-stream"}}))
+		server.AppendHandlers(ghttp.RespondWith(200, "randomgarbage", http.Header{"Content-Type": []string{"application/octet-stream"}}))
 
 		api, err := NewAPI(
 			WithClientOptions(
@@ -414,6 +414,22 @@ var _ = Describe("creating API with different options", func() {
 		o := api_test_object{"identifier"}
 		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(ErrUnsupportedResponseFormat))
+	})
+
+	It("does not crash on Engine responses without body", func() {
+		server.AppendHandlers(ghttp.RespondWith(204, nil))
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"identifier"}
+		err = api.Destroy(context.TODO(), &o)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	It("handles the Engine returning bad responses for List requests", func() {
