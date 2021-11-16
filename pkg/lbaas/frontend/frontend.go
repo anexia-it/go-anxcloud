@@ -40,7 +40,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]FrontendInfo, error) {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))
@@ -81,7 +81,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Frontend, error) {
 		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
@@ -115,7 +115,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
@@ -153,7 +153,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
@@ -191,7 +191,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, endpoint.String(), nil)
 	if err != nil {
 		return fmt.Errorf("could not create request object: %w", err)
