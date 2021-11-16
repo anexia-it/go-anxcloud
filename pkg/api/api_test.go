@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -97,11 +98,16 @@ type api_test_object struct {
 
 var api_test_error = errors.New("we shall fail")
 
-func (o *api_test_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o *api_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	if o.Val == "failing" {
 		return nil, api_test_error
 	} else if o.Val == "option-check" {
 		expected_option_value := ctx.Value(api_test_error)
+
+		opts, err := types.OptionsFromContext(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		if v, err := opts.Get("api_test_option"); err != nil {
 			return nil, err
@@ -117,7 +123,7 @@ func (o *api_test_object) EndpointURL(ctx context.Context, op types.Operation, o
 	return u, nil
 }
 
-func (o *api_test_object) FilterAPIRequest(op types.Operation, opts types.Options, req *http.Request) (*http.Request, error) {
+func (o *api_test_object) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
 	if o.Val == "failing_filter_request" {
 		return nil, api_test_error
 	}
@@ -125,7 +131,7 @@ func (o *api_test_object) FilterAPIRequest(op types.Operation, opts types.Option
 	return req, nil
 }
 
-func (o *api_test_object) FilterAPIResponse(op types.Operation, opts types.Options, res *http.Response) (*http.Response, error) {
+func (o *api_test_object) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
 	if o.Val == "failing_filter_response" {
 		return nil, api_test_error
 	}
@@ -133,7 +139,7 @@ func (o *api_test_object) FilterAPIResponse(op types.Operation, opts types.Optio
 	return res, nil
 }
 
-func (o *api_test_object) FilterAPIRequestBody(op types.Operation, opts types.Options) (interface{}, error) {
+func (o *api_test_object) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 	if o.Val == "failing_filter_request_body" {
 		return nil, api_test_error
 	} else if o.Val == "function_filter_request_body" {
@@ -143,7 +149,7 @@ func (o *api_test_object) FilterAPIRequestBody(op types.Operation, opts types.Op
 	return o, nil
 }
 
-func (o *api_test_object) HasPagination(ctx context.Context, opts types.Options) (bool, error) {
+func (o *api_test_object) HasPagination(ctx context.Context) (bool, error) {
 	if o.Val == "failing_has_pagination" {
 		return false, api_test_error
 	}
@@ -172,9 +178,9 @@ var _ = Describe("decodeResponse function", func() {
 	var ctx context.Context
 
 	JustBeforeEach(func() {
-		ctx = contextWithOptions(
-			contextWithOperation(
-				contextWithURL(
+		ctx = types.ContextWithOptions(
+			types.ContextWithOperation(
+				types.ContextWithURL(
 					context.TODO(),
 					url.URL{Path: "/"},
 				),
@@ -656,6 +662,151 @@ var _ = Describe("creating API with different options", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		err = api.Destroy(ctx, &o, opt)
+		Expect(err).NotTo(HaveOccurred())
+	})
+})
+
+const context_test_object_baseurl = "/v1/context_test_object"
+
+type context_test_object struct {
+	Test string `anxcloud:"identifier"`
+
+	endpointURLCalled    bool
+	filterRequestCalled  bool
+	filterResponseCalled bool
+	requestBodyCalled    bool
+	responseBodyCalled   bool
+}
+
+func (o context_test_object) checkContext(hasURL bool, ctx context.Context) {
+	switch o.Test {
+	case "Hooks":
+		// nothing to do
+	case "Operation":
+		Expect(types.OperationFromContext(ctx)).To(Equal(types.OperationUpdate))
+	case "Options":
+		Expect(types.OptionsFromContext(ctx)).To(BeAssignableToTypeOf(&types.UpdateOptions{}))
+	case "URL":
+		u, err := types.URLFromContext(ctx)
+
+		if hasURL {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(u).NotTo(BeZero())
+		} else {
+			Expect(err).To(MatchError(types.ErrContextKeyNotSet))
+			Expect(u).To(BeZero())
+		}
+	default:
+		Fail(fmt.Sprintf("Unknown property to test: %v", o.Test))
+	}
+}
+
+func (o *context_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+	o.checkContext(false, ctx)
+	o.endpointURLCalled = true
+
+	return url.Parse(context_test_object_baseurl)
+}
+
+func (o *context_test_object) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+	o.checkContext(true, ctx)
+	o.filterRequestCalled = true
+
+	return req, nil
+}
+
+func (o *context_test_object) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+	o.checkContext(true, ctx)
+	o.filterResponseCalled = true
+
+	return res, nil
+}
+
+func (o *context_test_object) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	o.checkContext(true, ctx)
+	o.requestBodyCalled = true
+
+	return o, nil
+}
+
+func (o *context_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
+	o.checkContext(true, ctx)
+	o.responseBodyCalled = true
+
+	d := json.NewDecoder(data)
+	d.DisallowUnknownFields()
+	return d.Decode(o)
+}
+
+var _ = Describe("context passed to Object methods", func() {
+	var server *ghttp.Server
+	var api API
+	var ctx context.Context
+
+	JustBeforeEach(func() {
+		ctx = context.TODO()
+
+		server = ghttp.NewServer()
+		a, err := NewAPI(WithClientOptions(
+			client.IgnoreMissingToken(),
+			client.BaseURL(server.URL()),
+		))
+
+		Expect(err).NotTo(HaveOccurred())
+		api = a
+	})
+
+	It("has all hooks called on it", func() {
+		o := context_test_object{"Hooks", false, false, false, false, false}
+
+		server.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.RespondWithJSONEncoded(200, o),
+		))
+
+		err := api.Update(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(o.endpointURLCalled).To(BeTrue())
+		Expect(o.filterRequestCalled).To(BeTrue())
+		Expect(o.filterResponseCalled).To(BeTrue())
+		Expect(o.requestBodyCalled).To(BeTrue())
+		Expect(o.responseBodyCalled).To(BeTrue())
+	})
+
+	It("has operation in context for every method call", func() {
+		o := context_test_object{"Operation", false, false, false, false, false}
+
+		server.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.RespondWithJSONEncoded(200, o),
+		))
+
+		err := api.Update(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("has options in context for every method call", func() {
+		o := context_test_object{"Options", false, false, false, false, false}
+
+		server.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.RespondWithJSONEncoded(200, o),
+		))
+
+		err := api.Update(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("has URL in context for every method call except EndpointURL", func() {
+		o := context_test_object{"URL", false, false, false, false, false}
+
+		server.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.RespondWithJSONEncoded(200, o),
+		))
+
+		err := api.Update(ctx, &o)
 		Expect(err).NotTo(HaveOccurred())
 	})
 })

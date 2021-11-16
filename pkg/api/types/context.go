@@ -1,10 +1,9 @@
-package api
+package types
 
 import (
 	"context"
+	"errors"
 	"net/url"
-
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 )
 
 type contextKey string
@@ -15,22 +14,25 @@ const (
 	contextKeyURL       contextKey = "url"
 )
 
-func contextWithOperation(ctx context.Context, op types.Operation) context.Context {
+// ErrContextKeyNotSet is returned when trying to retrieve an unset value from a context.
+var ErrContextKeyNotSet = errors.New("requested context key is not set")
+
+func ContextWithOperation(ctx context.Context, op Operation) context.Context {
 	return context.WithValue(ctx, contextKeyOperation, op)
 }
 
-func contextWithOptions(ctx context.Context, opts types.Options) context.Context {
+func ContextWithOptions(ctx context.Context, opts Options) context.Context {
 	return context.WithValue(ctx, contextKeyOptions, opts)
 }
 
-func contextWithURL(ctx context.Context, url url.URL) context.Context {
+func ContextWithURL(ctx context.Context, url url.URL) context.Context {
 	return context.WithValue(ctx, contextKeyURL, url)
 }
 
 // OperationFromContext returns the current generic client operation from a given context.
 // This is set on every context passed by the generic client to Object functions.
-func OperationFromContext(ctx context.Context) (types.Operation, error) {
-	if op, ok := ctx.Value(contextKeyOperation).(types.Operation); ok {
+func OperationFromContext(ctx context.Context) (Operation, error) {
+	if op, ok := ctx.Value(contextKeyOperation).(Operation); ok {
 		return op, nil
 	}
 
@@ -39,8 +41,8 @@ func OperationFromContext(ctx context.Context) (types.Operation, error) {
 
 // OptionsFromContext returns the Options for the current generic client operation.
 // This is set on every context passed by the generic client to Object functions.
-func OptionsFromContext(ctx context.Context) (types.Options, error) {
-	if op, ok := ctx.Value(contextKeyOptions).(types.Options); ok {
+func OptionsFromContext(ctx context.Context) (Options, error) {
+	if op, ok := ctx.Value(contextKeyOptions).(Options); ok {
 		return op, nil
 	}
 
