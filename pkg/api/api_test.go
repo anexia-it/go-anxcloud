@@ -622,7 +622,7 @@ var _ = Describe("creating API with different options", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		o := api_test_object{"identifier"}
-		req, err := api.(defaultAPI).makeRequest(context.TODO(), &o, &o, &types.ListOptions{}, types.Operation("bogus operation"))
+		req, err := api.(defaultAPI).makeRequest(context.TODO(), &o, &o, types.Operation("bogus operation"))
 		Expect(err).To(MatchError(ErrOperationNotSupported))
 		Expect(req).To(BeNil())
 	})

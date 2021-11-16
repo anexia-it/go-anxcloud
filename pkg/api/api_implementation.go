@@ -129,7 +129,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 		return err
 	}
 
-	req, err := a.makeRequest(ctx, o, nil, &options, types.OperationList)
+	req, err := a.makeRequest(ctx, o, nil, types.OperationList)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	result := json.RawMessage{}
-	err = a.doRequest(req, o, &result, &options, types.OperationList)
+	err = a.doRequest(req, o, &result)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			}
 
 			var response json.RawMessage
-			err := a.doRequest(req, o, &response, &options, types.OperationList)
+			err := a.doRequest(req, o, &response)
 			if err != nil {
 				return nil, err
 			}
@@ -225,7 +225,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	return nil
 }
 
-func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body interface{}, opts types.Options, op types.Operation) (*http.Request, error) {
+func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body interface{}, op types.Operation) (*http.Request, error) {
 	singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
 
 	// We do this right on top because this checks if the Object has a correct type which is more strictly defined than just the interface.
@@ -341,7 +341,7 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 	return request, nil
 }
 
-func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interface{}, opts types.Options, op types.Operation) error {
+func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interface{}) error {
 	ctx := req.Context()
 	response, err := a.client.Do(req)
 
@@ -408,12 +408,12 @@ func (a defaultAPI) do(ctx context.Context, obj types.Object, body interface{}, 
 		return err
 	}
 
-	request, err := a.makeRequest(ctx, obj, body, opts, op)
+	request, err := a.makeRequest(ctx, obj, body, op)
 	if err != nil {
 		return err
 	}
 
-	return a.doRequest(request, obj, body, opts, op)
+	return a.doRequest(request, obj, body)
 }
 
 func getResponseType(res *http.Response) (string, error) {
