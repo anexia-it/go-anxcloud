@@ -57,6 +57,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, erro
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancers %s", response.Status)
@@ -93,6 +94,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, erro
 	if err != nil {
 		return Loadbalancer{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Loadbalancer{}, fmt.Errorf("could not execute get load balancer request for '%s': %s", identifier,

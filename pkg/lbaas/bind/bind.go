@@ -56,6 +56,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]BindInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get frontend binds %s", response.Status)
@@ -92,6 +93,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Bind, error) {
 	if err != nil {
 		return Bind{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Bind{}, fmt.Errorf("could not execute get frontend binds request for '%s': %s", identifier,
@@ -130,6 +132,8 @@ func (a api) Create(ctx context.Context, definition Definition) (Bind, error) {
 		return Bind{}, fmt.Errorf("error when creating a frontend bind for frontend '%s': %w",
 			definition.Frontend, err)
 	}
+	defer response.Body.Close()
+
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Bind{}, fmt.Errorf("could not create frontend bind for frontend '%s': %s",
@@ -167,6 +171,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 		return Bind{}, fmt.Errorf("error when updating a frontend bind for frontend '%s': %w",
 			definition.Frontend, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Bind{}, fmt.Errorf("could not update frontend bind for frontend '%s': %s",
@@ -199,6 +204,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS frontend bind '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS frontend bind '%s': %s",

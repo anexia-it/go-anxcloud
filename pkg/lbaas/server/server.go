@@ -130,6 +130,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Server, error) 
 		return Server{}, fmt.Errorf("error when creating a LBaaS server for backend '%s': %w",
 			definition.Backend, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Server{}, fmt.Errorf("could not create LBaaS server for backend '%s': %s",
@@ -167,6 +168,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 		return Server{}, fmt.Errorf("error when updating a LBaaS server for backend '%s': %w",
 			definition.Backend, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Server{}, fmt.Errorf("could not update LBaaS server for backend '%s': %s",
@@ -199,6 +201,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS server '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS server '%s': %s",

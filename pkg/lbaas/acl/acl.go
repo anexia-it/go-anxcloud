@@ -55,6 +55,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]ACLInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancer ACLS %s", response.Status)
@@ -92,6 +93,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (ACL, error) {
 	if err != nil {
 		return ACL{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return ACL{}, fmt.Errorf("could not execute get load balancer ACL request for '%s': %s", identifier,
@@ -130,6 +132,7 @@ func (a api) Create(ctx context.Context, definition Definition) (ACL, error) {
 	if err != nil {
 		return ACL{}, fmt.Errorf("error when creating ACL '%s': %w", definition.Name, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return ACL{}, fmt.Errorf("could not create load balancer ACL '%s': %s", definition.Name,
@@ -169,6 +172,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 	if err != nil {
 		return ACL{}, fmt.Errorf("error when updating ACL '%s': %w", definition.Name, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return ACL{}, fmt.Errorf("could not update load balancer ACL '%s': %s", definition.Name,
@@ -203,6 +207,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS ACL '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS ACL '%s': %s",

@@ -56,6 +56,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]BackendInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancer backends %s", response.Status)
@@ -92,6 +93,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Backend, error) {
 	if err != nil {
 		return Backend{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Backend{}, fmt.Errorf("could not execute get load balancer backend request for '%s': %s", identifier,
@@ -130,6 +132,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Backend, error)
 	if err != nil {
 		return Backend{}, fmt.Errorf("error when creating backend '%s': %w", definition.Name, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Backend{}, fmt.Errorf("could not create load balancer backend '%s': %s", definition.Name,
@@ -169,6 +172,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 	if err != nil {
 		return Backend{}, fmt.Errorf("error when updating backend '%s': %w", definition.Name, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Backend{}, fmt.Errorf("could not update load balancer backend '%s': %s", definition.Name,
@@ -203,6 +207,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS backend '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS backend '%s': %s",

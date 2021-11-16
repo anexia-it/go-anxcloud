@@ -55,6 +55,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]FrontendInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancer frontends %s", response.Status)
@@ -91,6 +92,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Frontend, error) {
 	if err != nil {
 		return Frontend{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Frontend{}, fmt.Errorf("could not execute get load balancer frontend request for '%s': %s", identifier,
@@ -129,6 +131,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 		return Frontend{}, fmt.Errorf("error when creating a LBaaS frontend for load balancer '%s': %w",
 			definition.LoadBalancer, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Frontend{}, fmt.Errorf("could not create LBaaS frontend for load balancer '%s': %s",
@@ -166,6 +169,7 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 		return Frontend{}, fmt.Errorf("error when updating a LBaaS frontend for load balancer '%s': %w",
 			definition.LoadBalancer, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Frontend{}, fmt.Errorf("could not update LBaaS frontend for load balancer '%s': %s",
@@ -198,6 +202,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS frontend '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS frontend '%s': %s",
