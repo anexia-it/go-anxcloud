@@ -15,7 +15,7 @@ type pagination_test_object struct {
 	Message string `json:"message"`
 }
 
-func (p pagination_test_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (p pagination_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return nil, ErrOperationNotSupported
 }
 

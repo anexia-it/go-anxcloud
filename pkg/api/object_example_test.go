@@ -38,7 +38,7 @@ type ExampleObject struct {
 // operations on specific objects, you can switch-case on the operation and return the correct URLs. The
 // identifier is appended by default for Get, Update and Destroy operations. You can implement the interface
 // types.RequestFilterHook to have full control over the requests done for your object.
-func (o *ExampleObject) EndpointURL(ctx context.Context, op types.Operation, options types.Options) (*url.URL, error) {
+func (o *ExampleObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/example/v1")
 }
 
@@ -54,11 +54,11 @@ type ExampleFilterableObject struct {
 // The API in this case expects a query argument called `filter` with a URL-encoded query string in it,
 // so for filtering for name=foo and mode=tcp the full URL might look like this:
 // `/filter_example/v1?filter=name%3Dfoo%26mode%3Dtcp`.
-func (o *ExampleFilterableObject) EndpointURL(ctx context.Context, op types.Operation, options types.Options) (*url.URL, error) {
+func (o *ExampleFilterableObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	// we can ignore the error since the URL is hard-coded known as valid
 	u, _ := url.Parse("/filter_example/v1")
 
-	if op == types.OperationList {
+	if op, err := types.OperationFromContext(ctx); err == nil && op == types.OperationList {
 		filter := url.Values{}
 
 		if o.Name != "" {
@@ -74,6 +74,8 @@ func (o *ExampleFilterableObject) EndpointURL(ctx context.Context, op types.Oper
 			query.Add("filter", filters)
 			u.RawQuery = query.Encode()
 		}
+	} else if err != nil {
+		return nil, err
 	}
 
 	return u, nil

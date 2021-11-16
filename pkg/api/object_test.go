@@ -6,21 +6,19 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 type api_test_nonstruct_object bool
 
-func (o *api_test_nonstruct_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o *api_test_nonstruct_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
 type api_test_nonpointer_object bool
 
-func (o api_test_nonpointer_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_nonpointer_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
@@ -28,7 +26,7 @@ type api_test_noident_object struct {
 	Value string `json:"value"`
 }
 
-func (o api_test_noident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_noident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
@@ -36,7 +34,7 @@ type api_test_invalidident_object struct {
 	Value int `json:"value" anxcloud:"identifier"`
 }
 
-func (o api_test_invalidident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_invalidident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
@@ -44,7 +42,7 @@ type api_test_uuidident_object struct {
 	Identifier uuid.UUID `json:"identifier" anxcloud:"identifier"`
 }
 
-func (o api_test_uuidident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_uuidident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
@@ -66,7 +64,7 @@ type api_test_multiident_object struct {
 	Identifier2 string `json:"identifier2" anxcloud:"identifier"`
 }
 
-func (o api_test_multiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_multiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
@@ -74,7 +72,7 @@ type api_test_embeddedmultiident_object struct {
 	api_test_multiident_object
 }
 
-func (o api_test_embeddedmultiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_embeddedmultiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
@@ -83,7 +81,7 @@ type api_test_multiembeddedmultiident_object struct {
 	api_test_uuidident_object
 }
 
-func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context, op types.Operation, opts types.Options) (*url.URL, error) {
+func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
