@@ -42,7 +42,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - Loadbalancers", func() {
-		It("Get load balancers", func() {
+		It("get load balancers", func() {
 			ctx := context.Background()
 
 			loadBalancers, err := lbaas.NewAPI(cli).LoadBalancer().Get(ctx, 1, 50)
@@ -52,7 +52,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(len(loadBalancers)).Should(BeNumerically(">=", 2))
 		})
 
-		It("Get a specific load balancer", func() {
+		It("get a specific load balancer", func() {
 			ctx := context.Background()
 			api := lbaas.NewAPI(cli).LoadBalancer()
 
@@ -71,7 +71,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - Backend", func() {
-		It("Create a Backend", func() {
+		It("create a Backend", func() {
 			ctx := context.Background()
 			definition := &backend.Definition{
 				Name:         randomName(),
@@ -88,7 +88,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(backend.Identifier).ToNot(BeEmpty())
 		})
 
-		It("Get Backends", func() {
+		It("get Backends", func() {
 			ctx := context.Background()
 			createBackend(ctx, cli, nil)
 
@@ -98,7 +98,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(backends).ToNot(BeEmpty())
 		})
 
-		It("Get a specific backend", func() {
+		It("get a specific backend", func() {
 			ctx := context.Background()
 			testBackend := createBackend(ctx, cli, nil)
 
@@ -108,7 +108,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(fetchedBackend).To(BeEquivalentTo(testBackend))
 		})
 
-		It("Update a specific backend", func() {
+		It("update a specific backend", func() {
 			ctx := context.Background()
 			testBackend := createBackend(ctx, cli, nil)
 
@@ -127,7 +127,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - Servers", func() {
-		It("Create server", func() {
+		It("create server", func() {
 			ctx := context.Background()
 
 			definition := &server.Definition{
@@ -146,7 +146,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(createdServer.Backend.Identifier).To(BeEquivalentTo(definition.Backend))
 		})
 
-		It("Get servers", func() {
+		It("get servers", func() {
 			ctx := context.Background()
 			createServer(ctx, cli, nil)
 
@@ -155,7 +155,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(servers).ToNot(BeEmpty())
 		})
 
-		It("Get a specific server", func() {
+		It("get a specific server", func() {
 			ctx := context.Background()
 			createdServer := createServer(ctx, cli, nil)
 
@@ -164,7 +164,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(fetchedServer).To(BeEquivalentTo(createdServer))
 		})
 
-		It("Update a specific server", func() {
+		It("update a specific server", func() {
 			ctx := context.Background()
 			createdServer := createServer(ctx, cli, nil)
 
@@ -184,7 +184,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - Binds", func() {
-		It("Create Bind", func() {
+		It("create Bind", func() {
 			ctx := context.Background()
 			definition := &bind.Definition{
 				Name:     randomName(),
@@ -196,7 +196,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(createdBind.Frontend.Identifier).To(BeEquivalentTo(definition.Frontend))
 		})
 
-		It("Get Binds", func() {
+		It("get Binds", func() {
 			ctx := context.Background()
 			createBind(ctx, cli, nil)
 
@@ -205,7 +205,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(binds).ToNot(HaveLen(0))
 		})
 
-		It("Get a specific Bind", func() {
+		It("get a specific Bind", func() {
 			ctx := context.Background()
 			createdBind := createBind(ctx, cli, nil)
 
@@ -214,7 +214,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(fetchedBind).To(BeEquivalentTo(createdBind))
 		})
 
-		It("Update a specific Bind", func() {
+		It("update a specific Bind", func() {
 			ctx := context.Background()
 			createdBind := createBind(ctx, cli, nil)
 
@@ -232,7 +232,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - Frontends", func() {
-		It("Create frontend", func() {
+		It("create frontend", func() {
 			ctx := context.Background()
 			backend := createBackend(ctx, cli, nil)
 			definition := frontend.Definition{
@@ -250,7 +250,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(frontend.LoadBalancer.Identifier).To(BeEquivalentTo(definition.LoadBalancer))
 		})
 
-		It("Get load balancer frontends", func() {
+		It("get load balancer frontends", func() {
 			ctx := context.Background()
 			createFrontend(ctx, cli, nil)
 
@@ -260,7 +260,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(frontends).ToNot(BeEmpty())
 		})
 
-		It("Get a specific frontend", func() {
+		It("get a specific frontend", func() {
 			ctx := context.Background()
 			api := lbaas.NewAPI(cli).Frontend()
 			createdFrontend := createFrontend(ctx, cli, nil)
@@ -271,7 +271,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(fetchedFrontend).To(BeEquivalentTo(createdFrontend))
 		})
 
-		It("Update a specific frontend", func() {
+		It("update a specific frontend", func() {
 			ctx := context.Background()
 			api := lbaas.NewAPI(cli).Frontend()
 			createdFrontend := createFrontend(ctx, cli, nil)
@@ -293,7 +293,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 	})
 
 	Context("LBaaS - ACLs", func() {
-		It("Create ACL", func() {
+		It("create ACL", func() {
 			ctx := context.Background()
 			backend := createBackend(ctx, cli, nil)
 			definition := &acl.Definition{
@@ -316,7 +316,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(createdACL.Criterion).To(BeEquivalentTo(definition.Criterion))
 		})
 
-		It("Get ACLs", func() {
+		It("get ACLs", func() {
 			ctx := context.Background()
 			createACL(ctx, cli, nil)
 			api := acl.NewAPI(cli)
@@ -326,7 +326,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(acls).NotTo(BeEmpty())
 		})
 
-		It("Get specific ACL", func() {
+		It("get specific ACL", func() {
 			ctx := context.Background()
 			createdACL := createACL(ctx, cli, nil)
 			api := acl.NewAPI(cli)
@@ -336,7 +336,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(fetchedACL).To(BeEquivalentTo(createdACL))
 		})
 
-		It("Update a specific ACL", func() {
+		It("update a specific ACL", func() {
 			ctx := context.Background()
 			createdACL := createACL(ctx, cli, nil)
 			api := acl.NewAPI(cli)

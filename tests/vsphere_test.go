@@ -73,7 +73,7 @@ func vsphereTestInit() {
 	templateID = selected[0].ID
 }
 
-var _ = PDescribe("Vsphere API endpoint tests", func() {
+var _ = PDescribe("vsphere API endpoint tests", func() {
 
 	var cli client.Client
 
@@ -96,15 +96,15 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 		})
 	})
 
-	Context("Provisioning endpoint", func() {
+	Context("provisioning endpoint", func() {
 
 		Context("VM endpoint", func() {
 
-			It("Should create a VM and delete it later", func() {
+			It("should create a VM and delete it later", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 				defer cancel()
 
-				By("Reserving a new IP address")
+				By("reserving a new IP address")
 				res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
 					LocationID: locationID,
 					VlanID:     vlanID,
@@ -118,29 +118,29 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 				definition.Sockets = sockets
 				definition.SSH = randomPublicSSHKey()
 
-				By("Creating a new VM")
+				By("creating a new VM")
 				base64Encoding := true
 				provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
 				Expect(err).NotTo(HaveOccurred())
 
-				By("Waiting for the VM to be ready")
+				By("waiting for the VM to be ready")
 				vmID, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionResponse.Identifier)
 				Expect(err).NotTo(HaveOccurred())
 
-				By("Updating the VM")
+				By("updating the VM")
 				change := vm.NewChange()
 				change.MemoryMBs = changedMemory
 				updateResponse, err := vm.NewAPI(cli).Update(ctx, vmID, change)
 				Expect(err).NotTo(HaveOccurred())
 
-				By("Waiting for VM to be ready after an update")
+				By("waiting for VM to be ready after an update")
 				newVMid, err := progress.NewAPI(cli).AwaitCompletion(ctx, updateResponse.Identifier)
 				Expect(err).NotTo(HaveOccurred())
 				if newVMid != vmID {
 					log.Fatalf("VM change resulted in a new ID: %v -> %v", vmID, newVMid)
 				}
 
-				By("Deleting the VM")
+				By("deleting the VM")
 				response, err := vm.NewAPI(cli).Deprovision(ctx, vmID, false)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Identifier).ToNot(BeEmpty())
@@ -150,9 +150,9 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 			})
 		})
 
-		Context("Templates endpoint", func() {
+		Context("templates endpoint", func() {
 
-			It("Should list all available templates", func() {
+			It("should list all available templates", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 				defer cancel()
 
@@ -164,7 +164,7 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 
 		Context("IPs endpoint", func() {
 
-			It("Should get a free IP address", func() {
+			It("should get a free IP address", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 				defer cancel()
 
@@ -174,9 +174,9 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 
 		})
 
-		Context("Disk type endpoint", func() {
+		Context("disk type endpoint", func() {
 
-			It("Should list all available disk types", func() {
+			It("should list all available disk types", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 				defer cancel()
 
@@ -188,7 +188,7 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 
 		Context("CPU Performance Type endpoint", func() {
 
-			It("Should list all cpu performance types", func() {
+			It("should list all cpu performance types", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 				defer cancel()
 				_, err := cpuperformancetype.NewAPI(cli).List(ctx)
@@ -199,7 +199,7 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 
 		Context("VSphere Location endpoint", func() {
 
-			It("Should list all VSPhere locations", func() {
+			It("should list all VSPhere locations", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 				defer cancel()
 				locations, err := location.NewAPI(cli).List(ctx, 1, 50, "", "")
@@ -211,12 +211,12 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 
 	})
 
-	Context("Info endpoint", func() {
-		It("Should create and retrieve a VM", func() {
+	Context("info endpoint", func() {
+		It("should create and retrieve a VM", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 			defer cancel()
 
-			By("Reserving a new IP address")
+			By("reserving a new IP address")
 			res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
 				LocationID: locationID,
 				VlanID:     vlanID,
@@ -229,16 +229,16 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 			definition := vm.NewAPI(cli).NewDefinition(locationID, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
 			definition.SSH = randomPublicSSHKey()
 
-			By("Creating a new VM")
+			By("creating a new VM")
 			base64Encoding := true
 			provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Waiting for the VM to be ready")
+			By("waiting for the VM to be ready")
 			vmID, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionResponse.Identifier)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Retrieving the VM")
+			By("retrieving the VM")
 			vmInfo, err := info.NewAPI(cli).Get(ctx, vmID)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(vmInfo).NotTo(BeNil())
@@ -249,8 +249,8 @@ var _ = PDescribe("Vsphere API endpoint tests", func() {
 		})
 	})
 
-	Context("Progress Endpoint", func() {
-		It("Should handle 404 correctly", func() {
+	Context("progress Endpoint", func() {
+		It("should handle 404 correctly", func() {
 			By("using an identifiert which does not exist")
 			ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancelFunc()

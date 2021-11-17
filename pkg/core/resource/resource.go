@@ -25,7 +25,7 @@ type Type struct {
 
 // Info contains all information about a resource.
 type Info struct {
-	Identifier string   `json:"identifier"`
+	Identifier string   `json:"identifier" anxcloud:"identifier"`
 	Name       string   `json:"name"`
 	Type       Type     `json:"resource_type"`
 	Tags       []string `json:"tags"`

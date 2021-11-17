@@ -34,9 +34,9 @@ var _ = Describe("LBaaS Service Tests", func() {
 		cleanupHandlers = []CleanUpHandler{}
 	})
 
-	Context("Pagination Core Functionality", func() {
+	Context("pagination Core Functionality", func() {
 		const numberOfTests = 5
-		It("Testing pagination for frontend", func() {
+		It("testing pagination for frontend", func() {
 			ctx := context.Background()
 
 			for i := 0; i < numberOfTests; i++ {
@@ -57,7 +57,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			}
 		})
 
-		It("Testing pagination for backends", func() {
+		It("testing pagination for backends", func() {
 			ctx := context.Background()
 
 			for i := 0; i < numberOfTests; i++ {
@@ -78,7 +78,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			}
 		})
 
-		It("Testing pagination for server", func() {
+		It("testing pagination for server", func() {
 			ctx := context.Background()
 
 			for i := 0; i < numberOfTests; i++ {
@@ -99,7 +99,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			}
 		})
 
-		It("Testing pagination for binds", func() {
+		It("testing pagination for binds", func() {
 			ctx := context.Background()
 
 			for i := 0; i < numberOfTests; i++ {
@@ -121,8 +121,8 @@ var _ = Describe("LBaaS Service Tests", func() {
 		})
 	})
 
-	Context("Pagination Utility Function", func() {
-		It("Pagination As Go Channels", func() {
+	Context("pagination Utility Function", func() {
+		It("pagination As Go Channels", func() {
 			ctx := context.Background()
 
 			const numberOfBackends = 5
@@ -141,7 +141,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(counter).To(BeNumerically(">=", numberOfBackends))
 		})
 
-		It("Pagination Loop until (all)", func() {
+		It("pagination Loop until (all)", func() {
 			ctx := context.Background()
 			const numberOfTests = 5
 			for i := 0; i < numberOfTests; i++ {
@@ -159,7 +159,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(err).To(BeEquivalentTo(pagination.ErrConditionNeverMet))
 		})
 
-		It("Pagination Loop until (subset)", func() {
+		It("pagination Loop until (subset)", func() {
 			ctx := context.Background()
 			const numberOfTests = 5
 			for i := 0; i < numberOfTests; i++ {
@@ -180,7 +180,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(counter).To(BeNumerically(">=", numberOfTests-1))
 		})
 
-		It("Pagination Loop until (subset)", func() {
+		It("pagination Loop until (subset)", func() {
 			ctx := context.Background()
 			const numberOfTests = 5
 			for i := 0; i < numberOfTests; i++ {
