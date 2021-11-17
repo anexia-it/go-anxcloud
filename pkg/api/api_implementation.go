@@ -129,7 +129,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 		return err
 	}
 
-	req, err := a.makeRequest(ctx, o, nil, &options, types.OperationList)
+	req, err := a.makeRequest(ctx, o, nil, types.OperationList)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	singlePageMode := false
 
 	if psh, ok := o.(types.PaginationSupportHook); ok {
-		if v, err := psh.HasPagination(ctx, &options); err != nil {
+		if v, err := psh.HasPagination(ctx); err != nil {
 			return err
 		} else {
 			singlePageMode = !v
@@ -169,7 +169,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	result := json.RawMessage{}
-	err = a.doRequest(req, o, &result, &options, types.OperationList)
+	err = a.doRequest(req, o, &result)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			}
 
 			var response json.RawMessage
-			err := a.doRequest(req, o, &response, &options, types.OperationList)
+			err := a.doRequest(req, o, &response)
 			if err != nil {
 				return nil, err
 			}
@@ -225,7 +225,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	return nil
 }
 
-func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body interface{}, opts types.Options, op types.Operation) (*http.Request, error) {
+func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body interface{}, op types.Operation) (*http.Request, error) {
 	singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
 
 	// We do this right on top because this checks if the Object has a correct type which is more strictly defined than just the interface.
@@ -235,12 +235,12 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 		return nil, err
 	}
 
-	resourceURL, err := obj.EndpointURL(ctx, op, opts)
+	resourceURL, err := obj.EndpointURL(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx = contextWithURL(ctx, *resourceURL)
+	ctx = types.ContextWithURL(ctx, *resourceURL)
 
 	baseURL, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -300,7 +300,7 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 		var requestBody interface{} = body
 
 		if filterRequestBody, ok := obj.(types.RequestBodyHook); ok {
-			rb, err := filterRequestBody.FilterAPIRequestBody(op, opts)
+			rb, err := filterRequestBody.FilterAPIRequestBody(ctx)
 
 			if err != nil {
 				return nil, err
@@ -332,7 +332,7 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 	}
 
 	if filterRequest, ok := obj.(types.RequestFilterHook); ok {
-		request, err = filterRequest.FilterAPIRequest(op, opts, request)
+		request, err = filterRequest.FilterAPIRequest(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -341,7 +341,8 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 	return request, nil
 }
 
-func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interface{}, opts types.Options, op types.Operation) error {
+func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interface{}) error {
+	ctx := req.Context()
 	response, err := a.client.Do(req)
 
 	if err != nil {
@@ -349,7 +350,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	}
 
 	if filterResponse, ok := obj.(types.ResponseFilterHook); ok {
-		response, err = filterResponse.FilterAPIResponse(op, opts, response)
+		response, err = filterResponse.FilterAPIResponse(ctx, response)
 	}
 
 	if err != nil {
@@ -364,7 +365,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 
 	if response.StatusCode != http.StatusNoContent {
 		if mediaType, err := getResponseType(response); err == nil {
-			return decodeResponse(req.Context(), mediaType, response.Body, body)
+			return decodeResponse(ctx, mediaType, response.Body, body)
 		} else {
 			return err
 		}
@@ -378,8 +379,8 @@ func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types
 		return nil, ErrContextRequired
 	}
 
-	ctx = contextWithOperation(ctx, op)
-	ctx = contextWithOptions(ctx, opts)
+	ctx = types.ContextWithOperation(ctx, op)
+	ctx = types.ContextWithOptions(ctx, opts)
 
 	objectType := reflect.TypeOf(o)
 	for objectType.Kind() == reflect.Ptr {
@@ -407,12 +408,12 @@ func (a defaultAPI) do(ctx context.Context, obj types.Object, body interface{}, 
 		return err
 	}
 
-	request, err := a.makeRequest(ctx, obj, body, opts, op)
+	request, err := a.makeRequest(ctx, obj, body, op)
 	if err != nil {
 		return err
 	}
 
-	return a.doRequest(request, obj, body, opts, op)
+	return a.doRequest(request, obj, body)
 }
 
 func getResponseType(res *http.Response) (string, error) {

@@ -16,7 +16,7 @@ type Object interface {
 	// Returns the URL to retrieve resources of the given type from or an error.
 	// The request URL is formed of `client.BaseURL() + first return value of this function`, requests for a single object get
 	// the object identifier appended to the path, a / added as needed. APIs using other URL schemes need to implement RequestFilterHook.
-	EndpointURL(ctx context.Context, op Operation, options Options) (*url.URL, error)
+	EndpointURL(ctx context.Context) (*url.URL, error)
 }
 
 // IdentifiedObject is the same as Object and is intended as a doc-helper. Objects are IdentifiedObjects when their
@@ -30,26 +30,26 @@ type FilterObject Object
 // RequestFilterHook is an interface Objects can optionally implement to modify requests before they are sent to the engine.
 type RequestFilterHook interface {
 	// FilterAPIRequest is called for every API request involving this object. Instead of the original request, the one returned from this function is sent to the engine.
-	FilterAPIRequest(op Operation, options Options, req *http.Request) (*http.Request, error)
+	FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error)
 }
 
 // RequestBodyHook is an interface Objects can optionally implement to customize request bodies based on the object given by the user of this library.
 type RequestBodyHook interface {
 	// FilterAPIRequestBody returns the object to be sent as request body. Not implementing this interface is equivalent to returning the received object from this function.
-	FilterAPIRequestBody(op Operation, options Options) (interface{}, error)
+	FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 }
 
 // ResponseFilterHook is an interface Objects can optionally implement to modify response given by the engine before they are decoded.
 type ResponseFilterHook interface {
 	// FilterAPIResponse is called after a response from the engine regarding this object is received. Instead of the original response, the one returned by this function is decoded.
-	FilterAPIResponse(op Operation, options Options, res *http.Response) (*http.Response, error)
+	FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error)
 }
 
 // PaginationSupportHook is an interface Objects can optionally implement to enable or disable pagination support for List operations.
 type PaginationSupportHook interface {
 	// Returns if the API supports pagination for List operations. Mind optionally supported filters in EndpointURL, which may go to different API endpoints which independently might
 	// or might not support pagination.
-	HasPagination(ctx context.Context, options Options) (bool, error)
+	HasPagination(ctx context.Context) (bool, error)
 }
 
 type ResponseDecodeHook interface {
