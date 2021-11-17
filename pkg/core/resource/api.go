@@ -22,9 +22,16 @@ type api struct {
 	client client.Client
 }
 
-func (i Info) EndpointURL(ctx context.Context, op types.Operation, options types.Options) (*url.URL, error) {
+func (i Info) EndpointURL(ctx context.Context) (*url.URL, error) {
 	u, err := url.ParseRequestURI(pathPrefix)
+	if err != nil {
+		return nil, err
+	}
 
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	switch op {
 	// OperationCreate is not supported because the API does not exist in the engine.
 	// OperationDestroy and OperationUpdate is not yet implemented
