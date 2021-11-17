@@ -40,7 +40,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]FrontendInfo, error) {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))
@@ -55,6 +55,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]FrontendInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancer frontends %s", response.Status)
@@ -80,7 +81,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Frontend, error) {
 		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
@@ -91,6 +92,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Frontend, error) {
 	if err != nil {
 		return Frontend{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Frontend{}, fmt.Errorf("could not execute get load balancer frontend request for '%s': %s", identifier,
@@ -113,7 +115,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 
 	buf := bytes.Buffer{}
 	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
@@ -129,6 +131,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 		return Frontend{}, fmt.Errorf("error when creating a LBaaS frontend for load balancer '%s': %w",
 			definition.LoadBalancer, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Frontend{}, fmt.Errorf("could not create LBaaS frontend for load balancer '%s': %s",
@@ -144,13 +147,51 @@ func (a api) Create(ctx context.Context, definition Definition) (Frontend, error
 	return payload, nil
 }
 
+func (a api) Update(ctx context.Context, identifier string, definition Definition) (Frontend, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return Frontend{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
+
+	buf := bytes.Buffer{}
+	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
+		return Frontend{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &buf)
+	if err != nil {
+		return Frontend{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return Frontend{}, fmt.Errorf("error when updating a LBaaS frontend for load balancer '%s': %w",
+			definition.LoadBalancer, err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return Frontend{}, fmt.Errorf("could not update LBaaS frontend for load balancer '%s': %s",
+			definition.LoadBalancer, response.Status)
+	}
+
+	var payload Frontend
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return Frontend{}, fmt.Errorf("could not parse loadbalancer frontend updating response: %w", err)
+	}
+
+	return payload, nil
+}
+
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, endpoint.String(), nil)
 	if err != nil {
 		return fmt.Errorf("could not create request object: %w", err)
@@ -161,6 +202,7 @@ func (a api) DeleteByID(ctx context.Context, identifier string) error {
 		return fmt.Errorf("error when deleting a LBaaS frontend '%s': %w",
 			identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return fmt.Errorf("could not delete LBaaS frontend '%s': %s",

@@ -8,6 +8,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
 	"net/http"
 	"net/url"
+	utils "path"
 	"strconv"
 )
 
@@ -46,7 +47,7 @@ func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.P
 		return nil, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))

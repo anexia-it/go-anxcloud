@@ -42,7 +42,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, erro
 		return nil, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = path
+	endpoint.Path = utils.Join(endpoint.Path, path)
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))
@@ -57,6 +57,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, erro
 	if err != nil {
 		return nil, fmt.Errorf("error when executing request: %w", err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not get load balancers %s", response.Status)
@@ -82,7 +83,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, erro
 		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	endpoint.Path = utils.Join(path, identifier)
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
 	if err != nil {
@@ -93,6 +94,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, erro
 	if err != nil {
 		return Loadbalancer{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Loadbalancer{}, fmt.Errorf("could not execute get load balancer request for '%s': %s", identifier,

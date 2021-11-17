@@ -107,6 +107,23 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(err).To(BeNil())
 			Expect(fetchedBackend).To(BeEquivalentTo(testBackend))
 		})
+
+		It("Update a specific backend", func() {
+			ctx := context.Background()
+			testBackend := createBackend(ctx, cli, nil)
+
+			definition := backend.Definition{
+				Name:         randomName(),
+				State:        common.Updated,
+				Mode:         testBackend.Mode,
+				LoadBalancer: testBackend.LoadBalancer.Identifier,
+			}
+			fetchedBackend, err := backend.NewAPI(cli).Update(ctx, testBackend.Identifier, definition)
+
+			Expect(err).To(BeNil())
+			Expect(fetchedBackend.Identifier).To(BeEquivalentTo(testBackend.Identifier))
+			Expect(fetchedBackend.Name).To(BeEquivalentTo(definition.Name))
+		})
 	})
 
 	Context("LBaaS - Servers", func() {
@@ -146,6 +163,24 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(err).To(BeNil())
 			Expect(fetchedServer).To(BeEquivalentTo(createdServer))
 		})
+
+		It("Update a specific server", func() {
+			ctx := context.Background()
+			createdServer := createServer(ctx, cli, nil)
+
+			definition := server.Definition{
+				Name:    randomName(),
+				State:   common.Updating,
+				IP:      createdServer.IP,
+				Port:    createdServer.Port,
+				Backend: createdServer.Backend.Identifier,
+			}
+
+			fetchedServer, err := server.NewAPI(cli).Update(ctx, createdServer.Identifier, definition)
+			Expect(err).To(BeNil())
+			Expect(fetchedServer.Identifier).To(BeEquivalentTo(createdServer.Identifier))
+			Expect(fetchedServer.Name).To(BeEquivalentTo(definition.Name))
+		})
 	})
 
 	Context("LBaaS - Binds", func() {
@@ -160,6 +195,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(createdBind.Name).To(BeEquivalentTo(definition.Name))
 			Expect(createdBind.Frontend.Identifier).To(BeEquivalentTo(definition.Frontend))
 		})
+
 		It("Get Binds", func() {
 			ctx := context.Background()
 			createBind(ctx, cli, nil)
@@ -168,6 +204,7 @@ var _ = Describe("LBaaS Service Tests", func() {
 			Expect(err).To(BeNil())
 			Expect(binds).ToNot(HaveLen(0))
 		})
+
 		It("Get a specific Bind", func() {
 			ctx := context.Background()
 			createdBind := createBind(ctx, cli, nil)
@@ -175,6 +212,22 @@ var _ = Describe("LBaaS Service Tests", func() {
 			fetchedBind, err := bind.NewAPI(cli).GetByID(ctx, createdBind.Identifier)
 			Expect(err).To(BeNil())
 			Expect(fetchedBind).To(BeEquivalentTo(createdBind))
+		})
+
+		It("Update a specific Bind", func() {
+			ctx := context.Background()
+			createdBind := createBind(ctx, cli, nil)
+
+			definition := bind.Definition{
+				Name:     randomName(),
+				State:    common.Updating,
+				Frontend: createdBind.Frontend.Identifier,
+			}
+
+			fetchedBind, err := bind.NewAPI(cli).Update(ctx, createdBind.Identifier, definition)
+			Expect(err).To(BeNil())
+			Expect(fetchedBind.Identifier).To(BeEquivalentTo(createdBind.Identifier))
+			Expect(fetchedBind.Name).To(BeEquivalentTo(definition.Name))
 		})
 	})
 
@@ -216,6 +269,26 @@ var _ = Describe("LBaaS Service Tests", func() {
 
 			Expect(err).To(BeNil())
 			Expect(fetchedFrontend).To(BeEquivalentTo(createdFrontend))
+		})
+
+		It("Update a specific frontend", func() {
+			ctx := context.Background()
+			api := lbaas.NewAPI(cli).Frontend()
+			createdFrontend := createFrontend(ctx, cli, nil)
+
+			definition := frontend.Definition{
+				Name:           randomName(),
+				LoadBalancer:   createdFrontend.LoadBalancer.Identifier,
+				DefaultBackend: createdFrontend.DefaultBackend.Identifier,
+				Mode:           createdFrontend.Mode,
+				State:          common.Updating,
+			}
+
+			fetchedFrontend, err := api.Update(ctx, createdFrontend.Identifier, definition)
+
+			Expect(err).To(BeNil())
+			Expect(fetchedFrontend.Identifier).To(BeEquivalentTo(createdFrontend.Identifier))
+			Expect(fetchedFrontend.Name).To(BeEquivalentTo(definition.Name))
 		})
 	})
 
@@ -261,6 +334,28 @@ var _ = Describe("LBaaS Service Tests", func() {
 			fetchedACL, err := api.GetByID(ctx, createdACL.Identifier)
 			Expect(err).To(BeNil())
 			Expect(fetchedACL).To(BeEquivalentTo(createdACL))
+		})
+
+		It("Update a specific ACL", func() {
+			ctx := context.Background()
+			createdACL := createACL(ctx, cli, nil)
+			api := acl.NewAPI(cli)
+
+			definition := acl.Definition{
+				Name:       randomName(),
+				State:      common.Updating,
+				ParentType: createdACL.ParentType,
+				Criterion:  createdACL.Criterion,
+				Index:      createdACL.Index,
+				Value:      createdACL.Value,
+				Frontend:   nil,
+				Backend:    &createdACL.Backend.Identifier,
+			}
+
+			fetchedACL, err := api.Update(ctx, createdACL.Identifier, definition)
+			Expect(err).To(BeNil())
+			Expect(fetchedACL.Identifier).To(BeEquivalentTo(createdACL.Identifier))
+			Expect(fetchedACL.Name).To(BeEquivalentTo(definition.Name))
 		})
 	})
 })

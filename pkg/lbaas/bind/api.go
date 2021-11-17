@@ -13,6 +13,7 @@ type API interface {
 	Get(ctx context.Context, page, limit int) ([]BindInfo, error)
 	GetByID(ctx context.Context, identifier string) (Bind, error)
 	Create(ctx context.Context, definition Definition) (Bind, error)
+	Update(ctx context.Context, identifier string, definition Definition) (Bind, error)
 	DeleteByID(ctx context.Context, identifier string) error
 }
 
