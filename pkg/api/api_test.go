@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +19,7 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/funcr"
+	"github.com/go-logr/stdr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -214,6 +216,9 @@ var _ = Describe("decodeResponse function", func() {
 var _ = Describe("creating API with different options", func() {
 	var server *ghttp.Server
 
+	logger := stdr.New(log.New(GinkgoWriter, "", log.Ltime|log.Lshortfile|log.Lmsgprefix))
+	stdr.SetVerbosity(3)
+
 	BeforeEach(func() {
 		server = ghttp.NewServer()
 	})
@@ -225,6 +230,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("barks when making a request while using a client with unparsable BaseURL", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL("as.lfdna,smdnasd:::"), // a keysmash, added ::: to have it a really unparsable URL
 				client.IgnoreMissingToken(),
@@ -299,6 +305,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning an error on EndpointURL", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -316,6 +323,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning an empty identifier on EndpointURL for operations requiring an IdentifiedObject", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -330,6 +338,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning an error on FilterAPIRequest", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -344,6 +353,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning an error on FilterAPIRequestBody", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -358,6 +368,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning a request body that cannot be encoded in json on FilterAPIRequestBody", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -376,6 +387,7 @@ var _ = Describe("creating API with different options", func() {
 		server.SetAllowUnhandledRequests(true)
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -394,6 +406,7 @@ var _ = Describe("creating API with different options", func() {
 		)
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -410,6 +423,7 @@ var _ = Describe("creating API with different options", func() {
 		server.AppendHandlers(ghttp.RespondWith(200, "randomgarbage", http.Header{"Content-Type": []string{"application/octet-stream"}}))
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -426,6 +440,7 @@ var _ = Describe("creating API with different options", func() {
 		server.AppendHandlers(ghttp.RespondWith(204, nil))
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -447,6 +462,7 @@ var _ = Describe("creating API with different options", func() {
 		)
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -480,6 +496,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles users trying to list with page iterator and channel simultaneously", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -535,6 +552,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles the Object returning an error on HasPagination", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -555,6 +573,7 @@ var _ = Describe("creating API with different options", func() {
 		)
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
@@ -686,6 +705,7 @@ var _ = Describe("creating API with different options", func() {
 		}
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.WithClient(&hc),
 				client.IgnoreMissingToken(),
@@ -700,6 +720,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles not being given a context", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.IgnoreMissingToken(),
 			),
@@ -718,6 +739,7 @@ var _ = Describe("creating API with different options", func() {
 
 	It("handles bogus operations", func() {
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.IgnoreMissingToken(),
 			),
@@ -743,6 +765,7 @@ var _ = Describe("creating API with different options", func() {
 		)
 
 		api, err := NewAPI(
+			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL(server.URL()),
 				client.IgnoreMissingToken(),
