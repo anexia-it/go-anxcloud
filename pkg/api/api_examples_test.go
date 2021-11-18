@@ -118,10 +118,11 @@ func ExampleAPI_listPaged() {
 	// List all backends, with 10 entries per page and starting on first page.
 
 	// Beware: listing endpoints usually do not return all data for an object, sometimes
-	// only the identifier is filled. This varies by specific API.
+	// only the identifier is filled. This varies by specific API. If you need full objects,
+	// the FullObjects option might be your friend. To test this option, we use it here.
 	b := lbaasv1.Backend{}
 	var pageIter types.PageInfo
-	if err := apiClient.List(context.TODO(), &b, Paged(1, 2, &pageIter)); err != nil {
+	if err := apiClient.List(context.TODO(), &b, Paged(1, 2, &pageIter), FullObjects(true)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
 	} else {
 		var backends []lbaasv1.Backend
@@ -129,7 +130,9 @@ func ExampleAPI_listPaged() {
 			fmt.Printf("Listing entries on page %v\n", pageIter.CurrentPage())
 
 			for _, backend := range backends {
-				fmt.Printf("  Got backend named \"%v\"\n", backend.Name)
+				// backend.Mode is only filled when the full object is retrieved, we can only use it here because
+				// we added the FullObjects(true) option to the List() call above.
+				fmt.Printf("  Got backend named \"%v\" with mode \"%v\"\n", backend.Name, backend.Mode)
 			}
 		}
 
@@ -144,14 +147,14 @@ func ExampleAPI_listPaged() {
 
 	// Output:
 	// Listing entries on page 1
-	//   Got backend named "Example-Backend"
-	//   Got backend named "backend-01"
+	//   Got backend named "Example-Backend" with mode "tcp"
+	//   Got backend named "backend-01" with mode "tcp"
 	// Listing entries on page 2
-	//   Got backend named "test-backend-01"
-	//   Got backend named "test-backend-02"
+	//   Got backend named "test-backend-01" with mode "tcp"
+	//   Got backend named "test-backend-02" with mode "tcp"
 	// Listing entries on page 3
-	//   Got backend named "test-backend-03"
-	//   Got backend named "test-backend-04"
+	//   Got backend named "test-backend-03" with mode "tcp"
+	//   Got backend named "test-backend-04" with mode "tcp"
 	// Last page listed was page 4, which returned 0 entries
 }
 
@@ -165,7 +168,8 @@ func ExampleAPI_listChannel() {
 	// Oh and we filter by LoadBalancer, because we can and the example has to be somewhere.
 
 	// Beware: listing endpoints usually do not return all data for an object, sometimes
-	// only the identifier is filled. This varies by specific API.
+	// only the identifier is filled. This varies by specific API. If you need full objects,
+	// the FullObjects option might be your friend.
 	b := lbaasv1.Backend{LoadBalancer: lbaasv1.LoadBalancer{Identifier: "bogus identifier 2"}}
 	if err := apiClient.List(context.TODO(), &b, ObjectChannel(&channel)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
@@ -176,14 +180,18 @@ func ExampleAPI_listChannel() {
 				break
 			}
 
-			fmt.Printf("Got backend named \"%v\"\n", b.Name)
+			// b.Mode is only filled when the full object is retrieved since this attribute is
+			// not returned by the List API endpoint. To have it, we would have to either manually
+			// retrieve the full object or use the FullObjects option in the List call above.
+			// See the ListPaged example for the FullObjects option in action.
+			fmt.Printf("Got backend named \"%v\" with mode \"%v\"\n", b.Name, b.Mode)
 		}
 	}
 
 	// Output:
-	// Got backend named "Example-Backend"
-	// Got backend named "test-backend-02"
-	// Got backend named "test-backend-04"
+	// Got backend named "Example-Backend" with mode ""
+	// Got backend named "test-backend-02" with mode ""
+	// Got backend named "test-backend-04" with mode ""
 }
 
 func ExampleAPI_update() {

@@ -30,12 +30,15 @@ type GetOptions struct {
 // ListOptions contains options valid for List operations.
 type ListOptions struct {
 	commonOptions
+
 	ObjectChannel *ObjectChannel
 
 	Paged          bool
 	Page           uint
 	EntriesPerPage uint
 	PageInfo       *PageInfo
+
+	FullObjects bool
 }
 
 // CreateOptions contains options valid for Create operations.

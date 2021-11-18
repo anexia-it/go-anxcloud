@@ -213,7 +213,7 @@ var _ = Describe("decodeResponse function", func() {
 	})
 })
 
-var _ = Describe("creating API with different options", func() {
+var _ = Describe("using an API object", func() {
 	var server *ghttp.Server
 
 	logger := stdr.New(log.New(GinkgoWriter, "", log.Ltime|log.Lshortfile|log.Lmsgprefix))
@@ -492,6 +492,219 @@ var _ = Describe("creating API with different options", func() {
 
 		err = api.List(context.TODO(), &o, Paged(1, 1, &pi))
 		Expect(err).To(MatchError(ErrPageResponseNotSupported))
+	})
+
+	Context("configured to use a mock server", func() {
+		type response struct {
+			status int
+			path   string
+			query  string
+			data   interface{}
+		}
+
+		var responses []response
+
+		var api API
+
+		JustBeforeEach(func() {
+			for _, r := range responses {
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", r.path, r.query),
+					ghttp.RespondWithJSONEncoded(r.status, r.data),
+				))
+			}
+
+			var err error
+			api, err = NewAPI(
+				WithLogger(logger),
+				WithClientOptions(
+					client.BaseURL(server.URL()),
+					client.IgnoreMissingToken(),
+				),
+			)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		commonCheck := func(fullObjects bool) {
+			namePrefix := ""
+
+			if fullObjects {
+				namePrefix = "full "
+			}
+
+			It("returns correct data with List operation used with pagination", func() {
+				o := api_test_object{}
+
+				var pi types.PageInfo
+				// we use the same page size as for channel to make testing easier and to not have to
+				// provide the Paged option when using a channel
+				err := api.List(context.TODO(), &o, Paged(1, ListChannelDefaultPageSize, &pi), FullObjects(fullObjects))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
+
+				var objects []api_test_object
+				for pi.Next(&objects) {
+					Expect(objects).To(HaveLen(2))
+
+					switch pi.CurrentPage() {
+					case 1:
+						Expect(objects).To(BeEquivalentTo([]api_test_object{
+							{namePrefix + "foo 1"},
+							{namePrefix + "foo 2"},
+						}))
+					case 2:
+						Expect(objects).To(BeEquivalentTo([]api_test_object{
+							{namePrefix + "foo 3"},
+							{namePrefix + "foo 4"},
+						}))
+					case 3:
+						Expect(objects).To(BeEquivalentTo([]api_test_object{}))
+					default:
+						Fail("Unexpected current page")
+					}
+				}
+
+				Expect(pi.Error()).NotTo(HaveOccurred())
+				Expect(pi.CurrentPage()).To(BeEquivalentTo(3))
+			})
+
+			It("returns correct data with List operation used with a channel", func() {
+				o := api_test_object{}
+
+				channel := make(types.ObjectChannel)
+				err := api.List(context.TODO(), &o, ObjectChannel(&channel), FullObjects(fullObjects))
+				Expect(err).NotTo(HaveOccurred())
+
+				i := 0
+				for retriever := range channel {
+					i++
+
+					err := retriever(&o)
+					Expect(err).NotTo(HaveOccurred())
+
+					switch i {
+					case 1:
+						Expect(o.Val).To(Equal(namePrefix + "foo 1"))
+					case 2:
+						Expect(o.Val).To(Equal(namePrefix + "foo 2"))
+					case 3:
+						Expect(o.Val).To(Equal(namePrefix + "foo 3"))
+					case 4:
+						Expect(o.Val).To(Equal(namePrefix + "foo 4"))
+					default:
+						Fail("Unexpected number of objects retrieved")
+					}
+				}
+			})
+		}
+
+		Context("FullObjects disabled", func() {
+			BeforeEach(func() {
+				responses = []response{
+					{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+					{200, "/resource/v1", "page=2&limit=10", []api_test_object{{"foo 3"}, {"foo 4"}}},
+					{200, "/resource/v1", "page=3&limit=10", []api_test_object{}},
+				}
+			})
+
+			commonCheck(false)
+		})
+
+		Context("FullObjects enabled", func() {
+			Context("requests all succeeding", func() {
+				BeforeEach(func() {
+					responses = []response{
+						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+
+						{200, "/resource/v1/foo 1", "", api_test_object{"full foo 1"}},
+						{200, "/resource/v1/foo 2", "", api_test_object{"full foo 2"}},
+
+						{200, "/resource/v1", "page=2&limit=10", []api_test_object{{"foo 3"}, {"foo 4"}}},
+
+						{200, "/resource/v1/foo 3", "", api_test_object{"full foo 3"}},
+						{200, "/resource/v1/foo 4", "", api_test_object{"full foo 4"}},
+
+						{200, "/resource/v1", "page=3&limit=10", []api_test_object{}},
+					}
+				})
+
+				commonCheck(true)
+			})
+
+			Context("list request succeeding but get request failing", func() {
+				BeforeEach(func() {
+					responses = []response{
+						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+
+						{400, "/resource/v1/foo 1", "", map[string]string{"error": "something went wrong"}}, // a very realistic error, sadly.
+					}
+				})
+
+				It("returns the error via page iterator", func() {
+					o := api_test_object{}
+
+					var pi types.PageInfo
+					err := api.List(context.TODO(), &o, Paged(1, 10, &pi), FullObjects(true))
+					Expect(err).NotTo(HaveOccurred())
+					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
+
+					var objects []api_test_object
+					Expect(pi.Next(&objects)).To(BeFalse())
+					Expect(pi.Error()).To(HaveOccurred())
+					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
+				})
+
+				It("returns the error via channel", func() {
+					o := api_test_object{}
+					ctx, cancel := context.WithCancel(context.TODO())
+
+					var c types.ObjectChannel
+					err := api.List(ctx, &o, ObjectChannel(&c), FullObjects(true))
+					Expect(err).NotTo(HaveOccurred())
+
+					retriever := <-c
+					Expect(retriever(&o)).To(HaveOccurred())
+					cancel()
+				})
+			})
+
+			Context("list request succeeding but decoding fails", func() {
+				BeforeEach(func() {
+					responses = []response{
+						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+
+						{200, "/resource/v1/foo 1", "", "foo"},
+					}
+				})
+
+				It("returns the error via page iterator", func() {
+					o := api_test_object{}
+
+					var pi types.PageInfo
+					err := api.List(context.TODO(), &o, Paged(1, 10, &pi), FullObjects(true))
+					Expect(err).NotTo(HaveOccurred())
+					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
+
+					var objects []api_test_object
+					Expect(pi.Next(&objects)).To(BeFalse())
+					Expect(pi.Error()).To(HaveOccurred())
+					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
+				})
+
+				It("returns the error via channel", func() {
+					o := api_test_object{}
+					ctx, cancel := context.WithCancel(context.TODO())
+
+					var c types.ObjectChannel
+					err := api.List(ctx, &o, ObjectChannel(&c), FullObjects(true))
+					Expect(err).NotTo(HaveOccurred())
+
+					retriever := <-c
+					Expect(retriever(&o)).To(HaveOccurred())
+					cancel()
+				})
+			})
+		})
 	})
 
 	It("handles users trying to list with page iterator and channel simultaneously", func() {

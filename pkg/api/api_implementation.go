@@ -194,7 +194,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			return response, nil
 		}
 
-		iter, err := newPageIter(ctx, result, options, fetcher, singlePageMode)
+		iter, err := newPageIter(ctx, a, result, options, fetcher, singlePageMode)
 		if err != nil {
 			return err
 		}
@@ -221,6 +221,12 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 						err := decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
 						if err != nil {
 							return err
+						}
+
+						if options.FullObjects {
+							if err := a.Get(ctx, out); err != nil {
+								return err
+							}
 						}
 
 						select {

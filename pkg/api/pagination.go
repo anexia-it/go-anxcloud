@@ -29,7 +29,10 @@ type pageIter struct {
 	pageFetcher pageFetcher
 
 	singlePageMode bool
-	ctx            context.Context
+	fullObjects    bool
+
+	ctx context.Context
+	api API
 }
 
 // CurrentPage returns the page number the last Next call processed.
@@ -114,8 +117,10 @@ func (p *pageIter) Next(objects interface{}) bool {
 		return false
 	}
 
+	// allocate new array for target type and already known number of objects
 	newVal := reflect.MakeSlice(val.Type().Elem(), len(data), len(data))
 
+	// decode every page response object into index in target type array
 	for i, e := range data {
 		decodeInto := newVal.Index(i).Addr().Interface()
 
@@ -125,6 +130,21 @@ func (p *pageIter) Next(objects interface{}) bool {
 			p.errRetryCounter++
 			p.err = err
 			return false
+		}
+	}
+
+	// If decoding into Object's (and not json.RawMessage), optionally retrieve the full object.
+	// We could do this in the loop above, but this way we already know the entries on the page are all valid.
+	if isObjects && p.fullObjects {
+		for i := 0; i < newVal.Len(); i++ {
+			retrieveInto := newVal.Index(i).Addr().Interface()
+			err := p.api.Get(p.ctx, retrieveInto.(types.IdentifiedObject))
+
+			if err != nil {
+				p.errRetryCounter++
+				p.err = err
+				return false
+			}
 		}
 	}
 
@@ -161,14 +181,16 @@ func (p *pageIter) ResetError() {
 	}
 }
 
-func newPageIter(ctx context.Context, responseBody json.RawMessage, opts types.ListOptions, fetcher pageFetcher, singlePageMode bool) (types.PageInfo, error) {
+func newPageIter(ctx context.Context, api API, responseBody json.RawMessage, opts types.ListOptions, fetcher pageFetcher, singlePageMode bool) (types.PageInfo, error) {
 	if logger, err := logr.FromContext(ctx); err == nil {
 		ctx = logr.NewContext(ctx, logger.WithName("pagination"))
 	}
 
 	ret := pageIter{
 		ctx:            ctx,
+		api:            api,
 		singlePageMode: singlePageMode,
+		fullObjects:    opts.FullObjects,
 	}
 
 	currentPage, limit, totalPages, totalItems, _, err := decodePaginationResponseBody(responseBody, opts)
