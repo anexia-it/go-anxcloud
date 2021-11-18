@@ -25,5 +25,7 @@ type API interface {
 	Destroy(context.Context, types.IdentifiedObject, ...DestroyOption) error
 
 	// List objects matching the info given in the object.
+	// Beware: listing endpoints usually do not return all data for an object, sometimes
+	// only the identifier is filled. This varies by specific API.
 	List(context.Context, types.FilterObject, ...ListOption) error
 }
