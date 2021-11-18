@@ -117,7 +117,10 @@ func ExampleAPI_listPaged() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	// list all backends, with 10 entries per page and starting on first page.
+	// List all backends, with 10 entries per page and starting on first page.
+
+	// Beware: listing endpoints usually do not return all data for an object, sometimes
+	// only the identifier is filled. This varies by specific API.
 	b := backend.Backend{}
 	var pageIter types.PageInfo
 	if err := apiClient.List(context.TODO(), &b, Paged(1, 2, &pageIter)); err != nil {
@@ -162,6 +165,9 @@ func ExampleAPI_listChannel() {
 
 	// list all backends using a channel and have the library handle the paging.
 	// Oh and we filter by LoadBalancer, because we can and the example has to be somewhere.
+
+	// Beware: listing endpoints usually do not return all data for an object, sometimes
+	// only the identifier is filled. This varies by specific API.
 	b := backend.Backend{LoadBalancer: loadbalancer.LoadBalancerInfo{Identifier: "bogus identifier 2"}}
 	if err := apiClient.List(context.TODO(), &b, AsObjectChannel(&channel)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
