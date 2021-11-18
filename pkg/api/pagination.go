@@ -86,7 +86,7 @@ func (p *pageIter) Next(objects interface{}) bool {
 		elementType := val.Elem().Type().Elem()
 		ptrToElementType := reflect.PtrTo(elementType)
 
-		isObjects = elementType.Implements(objectType) || ptrToElementType.Implements(objectType)
+		isObjects = ptrToElementType.Implements(objectType)
 		isRawMessages = elementType == reflect.TypeOf((*json.RawMessage)(nil)).Elem()
 	}
 
@@ -96,7 +96,7 @@ func (p *pageIter) Next(objects interface{}) bool {
 	// json.RawMessage is allowed for retrieving objects via channel, where the page is decoded into an array of
 	// json.RawMessage and every entry of that is decoded into the target object as soon as it is needed.
 	if !isPointer || !isArrayOrSlice || (!isObjects && !isRawMessages) {
-		p.err = fmt.Errorf("%w: the argument given to PageInfo.Next() must be a pointer to []T where T or *T implements types.Object or T is json.RawMessage; expected *[]T, you gave %v", ErrTypeNotSupported, wrongType)
+		p.err = fmt.Errorf("%w: the argument given to PageInfo.Next() must be a pointer to []T where *T implements types.Object or T is json.RawMessage; expected *[]T, you gave %v", ErrTypeNotSupported, wrongType)
 		return false
 	}
 
