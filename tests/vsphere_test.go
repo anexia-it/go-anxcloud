@@ -73,7 +73,7 @@ func vsphereTestInit() {
 	templateID = selected[0].ID
 }
 
-var _ = PDescribe("vsphere API endpoint tests", func() {
+var _ = Describe("vsphere API endpoint tests", func() {
 
 	var cli client.Client
 
