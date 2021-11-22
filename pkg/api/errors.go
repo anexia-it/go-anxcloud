@@ -37,6 +37,9 @@ var (
 
 	// ErrContextRequired is returned when a nil context was passed as argument.
 	ErrContextRequired = errors.New("no context given")
+
+	// ErrObjectChannelNotReady is returned when trying to use an object channel that was not prepared by a List operation yet.
+	ErrObjectChannelNotReady = errors.New("object channel not ready to be used")
 )
 
 // EngineError is the base type for all errors returned by the engine.

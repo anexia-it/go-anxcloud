@@ -19,11 +19,6 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 )
 
-const (
-	// ListChannelDefaultPageSize specifies the default page size for List operations returning the data via channel.
-	ListChannelDefaultPageSize = 10
-)
-
 // defaultAPI is the type for our generic implementation of the API interface.
 type defaultAPI struct {
 	client client.Client
@@ -135,16 +130,6 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 	ctx = req.Context() // makeRequest extends the context
 
-	var channelPageIterator types.PageInfo
-	if options.ObjectChannel != nil && !options.Paged {
-		options.Paged = true
-		options.Page = 1
-		options.EntriesPerPage = ListChannelDefaultPageSize
-		options.PageInfo = &channelPageIterator
-	} else if options.ObjectChannel != nil && options.PageInfo != nil {
-		return ErrCannotListChannelAndPaged
-	}
-
 	singlePageMode := false
 
 	if psh, ok := o.(types.PaginationSupportHook); ok {
@@ -152,6 +137,19 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 			return err
 		} else {
 			singlePageMode = !v
+		}
+	}
+
+	var ch *objectChannel
+	if options.Channel != nil {
+		if oc, ocOK := options.Channel.(*objectChannel); !ocOK {
+			return fmt.Errorf("%w: we can only initialize our objectChannel implementation", ErrTypeNotSupported)
+		} else {
+			ch = oc
+		}
+
+		if err = ch.prepare(ctx, a, &options); err != nil {
+			return err
 		}
 	}
 
@@ -200,26 +198,6 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 		}
 
 		*options.PageInfo = iter
-	}
-
-	if options.ObjectChannel != nil {
-		go func(c types.ObjectChannel, pi types.PageInfo) {
-			var pageData []json.RawMessage
-
-			for pi.Next(&pageData) {
-				for _, o := range pageData {
-					// since we are in a goroutine, we might already be in the next iteration of this loop
-					// at the time the receiving end of this channel calls the closure. Having a loop-body
-					// scoped variables makes the data for the closure perfectly identified.
-					closureData := o
-					c <- func(out types.Object) error {
-						return decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
-					}
-				}
-			}
-
-			close(c)
-		}(*options.ObjectChannel, channelPageIterator)
 	}
 
 	return nil

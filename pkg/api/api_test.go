@@ -490,8 +490,8 @@ var _ = Describe("creating API with different options", func() {
 		o := api_test_object{"identifier"}
 
 		var pi types.PageInfo
-		oc := make(types.ObjectChannel)
-		err = api.List(context.TODO(), &o, Paged(1, 2, &pi), AsObjectChannel(&oc))
+		oc := NewObjectChannel()
+		err = api.List(context.TODO(), &o, Paged(1, 2, &pi), ObjectChannel(oc))
 		Expect(err).To(MatchError(ErrCannotListChannelAndPaged))
 	})
 

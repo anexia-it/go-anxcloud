@@ -24,12 +24,12 @@ func (p PagedOption) ApplyToList(o *types.ListOptions) {
 	o.PageInfo = p.Info
 }
 
-// AsObjectChannelOption configures the List operation to return the objects via the given channel.
-type AsObjectChannelOption struct {
-	Channel *types.ObjectChannel
+// ObjectChannelOption configures the List operation to return the objects via the given channel.
+type ObjectChannelOption struct {
+	Channel types.ObjectChannelCloser
 }
 
-// ApplyToList applies the AsObjectChannel option to all the ListOptions.
-func (aoc AsObjectChannelOption) ApplyToList(o *types.ListOptions) {
-	o.ObjectChannel = aoc.Channel
+// ApplyToList applies the ObjectChannelOption to all the ListOptions.
+func (oc ObjectChannelOption) ApplyToList(o *types.ListOptions) {
+	o.Channel = oc.Channel
 }

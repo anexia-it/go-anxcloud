@@ -30,7 +30,7 @@ type GetOptions struct {
 // ListOptions contains options valid for List operations.
 type ListOptions struct {
 	commonOptions
-	ObjectChannel *ObjectChannel
+	Channel ObjectChannelCloser
 
 	Paged          bool
 	Page           uint
