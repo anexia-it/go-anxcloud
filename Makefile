@@ -12,7 +12,10 @@ build: fmtcheck go-lint
 	go build -ldflags "$(GOLDFLAGS)" ./...
 
 .PHONY: generate
-generate:
+generate: tools
+	# generate object tests
+	tools/tools object-generator --mode tests --in ./pkg/... --out xxgenerated_object_test.go
+	# run golang default generator
 	go generate ./...
 
 .PHONY: depscheck
@@ -92,3 +95,4 @@ tools:
 	cd tools && go install github.com/client9/misspell/cmd/misspell
 	cd tools && go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd tools && go install github.com/katbyte/terrafmt
+	cd tools && go build
