@@ -161,7 +161,7 @@ func ExampleAPI_listChannel() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	channel := make(types.ObjectChannel)
+	var channel types.ObjectChannel
 
 	// list all backends using a channel and have the library handle the paging.
 	// Oh and we filter by LoadBalancer, because we can and the example has to be somewhere.
