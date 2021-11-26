@@ -34,24 +34,24 @@ if something was changed influencing the generated code without re-generating it
 
 ### Magic comment format
 
-Comments always start with `//+anxcloud;`, that's what the generator is looking for. No space allowed between the
-comment-starting `//` and `+anxcloud`. To process the comment, this common prefix is stripped from it.
+Comments always start with `// anxcloud:`, that's what the generator is looking for. Single space required between the
+comment-starting `//` and `anxcloud:`. To process the comment, this common prefix is stripped from it.
 
-The payload of the comment (what is left after stripping the prefix) is then split by `;` to get some `specs`,
-which are then split by `:` to have a spec name and value. Not all specs have a value, if a spec has multiple
+The payload of the comment (what is left after stripping the prefix) is then split by `:` to get some `specs`,
+which are then split by `=` to have a spec name and value. Not all specs have a value, if a spec has multiple
 values, it has them separated by `,`.
 
 Some examples:
 
 ```go
-//+anxcloud;object
+// anxcloud:object
 // -> this is parsed to having the spec called 'object' with no value
 
-//+anxcloud;object;hooks=ResponseBodyHook
+// anxcloud:object:hooks=ResponseBodyHook
 // -> this is parsed to having the spec called 'object' with no value
 //    and the spec 'hooks' with value 'ResponseBodyHook'.
 
-//+anxcloud;object;hooks=ResponseBodyHook,ResponseDecodeHook
+// anxcloud:object:hooks=ResponseBodyHook,ResponseDecodeHook
 // -> this is parsed to having the spec called 'object' with no value
 //    and the spec 'hooks' with value 'ResponseBodyHook,ResponseDecodeHook'.
 //    Code handling the 'hooks' spec will split the value by ',' to decode
@@ -64,7 +64,7 @@ Currently all the specs have to be given in the same comment line, placed above 
 Example how it looks in real world:
 
 ```go
-//+anxcloud;object;hooks=ResponseBodyHook
+// anxcloud:object:hooks=ResponseBodyHook
 
 // LoadBalancer describes a single LoadBalancer in Anexia LBaaS API.
 type LoadBalancer struct {

@@ -26,7 +26,7 @@ type RuleInfo struct {
 	Name       string `json:"name"`
 }
 
-//+anxcloud;object;hooks:RequestBodyHook
+// anxcloud:object:hooks=RequestBodyHook
 
 // Loadbalancer holds the information of a load balancer instance.
 type Loadbalancer struct {

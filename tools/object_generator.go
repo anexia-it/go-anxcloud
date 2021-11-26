@@ -17,7 +17,7 @@ import (
 	"go/token"
 )
 
-const magicCommentPrefix = "//+anxcloud;"
+const magicCommentPrefix = "// anxcloud:"
 
 type typeDefinition struct {
 	Name     string   `json:"name"`
@@ -201,10 +201,10 @@ comments:
 }
 
 func (gen *ObjectGenerator) processComment(comment string, decl *ast.GenDecl, file string, line int) {
-	parts := strings.Split(comment, ";")
+	parts := strings.Split(comment, ":")
 	specs := make(map[string]string, len(parts))
 	for _, part := range parts {
-		kv := strings.Split(part, ":")
+		kv := strings.Split(part, "=")
 
 		v := ""
 		if len(kv) == 2 {
