@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
-	lbaasCommon "github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 )
@@ -23,7 +21,7 @@ func ExampleNewAPI() {
 		log.Fatalf("Error creating api instance: %v\n", err)
 	} else {
 		// do something with api
-		lb := loadbalancer.Loadbalancer{Identifier: "bogus identifier"}
+		lb := lbaasv1.LoadBalancer{Identifier: "bogus identifier"}
 		if err := api.Get(context.TODO(), &lb); IgnoreNotFound(err) != nil {
 			fmt.Printf("Error retrieving loadbalancer with identifier '%v'\n", lb.Identifier)
 		}
@@ -39,14 +37,14 @@ func Example_usage() {
 	apiClient := newExampleAPI()
 
 	// retrieve and create backend, handling errors along the way.
-	backend := backend.Backend{Identifier: "bogus identifier 1"}
+	backend := lbaasv1.Backend{Identifier: "bogus identifier 1"}
 	if err := apiClient.Get(context.TODO(), &backend); IgnoreNotFound(err) != nil {
 		fmt.Printf("Fatal error while retrieving backend: %v\n", err)
 	} else if err != nil {
 		fmt.Printf("Backend not yet existing, creating ...\n")
 
 		backend.Name = "backend-01"
-		backend.Mode = lbaasCommon.HTTP
+		backend.Mode = lbaasv1.HTTP
 		// [...]
 
 		if err := apiClient.Create(context.TODO(), &backend); err != nil {
@@ -70,9 +68,9 @@ func ExampleAPI_create() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	backend := backend.Backend{
+	backend := lbaasv1.Backend{
 		Name: "backend-01",
-		Mode: lbaasCommon.HTTP,
+		Mode: lbaasv1.HTTP,
 		// [...]
 	}
 
@@ -89,7 +87,7 @@ func ExampleAPI_destroy() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	backend := backend.Backend{Identifier: "bogus identifier 1"}
+	backend := lbaasv1.Backend{Identifier: "bogus identifier 1"}
 	if err := apiClient.Destroy(context.TODO(), &backend); err != nil {
 		fmt.Printf("Error destroying backend: %v\n", err)
 	} else {
@@ -103,7 +101,7 @@ func ExampleAPI_get() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	backend := backend.Backend{Identifier: "bogus identifier 1"}
+	backend := lbaasv1.Backend{Identifier: "bogus identifier 1"}
 	if err := apiClient.Get(context.TODO(), &backend); err != nil {
 		fmt.Printf("Error retrieving backend: %v\n", err)
 	} else {
@@ -121,12 +119,12 @@ func ExampleAPI_listPaged() {
 
 	// Beware: listing endpoints usually do not return all data for an object, sometimes
 	// only the identifier is filled. This varies by specific API.
-	b := backend.Backend{}
+	b := lbaasv1.Backend{}
 	var pageIter types.PageInfo
 	if err := apiClient.List(context.TODO(), &b, Paged(1, 2, &pageIter)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
 	} else {
-		var backends []backend.Backend
+		var backends []lbaasv1.Backend
 		for pageIter.Next(&backends) {
 			fmt.Printf("Listing entries on page %v\n", pageIter.CurrentPage())
 
@@ -168,7 +166,7 @@ func ExampleAPI_listChannel() {
 
 	// Beware: listing endpoints usually do not return all data for an object, sometimes
 	// only the identifier is filled. This varies by specific API.
-	b := backend.Backend{LoadBalancer: loadbalancer.LoadBalancerInfo{Identifier: "bogus identifier 2"}}
+	b := lbaasv1.Backend{LoadBalancer: lbaasv1.LoadBalancer{Identifier: "bogus identifier 2"}}
 	if err := apiClient.List(context.TODO(), &b, ObjectChannel(&channel)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
 	} else {
@@ -192,10 +190,10 @@ func ExampleAPI_update() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	b := backend.Backend{
+	b := lbaasv1.Backend{
 		Identifier: "bogus identifier 1",
 		Name:       "Updated backend",
-		Mode:       lbaasCommon.HTTP,
+		Mode:       lbaasv1.HTTP,
 		// [...]
 	}
 
@@ -204,7 +202,7 @@ func ExampleAPI_update() {
 	} else {
 		fmt.Printf("Successfully updated backend\n")
 
-		retrieved := backend.Backend{Identifier: "bogus identifier 1"}
+		retrieved := lbaasv1.Backend{Identifier: "bogus identifier 1"}
 		if err := apiClient.Get(context.TODO(), &retrieved); err != nil {
 			fmt.Printf("Error verifying updated backend: %v\n", err)
 		} else {

@@ -5,33 +5,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
+
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 const path = "api/LBaaS/v1/frontend.json"
+
+// Frontend represents a LBaaS Frontend.
+type Frontend = v1.Frontend
 
 // FrontendInfo holds the name and the identifier of a frontend
 type FrontendInfo struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
-}
-
-// Frontend represents a LBaaS Frontend.
-type Frontend struct {
-	CustomerIdentifier string                         `json:"customer_identifier"`
-	ResellerIdentifier string                         `json:"reseller_identifier"`
-	Identifier         string                         `json:"identifier"`
-	Name               string                         `json:"name"`
-	LoadBalancer       *loadbalancer.LoadBalancerInfo `json:"load_balancer,omitempty"`
-	DefaultBackend     *backend.BackendInfo           `json:"default_backend,omitempty"`
-	Mode               common.Mode                    `json:"mode"`
-	ClientTimeout      string                         `json:"client_timeout"`
 }
 
 func (a api) Get(ctx context.Context, page, limit int) ([]FrontendInfo, error) {

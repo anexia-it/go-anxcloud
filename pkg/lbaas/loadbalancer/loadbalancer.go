@@ -8,10 +8,16 @@ import (
 	"net/url"
 	utils "path"
 	"strconv"
+
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
-const (
-	path = "api/LBaaS/v1/loadbalancer.json"
+type (
+	// RuleInfo holds the name and identifier of a rule.
+	RuleInfo = v1.RuleInfo
+
+	// Loadbalancer holds the information of a load balancer instance.
+	Loadbalancer = v1.LoadBalancer
 )
 
 // LoadBalancerInfo holds the identifier and the name of a load balancer
@@ -20,23 +26,9 @@ type LoadBalancerInfo struct {
 	Name       string `json:"name"`
 }
 
-// RuleInfo holds the name and identifier of a rule.
-type RuleInfo struct {
-	Identifier string `json:"identifier" anxcloud:"identifier"`
-	Name       string `json:"name"`
-}
-
-// anxcloud:object:hooks=RequestBodyHook
-
-// Loadbalancer holds the information of a load balancer instance.
-type Loadbalancer struct {
-	CustomerIdentifier string     `json:"customer_identifier"`
-	ResellerIdentifier string     `json:"reseller_identifier"`
-	Identifier         string     `json:"identifier" anxcloud:"identifier"`
-	Name               string     `json:"name"`
-	IpAddress          string     `json:"ip_address"`
-	AutomationRules    []RuleInfo `json:"automation_rules"`
-}
+const (
+	path = "api/LBaaS/v1/loadbalancer.json"
+)
 
 func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
