@@ -203,9 +203,14 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	}
 
 	if options.ObjectChannel != nil {
-		go func(c types.ObjectChannel, pi types.PageInfo) {
+		c := make(chan types.ObjectRetriever)
+		*options.ObjectChannel = c
+
+		objectRetrieved := make(chan bool)
+		go func(pi types.PageInfo) {
 			var pageData []json.RawMessage
 
+		outer:
 			for pi.Next(&pageData) {
 				for _, o := range pageData {
 					// since we are in a goroutine, we might already be in the next iteration of this loop
@@ -213,13 +218,29 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 					// scoped variables makes the data for the closure perfectly identified.
 					closureData := o
 					c <- func(out types.Object) error {
-						return decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
+						err := decodeResponse(ctx, "application/json", bytes.NewBuffer(closureData), out)
+						if err != nil {
+							return err
+						}
+
+						select {
+						case <-ctx.Done():
+						case objectRetrieved <- true:
+						}
+
+						return nil
+					}
+
+					select {
+					case <-ctx.Done():
+						break outer
+					case <-objectRetrieved:
 					}
 				}
 			}
 
 			close(c)
-		}(*options.ObjectChannel, channelPageIterator)
+		}(channelPageIterator)
 	}
 
 	return nil

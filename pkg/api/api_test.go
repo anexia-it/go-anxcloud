@@ -491,7 +491,7 @@ var _ = Describe("creating API with different options", func() {
 
 		var pi types.PageInfo
 		oc := make(types.ObjectChannel)
-		err = api.List(context.TODO(), &o, Paged(1, 2, &pi), AsObjectChannel(&oc))
+		err = api.List(context.TODO(), &o, Paged(1, 2, &pi), ObjectChannel(&oc))
 		Expect(err).To(MatchError(ErrCannotListChannelAndPaged))
 	})
 
@@ -574,6 +574,109 @@ var _ = Describe("creating API with different options", func() {
 
 		Expect(pi.Next(&os)).To(BeFalse())
 
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
+	})
+
+	It("can list objects with channel", func() {
+		server.AppendHandlers(
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"no_pagination"}
+
+		var ch types.ObjectChannel
+		err = api.List(context.TODO(), &o, ObjectChannel(&ch))
+		Expect(err).NotTo(HaveOccurred())
+
+		i := 0
+		for retriever := range ch {
+			err = retriever(&o)
+			Expect(err).NotTo(HaveOccurred())
+
+			switch i {
+			case 0:
+				Expect(o.Val).To(Equal("foo"))
+			case 1:
+				Expect(o.Val).To(Equal("bar"))
+			default:
+				Fail("unexpected number of objects")
+			}
+
+			i++
+		}
+
+		Expect(i).To(Equal(2))
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
+	})
+
+	It("listing objects with channel handles decode errors", func() {
+		server.AppendHandlers(
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"failing_decode_response"}
+
+		ctx, cancel := context.WithCancel(context.TODO())
+		var ch types.ObjectChannel
+		err = api.List(ctx, &o, ObjectChannel(&ch))
+		Expect(err).NotTo(HaveOccurred())
+
+		retriever := <-ch
+		cancel()
+
+		err = retriever(&o)
+		Expect(err).To(MatchError(api_test_error))
+
+		Eventually(ch).Should(BeClosed())
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
+	})
+
+	It("can abort listing objects with channel", func() {
+		server.AppendHandlers(
+			ghttp.RespondWith(200, `[{"value":"foo"},{"value":"bar"},{"value":"baz"},{"value":"bla"}]`, http.Header{"Content-Type": []string{"application/json"}}),
+		)
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := api_test_object{"no_pagination"}
+
+		ctx, cancel := context.WithCancel(context.TODO())
+		var ch types.ObjectChannel
+		err = api.List(ctx, &o, ObjectChannel(&ch))
+		Expect(err).NotTo(HaveOccurred())
+
+		// to prevent having another retriever pushed to the channel we have to
+		// cancel before running the retriever
+		retriever := <-ch
+		cancel()
+
+		err = retriever(&o)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(o.Val).To(Equal("foo"))
+
+		Eventually(ch).Should(BeClosed())
 		Expect(server.ReceivedRequests()).To(HaveLen(1))
 	})
 

@@ -161,7 +161,7 @@ func ExampleAPI_listChannel() {
 	// see example on NewAPI how to implement this function
 	apiClient := newExampleAPI()
 
-	channel := make(types.ObjectChannel)
+	var channel types.ObjectChannel
 
 	// list all backends using a channel and have the library handle the paging.
 	// Oh and we filter by LoadBalancer, because we can and the example has to be somewhere.
@@ -169,7 +169,7 @@ func ExampleAPI_listChannel() {
 	// Beware: listing endpoints usually do not return all data for an object, sometimes
 	// only the identifier is filled. This varies by specific API.
 	b := backend.Backend{LoadBalancer: loadbalancer.LoadBalancerInfo{Identifier: "bogus identifier 2"}}
-	if err := apiClient.List(context.TODO(), &b, AsObjectChannel(&channel)); err != nil {
+	if err := apiClient.List(context.TODO(), &b, ObjectChannel(&channel)); err != nil {
 		fmt.Printf("Error listing backends: %v\n", err)
 	} else {
 		for res := range channel {
