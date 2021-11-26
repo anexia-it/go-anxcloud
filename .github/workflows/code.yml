@@ -14,7 +14,7 @@ env:
 jobs:
   go-lint:
     runs-on: ubuntu-latest
-    container: golang:1.14-stretch
+    container: golang:1.15-buster
     steps:
       - uses: actions/checkout@v2
       - name: run linters
@@ -22,3 +22,12 @@ jobs:
           make tools
           golangci-lint run --config .golangci.yml
           make fmtcheck
+  codegen-uptodate:
+    runs-on: ubuntu-latest
+    container: golang:1.15-buster
+    steps:
+      - uses: actions/checkout@v2
+      - name: generate code
+        run:  |
+          make generate
+          if [ -n "$(git status --porcelain=v1)" ]; then git add -N .; git diff; exit 1; fi
