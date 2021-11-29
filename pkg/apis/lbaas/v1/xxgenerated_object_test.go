@@ -1,0 +1,48 @@
+package v1
+
+import (
+	. "github.com/anexia-it/go-anxcloud/pkg/utils/test/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+)
+
+var _ = Describe("Object Backend", func() {
+	It("implements the interface types.Object", func() {
+		var i types.Object
+		o := Backend{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+	It("implements the interface types.RequestBodyHook", func() {
+		var i types.RequestBodyHook
+		o := Backend{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+})
+
+var _ = Describe("Object Frontend", func() {
+	It("implements the interface types.Object", func() {
+		var i types.Object
+		o := Frontend{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+	It("implements the interface types.RequestBodyHook", func() {
+		var i types.RequestBodyHook
+		o := Frontend{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+})
+
+var _ = Describe("Object LoadBalancer", func() {
+	It("implements the interface types.Object", func() {
+		var i types.Object
+		o := LoadBalancer{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+	It("implements the interface types.RequestBodyHook", func() {
+		var i types.RequestBodyHook
+		o := LoadBalancer{}
+		Expect(&o).To(ImplementInterface(&i))
+	})
+})

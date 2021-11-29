@@ -10,29 +10,20 @@ import (
 	utils "path"
 	"strconv"
 
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 const (
 	path = "api/LBaaS/v1/backend.json"
 )
 
+// The Backend resource configures settings common for all specific backend Server resources linked to it.
+type Backend = v1.Backend
+
 // BackendInfo holds the identifier and the name of a load balancer backend.
 type BackendInfo struct {
 	Identifier string `json:"identifier" anxcloud:"identifier"`
 	Name       string `json:"name"`
-}
-
-type Backend struct {
-	CustomerIdentifier string                        `json:"customer_identifier"`
-	ResellerIdentifier string                        `json:"reseller_identifier"`
-	Identifier         string                        `json:"identifier" anxcloud:"identifier"`
-	Name               string                        `json:"name"`
-	LoadBalancer       loadbalancer.LoadBalancerInfo `json:"load_balancer"`
-	HealthCheck        string                        `json:"health_check"`
-	Mode               common.Mode                   `json:"mode"`
-	ServerTimeout      int                           `json:"server_timeout"`
 }
 
 func (a api) Get(ctx context.Context, page, limit int) ([]BackendInfo, error) {

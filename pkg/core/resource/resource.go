@@ -7,28 +7,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/core/v1"
 )
 
 const pathPrefix = "/api/core/v1/resource.json"
+
+type (
+	Type = v1.Type
+	Info = v1.Info
+)
 
 // Summary describes a resource in short.
 type Summary struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
-}
-
-// Type is part of info.
-type Type struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
-}
-
-// Info contains all information about a resource.
-type Info struct {
-	Identifier string   `json:"identifier" anxcloud:"identifier"`
-	Name       string   `json:"name"`
-	Type       Type     `json:"resource_type"`
-	Tags       []string `json:"tags"`
 }
 
 type listResponse struct {

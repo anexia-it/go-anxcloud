@@ -1,4 +1,4 @@
-package loadbalancer
+package v1
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestLoadbalancer(t *testing.T) {
+func TestLBaaS(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "test suite for Loadbalancer")
+	RunSpecs(t, "test suite for LBaaS API definition")
 }

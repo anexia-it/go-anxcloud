@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
@@ -10,9 +11,8 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
+	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
-	lbaasCommon "github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/loadbalancer"
 )
 
 func newMockServer() *ghttp.Server {
@@ -43,45 +43,44 @@ func newMockServer() *ghttp.Server {
 
 	server := ghttp.NewServer()
 	server.SetAllowUnhandledRequests(true)
-	server.SetUnhandledRequestStatusCode(500)
 
-	backends := []backend.Backend{
+	backends := []lbaasv1.Backend{
 		{
 			Name:       "Example-Backend",
 			Identifier: "bogus identifier 1",
-			Mode:       lbaasCommon.TCP,
-			LoadBalancer: loadbalancer.LoadBalancerInfo{
+			Mode:       lbaasv1.TCP,
+			LoadBalancer: lbaasv1.LoadBalancer{
 				Identifier: "bogus identifier 2",
 			},
 		},
 		{
 			Name:       "backend-01",
 			Identifier: "bogus identifier 3",
-			Mode:       lbaasCommon.TCP,
+			Mode:       lbaasv1.TCP,
 		},
 		{
 			Name:       "test-backend-01",
 			Identifier: "test identifier 1",
-			Mode:       lbaasCommon.TCP,
+			Mode:       lbaasv1.TCP,
 		},
 		{
 			Name:       "test-backend-02",
 			Identifier: "test identifier 2",
-			Mode:       lbaasCommon.TCP,
-			LoadBalancer: loadbalancer.LoadBalancerInfo{
+			Mode:       lbaasv1.TCP,
+			LoadBalancer: lbaasv1.LoadBalancer{
 				Identifier: "bogus identifier 2",
 			},
 		},
 		{
 			Name:       "test-backend-03",
 			Identifier: "test identifier 3",
-			Mode:       lbaasCommon.TCP,
+			Mode:       lbaasv1.TCP,
 		},
 		{
 			Name:       "test-backend-04",
 			Identifier: "test identifier 4",
-			Mode:       lbaasCommon.TCP,
-			LoadBalancer: loadbalancer.LoadBalancerInfo{
+			Mode:       lbaasv1.TCP,
+			LoadBalancer: lbaasv1.LoadBalancer{
 				Identifier: "bogus identifier 2",
 			},
 		},
@@ -158,7 +157,7 @@ func newMockServer() *ghttp.Server {
 			backend.Backend{
 				Name:       "backend-01",
 				Identifier: "generated identifier " + strconv.Itoa(identifierGenerateCounter),
-				Mode:       lbaasCommon.TCP,
+				Mode:       lbaasv1.TCP,
 			},
 		)
 
@@ -182,13 +181,17 @@ func newMockServer() *ghttp.Server {
 
 	server.RouteToHandler("PUT", singleBackendPath, func(res http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("content-type") != "application/json; charset=utf-8" {
-			errorResponse(505, "Content-Type header on request not set", res)
+			errorResponse(500, "Content-Type header on request not set", res)
 			return
 		}
 
-		update := backend.Backend{}
+		update := struct {
+			lbaasv1.Backend
+			LoadBalancer string `json:"load_balancer"`
+		}{}
 		if err := json.NewDecoder(req.Body).Decode(&update); err != nil {
-			errorResponse(505, "Invalid request body", res)
+			fmt.Printf("Invalid request body: %v\n", err)
+			errorResponse(500, fmt.Sprintf("invalid request body: %v", err), res)
 			return
 		}
 
@@ -199,7 +202,8 @@ func newMockServer() *ghttp.Server {
 
 		for _, b := range backends {
 			if b.Identifier == identifier {
-				newBackends = append(newBackends, update)
+				update.Backend.LoadBalancer.Identifier = update.LoadBalancer
+				newBackends = append(newBackends, update.Backend)
 				found = true
 			} else {
 				newBackends = append(newBackends, b)
@@ -212,7 +216,7 @@ func newMockServer() *ghttp.Server {
 			errorResponse(404, "", res)
 		} else {
 			res.Header().Add("Content-Type", "application/json; charset=utf-8")
-			_ = json.NewEncoder(res).Encode(update)
+			_ = json.NewEncoder(res).Encode(update.Backend)
 		}
 	})
 
