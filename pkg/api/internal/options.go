@@ -33,3 +33,12 @@ type ObjectChannelOption struct {
 func (aoc ObjectChannelOption) ApplyToList(o *types.ListOptions) {
 	o.ObjectChannel = aoc.Channel
 }
+
+// FullObjectsOption configures if the List operation shall make a Get operation for each object before
+// returning it to the caller.
+type FullObjectsOption bool
+
+// ApplyToList applies the FullObjectsOption option to all the ListOptions.
+func (foo FullObjectsOption) ApplyToList(o *types.ListOptions) {
+	o.FullObjects = bool(foo)
+}

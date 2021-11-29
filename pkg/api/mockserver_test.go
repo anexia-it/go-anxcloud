@@ -122,11 +122,14 @@ func newMockServer() *ghttp.Server {
 			}
 		}
 
-		ret := make([]backend.Backend, 0, len(backends))
+		ret := make([]map[string]string, 0, len(backends))
 
 		for _, b := range backends {
 			if lb_filter == nil || b.LoadBalancer.Identifier == *lb_filter {
-				ret = append(ret, b)
+				ret = append(ret, map[string]string{
+					"name":       b.Name,
+					"identifier": b.Identifier,
+				})
 			}
 		}
 
@@ -135,7 +138,7 @@ func newMockServer() *ghttp.Server {
 			idxEnd := idxStart + limit
 
 			if idxStart >= len(ret) {
-				ret = make([]backend.Backend, 0)
+				ret = []map[string]string{}
 			} else {
 				if idxEnd > len(ret) {
 					idxEnd = len(ret)
