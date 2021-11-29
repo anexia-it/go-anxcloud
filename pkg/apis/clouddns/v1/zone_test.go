@@ -1,4 +1,4 @@
-package zone
+package v1
 
 import (
 	"context"
@@ -107,7 +107,7 @@ func ensureTestRecord(a api.API, record Record) string {
 	Expect(err).NotTo(HaveOccurred())
 
 	channel := make(types.ObjectChannel)
-	err = a.List(context.TODO(), &record, api.AsObjectChannel(&channel))
+	err = a.List(context.TODO(), &record, api.ObjectChannel(&channel))
 	if err != nil {
 		Fail("Couldn't get list of records")
 		return uuid.Nil.String()
@@ -198,7 +198,7 @@ var _ = Describe("CloudDNS API client", func() {
 			defer cancel()
 
 			channel := make(types.ObjectChannel)
-			err := a.List(ctx, &Zone{}, api.AsObjectChannel(&channel))
+			err := a.List(ctx, &Zone{}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			zone := Zone{}
@@ -394,7 +394,7 @@ var _ = Describe("CloudDNS API client", func() {
 			defer cancel()
 
 			channel := make(types.ObjectChannel)
-			err := a.List(ctx, &Record{ZoneName: zoneName}, api.AsObjectChannel(&channel))
+			err := a.List(ctx, &Record{ZoneName: zoneName}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			r := Record{}
@@ -443,7 +443,7 @@ var _ = Describe("CloudDNS API client", func() {
 			channel := make(types.ObjectChannel)
 
 			mock_search_records_by_name(zoneName, "www")
-			err := a.List(ctx, &Record{ZoneName: zoneName, Name: "www"}, api.AsObjectChannel(&channel))
+			err := a.List(ctx, &Record{ZoneName: zoneName, Name: "www"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			r := Record{}
@@ -459,7 +459,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_rdata(zoneName, "::1")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, RData: "::1"}, api.AsObjectChannel(&channel))
+			err = a.List(ctx, &Record{ZoneName: zoneName, RData: "::1"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
@@ -474,7 +474,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_type(zoneName, "TXT")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, Type: "TXT"}, api.AsObjectChannel(&channel))
+			err = a.List(ctx, &Record{ZoneName: zoneName, Type: "TXT"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
@@ -489,7 +489,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_all(zoneName, "www", "127.0.0.1", "A")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, Name: "www", RData: "127.0.0.1", Type: "A"}, api.AsObjectChannel(&channel))
+			err = a.List(ctx, &Record{ZoneName: zoneName, Name: "www", RData: "127.0.0.1", Type: "A"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
