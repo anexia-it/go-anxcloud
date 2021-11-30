@@ -49,12 +49,12 @@ var buildNumberRegex = regexp.MustCompile(`[bB]?(\d+)`)
 
 func extractBuildNumber(build string) int {
 	matches := buildNumberRegex.FindStringSubmatch(build)
-	if len(matches) == 0 {
+	if len(matches) != 2 {
 		// panic here since someone needs to check on the regex
 		panic("build does not match the buildNumberRegex")
 	}
 
-	number, err := strconv.ParseInt(matches[0], 10, 0)
+	number, err := strconv.ParseInt(matches[1], 10, 0)
 	if err != nil {
 		panic(fmt.Sprintf("could not extract build for %s: %s", build, err.Error()))
 	}
@@ -278,7 +278,14 @@ var _ = Describe("vsphere API endpoint tests", func() {
 
 		})
 	})
+})
 
+var _ = Describe("build number parsing for templates", func() {
+	It("extracting build number from string", func() {
+		Expect(extractBuildNumber("b5555")).To(BeEquivalentTo(5555))
+		Expect(extractBuildNumber("B111")).To(BeEquivalentTo(111))
+		Expect(extractBuildNumber("123")).To(BeEquivalentTo(123))
+	})
 })
 
 func randomPublicSSHKey() string {
