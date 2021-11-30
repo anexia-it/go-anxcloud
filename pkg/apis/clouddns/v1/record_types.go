@@ -4,7 +4,7 @@ package v1
 
 type Record struct {
 	Identifier string `json:"identifier,omitempty" anxcloud:"identifier"`
-	ZoneName   string
+	ZoneName   string `json:"-"`
 	Immutable  bool   `json:"immutable,omitempty"`
 	Name       string `json:"name"`
 	RData      string `json:"rdata"`

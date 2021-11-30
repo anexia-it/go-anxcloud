@@ -16,7 +16,7 @@ type DNSServer struct {
 	Server string `json:"server"`
 
 	// DNS Server alias
-	Alias string
+	Alias string `json:"alias"`
 }
 
 // anxcloud:object:hooks=ResponseDecodeHook,RequestFilterHook,RequestBodyHook,ResponseFilterHook,PaginationSupportHook
