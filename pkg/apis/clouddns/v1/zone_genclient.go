@@ -50,6 +50,10 @@ func (z *Zone) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 			ZoneName string `json:"zoneName"`
 		}{*z, z.Name}
 
+		// `name` does not exist as a field on the Engine API for these requests,
+		// so we strip it from the request body.
+		zWithZoneName.Name = ""
+
 		return zWithZoneName, nil
 	}
 
