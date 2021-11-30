@@ -6,8 +6,9 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
@@ -43,6 +44,23 @@ const (
 
 var templateID string
 
+// This versioning scheme that currently seems to be in place for template build numbers.
+var buildNumberRegex = regexp.MustCompile(`[bB]?(\d+)`)
+
+func extractBuildNumber(build string) int {
+	matches := buildNumberRegex.FindStringSubmatch(build)
+	if len(matches) == 0 {
+		// panic here since someone needs to check on the regex
+		panic("build does not match the buildNumberRegex")
+	}
+
+	number, err := strconv.ParseInt(matches[0], 10, 0)
+	if err != nil {
+		panic(fmt.Sprintf("could not extract build for %s: %s", build, err.Error()))
+	}
+	return int(number)
+}
+
 func vsphereTestInit() {
 	cli, err := client.New(client.AuthFromEnv(false))
 
@@ -65,7 +83,7 @@ func vsphereTestInit() {
 	}
 
 	sort.Slice(selected, func(i, j int) bool {
-		return strings.Compare(selected[i].Build, selected[j].Build) > 0
+		return extractBuildNumber(selected[i].Build) > extractBuildNumber(selected[j].Build)
 	})
 
 	log.Printf("VSphere: selected template %v (build %v, ID %v)\n", selected[0].Name, selected[0].Build, selected[0].ID)
