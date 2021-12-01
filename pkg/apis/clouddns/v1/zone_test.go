@@ -50,7 +50,7 @@ func ensureTestZone(api api.API, name string, times randomTimes) {
 	createdZones = append(createdZones, name)
 }
 
-func cleanupZones(api api.API) error {
+func cleanupZones(a api.API) error {
 	if !test.RunAsIntegrationTest {
 		return nil
 	}
@@ -63,11 +63,11 @@ func cleanupZones(api api.API) error {
 		lastTryErrors := make([]error, 0, len(createdZones))
 
 		for _, zoneName := range createdZones {
-			err := api.Destroy(context.TODO(), &Zone{Name: zoneName})
+			err := a.Destroy(context.TODO(), &Zone{Name: zoneName})
 
 			if err != nil {
-				re := &client.ResponseError{}
-				if isResponseError := errors.As(err, &re); !isResponseError || re.Response.StatusCode != 404 {
+				re := api.HTTPError{}
+				if isResponseError := errors.As(err, &re); !isResponseError || re.StatusCode() != 404 {
 					notDone = append(notDone, zoneName)
 					lastTryErrors = append(lastTryErrors, err)
 				}
