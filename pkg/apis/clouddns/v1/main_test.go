@@ -5,20 +5,15 @@ import (
 
 	"github.com/anexia-it/go-anxcloud/pkg/api"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-func init() {
-	test.InitFlags()
-}
-
 func getApi() (api.API, error) {
 	options := make([]client.Option, 0, 2)
 
-	if test.RunAsIntegrationTest {
+	if isIntegrationTest {
 		options = append(options, client.AuthFromEnv(false))
 	} else {
 		initMockServer()
@@ -34,14 +29,7 @@ func getApi() (api.API, error) {
 
 func TestCloudDNS(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	suite := "Generic CloudDNS unit tests"
-
-	if test.RunAsIntegrationTest {
-		suite = "Generic CloudDNS integration tests"
-	}
-
-	RunSpecs(t, suite)
+	RunSpecs(t, "CloudDNS tests")
 
 	a, _ := getApi()
 	if err := cleanupZones(a); err != nil {

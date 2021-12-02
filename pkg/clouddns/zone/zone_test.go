@@ -9,11 +9,11 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/anexia-it/go-anxcloud/pkg/client"
+
+	testutils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
 )
 
 type randomTimes struct {
@@ -26,7 +26,7 @@ type randomTimes struct {
 var createdZones = make([]string, 0)
 
 func ensureTestZone(c client.Client, name string, times randomTimes) {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return
 	}
 
@@ -48,7 +48,7 @@ func ensureTestZone(c client.Client, name string, times randomTimes) {
 }
 
 func cleanupZones(c client.Client) error {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return nil
 	}
 
@@ -98,7 +98,7 @@ func cleanupZones(c client.Client) error {
 }
 
 func ensureTestRecord(c client.Client, zone string, record RecordRequest) uuid.UUID {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return uuid.Nil
 	}
 
@@ -124,7 +124,7 @@ var _ = Describe("CloudDNS API client", func() {
 	var times randomTimes
 
 	BeforeEach(func() {
-		zoneName = test.RandomHostname() + ".go-anxcloud.test"
+		zoneName = testutils.RandomHostname() + ".go-anxcloud.test"
 		c = getClient()
 
 		rng := rand.New(rand.NewSource(GinkgoRandomSeed()))
