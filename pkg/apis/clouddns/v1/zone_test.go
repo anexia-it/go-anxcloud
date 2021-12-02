@@ -28,7 +28,7 @@ type randomTimes struct {
 var createdZones = make([]string, 0)
 
 func ensureTestZone(api api.API, name string, times randomTimes) {
-	if !test.RunAsIntegrationTest {
+	if useMock {
 		return
 	}
 
@@ -51,7 +51,7 @@ func ensureTestZone(api api.API, name string, times randomTimes) {
 }
 
 func cleanupZones(a api.API) error {
-	if !test.RunAsIntegrationTest {
+	if useMock {
 		return nil
 	}
 
@@ -99,7 +99,7 @@ func cleanupZones(a api.API) error {
 }
 
 func ensureTestRecord(a api.API, record Record) string {
-	if !test.RunAsIntegrationTest {
+	if useMock {
 		return uuid.Nil.String()
 	}
 
