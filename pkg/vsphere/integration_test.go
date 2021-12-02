@@ -1,4 +1,7 @@
-package tests_test
+// +build integration
+// go:build integration
+
+package vsphere
 
 import (
 	"context"
@@ -6,10 +9,10 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"log"
-	"regexp"
 	"sort"
-	"strconv"
 	"time"
+
+	"golang.org/x/crypto/ssh"
 
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
@@ -26,13 +29,14 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
 
 	testUtils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"golang.org/x/crypto/ssh"
 )
 
 const (
+	locationID = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
+	vlanID     = "02f39d20ca0f4adfb5032f88dbc26c39"
+
 	templateType  = "templates"
 	templateName  = "Flatcar Linux Stable"
 	cpus          = 2
@@ -44,24 +48,7 @@ const (
 
 var templateID string
 
-// This versioning scheme that currently seems to be in place for template build numbers.
-var buildNumberRegex = regexp.MustCompile(`[bB]?(\d+)`)
-
-func extractBuildNumber(build string) int {
-	matches := buildNumberRegex.FindStringSubmatch(build)
-	if len(matches) != 2 {
-		// panic here since someone needs to check on the regex
-		panic("build does not match the buildNumberRegex")
-	}
-
-	number, err := strconv.ParseInt(matches[1], 10, 0)
-	if err != nil {
-		panic(fmt.Sprintf("could not extract build for %s: %s", build, err.Error()))
-	}
-	return int(number)
-}
-
-func vsphereTestInit() {
+func initTemplateID() {
 	cli, err := client.New(client.AuthFromEnv(false))
 
 	if err != nil {
@@ -91,7 +78,8 @@ func vsphereTestInit() {
 	templateID = selected[0].ID
 }
 
-var _ = Describe("vsphere API endpoint tests", func() {
+var _ = Describe("vsphere API client", func() {
+	initTemplateID()
 
 	var cli client.Client
 
@@ -277,14 +265,6 @@ var _ = Describe("vsphere API endpoint tests", func() {
 			Expect(err).NotTo(BeNil())
 
 		})
-	})
-})
-
-var _ = Describe("build number parsing for templates", func() {
-	It("extracting build number from string", func() {
-		Expect(extractBuildNumber("b5555")).To(BeEquivalentTo(5555))
-		Expect(extractBuildNumber("B111")).To(BeEquivalentTo(111))
-		Expect(extractBuildNumber("123")).To(BeEquivalentTo(123))
 	})
 })
 
