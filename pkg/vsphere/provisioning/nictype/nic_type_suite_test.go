@@ -9,5 +9,5 @@ import (
 
 func TestNICTypeSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "NIC type test suite")
+	RunSpecs(t, "vsphere/provisioning/nictype API client suite")
 }
