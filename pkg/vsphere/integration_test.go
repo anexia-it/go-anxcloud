@@ -8,7 +8,6 @@ import (
 	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -17,20 +16,18 @@ import (
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
 
-	cpuperformancetype "github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/cpuperformancetypes"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
-
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/anexia-it/go-anxcloud/pkg/ipam/address"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/templates"
 	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
 
-	testUtils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
+	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	gomegaTypes "github.com/onsi/gomega/types"
 )
 
 const (
@@ -46,225 +43,263 @@ const (
 	disk          = 10
 )
 
-var templateID string
-
-func initTemplateID() {
-	cli, err := client.New(client.AuthFromEnv(false))
-
-	if err != nil {
-		log.Fatalf("Error creating client for retrieving template ID: %v\n", err)
-	}
-
-	tplAPI := templates.NewAPI(cli)
-	tpls, err := tplAPI.List(context.TODO(), locationID, templates.TemplateTypeTemplates, 1, 500)
-
-	if err != nil {
-		log.Fatalf("Error retrieving templates: %v\n", err)
-	}
-
-	selected := make([]templates.Template, 0, 1)
-	for _, tpl := range tpls {
-		if tpl.Name == templateName {
-			selected = append(selected, tpl)
-		}
-	}
-
-	sort.Slice(selected, func(i, j int) bool {
-		return extractBuildNumber(selected[i].Build) > extractBuildNumber(selected[j].Build)
-	})
-
-	log.Printf("VSphere: selected template %v (build %v, ID %v)\n", selected[0].Name, selected[0].Build, selected[0].ID)
-
-	templateID = selected[0].ID
+func BeBuiltFromTemplate(id string) gomegaTypes.GomegaMatcher {
+	return WithTransform(
+		func(i info.Info) string { return i.TemplateID },
+		Equal(id),
+	)
 }
 
-var _ = Describe("vsphere API client", func() {
-	initTemplateID()
+func HaveCPUs(cpus int) gomegaTypes.GomegaMatcher {
+	return WithTransform(
+		func(i info.Info) int { return i.Cores },
+		Equal(cpus),
+	)
+}
 
+func HaveSockets(sockets int) gomegaTypes.GomegaMatcher {
+	return WithTransform(
+		func(i info.Info) int { return i.Cores / i.CPU },
+		Equal(sockets),
+	)
+}
+
+func HaveMemory(memory int) gomegaTypes.GomegaMatcher {
+	return WithTransform(
+		func(i info.Info) int { return i.RAM },
+		Equal(memory),
+	)
+}
+
+func HaveDisks(diskSizes ...int) gomegaTypes.GomegaMatcher {
+	floatSizes := make([]float64, 0, len(diskSizes))
+	for _, s := range diskSizes {
+		floatSizes = append(floatSizes, float64(s))
+	}
+
+	return SatisfyAll(
+		WithTransform(
+			func(i info.Info) int { return i.Disks },
+			Equal(len(diskSizes)),
+		),
+		WithTransform(
+			func(i info.Info) []float64 {
+				ret := make([]float64, 0, len(i.DiskInfo))
+				for _, di := range i.DiskInfo {
+					ret = append(ret, di.DiskGB)
+				}
+				return ret
+			},
+			BeEquivalentTo(floatSizes),
+		),
+	)
+}
+
+func HaveIPv4Addresses(addresses ...[]string) gomegaTypes.GomegaMatcher {
+	return WithTransform(
+		func(i info.Info) [][]string {
+			ret := make([][]string, 0, len(i.Network))
+			for _, net := range i.Network {
+				ret = append(ret, net.IPv4)
+			}
+			return ret
+		},
+		SatisfyAll(
+			HaveLen(len(addresses)),
+			ConsistOf(addresses),
+		),
+	)
+}
+
+// Best practice is to have tests indepentent from each other, but this would require us to spawn a new VM and
+// wait for it to be ready for most of the tests in this block. Because this increases test runtime a lot, we
+// opted to a ordered aproach, having the VM-create test create the VM we use for the other tests. This makes
+// the tests depending on each other, but reduces runtime _a lot_.
+// When adding new test cases, be especially careful to check if everything is fine after you modified the VM
+// to ensure test cases following your changed one don't fail on things you didn't check and they didn't touch.
+var _ = Describe("vsphere API client", Ordered, func() {
 	var cli client.Client
 
 	BeforeEach(func() {
 		var err error
-		cli, err = client.New(client.AuthFromEnv(false))
+		cli, err = client.New(
+			client.AuthFromEnv(false),
+			client.LogWriter(GinkgoWriter),
+		)
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("VMList Endpoint", func() {
-		It("Should List VMs", func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-			defer cancel()
+	var ipAddress string
+	var templateID string
+	var vmID string
+	var provisionID string
 
-			vms, err := vmlist.NewAPI(cli).Get(ctx, 1, 1)
-			if err != nil {
-				return
+	verifyVMInfo := func(expectedMemory int) {
+		It("eventually retrieves the test VM with expected data", func() {
+			getVMInfo := func(g Gomega) info.Info {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+
+				vmInfo, err := info.NewAPI(cli).Get(ctx, vmID)
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(vmInfo).NotTo(BeNil())
+
+				return vmInfo
 			}
-			Expect(vms).To(HaveLen(1))
+
+			Eventually(getVMInfo, 5*time.Minute, 30*time.Second).Should(SatisfyAll(
+				BeBuiltFromTemplate(templateID),
+				HaveCPUs(cpus),
+				HaveSockets(sockets),
+				HaveMemory(expectedMemory),
+				HaveDisks(disk),
+				HaveIPv4Addresses([]string{ipAddress}),
+			))
 		})
+	}
+
+	It("should find the template by name", func() {
+		tplAPI := templates.NewAPI(cli)
+		tpls, err := tplAPI.List(context.TODO(), locationID, templates.TemplateTypeTemplates, 1, 500)
+
+		Expect(err).NotTo(HaveOccurred())
+
+		selected := make([]templates.Template, 0, 1)
+		for _, tpl := range tpls {
+			if tpl.Name == templateName {
+				selected = append(selected, tpl)
+			}
+		}
+
+		sort.Slice(selected, func(i, j int) bool {
+			return extractBuildNumber(selected[i].Build) > extractBuildNumber(selected[j].Build)
+		})
+
+		templateID = selected[0].ID
 	})
 
-	Context("provisioning endpoint", func() {
+	It("should reserve an IP address for our test VM", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
-		Context("VM endpoint", func() {
+		res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
+			LocationID: locationID,
+			VlanID:     vlanID,
+			Count:      1,
+		})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(len(res.Data)).To(Equal(1))
 
-			It("should create a VM and delete it later", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-				defer cancel()
+		ipAddress = res.Data[0].Address
+	})
 
-				By("reserving a new IP address")
-				res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
-					LocationID: locationID,
-					VlanID:     vlanID,
-					Count:      1,
-				})
-				Expect(err).NotTo(HaveOccurred())
-				Expect(len(res.Data)).To(Equal(1))
+	It("should create the test VM with the reserved IP address", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		defer cancel()
 
-				networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{res.Data[0].Address}, VLAN: vlanID}}
-				definition := vm.NewAPI(cli).NewDefinition(locationID, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
-				definition.Sockets = sockets
-				definition.SSH = randomPublicSSHKey()
+		definition := vm.NewAPI(cli).NewDefinition(
+			locationID,
+			templateType, templateID,
+			randomHostname(),
+			cpus, memory, disk,
+			[]vm.Network{
+				{
+					NICType: "vmxnet3",
+					IPs:     []string{ipAddress},
+					VLAN:    vlanID,
+				},
+			},
+		)
+		definition.Sockets = sockets
+		definition.SSH = randomPublicSSHKey()
 
-				By("creating a new VM")
-				base64Encoding := true
-				provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
-				Expect(err).NotTo(HaveOccurred())
+		provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, true)
+		Expect(err).NotTo(HaveOccurred())
 
-				By("waiting for the VM to be ready")
-				vmID, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionResponse.Identifier)
-				Expect(err).NotTo(HaveOccurred())
+		provisionID = provisionResponse.Identifier
+	})
 
-				By("updating the VM")
-				change := vm.NewChange()
-				change.MemoryMBs = changedMemory
-				updateResponse, err := vm.NewAPI(cli).Update(ctx, vmID, change)
-				Expect(err).NotTo(HaveOccurred())
+	It("eventually retrieves the test VM provisioning being completed", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
 
-				By("waiting for VM to be ready after an update")
-				newVMid, err := progress.NewAPI(cli).AwaitCompletion(ctx, updateResponse.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-				if newVMid != vmID {
-					log.Fatalf("VM change resulted in a new ID: %v -> %v", vmID, newVMid)
+		id, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionID)
+		Expect(err).NotTo(HaveOccurred())
+
+		vmID = id
+	})
+
+	It("lists VMs including our test VM", func() {
+		found := false
+		page := 1
+
+		for !found {
+			vms, err := vmlist.NewAPI(cli).Get(context.TODO(), page, 20)
+			Expect(err).To(BeNil())
+			Expect(vms).NotTo(BeEmpty())
+
+			for _, vm := range vms {
+				if vm.Identifier == vmID {
+					found = true
+					break
 				}
+			}
 
-				By("deleting the VM")
-				response, err := vm.NewAPI(cli).Deprovision(ctx, vmID, false)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(response.Identifier).ToNot(BeEmpty())
-				returnedIdent, err := progress.NewAPI(cli).AwaitCompletion(ctx, response.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(returnedIdent).To(BeEquivalentTo(vmID))
-			})
-		})
-
-		Context("templates endpoint", func() {
-
-			It("should list all available templates", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-				defer cancel()
-
-				_, err := templates.NewAPI(cli).List(ctx, locationID, templates.TemplateTypeTemplates, 1, 50)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-		})
-
-		Context("IPs endpoint", func() {
-
-			It("should get a free IP address", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-				defer cancel()
-
-				_, err := ips.NewAPI(cli).GetFree(ctx, locationID, vlanID)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-		})
-
-		Context("disk type endpoint", func() {
-
-			It("should list all available disk types", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-				defer cancel()
-
-				_, err := disktype.NewAPI(cli).List(ctx, locationID, 1, 1000)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-		})
-
-		Context("CPU Performance Type endpoint", func() {
-
-			It("should list all cpu performance types", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-				defer cancel()
-				_, err := cpuperformancetype.NewAPI(cli).List(ctx)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-		})
-
-		Context("VSphere Location endpoint", func() {
-
-			It("should list all VSPhere locations", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-				defer cancel()
-				locations, err := location.NewAPI(cli).List(ctx, 1, 50, "", "")
-				Expect(err).NotTo(HaveOccurred())
-				Expect(len(locations)).To(BeNumerically(">", 0))
-			})
-
-		})
-
+			page++
+		}
 	})
 
-	Context("info endpoint", func() {
-		It("should create and retrieve a VM", func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
-			defer cancel()
+	verifyVMInfo(memory)
 
-			By("reserving a new IP address")
-			res, err := address.NewAPI(cli).ReserveRandom(ctx, address.ReserveRandom{
-				LocationID: locationID,
-				VlanID:     vlanID,
-				Count:      1,
-			})
-			Expect(err).NotTo(HaveOccurred())
-			Expect(len(res.Data)).To(Equal(1))
+	It("should update our test VM", func() {
+		change := vm.NewChange()
+		change.MemoryMBs = changedMemory
+		updateResponse, err := vm.NewAPI(cli).Update(context.TODO(), vmID, change)
+		Expect(err).NotTo(HaveOccurred())
 
-			networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{res.Data[0].Address}, VLAN: vlanID}}
-			definition := vm.NewAPI(cli).NewDefinition(locationID, templateType, templateID, randomHostname(), cpus, memory, disk, networkInterfaces)
-			definition.SSH = randomPublicSSHKey()
-
-			By("creating a new VM")
-			base64Encoding := true
-			provisionResponse, err := vm.NewAPI(cli).Provision(ctx, definition, base64Encoding)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("waiting for the VM to be ready")
-			vmID, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionResponse.Identifier)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("retrieving the VM")
-			vmInfo, err := info.NewAPI(cli).Get(ctx, vmID)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(vmInfo).NotTo(BeNil())
-			Expect(vmInfo.Disks).To(Equal(1))
-			expectedDiskSize := 10.00
-			Expect(vmInfo.DiskInfo[0].DiskGB).To(Equal(expectedDiskSize))
-
-		})
+		provisionID = updateResponse.Identifier
 	})
 
-	Context("progress Endpoint", func() {
-		It("should handle 404 correctly", func() {
-			By("using an identifiert which does not exist")
-			ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancelFunc()
-			progress, err := progress.NewAPI(cli).AwaitCompletion(ctx, "this-id-does-not-exist")
-			Expect(progress).To(BeEmpty())
-			Expect(err).NotTo(BeNil())
+	It("eventually retrieves the test VM updating being completed", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
 
-		})
+		id, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionID)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(id).To(Equal(vmID))
+	})
+
+	verifyVMInfo(changedMemory)
+
+	It("deletes the VM, waiting for it to be gone", func() {
+		response, err := vm.NewAPI(cli).Deprovision(context.TODO(), vmID, false)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Identifier).ToNot(BeEmpty())
+
+		provisionID = response.Identifier
+	})
+
+	It("eventually retrieves the test VM deletion being completed", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		returnedIdent, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionID)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(returnedIdent).To(BeEquivalentTo(vmID))
+
+		vmID = "" // we clear vmID to signal the VM already being deleted to the AfterAll block
+	})
+
+	// this block deletes the created VM if not already done by the test for that
+	AfterAll(func() {
+		if vmID == "" {
+			return
+		}
+
+		By("deleting the VM")
+		response, err := vm.NewAPI(cli).Deprovision(context.TODO(), vmID, false)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Identifier).ToNot(BeEmpty())
 	})
 })
 
@@ -279,5 +314,5 @@ func randomPublicSSHKey() string {
 }
 
 func randomHostname() string {
-	return fmt.Sprintf("go-test-%s", testUtils.RandomHostname())
+	return fmt.Sprintf("go-test-%s", test.RandomHostname())
 }

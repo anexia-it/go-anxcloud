@@ -1,19 +1,21 @@
 // +build integration
 // go:build integration
 
-package nictype
+package disktype
 
 import (
 	"context"
-	"time"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("NIC type API client", func() {
+const (
+	locationID = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
+)
+
+var _ = Describe("vsphere/provisioning/disktype API client", func() {
 	var cli client.Client
 
 	BeforeEach(func() {
@@ -22,11 +24,11 @@ var _ = Describe("NIC type API client", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	It("lists available NIC types", func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	It("lists available disk types", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 		defer cancel()
-		nicTypes, err := NewAPI(cli).List(ctx)
+
+		_, err := NewAPI(cli).List(ctx, locationID, 1, 1000)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(len(nicTypes)).To(BeNumerically(">", 1))
 	})
 })
