@@ -33,20 +33,23 @@ benchmark:
 
 .PHONY: test
 test:
-	CGO_ENABLED=1 go test -coverpkg ./pkg/... -coverprofile coverage.out -timeout 0 -race ./pkg/...
+	CGO_ENABLED=1 go test 			\
+		-timeout 0 					\
+		-race 						\
+		-coverpkg ./pkg/...			\
+		-coverprofile coverage.out 	\
+		./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
 func-test:
-	# we run the tests in our tests directory and for every package listed additionally
-	# some of the newer tests (starting with the refactored CloudDNS tests) can run as
-	# either unit or integration tests, using mocks of the API for unit tests. They need
-	# the -integration-test flag to run as integration tests.
-	CGO_ENABLED=1 go test -timeout 180m                \
-	    -coverpkg ./pkg/... -coverprofile coverage.out \
-	    ./tests/...                                    \
-	    ./pkg/clouddns/zone/...                        \
-	    -args -integration-test
+	CGO_ENABLED=1 go test  			\
+		-timeout 180m				\
+		-race 						\
+		-tags integration 			\
+	    -coverpkg ./pkg/...			\
+		-coverprofile coverage.out	\
+	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: go-lint
