@@ -2,7 +2,7 @@ package loadbalancer
 
 import (
 	. "github.com/anexia-it/go-anxcloud/pkg/utils/test/gomega"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"

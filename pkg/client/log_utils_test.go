@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"testing"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/funcr"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -146,8 +145,3 @@ var _ = Describe("stringifyHeaders", func() {
 		Expect(headers).To(Equal("000: '1234', Foo: ['Bar', 'Baz'], Foxes: 'are cool'"))
 	})
 })
-
-func TestTraceLogging(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "client trace-logging suite")
-}

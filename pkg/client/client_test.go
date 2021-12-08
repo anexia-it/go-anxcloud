@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
 )
@@ -221,7 +221,7 @@ var _ = Describe("client", func() {
 	})
 })
 
-func TestClient(t *testing.T) {
+func TestClientSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "client suite")
+	RunSpecs(t, "client test suite")
 }
