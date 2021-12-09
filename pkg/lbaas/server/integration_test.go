@@ -48,6 +48,24 @@ var _ = Describe("lbaas/server client", func() {
 		backend = b
 	})
 
+	createServer := func(definition Definition) Server {
+		s, err := api.Create(context.TODO(), definition)
+		Expect(err).NotTo(HaveOccurred())
+
+		DeferCleanup(func() {
+			err := api.DeleteByID(context.TODO(), s.Identifier)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Expect(s.Name).To(Equal(definition.Name))
+		Expect(s.Port).To(Equal(definition.Port))
+		Expect(s.IP).To(Equal(definition.IP))
+		Expect(s.Backend).NotTo(BeNil())
+		Expect(s.Backend.Identifier).To(Equal(backend.Identifier))
+
+		return s
+	}
+
 	Context("with a server created for testing", func() {
 		var definition Definition
 		var server Server
@@ -61,21 +79,7 @@ var _ = Describe("lbaas/server client", func() {
 				Backend: backend.Identifier,
 			}
 
-			s, err := api.Create(context.TODO(), definition)
-			Expect(err).NotTo(HaveOccurred())
-
-			DeferCleanup(func() {
-				err := api.DeleteByID(context.TODO(), s.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			Expect(s.Name).To(Equal(definition.Name))
-			Expect(s.Port).To(Equal(definition.Port))
-			Expect(s.IP).To(Equal(definition.IP))
-			Expect(s.Backend).NotTo(BeNil())
-			Expect(s.Backend.Identifier).To(Equal(backend.Identifier))
-
-			server = s
+			server = createServer(definition)
 		})
 
 		It("lists servers including our test server", func() {
@@ -121,6 +125,36 @@ var _ = Describe("lbaas/server client", func() {
 			Expect(s.Name).To(Equal(definition.Name))
 			Expect(s.IP).To(Equal(definition.IP))
 			Expect(s.Port).To(Equal(definition.Port))
+		})
+	})
+
+	Context("with some servers created for testing", func() {
+		const numberOfTestServers = 5
+
+		BeforeEach(func() {
+			for i := 0; i < numberOfTestServers; i++ {
+				createServer(Definition{
+					Name:    test.TestResourceName(),
+					State:   common.NewlyCreated,
+					IP:      "8.8.8.8",
+					Port:    8080,
+					Backend: backend.Identifier,
+				})
+			}
+		})
+
+		It("iterates through pages as expected", func() {
+			page, err := api.GetPage(context.TODO(), 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">=", numberOfTestServers))
+
+			// we already had the first page
+			for i := 2; i < numberOfTestServers+1; i++ {
+				page, err = api.NextPage(context.TODO(), page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 	})
 })

@@ -64,6 +64,21 @@ var _ = Describe("lbaas/bind client", func() {
 		frontendIdentifier = f.Identifier
 	})
 
+	createBind := func(definition Definition) Bind {
+		b, err := api.Create(context.TODO(), definition)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(b.Name).To(Equal(definition.Name))
+		Expect(b.Frontend.Identifier).To(Equal(frontendIdentifier))
+
+		DeferCleanup(func() {
+			err := api.DeleteByID(context.TODO(), b.Identifier)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		return b
+	}
+
 	Context("with a Bind created for testing", func() {
 		var definition Definition
 		var bind Bind
@@ -75,18 +90,7 @@ var _ = Describe("lbaas/bind client", func() {
 				State:    common.NewlyCreated,
 			}
 
-			b, err := api.Create(context.TODO(), definition)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(b.Name).To(Equal(definition.Name))
-			Expect(b.Frontend.Identifier).To(Equal(frontendIdentifier))
-
-			DeferCleanup(func() {
-				err := api.DeleteByID(context.TODO(), b.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			bind = b
+			bind = createBind(definition)
 		})
 
 		It("lists Binds including our test Bind", func() {
@@ -127,6 +131,34 @@ var _ = Describe("lbaas/bind client", func() {
 
 			Expect(b.Identifier).To(Equal(bind.Identifier))
 			Expect(b.Name).To(Equal(definition.Name))
+		})
+	})
+
+	Context("with some binds created for testing", func() {
+		const numberOfTestBinds = 5
+
+		BeforeEach(func() {
+			for i := 0; i < numberOfTestBinds; i++ {
+				createBind(Definition{
+					Name:     test.TestResourceName(),
+					Frontend: frontendIdentifier,
+					State:    common.NewlyCreated,
+				})
+			}
+		})
+
+		It("iterates through pages as expected", func() {
+			page, err := api.GetPage(context.TODO(), 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">=", numberOfTestBinds))
+
+			// we already had the first page
+			for i := 2; i < numberOfTestBinds+1; i++ {
+				page, err = api.NextPage(context.TODO(), page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 	})
 })

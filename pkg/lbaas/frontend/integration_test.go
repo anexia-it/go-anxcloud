@@ -47,6 +47,23 @@ var _ = Describe("lbaas/frontend client", func() {
 		backend = b
 	})
 
+	createFrontend := func(def Definition) Frontend {
+		f, err := api.Create(context.TODO(), def)
+		Expect(err).NotTo(HaveOccurred())
+
+		DeferCleanup(func() {
+			err := api.DeleteByID(context.TODO(), f.Identifier)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Expect(f.Name).To(Equal(def.Name))
+		Expect(f.Mode).To(Equal(def.Mode))
+		Expect(f.LoadBalancer).NotTo(BeNil())
+		Expect(f.LoadBalancer.Identifier).To(Equal(loadbalancerIdentifier))
+
+		return f
+	}
+
 	Context("with a frontend created for testing", func() {
 		var definition Definition
 		var frontend Frontend
@@ -60,20 +77,7 @@ var _ = Describe("lbaas/frontend client", func() {
 				State:          common.NewlyCreated,
 			}
 
-			f, err := api.Create(context.TODO(), definition)
-			Expect(err).NotTo(HaveOccurred())
-
-			DeferCleanup(func() {
-				err := api.DeleteByID(context.TODO(), f.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			Expect(f.Name).To(Equal(definition.Name))
-			Expect(f.Mode).To(Equal(definition.Mode))
-			Expect(f.LoadBalancer).NotTo(BeNil())
-			Expect(f.LoadBalancer.Identifier).To(Equal(loadbalancerIdentifier))
-
-			frontend = f
+			frontend = createFrontend(definition)
 		})
 
 		It("lists frontends including our test frontend", func() {
@@ -118,6 +122,36 @@ var _ = Describe("lbaas/frontend client", func() {
 			Expect(f.Identifier).To(Equal(frontend.Identifier))
 			Expect(f.Name).To(Equal(definition.Name))
 			Expect(f.Mode).To(Equal(common.TCP))
+		})
+	})
+
+	Context("with some frontends created for testing", func() {
+		const numberOfTestFrontends = 5
+
+		BeforeEach(func() {
+			for i := 0; i < numberOfTestFrontends; i++ {
+				createFrontend(Definition{
+					Name:           test.TestResourceName(),
+					LoadBalancer:   loadbalancerIdentifier,
+					DefaultBackend: backend.Identifier,
+					Mode:           common.TCP,
+					State:          common.NewlyCreated,
+				})
+			}
+		})
+
+		It("iterates through pages as expected", func() {
+			page, err := api.GetPage(context.TODO(), 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">=", numberOfTestFrontends))
+
+			// we already had the first page
+			for i := 2; i < numberOfTestFrontends+1; i++ {
+				page, err = api.NextPage(context.TODO(), page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 	})
 })
