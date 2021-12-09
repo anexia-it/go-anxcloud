@@ -29,8 +29,7 @@ jobs:
           go-version: ${{ matrix.go.version }}
       - name: run linters
         run: |
-          make tools
-          golangci-lint run --config .golangci.yml
+          make go-lint
           make fmtcheck
   codegen-uptodate:
     runs-on: ubuntu-latest
