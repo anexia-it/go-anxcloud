@@ -36,7 +36,6 @@ test:
 	CGO_ENABLED=1 go test 			\
 		-timeout 0 					\
 		-race 						\
-		-coverpkg ./pkg/...			\
 		-coverprofile coverage.out 	\
 		./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
