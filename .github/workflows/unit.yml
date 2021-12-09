@@ -9,8 +9,19 @@ on:
 jobs:
   unit:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+        - version: "1.16"
+          name: target
+        - version: "1.17"
+          name: latest
+    name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go.version }}
       - name: run unit tests
         run: make test
       - name: Upload coverage to Codecov

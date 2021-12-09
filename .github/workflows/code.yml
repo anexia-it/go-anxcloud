@@ -14,9 +14,19 @@ env:
 jobs:
   go-lint:
     runs-on: ubuntu-latest
-    container: golang:1.15-buster
+    strategy:
+      matrix:
+        go:
+        - version: "1.16"
+          name: target
+        - version: "1.17"
+          name: latest
+    name: "Linting with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go.version }}
       - name: run linters
         run: |
           make tools
@@ -24,9 +34,19 @@ jobs:
           make fmtcheck
   codegen-uptodate:
     runs-on: ubuntu-latest
-    container: golang:1.15-buster
+    strategy:
+      matrix:
+        go:
+        - version: "1.16"
+          name: target
+        - version: "1.17"
+          name: latest
+    name: "Code generator with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go.version }}
       - name: generate code
         run:  |
           make generate
