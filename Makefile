@@ -32,8 +32,8 @@ benchmark:
 	go test -bench=. -benchmem ./...
 
 .PHONY: test
-test:
-	CGO_ENABLED=1 go test 			\
+test: tools/ginkgo
+	tools/ginkgo run -p 			\
 		-timeout 0 					\
 		-race 						\
 		-coverprofile coverage.out 	\
@@ -41,12 +41,12 @@ test:
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
-func-test:
-	CGO_ENABLED=1 go test  			\
+func-test: tools/ginkgo
+	tools/ginkgo run -p  			\
 		-timeout 180m				\
 		-race 						\
 		-tags integration 			\
-	    -coverpkg ./pkg/...			\
+		-coverpkg ./...				\
 		-coverprofile coverage.out	\
 	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
@@ -102,3 +102,6 @@ install-precommit-hook: .git/hooks/pre-commit
 .git/hooks/pre-commit: scripts/pre-commit
 	cp $< $@
 	chmod +x $@
+
+tools/ginkgo:
+	GOBIN=$(PWD)/tools go install github.com/onsi/ginkgo/v2/ginkgo@latest
