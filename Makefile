@@ -32,7 +32,7 @@ benchmark:
 	go test -bench=. -benchmem ./...
 
 .PHONY: test
-test: tools/ginkgo
+test: tools
 	tools/ginkgo run -p 			\
 		-timeout 0 					\
 		-race 						\
@@ -41,7 +41,7 @@ test: tools/ginkgo
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
-func-test: tools/ginkgo
+func-test: tools
 	tools/ginkgo run -p  			\
 		-timeout 180m				\
 		-race 						\
@@ -52,14 +52,15 @@ func-test: tools/ginkgo
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: go-lint
-go-lint:
+go-lint: tools
 	@echo "==> Checking source code against linters..."
-	@golangci-lint run ./...
+	@tools/golangci-lint run ./...
+	@tools/golangci-lint run --build-tags integration ./...
 
 .PHONY: docs-lint
-docs-lint:
+docs-lint: tools
 	@echo "==> Checking docs against linters..."
-	@misspell -error -source=text docs/ || (echo; \
+	@tools/misspell -error -source=text docs/ || (echo; \
 		echo "Unexpected misspelling found in docs files."; \
 		echo "To automatically fix the misspelling, run 'make docs-lint-fix' and commit the changes."; \
 		exit 1)
@@ -69,9 +70,9 @@ docs-lint:
 		exit 1)
 
 .PHONY: docs-lint-fix
-docs-lint-fix:
+docs-lint-fix: tools
 	@echo "==> Applying automatic docs linter fixes..."
-	@misspell -w -source=text docs/
+	@tools/misspell -w -source=text docs/
 	@docker run -v $(PWD):/markdown 06kellyjac/markdownlint-cli --fix docs/
 
 .PHONY: lint
@@ -91,8 +92,9 @@ fmtcheck:
 
 .PHONY: tools
 tools:
-	cd tools && go install github.com/client9/misspell/cmd/misspell
-	cd tools && go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	cd tools && go build -o . github.com/client9/misspell/cmd/misspell
+	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
+	cd tools && go build -o . github.com/onsi/ginkgo/v2/ginkgo
 	cd tools && go build
 
 .PHONY: install-precommit-hook
@@ -102,6 +104,3 @@ install-precommit-hook: .git/hooks/pre-commit
 .git/hooks/pre-commit: scripts/pre-commit
 	cp $< $@
 	chmod +x $@
-
-tools/ginkgo:
-	GOBIN=$(PWD)/tools go install github.com/onsi/ginkgo/v2/ginkgo@latest

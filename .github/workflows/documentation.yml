@@ -36,5 +36,4 @@ jobs:
       with:
         go-version: ${{ matrix.go.version }}
     - run: |
-        make tools
         make docs-lint
