@@ -29,6 +29,24 @@ var _ = Describe("lbaas/backend client", func() {
 		api = NewAPI(cli)
 	})
 
+	createBackend := func(definition Definition) Backend {
+		b, err := api.Create(context.TODO(), definition)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(b.Name).To(Equal(definition.Name))
+		Expect(b.Mode).To(Equal(definition.Mode))
+		Expect(b.LoadBalancer).NotTo(BeNil())
+		Expect(b.LoadBalancer.Identifier).To(Equal(definition.LoadBalancer))
+		Expect(b.Identifier).ToNot(BeEmpty())
+
+		DeferCleanup(func() {
+			err := api.DeleteByID(context.TODO(), b.Identifier)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		return b
+	}
+
 	Context("with a backend created", func() {
 		var definition Definition
 		var backend Backend
@@ -41,19 +59,7 @@ var _ = Describe("lbaas/backend client", func() {
 				Mode:         common.TCP,
 			}
 
-			b, err := api.Create(context.TODO(), definition)
-			Expect(err).NotTo(HaveOccurred())
-			backend = b
-
-			Expect(backend.Name).To(Equal(definition.Name))
-			Expect(backend.Mode).To(Equal(definition.Mode))
-			Expect(backend.LoadBalancer).NotTo(BeNil())
-			Expect(backend.LoadBalancer.Identifier).To(Equal(definition.LoadBalancer))
-			Expect(backend.Identifier).ToNot(BeEmpty())
-		})
-
-		AfterEach(func() {
-			api.DeleteByID(context.TODO(), backend.Identifier)
+			backend = createBackend(definition)
 		})
 
 		It("lists backends including the test backend", func() {
@@ -95,6 +101,35 @@ var _ = Describe("lbaas/backend client", func() {
 
 			Expect(b.Identifier).To(Equal(backend.Identifier))
 			Expect(b.Name).To(Equal(definition.Name))
+		})
+	})
+
+	Context("with some backends created for testing", func() {
+		const numberOfTestBackends = 5
+
+		BeforeEach(func() {
+			for i := 0; i < numberOfTestBackends; i++ {
+				createBackend(Definition{
+					Name:         test.TestResourceName(),
+					State:        common.NewlyCreated,
+					LoadBalancer: loadbalancerIdentifier,
+					Mode:         common.TCP,
+				})
+			}
+		})
+
+		It("iterates through pages as expected", func() {
+			page, err := api.GetPage(context.TODO(), 1, 1)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(page.Size()).To(BeEquivalentTo(1))
+			Expect(page.Total()).To(BeNumerically(">=", numberOfTestBackends))
+
+			// we already had the first page
+			for i := 2; i < numberOfTestBackends+1; i++ {
+				page, err = api.NextPage(context.TODO(), page)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(page.Num()).To(BeEquivalentTo(i))
+			}
 		})
 	})
 })
