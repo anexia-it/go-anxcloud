@@ -1,5 +1,5 @@
+//go:build integration
 // +build integration
-// go:build integration
 
 package vsphere
 
@@ -111,7 +111,7 @@ func HaveIPv4Addresses(addresses ...[]string) gomegaTypes.GomegaMatcher {
 	)
 }
 
-// Best practice is to have tests indepentent from each other, but this would require us to spawn a new VM and
+// Best practice is to have tests independent from each other, but this would require us to spawn a new VM and
 // wait for it to be ready for most of the tests in this block. Because this increases test runtime a lot, we
 // opted to a ordered aproach, having the VM-create test create the VM we use for the other tests. This makes
 // the tests depending on each other, but reduces runtime _a lot_.
