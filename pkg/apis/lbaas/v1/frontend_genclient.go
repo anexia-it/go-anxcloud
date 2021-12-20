@@ -1,7 +1,10 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"
@@ -16,11 +19,14 @@ func (f *Frontend) EndpointURL(ctx context.Context) (*url.URL, error) {
 	}
 
 	u, err := url.ParseRequestURI("/api/LBaaS/v1/frontend.json")
+	if err != nil {
+		return nil, err
+	}
 
 	if op == types.OperationList {
 		filters := make(url.Values)
 
-		if f.LoadBalancer.Identifier != "" {
+		if f.LoadBalancer != nil && f.LoadBalancer.Identifier != "" {
 			filters.Add("load_balancer", f.LoadBalancer.Identifier)
 		}
 
@@ -33,7 +39,7 @@ func (f *Frontend) EndpointURL(ctx context.Context) (*url.URL, error) {
 		u.RawQuery = query.Encode()
 	}
 
-	return u, err
+	return u, nil
 }
 
 // FilterAPIRequestBody generates the request body for creating a new Frontend, which differs from the Frontend object.
@@ -44,16 +50,15 @@ func (f *Frontend) FilterAPIRequestBody(ctx context.Context) (interface{}, error
 	}
 
 	if op == types.OperationCreate {
+		f.State = NewlyCreated
 		return struct {
-			Name           string `json:"name"`
+			Frontend
 			LoadBalancer   string `json:"load_balancer"`
 			DefaultBackend string `json:"default_backend"`
-			State          State  `json:"state"`
 		}{
-			Name:           f.Name,
+			Frontend:       *f,
 			LoadBalancer:   f.LoadBalancer.Identifier,
 			DefaultBackend: f.DefaultBackend.Identifier,
-			State:          NewlyCreated,
 		}, nil
 	} else if op == types.OperationUpdate {
 		return struct {
@@ -68,4 +73,22 @@ func (f *Frontend) FilterAPIRequestBody(ctx context.Context) (interface{}, error
 	}
 
 	return f, nil
+}
+
+func (f *Frontend) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return res, err
+	}
+
+	if op == types.OperationDestroy {
+		err = res.Body.Close()
+		if err != nil {
+			return res, err
+		}
+
+		res.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
+		return res, nil
+	}
+	return res, nil
 }

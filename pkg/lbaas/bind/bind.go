@@ -5,12 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
-
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/frontend"
 )
 
 const (
@@ -23,17 +22,7 @@ type BindInfo struct {
 	Name       string `json:"name"`
 }
 
-type Bind struct {
-	CustomerIdentifier string                `json:"customer_identifier"`
-	ResellerIdentifier string                `json:"reseller_identifier"`
-	Identifier         string                `json:"identifier"`
-	Name               string                `json:"name"`
-	Frontend           frontend.FrontendInfo `json:"frontend"`
-	Address            string                `json:"address"`
-	Port               int                   `json:"port"`
-	SSL                bool                  `json:"ssl"`
-	SslCertificatePath string                `json:"ssl_certificate_path"`
-}
+type Bind = v1.Bind
 
 func (a api) Get(ctx context.Context, page, limit int) ([]BindInfo, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
