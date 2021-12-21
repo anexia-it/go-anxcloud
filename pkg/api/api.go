@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // TODO(LittleFox94): Maybe Client is a better name for this, but

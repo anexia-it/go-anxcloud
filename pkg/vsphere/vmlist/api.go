@@ -2,7 +2,7 @@ package vmlist
 
 import (
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // API contains methods for VM listing.

@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // Request is the requested power state operation of a VM.

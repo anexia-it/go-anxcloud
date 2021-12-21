@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
+
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 const (

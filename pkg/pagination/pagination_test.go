@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

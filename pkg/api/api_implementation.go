@@ -15,8 +15,8 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 const (

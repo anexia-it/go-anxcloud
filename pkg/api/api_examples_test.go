@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
-	lbaasTest "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1/test"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	lbaasTest "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1/test"
+	"go.anx.io/go-anxcloud/pkg/client"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 func ExampleNewAPI() {

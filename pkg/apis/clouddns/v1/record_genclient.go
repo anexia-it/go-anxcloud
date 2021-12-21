@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {

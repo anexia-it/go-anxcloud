@@ -3,7 +3,7 @@ package v1
 import (
 	"bytes"
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 	"io"
 	"net/http"
 	"net/url"

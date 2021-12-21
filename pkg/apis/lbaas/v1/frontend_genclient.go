@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // EndpointURL returns the URL where to retrieve objects of type Frontend and the identifier of the given Frontend.

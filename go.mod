@@ -1,4 +1,4 @@
-module github.com/anexia-it/go-anxcloud
+module go.anx.io/go-anxcloud
 
 go 1.16
 

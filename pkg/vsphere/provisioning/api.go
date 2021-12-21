@@ -2,13 +2,13 @@
 package provisioning
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/disktype"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/ips"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/templates"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/disktype"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/ips"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/location"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/progress"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/templates"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/vm"
 )
 
 // API contains methods for VM provisioning.

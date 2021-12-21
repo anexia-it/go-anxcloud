@@ -3,7 +3,7 @@ package progress
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // API contains methods for progress inquiries.

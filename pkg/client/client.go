@@ -112,7 +112,7 @@ func LogWriter(w io.Writer) Option {
 	return func(o *clientOptions) error {
 		o.logger = ioLogger(w)
 
-		o.logger.Info("The LogWriter option of github.com/anexia-it/go-anxcloud/pkg/client is deprecated.")
+		o.logger.Info("The LogWriter option of go.anx.io/go-anxcloud/pkg/client is deprecated.")
 
 		return nil
 	}

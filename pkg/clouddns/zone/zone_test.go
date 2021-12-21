@@ -9,11 +9,11 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-
-	testutils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
 type randomTimes struct {
@@ -124,7 +124,7 @@ var _ = Describe("CloudDNS API client", func() {
 	var times randomTimes
 
 	BeforeEach(func() {
-		zoneName = testutils.RandomHostname() + ".go-anxcloud.test"
+		zoneName = test.RandomHostname() + ".go-anxcloud.test"
 		c = getClient()
 
 		rng := rand.New(rand.NewSource(GinkgoRandomSeed()))

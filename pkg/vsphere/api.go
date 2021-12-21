@@ -2,12 +2,12 @@
 package vsphere
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/powercontrol"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/search"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/vsphere/info"
+	"go.anx.io/go-anxcloud/pkg/vsphere/powercontrol"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning"
+	"go.anx.io/go-anxcloud/pkg/vsphere/search"
+	"go.anx.io/go-anxcloud/pkg/vsphere/vmlist"
 )
 
 // API contains methods for VMs.

@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/pagination"
+	"go.anx.io/go-anxcloud/pkg/pagination"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // API contains methods for load balancer backend server management.

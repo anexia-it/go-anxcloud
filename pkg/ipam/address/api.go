@@ -2,8 +2,8 @@ package address
 
 import (
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
 // API contains methods for IP manipulation.

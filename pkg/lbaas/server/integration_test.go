@@ -6,11 +6,11 @@ package server
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/test"
 
-	lbaasBackend "github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
+	lbaasBackend "go.anx.io/go-anxcloud/pkg/lbaas/backend"
+	"go.anx.io/go-anxcloud/pkg/lbaas/common"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

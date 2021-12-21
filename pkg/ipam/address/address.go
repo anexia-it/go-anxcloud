@@ -7,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 	"math/rand"
 	"net/http"
 	"net/url"

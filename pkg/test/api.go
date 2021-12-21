@@ -2,8 +2,8 @@
 package test
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/test/echo"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/test/echo"
 )
 
 // API contains methods for "testing" the API.

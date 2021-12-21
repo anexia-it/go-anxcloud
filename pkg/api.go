@@ -2,13 +2,13 @@
 package pkg
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/clouddns"
-	"github.com/anexia-it/go-anxcloud/pkg/ipam"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas"
-	"github.com/anexia-it/go-anxcloud/pkg/test"
-	"github.com/anexia-it/go-anxcloud/pkg/vlan"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/clouddns"
+	"go.anx.io/go-anxcloud/pkg/ipam"
+	"go.anx.io/go-anxcloud/pkg/lbaas"
+	"go.anx.io/go-anxcloud/pkg/test"
+	"go.anx.io/go-anxcloud/pkg/vlan"
+	"go.anx.io/go-anxcloud/pkg/vsphere"
 )
 
 // API contains all API calls structured their location in the API.

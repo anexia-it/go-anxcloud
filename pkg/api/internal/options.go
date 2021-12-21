@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // PagedOption is an option valid for List operations to retrieve objects in a paged fashion (instead of all at once).

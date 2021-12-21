@@ -15,14 +15,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/logr/funcr"
 	"github.com/go-logr/stdr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 var _ = Describe("getResponseType function", func() {

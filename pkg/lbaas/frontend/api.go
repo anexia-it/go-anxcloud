@@ -3,8 +3,8 @@ package frontend
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/pagination"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/pagination"
 )
 
 // API contains methods for load balancer frontend management.

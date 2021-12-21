@@ -13,16 +13,16 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/info"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/vmlist"
+	"go.anx.io/go-anxcloud/pkg/vsphere/info"
+	"go.anx.io/go-anxcloud/pkg/vsphere/vmlist"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/ipam/address"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/progress"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/templates"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/ipam/address"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/progress"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/templates"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/vm"
 
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
+	"go.anx.io/go-anxcloud/pkg/utils/test"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

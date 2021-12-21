@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/core/v1"
+	v1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 )
 
 const pathPrefix = "/api/core/v1/resource.json"

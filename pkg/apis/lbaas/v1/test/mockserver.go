@@ -11,7 +11,7 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
-	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 type backend v1.Backend

@@ -8,9 +8,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 var _ = Describe("vsphere/provisioning/disktype API client", func() {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 	"github.com/go-logr/logr"
+	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 func (i Info) EndpointURL(ctx context.Context) (*url.URL, error) {

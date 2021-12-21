@@ -1,4 +1,4 @@
-[![Documentation](https://godoc.org/github.com/anexia-it/go-anxcloud?status.svg)](http://godoc.org/github.com/anexia-it/go-anxcloud)
+[![Documentation](https://godoc.org/go.anx.io/go-anxcloud?status.svg)](http://godoc.org/go.anx.io/go-anxcloud)
 [![codecov](https://codecov.io/gh/anexia-it/go-anxcloud/branch/main/graph/badge.svg?token=G4XZW5U5WT)](https://codecov.io/gh/anexia-it/go-anxcloud)
 
 # Go Client for the Anexia API
@@ -7,7 +7,7 @@ Go SDK for interacting with the Anexia Engine [API](https://engine.anexia-it.com
 
 ## Installing
 
-To use the SDK, just add `github.com/anexia-it/go-anxcloud <version>` to your Go module.
+To use the SDK, just add `go.anx.io/go-anxcloud <version>` to your Go module.
 
 ## Getting started
 
@@ -18,7 +18,7 @@ The library is used in [our terraform provider](https://github.com/anexia-it/ter
 ### Example
 
 Below is a short example using the new generic client in this package. Not all APIs can already be used with it, but we are working on that.
-Find [more examples in the docs](https://pkg.go.dev/github.com/anexia-it/go-anxcloud@main/pkg/api#example-package-Usage) (linked to docs for
+Find [more examples in the docs](https://pkg.go.dev/go.anx.io/go-anxcloud@main/pkg/api#example-package-Usage) (linked to docs for
 main branch, not the latest (or any) release).
 
 ```go
@@ -28,12 +28,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api"
-	apiTypes "github.com/anexia-it/go-anxcloud/pkg/api/types"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/api"
+	apiTypes "go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/client"
 
 	// apis usable with the generic client have their own package in a location analog to this
-	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
+	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 func main() {
@@ -93,9 +93,9 @@ import (
 	"fmt"
 	"time"
 
-	anexia "github.com/anexia-it/go-anxcloud/pkg"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/vm"
+	anexia "go.anx.io/go-anxcloud/pkg"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/vm"
 )
 
 func main() {

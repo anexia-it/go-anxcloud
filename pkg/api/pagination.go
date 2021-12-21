@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 	"github.com/go-logr/logr"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // maxPageFetchRetry is the maximum number of retries to fetch a single page.

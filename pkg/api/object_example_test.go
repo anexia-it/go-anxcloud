@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"net/url"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 
 	// the following are for testing only, you don't need them
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // ExampleObject is an API Object we define as example how to make something an Object.
