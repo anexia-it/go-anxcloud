@@ -63,11 +63,6 @@ docs-lint:
 		echo "Unexpected issues found in docs Markdown files."; \
 		echo "To apply any automatic fixes, run 'make docs-lint-fix' and commit the changes."; \
 		exit 1)
-	@terrafmt diff ./docs --check --pattern '*.md' --quiet || (echo; \
-		echo "Unexpected differences in docs HCL formatting."; \
-		echo "To see the full differences, run: terrafmt diff ./docs --pattern '*.md'"; \
-		echo "To automatically fix the formatting, run 'make docs-lint-fix' and commit the changes."; \
-		exit 1)
 
 .PHONY: docs-lint-fix
 docs-lint-fix:
@@ -94,5 +89,4 @@ fmtcheck:
 tools:
 	cd tools && go install github.com/client9/misspell/cmd/misspell
 	cd tools && go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	cd tools && go install github.com/katbyte/terrafmt
 	cd tools && go build
