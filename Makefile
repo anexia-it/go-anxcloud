@@ -24,6 +24,8 @@ depscheck:
 	@go mod tidy
 	@git diff --exit-code -- go.mod go.sum || \
 		(echo; echo "Found differences in go.mod/go.sum files. Run 'go mod tidy' or revert go.mod/go.sum changes."; exit 1)
+	@# reset go.sum to state before checking if it is clean
+	@git checkout -q go.sum
 
 .PHONY: benchmark
 benchmark:
@@ -90,3 +92,11 @@ tools:
 	cd tools && go install github.com/client9/misspell/cmd/misspell
 	cd tools && go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd tools && go build
+
+.PHONY: install-precommit-hook
+install-precommit-hook: .git/hooks/pre-commit
+
+.PHONY: .git/hooks/pre-commit
+.git/hooks/pre-commit: scripts/pre-commit
+	cp $< $@
+	chmod +x $@
