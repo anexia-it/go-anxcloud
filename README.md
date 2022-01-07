@@ -66,7 +66,7 @@ func main() {
 	}
 
 	for retriever := range frontends {
-		// reset frontend every loop to avoid race conditions
+		// reinitialise frontend every loop to reset pointers and avoid potential overwriting of data in the next loop
 		var frontend lbaasv1.Frontend
 		if err := retriever(&frontend); err != nil {
 			log.Fatalf("Error retrieving Frontend: %v", err)
