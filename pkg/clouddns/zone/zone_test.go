@@ -220,14 +220,12 @@ var _ = Describe("CloudDNS API client", func() {
 			mock_expect_request_count(1)
 		})
 
-		// TODO: this is broken because of ENGSUP-5233
-		PIt("should make a valid update zone request", func() {
+		It("should make a valid update zone request", func() {
 			zoneDefinition := Definition{
-				Name:       "Not the ZoneName",
 				ZoneName:   zoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
-				AdminEmail: "admin@" + zoneName,
+				AdminEmail: "not-the-admin@" + zoneName,
 				Refresh:    times.refresh,
 				Retry:      times.retry,
 				Expire:     times.expire,
@@ -243,7 +241,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
-			Expect(response.Name).To(Equal("Not the ZoneName"))
+			Expect(response.AdminEmail).To(Equal("not-the-admin@" + zoneName))
 
 			mock_expect_request_count(1)
 		})
