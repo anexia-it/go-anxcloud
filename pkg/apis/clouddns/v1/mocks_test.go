@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -83,16 +85,22 @@ func mock_list_zones(zone string, times randomTimes) {
 	))
 }
 
-func mock_get_zone(zone string, times randomTimes) {
+func mock_get_zone(zone string, times randomTimes, updated bool) {
 	if mock == nil {
 		return
+	}
+
+	adminEmail := "admin@" + zone
+
+	if updated {
+		adminEmail = "not-the-admin@" + zone
 	}
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s", zone)),
 		ghttp.RespondWithJSONEncoded(200, Zone{
 			Name:       zone,
-			AdminEmail: "admin@" + zone,
+			AdminEmail: adminEmail,
 			Refresh:    times.refresh,
 			Retry:      times.retry,
 			Expire:     times.expire,
@@ -129,9 +137,33 @@ func mock_update_zone(z Zone) {
 		return
 	}
 
+	expectedData := struct {
+		Zone
+		Name string `json:"zoneName"`
+	}{
+		Zone: z,
+		Name: z.Name,
+	}
+
+	expectedData.Zone.Name = ""
+
+	// make sure our expected data does not contain the name attribute, since it
+	// is called zoneName for updates..
+	jsonData := bytes.Buffer{}
+	err := json.NewEncoder(&jsonData).Encode(expectedData)
+	Expect(err).NotTo(HaveOccurred())
+
+	decodedData := map[string]interface{}{}
+	err = json.NewDecoder(&jsonData).Decode(&decodedData)
+	Expect(err).NotTo(HaveOccurred())
+
+	_, hasNameAttribute := decodedData["name"]
+	Expect(hasNameAttribute).To(BeFalse())
+
+	// setup for checking the actual test request
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("PUT", "/api/clouddns/v1/zone.json"),
-		ghttp.VerifyJSONRepresenting(z),
+		ghttp.VerifyJSONRepresenting(expectedData),
 		ghttp.RespondWithJSONEncoded(200, z),
 	))
 }
