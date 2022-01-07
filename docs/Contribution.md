@@ -94,3 +94,12 @@ This example makes sure the type `LoadBalancer` does everything necessary to be 
     | types     | names of hook interfaces from `pkg/api/types` |
 
     Explicitly specifies the type implements the given interfaces.
+
+## pre-commit hook
+
+There is a `pre-commit` hook checking some things before you even make a commit, you can install it with
+`make install-precommit-hook`. It might occasionally warn you about it being not up to date, run that command
+again to update it.
+
+It's not very clever yet and in some cases might hinder working, for example when rebasing. You can always just
+uninstall it with `rm .git/hooks/pre-commit`.
