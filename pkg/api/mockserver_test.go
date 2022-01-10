@@ -12,8 +12,10 @@ import (
 	"github.com/onsi/gomega/ghttp"
 
 	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
 )
+
+type Backend lbaasv1.Backend
+type State lbaasv1.State
 
 func newMockServer() *ghttp.Server {
 	type errorResponseData struct {
@@ -157,7 +159,7 @@ func newMockServer() *ghttp.Server {
 	server.RouteToHandler("POST", backendBasePath, func(res http.ResponseWriter, req *http.Request) {
 		res.Header().Add("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(res).Encode(
-			backend.Backend{
+			Backend{
 				Name:       "backend-01",
 				Identifier: "generated identifier " + strconv.Itoa(identifierGenerateCounter),
 				Mode:       lbaasv1.TCP,
@@ -174,7 +176,7 @@ func newMockServer() *ghttp.Server {
 		for _, b := range backends {
 			if b.Identifier == identifier {
 				res.Header().Add("Content-Type", "application/json; charset=utf-8")
-				_ = json.NewEncoder(res).Encode(b)
+				_ = json.NewEncoder(res).Encode(Backend(b))
 				return
 			}
 		}
@@ -188,10 +190,7 @@ func newMockServer() *ghttp.Server {
 			return
 		}
 
-		update := struct {
-			lbaasv1.Backend
-			LoadBalancer string `json:"load_balancer"`
-		}{}
+		var update Backend
 		if err := json.NewDecoder(req.Body).Decode(&update); err != nil {
 			fmt.Printf("Invalid request body: %v\n", err)
 			errorResponse(500, fmt.Sprintf("invalid request body: %v", err), res)
@@ -200,13 +199,12 @@ func newMockServer() *ghttp.Server {
 
 		identifier := path.Base(req.URL.Path)
 
-		newBackends := make([]backend.Backend, 0, len(backends))
+		newBackends := make([]lbaasv1.Backend, 0, len(backends))
 		found := false
 
 		for _, b := range backends {
 			if b.Identifier == identifier {
-				update.Backend.LoadBalancer.Identifier = update.LoadBalancer
-				newBackends = append(newBackends, update.Backend)
+				newBackends = append(newBackends, lbaasv1.Backend(update))
 				found = true
 			} else {
 				newBackends = append(newBackends, b)
@@ -219,14 +217,14 @@ func newMockServer() *ghttp.Server {
 			errorResponse(404, "", res)
 		} else {
 			res.Header().Add("Content-Type", "application/json; charset=utf-8")
-			_ = json.NewEncoder(res).Encode(update.Backend)
+			_ = json.NewEncoder(res).Encode(update)
 		}
 	})
 
 	server.RouteToHandler("DELETE", singleBackendPath, func(res http.ResponseWriter, req *http.Request) {
 		identifier := path.Base(req.URL.Path)
 
-		newBackends := make([]backend.Backend, 0, len(backends))
+		newBackends := make([]lbaasv1.Backend, 0, len(backends))
 
 		found := false
 		for _, b := range backends {
@@ -248,4 +246,65 @@ func newMockServer() *ghttp.Server {
 	})
 
 	return server
+}
+
+func (b *Backend) UnmarshalJSON(bytes []byte) error {
+	var clientData struct {
+		lbaasv1.Backend
+		LoadBalancer string `json:"load_balancer,omitempty"`
+		State        string `json:"state"`
+	}
+
+	err := json.Unmarshal(bytes, &clientData)
+	if err != nil {
+		return err
+	}
+	clientData.Backend.State = getStateByID(clientData.State)
+	clientData.Backend.LoadBalancer.Identifier = clientData.LoadBalancer
+
+	*b = Backend(clientData.Backend)
+	return nil
+}
+
+func (b Backend) MarshalJSON() ([]byte, error) {
+	clientData := struct {
+		lbaasv1.Backend
+		State        State                  `json:"state"`
+		LoadBalancer map[string]interface{} `json:"load_balancer"`
+	}{
+		Backend: lbaasv1.Backend(b),
+		State:   State(getStateByID(b.State.ID)),
+		LoadBalancer: map[string]interface{}{
+			"name":       b.LoadBalancer.Name,
+			"identifier": b.LoadBalancer.Name,
+		},
+	}
+
+	return json.Marshal(clientData)
+}
+
+// MarshalJSON overwrites the original MarshalJSON from lbaasv1.State so that we can properly use it in the mocked server
+func (s State) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"id":   s.ID,
+		"type": s.Type,
+		"text": s.Text,
+	})
+}
+
+func getStateByID(stateID string) lbaasv1.State {
+	switch stateID {
+	case lbaasv1.NewlyCreated.ID, "":
+		return lbaasv1.NewlyCreated
+	case lbaasv1.Updating.ID:
+		return lbaasv1.Updating
+	case lbaasv1.Updated.ID:
+		return lbaasv1.Updated
+	case lbaasv1.Deployed.ID:
+		return lbaasv1.Deployed
+	case lbaasv1.DeploymentError.ID:
+		return lbaasv1.DeploymentError
+	default:
+		panic(fmt.Sprintf("unkown id '%s'", stateID))
+	}
 }
