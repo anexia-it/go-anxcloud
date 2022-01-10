@@ -68,6 +68,9 @@ var _ = Describe("logRequest and logResponse", func() {
 
 			Expect(fullLog.String()).NotTo(ContainSubstring("session_id"))
 			Expect(fullLog.String()).To(ContainSubstring("REDACTED"))
+
+			Expect(fullLog.String()).NotTo(ContainSubstring(`"url"=`))
+			Expect(fullLog.String()).NotTo(ContainSubstring(`"method"=`))
 		})
 
 		It("does not mangle the request body", func() {
@@ -90,6 +93,31 @@ var _ = Describe("logRequest and logResponse", func() {
 			Expect(func() {
 				logResponse(nil, logger)
 			}).NotTo(Panic())
+		})
+
+		It("includes method and URL in response log when the request is available", func() {
+			w := httptest.NewRecorder()
+
+			cookie := http.Cookie{
+				Name:  "Session-Cookie",
+				Value: "session_id",
+			}
+
+			http.SetCookie(w, &cookie)
+
+			written, err := w.Write([]byte("OK"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(written).To(Equal(2))
+
+			res := w.Result()
+			res.Request = httptest.NewRequest("GET", "/foo", bytes.NewBuffer([]byte("OK")))
+
+			logResponse(res, logger)
+
+			Expect(fullLog.String()).NotTo(ContainSubstring("session_id"))
+			Expect(fullLog.String()).To(ContainSubstring("REDACTED"))
+			Expect(fullLog.String()).To(ContainSubstring(`"url"="/foo"`))
+			Expect(fullLog.String()).To(ContainSubstring(`"method"="GET"`))
 		})
 	})
 
@@ -143,5 +171,28 @@ var _ = Describe("stringifyHeaders", func() {
 
 	It("stringifies headers fully as expected", func() {
 		Expect(headers).To(Equal("000: '1234', Foo: ['Bar', 'Baz'], Foxes: 'are cool'"))
+	})
+})
+
+var _ = Describe("ioLogger", func() {
+	var fullLog strings.Builder
+
+	var logger logr.Logger
+
+	JustBeforeEach(func() {
+		fullLog = strings.Builder{}
+		logger = ioLogger(&fullLog)
+	})
+
+	It("receives request logs", func() {
+		req := httptest.NewRequest("GET", "/foo", nil)
+		req.Header.Add("Authorization", "auth_token")
+
+		logRequest(req, logger)
+
+		Expect(fullLog.String()).NotTo(ContainSubstring("auth_token"))
+		Expect(fullLog.String()).To(ContainSubstring("REDACTED"))
+		Expect(fullLog.String()).To(ContainSubstring(`"url"="/foo"`))
+		Expect(fullLog.String()).To(ContainSubstring(`"method"="GET"`))
 	})
 })
