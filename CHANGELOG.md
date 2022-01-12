@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!--
+Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
+guideline:
+
+* <api-scope>[/<sub-api-scope] - <a short description of what changed>
+
+e.g.
+
+* vsphere/provisioning - added progress identifier
+-->
+
+### Added
+* new client, unifying features across APIs and reducing code duplication (PR #56)
+  - already supported:
+    + core/resources
+    + lbaas
+    + clouddns/zone
+* client: new option `BaseURL` (PR #58)
+* client: interface to retrieve metrics, such as requests currently in-flight or request duration (PR #66)
+* old-style clients:
+  - lbaas: pagination support (PR #45)
+  - core/location: add getters for locations by identifier and code (PR #49)
+  - vsphere/info: add CPU performance type and CPU clock rate attributes (PR #51)
+
+### Changed
+* client: now uses [`logr`](https://github.com/go-logr/logr) for logging (PR #50)
+* package is now tested against Go versions 1.16 and 1.17
+
+### Deprecated
+* the old-style clients are deprecated and will be removed in the minor version following the version with everything supported by the generic client we have old-style clients for
+  - write code against the generic client instead, create issues for APIs you need to help us prioritize them
+* client: the `LogWriter` option for dumping requests and responses is replaced by the `Logger` option (PR #50)
+
+### Removed
+* client: DefaultBaseURL was exported by mistake and is not exposed anymore, use the BaseURL method on the client instance instead (PR #58)
+
+### Fixed
+* connections could end up dangling around (PR #48)
+
 ## [0.3.28] - 2021-10-05
 ### Added
 * ipam/prefix - allow to create empty prefixes
