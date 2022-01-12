@@ -4,10 +4,13 @@
 > you are agreeing to comply with this waiver of copyright interest.
 > Details can be found in our [LICENSE](LICENSE).
 
-
 There are two primary ways to help:
  - Using the issue tracker, and
  - Changing the code-base.
+
+If you found something you believe is a (possible) security issue, please do not hesitate
+to contact us via the information in [SECURITY.md](SECURITY.md). Do not open an issue for
+that, as it would be public and put users at risk.
 
 
 ## Using the issue tracker
