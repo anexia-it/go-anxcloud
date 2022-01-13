@@ -12,7 +12,9 @@ type (
 const (
 	HTTP = v1.HTTP
 	TCP  = v1.TCP
+)
 
+var (
 	Updating        = v1.Updating
 	Updated         = v1.Updated
 	DeploymentError = v1.DeploymentError

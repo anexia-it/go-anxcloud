@@ -6,6 +6,7 @@ import (
 	"log"
 
 	lbaasv1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
+	lbaasTest "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1/test"
 	"github.com/anexia-it/go-anxcloud/pkg/client"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"
@@ -225,7 +226,7 @@ func ExampleAPI_update() {
 
 // creates a new API instance for using the examples as tests. Includes a mock server.
 func newExampleAPI() API {
-	server := newMockServer()
+	server := lbaasTest.NewMockServer()
 
 	apiClient, err := NewAPI(
 		WithClientOptions(

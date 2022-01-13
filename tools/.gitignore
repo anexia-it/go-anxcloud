@@ -1,1 +1,4 @@
 /tools
+/ginkgo
+/golangci-lint
+/misspell

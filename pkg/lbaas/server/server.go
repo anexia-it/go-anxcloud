@@ -5,34 +5,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
-
-	"github.com/anexia-it/go-anxcloud/pkg/lbaas/backend"
 )
 
 const (
 	path = "/api/LBaaS/v1/server.json"
 )
 
+type Server = v1.Server
+
 // ServerInfo holds the identifier and the name of a load balancer backend.
 type ServerInfo struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
-}
-
-// Server holds the information of a load balancers backend server
-type Server struct {
-	CustomerIdentifier string              `json:"customer_identifier"`
-	ResellerIdentifier string              `json:"reseller_identifier"`
-	Identifier         string              `json:"identifier"`
-	Name               string              `json:"name"`
-	IP                 string              `json:"ip"`
-	Port               int                 `json:"port"`
-	Backend            backend.BackendInfo `json:"backend"`
-	Check              string              `json:"check"`
 }
 
 func (a api) Get(ctx context.Context, page, limit int) ([]ServerInfo, error) {

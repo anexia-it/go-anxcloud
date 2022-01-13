@@ -9,6 +9,9 @@ import (
 	"testing"
 
 	"github.com/anexia-it/go-anxcloud/pkg/client"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestEcho(t *testing.T) {
@@ -74,4 +77,9 @@ func TestEchoOtherValue(t *testing.T) {
 	if err := NewAPI(c).Echo(ctx); !errors.Is(err, ErrInvalidEchoResponse) {
 		t.Errorf("expected ErrInvalidEchoResponse but got %v", err)
 	}
+}
+
+func TestEchoSuite(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Echo test suite")
 }

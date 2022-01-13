@@ -2,12 +2,27 @@
 
 ## Testing
 
-`Ginkgo` is used as test suite to implement integration tests for each of the sdk packages. The integration tests
-are located under `./tests`.
+We use `Ginkgo` (v2) for our tests. Unit and integration tests are both directly in the package they test, integration
+tests are disabled by default with build tags, like this:
 
-To execute the complete test suite just run  `ginkgo ./tests`.\
-To specify a subset of testcases use  the `-focus` flag and provide a regex to match the description of the tests
-used with `Describe(...)`. For example to execute all `core` tests run `ginkgo -focus="Core API endpoint tests"`.
+```go
+//go:build integration
+// +build integration
+
+package foo
+```
+
+Integration tests for bigger scopes (in a package and testing integration of sub-packages together) are placed in the
+matching higher hierarchy package (e.g.: test basics in `pkg/vsphere/provisioning/disktype` and test whole "create VM
+and do things with it" in `pkg/vsphere`).
+
+Tests are executed with either `make test` (for unit tests) or `make func-test` (for e2e/integration tests). Note the
+integration tests need an authentication token in environment variable `ANEXIA_TOKEN`.
+
+To run unit tests for a single package or everything below a given package you can use either `go test ./pkg/lbaas/acl`
+(for testing only acl package) or `go test ./pkg/lbaas/...` (for testing everything below ./pkg/lbaas, including the
+`lbaas` package itself). For running integration tags, add the build tag like `go test -tags integration ./pkg/lbaas/...`.
+You can also use the `ginkgo` CLI tool `ginkgo -tags integration pkg/lbaas/...`.
 
 
 ## Code generator

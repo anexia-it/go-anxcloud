@@ -1,4 +1,4 @@
 comment:
-  # we upload two reports per commit: unittests and integration, comment only when
-  # both arrived to reduce confusion over incomplete reports.
-  after_n_builds: 2
+  # we upload four reports per commit: unittests and integration, each for two Go versions.
+  # Configure codecov to comment only when all arrived to reduce confusion over incomplete reports.
+  after_n_builds: 4

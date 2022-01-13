@@ -9,7 +9,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api"
@@ -28,7 +28,7 @@ type randomTimes struct {
 var createdZones = make([]string, 0)
 
 func ensureTestZone(api api.API, name string, times randomTimes) {
-	if !test.RunAsIntegrationTest {
+	if !isIntegrationTest {
 		return
 	}
 
@@ -51,7 +51,7 @@ func ensureTestZone(api api.API, name string, times randomTimes) {
 }
 
 func cleanupZones(a api.API) error {
-	if !test.RunAsIntegrationTest {
+	if !isIntegrationTest {
 		return nil
 	}
 
@@ -99,7 +99,7 @@ func cleanupZones(a api.API) error {
 }
 
 func ensureTestRecord(a api.API, record Record) string {
-	if !test.RunAsIntegrationTest {
+	if !isIntegrationTest {
 		return uuid.Nil.String()
 	}
 
@@ -214,7 +214,7 @@ var _ = Describe("CloudDNS API client", func() {
 		})
 
 		It("should retrieve our zone with expected data", func() {
-			mock_get_zone(zoneName, times)
+			mock_get_zone(zoneName, times, false)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
@@ -227,13 +227,12 @@ var _ = Describe("CloudDNS API client", func() {
 			mock_expect_request_count(1)
 		})
 
-		// TODO: this is broken because of ENGSUP-5233
-		PIt("should make a valid update zone request", func() {
+		It("should make a valid update zone request", func() {
 			zone := Zone{
 				Name:       zoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
-				AdminEmail: "admin@" + zoneName,
+				AdminEmail: "not-the-admin@" + zoneName,
 				Refresh:    times.refresh,
 				Retry:      times.retry,
 				Expire:     times.expire,
@@ -249,7 +248,15 @@ var _ = Describe("CloudDNS API client", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 
-			mock_expect_request_count(1)
+			mock_get_zone(zoneName, times, true)
+
+			retrievedZone := Zone{Name: zoneName}
+			err = a.Get(ctx, &retrievedZone)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(retrievedZone.AdminEmail).To(Equal("not-the-admin@" + zoneName))
+
+			mock_expect_request_count(2)
 		})
 
 		It("should make a valid delete zone request", func() {

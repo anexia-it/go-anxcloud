@@ -1,7 +1,10 @@
 package v1
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/anexia-it/go-anxcloud/pkg/api/types"
@@ -69,4 +72,22 @@ func (b *Backend) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 	}
 
 	return b, nil
+}
+
+func (b *Backend) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return res, err
+	}
+
+	if op == types.OperationDestroy {
+		err = res.Body.Close()
+		if err != nil {
+			return res, err
+		}
+
+		res.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
+		return res, nil
+	}
+	return res, nil
 }

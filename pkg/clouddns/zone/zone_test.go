@@ -9,11 +9,11 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
 	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
+
+	testutils "github.com/anexia-it/go-anxcloud/pkg/utils/test"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 type randomTimes struct {
@@ -26,7 +26,7 @@ type randomTimes struct {
 var createdZones = make([]string, 0)
 
 func ensureTestZone(c client.Client, name string, times randomTimes) {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return
 	}
 
@@ -48,7 +48,7 @@ func ensureTestZone(c client.Client, name string, times randomTimes) {
 }
 
 func cleanupZones(c client.Client) error {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return nil
 	}
 
@@ -98,7 +98,7 @@ func cleanupZones(c client.Client) error {
 }
 
 func ensureTestRecord(c client.Client, zone string, record RecordRequest) uuid.UUID {
-	if !test.RunAsIntegrationTest {
+	if mock != nil {
 		return uuid.Nil
 	}
 
@@ -124,7 +124,7 @@ var _ = Describe("CloudDNS API client", func() {
 	var times randomTimes
 
 	BeforeEach(func() {
-		zoneName = test.RandomHostname() + ".go-anxcloud.test"
+		zoneName = testutils.RandomHostname() + ".go-anxcloud.test"
 		c = getClient()
 
 		rng := rand.New(rand.NewSource(GinkgoRandomSeed()))
@@ -220,14 +220,12 @@ var _ = Describe("CloudDNS API client", func() {
 			mock_expect_request_count(1)
 		})
 
-		// TODO: this is broken because of ENGSUP-5233
-		PIt("should make a valid update zone request", func() {
+		It("should make a valid update zone request", func() {
 			zoneDefinition := Definition{
-				Name:       "Not the ZoneName",
 				ZoneName:   zoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
-				AdminEmail: "admin@" + zoneName,
+				AdminEmail: "not-the-admin@" + zoneName,
 				Refresh:    times.refresh,
 				Retry:      times.retry,
 				Expire:     times.expire,
@@ -243,7 +241,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response).To(Not(BeNil()))
-			Expect(response.Name).To(Equal("Not the ZoneName"))
+			Expect(response.AdminEmail).To(Equal("not-the-admin@" + zoneName))
 
 			mock_expect_request_count(1)
 		})

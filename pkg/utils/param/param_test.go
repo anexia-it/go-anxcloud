@@ -1,17 +1,18 @@
-package tests_test
+package param
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/utils/param"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"net/url"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("parameter Builder Tests", func() {
+var _ = Describe("ParameterBuilder", func() {
 	It("should Create Parameter", func() {
 		const testKey = "testKey"
 		const testValue = "testValue"
-		builder := param.ParameterBuilder(testKey)
+		builder := ParameterBuilder(testKey)
 		parameter := builder(testValue)
 
 		values := url.Values{}
@@ -19,3 +20,8 @@ var _ = Describe("parameter Builder Tests", func() {
 		Expect(values.Get(testKey)).To(BeEquivalentTo(testValue))
 	})
 })
+
+func TestParam(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Param test suite")
+}
