@@ -2,23 +2,9 @@
 
 <!--- Please leave a helpful description of the pull request here. --->
 
-### Release Note
-Release note for [CHANGELOG](https://github.com/anexia-it/go-anxcloud/blob/master/CHANGELOG.md):
-<!--
-If change is not user facing, just write "NONE" in the release-note block below.
-Otherwise use a format like
+### Checklist
 
-* <api-scope>[/<sub-api-scope] - <a short description of what changed>
-
-e.g.
-
-* vsphere/provisioning - added progress identifier
-
--->
-
-```release-note
-
-```
+* [ ] added release notes to `Unreleased` section in [CHANGELOG.md](CHANGELOG.md), if user facing change
 
 ### References
 
