@@ -3,7 +3,7 @@
 
 # Go Client for the Anexia API
 
-Go SDK for interacting with the Anexia multi purpose [API](https://engine.anexia-it.com/).
+Go SDK for interacting with the Anexia Engine [API](https://engine.anexia-it.com/).
 
 ## Installing
 
@@ -11,10 +11,11 @@ To use the SDK, just add `github.com/anexia-it/go-anxcloud <version>` to your Go
 
 ## Getting started
 
-Before using the SDK you should familiarize yourself with the API. See [here](https://engine.anexia-it.com/docs/) for more info.
-I you crave for an example, take a look at [the terraform provider for this project](https://github.com/anexia-it/terraform-provider-anxcloud)
+Before using the SDK you should familiarize yourself with the [Anexia Engine API](https://engine.anexia-it.com/docs/).
 
-## Example
+The library is used in [our terraform provider](https://github.com/anexia-it/terraform-provider-anxcloud), check it out if you want some examples how to use it.
+
+### Example
 
 Below is a short example using the new generic client in this package. Not all APIs can already be used with it, but we are working on that.
 Find [more examples in the docs](https://pkg.go.dev/github.com/anexia-it/go-anxcloud@main/pkg/api#example-package-Usage) (linked to docs for
