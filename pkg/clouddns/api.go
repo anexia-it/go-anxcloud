@@ -2,8 +2,8 @@
 package clouddns
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/clouddns/zone"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/clouddns/zone"
 )
 
 // API contains methods managing zones and records.

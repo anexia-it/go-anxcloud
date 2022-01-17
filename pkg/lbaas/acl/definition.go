@@ -1,6 +1,6 @@
 package acl
 
-import "github.com/anexia-it/go-anxcloud/pkg/lbaas/common"
+import "go.anx.io/go-anxcloud/pkg/lbaas/common"
 
 // Definition describes the ACL object that should be created
 type Definition struct {

@@ -8,8 +8,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/ipam/prefix"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/ipam/prefix"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

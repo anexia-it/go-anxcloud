@@ -253,7 +253,7 @@ var _ = Describe("client", func() {
 				err := LogWriter(&log)(&opts)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(log.String()).To(ContainSubstring("The LogWriter option of github.com/anexia-it/go-anxcloud/pkg/client is deprecated."))
+				Expect(log.String()).To(ContainSubstring("The LogWriter option of go.anx.io/go-anxcloud/pkg/client is deprecated."))
 			})
 
 			commonLogTest(true)

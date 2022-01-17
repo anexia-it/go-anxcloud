@@ -2,11 +2,11 @@
 package core
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/core/resource"
-	"github.com/anexia-it/go-anxcloud/pkg/core/service"
-	"github.com/anexia-it/go-anxcloud/pkg/core/tags"
-	"github.com/anexia-it/go-anxcloud/pkg/vsphere/provisioning/location"
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/core/resource"
+	"go.anx.io/go-anxcloud/pkg/core/service"
+	"go.anx.io/go-anxcloud/pkg/core/tags"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/location"
 )
 
 // API contains methods for accessing features under /core.

@@ -3,8 +3,8 @@ package v1
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

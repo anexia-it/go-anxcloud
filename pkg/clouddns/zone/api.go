@@ -4,8 +4,8 @@ package zone
 
 import (
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 	uuid "github.com/satori/go.uuid"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // API contains methods for zone and record management

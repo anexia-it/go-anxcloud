@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	anxAPI "github.com/anexia-it/go-anxcloud/pkg/api"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
-	anxClient "github.com/anexia-it/go-anxcloud/pkg/client"
-	"github.com/anexia-it/go-anxcloud/pkg/utils/test"
+	anxAPI "go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/api/types"
+	anxClient "go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/test"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

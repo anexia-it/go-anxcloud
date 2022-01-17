@@ -7,9 +7,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 var _ = Describe("core/service API client", func() {

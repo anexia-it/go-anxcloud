@@ -3,10 +3,11 @@ package v1
 import (
 	"bytes"
 	"context"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 	"io"
 	"net/http"
 	"net/url"
+
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 func (b Bind) EndpointURL(ctx context.Context) (*url.URL, error) {

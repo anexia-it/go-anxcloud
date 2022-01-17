@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
 	uuid "github.com/satori/go.uuid"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, error) {

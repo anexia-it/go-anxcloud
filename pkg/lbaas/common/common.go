@@ -1,7 +1,7 @@
 package common
 
 import (
-	v1 "github.com/anexia-it/go-anxcloud/pkg/apis/lbaas/v1"
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 type (

@@ -32,6 +32,7 @@ e.g.
   - vsphere/info: add CPU performance type and CPU clock rate attributes (PR #51)
 
 ### Changed
+* import path is now go.anx.io/go-anxcloud, please change your code accordingly
 * client: now uses [`logr`](https://github.com/go-logr/logr) for logging (PR #50)
 * package is now tested against Go versions 1.16 and 1.17
 

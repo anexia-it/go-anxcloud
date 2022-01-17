@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/anexia-it/go-anxcloud/pkg/api/internal"
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/internal"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // ObjectChannel configures the List operation to return the objects via the given channel. When listing via

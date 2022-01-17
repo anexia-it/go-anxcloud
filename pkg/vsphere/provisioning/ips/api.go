@@ -3,7 +3,7 @@ package ips
 import (
 	"context"
 
-	"github.com/anexia-it/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/client"
 )
 
 // API contains methods for IP manipulation (but only in the context of provisioning).

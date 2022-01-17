@@ -1,11 +1,11 @@
 package v1
 
 import (
-	. "github.com/anexia-it/go-anxcloud/pkg/utils/test/gomega"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "go.anx.io/go-anxcloud/pkg/utils/test/gomega"
 
-	"github.com/anexia-it/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 var _ = Describe("Object Info", func() {

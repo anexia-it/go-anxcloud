@@ -1,4 +1,4 @@
-module github.com/anexia-it/terraform-provider-anxcloud/tools
+module go.anx.io/go-anxcloud/tools
 
 go 1.16
 
