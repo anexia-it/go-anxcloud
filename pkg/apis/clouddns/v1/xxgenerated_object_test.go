@@ -32,11 +32,6 @@ var _ = Describe("Object Zone", func() {
 		o := Zone{}
 		Expect(&o).To(ImplementInterface(&i))
 	})
-	It("implements the interface types.ResponseDecodeHook", func() {
-		var i types.ResponseDecodeHook
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
 	It("implements the interface types.RequestFilterHook", func() {
 		var i types.RequestFilterHook
 		o := Zone{}

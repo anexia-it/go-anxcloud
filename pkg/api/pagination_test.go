@@ -46,8 +46,6 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 				case 2:
 					return json.RawMessage(`-öasjfn.ksdjfbksdnmf, sdf`), nil
 				case 3:
-					return json.RawMessage(`[{ "error": "random garbage data returned" }]`), nil
-				case 4:
 					expectedPage++
 					return afterErrorResponse, nil
 				}
@@ -130,8 +128,6 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 						Expect(err.Error()).To(ContainSubstring("Server error"))
 					case 2:
 						Expect(err).To(MatchError(ErrPageResponseNotSupported))
-					case 3:
-						Expect(err.Error()).To(ContainSubstring("unknown field \"error\""))
 					}
 
 					Expect(pi.Next(&out)).To(BeFalse())
@@ -146,7 +142,7 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 			}
 
 			Expect(pi.Error()).NotTo(HaveOccurred())
-			Expect(expectedError).To(Equal(3))
+			Expect(expectedError).To(Equal(2))
 		})
 	}
 

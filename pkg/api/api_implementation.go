@@ -483,11 +483,7 @@ func decodeResponse(ctx context.Context, mediaType string, data io.Reader, res i
 			return nil
 		}
 
-		d := json.NewDecoder(data)
-		// we have to disallow unknown fields since golangs json decoder does not have a way to specify required
-		// fields, meaning any json object can be decoded into any go struct.
-		d.DisallowUnknownFields()
-		return d.Decode(res)
+		return json.NewDecoder(data).Decode(res)
 	}
 
 	return fmt.Errorf("%w: no idea how to handle media type %v", ErrUnsupportedResponseFormat, mediaType)
