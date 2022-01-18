@@ -18,6 +18,8 @@ e.g.
 * vsphere/provisioning - added progress identifier
 -->
 
+## [0.4.0] - 2022-01-24
+
 ### Added
 * new client, unifying features across APIs and reducing code duplication (PR #56)
   - already supported:
