@@ -1071,10 +1071,7 @@ func (o *context_test_object) FilterAPIRequestBody(ctx context.Context) (interfa
 func (o *context_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 	o.checkContext(true, ctx)
 	o.responseBodyCalled = true
-
-	d := json.NewDecoder(data)
-	d.DisallowUnknownFields()
-	return d.Decode(o)
+	return json.NewDecoder(data).Decode(o)
 }
 
 var _ = Describe("context passed to Object methods", func() {

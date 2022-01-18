@@ -19,7 +19,7 @@ type DNSServer struct {
 	Alias string `json:"alias"`
 }
 
-// anxcloud:object:hooks=ResponseDecodeHook,RequestFilterHook,RequestBodyHook,ResponseFilterHook,PaginationSupportHook
+// anxcloud:object:hooks=RequestFilterHook,RequestBodyHook,ResponseFilterHook,PaginationSupportHook
 
 type Zone struct {
 	// Zone name

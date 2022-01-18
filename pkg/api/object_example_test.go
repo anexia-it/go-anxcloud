@@ -94,11 +94,8 @@ func (h *ExampleObjectMockHandler) ServeHTTP(res http.ResponseWriter, req *http.
 
 	switch req.URL.Path {
 	case "/example/v1":
-		d := json.NewDecoder(req.Body)
-		d.DisallowUnknownFields()
-
 		o := ExampleObject{}
-		_ = d.Decode(&o)
+		_ = json.NewDecoder(req.Body).Decode(&o)
 
 		o.Identifier = "some random identifier"
 		_ = json.NewEncoder(res).Encode(o)

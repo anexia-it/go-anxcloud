@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,12 +15,6 @@ import (
 func (z *Zone) EndpointURL(ctx context.Context) (*url.URL, error) {
 	u, err := url.ParseRequestURI("/api/clouddns/v1/zone.json/")
 	return u, err
-}
-
-func (z *Zone) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
-	// Declare a custom decoder which allows unknown fields - the Zone struct is not modelling all the fields
-	d := json.NewDecoder(data)
-	return d.Decode(z)
 }
 
 func (z *Zone) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
