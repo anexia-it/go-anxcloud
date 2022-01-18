@@ -3,16 +3,24 @@ name: Code
 on:
   push:
     branches:
-      - main
+    - main
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      sha:
+        required: true
+        description: Commit hash of the HEAD-of-PR-branch to allow integration tests for
+      pr_id:
+        required: true
+        description: ID of the pull request this workflow was triggered for
 
 env:
   GO111MODULE: on
 
 jobs:
-  go-lint:
+  static-checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,32 +29,160 @@ jobs:
           name: target
         - version: "1.17"
           name: latest
-    name: "Linting with ${{ matrix.go.name }} Go"
+    name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go.version }}
-      - name: run linters
-        run: |
-          make go-lint
-          make fmtcheck
-  codegen-uptodate:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go:
-        - version: "1.16"
-          name: target
-        - version: "1.17"
-          name: latest
-    name: "Code generator with ${{ matrix.go.name }} Go"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go.version }}
-      - name: generate code
+
+      - name: check if generate code is up-to-date
         run:  |
           make generate
           if [ -n "$(git status --porcelain=v1)" ]; then git add -N .; git diff; exit 1; fi
+
+      - name: check if go.mod and go.sum are tidy
+        run: make depscheck
+
+      - name: check code format
+        run: make fmtcheck
+
+      - name: check code quality
+        run: make go-lint
+
+  unit-tests:
+    needs: static-checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+        - version: "1.16"
+          name: target
+        - version: "1.17"
+          name: latest
+    name: "Unit tests with ${{ matrix.go.name }} Go"
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go.version }}
+
+    - name: run unit tests
+      run: make test
+
+    - name: upload coverage
+      uses: actions/upload-artifact@v2
+      with:
+        name: unit-coverage-${{ matrix.go.name }}
+        path: coverage.out
+
+  integration-tests:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    # integration tests are run
+    #  * when pushed directly to main branch at anexia-it/go-anxcloud (members of the repo are trusted)
+    #  * when PR for branch on anexia-it/go-anxcloud (members of the repo are trusted)
+    #  * when workflow started via workflow_dispatch (ok-to-test slash-command)
+    if: >
+      (
+        github.event_name == 'push' &&
+        github.repository == 'anexia-it/go-anxcloud'
+      ) ||
+      (
+        github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == 'anexia-it/go-anxcloud'
+      ) ||
+      (
+        github.event_name == 'workflow_dispatch'            &&
+        github.event.client_payload.slash_command.sha != '' &&
+      )
+    strategy:
+      matrix:
+        go:
+        - version: "1.16"
+          name: target
+        - version: "1.17"
+          name: latest
+    name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: check if HEAD of branch is allowed to run integration tests
+      if:   github.event_name == 'workflow_dispatch'
+      run:  test $(git show --format=%H HEAD^) = "${{ github.event.inputs.sha }}"
+
+    - uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go.version }}
+
+    - name: run integration tests
+      env:
+        ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
+      run: make func-test
+
+    # Update check run called "integration-fork"
+    - uses: actions/github-script@v1
+      id: update-check-run
+      if: always() && github.event_name == 'workflow_dispatch'
+      env:
+        ref: ${{ github.event.inputs.pr_id }}
+        job: ${{ github.job }}
+        # Conveniently, job.status maps to https://developer.github.com/v3/checks/runs/#update-a-check-run
+        conclusion: ${{ job.status }}
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { data: pull } = await github.pulls.get({
+            ...context.repo,
+            # refs/pull/$number/merge
+            pull_number: process.env.ref.split('/')[2]
+          });
+          const ref = pull.head.sha;
+
+          const { data: checks } = await github.checks.listForRef({
+            ...context.repo,
+            ref
+          });
+
+          const check = checks.check_runs.filter(c => c.name === process.env.job);
+
+          const { data: result } = await github.checks.update({
+            ...context.repo,
+            check_run_id: check[0].id,
+            status: 'completed',
+            conclusion: process.env.conclusion
+          });
+
+          return result;
+
+    - name: upload coverage
+      uses: actions/upload-artifact@v2
+      with:
+        name: integration-coverage-${{ matrix.go.name }}
+        path: coverage.out
+
+  upload-results:
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v2
+
+    - name: upload test coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        files: unit-coverage-target/coverage.out, unit-coverage-latest/coverage.out
+        flags: unittests
+        verbose: true
+        override_pr: ${{ github.event.inputs.pr_id }}
+
+    - name: upload test coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        files: integration-coverage-target/coverage.out, integration-coverage-latest/coverage.out
+        flags: integration
+        verbose: true
+        override_pr: ${{ github.event.inputs.pr_id }}
