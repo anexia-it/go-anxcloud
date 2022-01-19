@@ -169,20 +169,38 @@ jobs:
     steps:
     - uses: actions/download-artifact@v2
 
-    - name: upload test coverage to Codecov
+    - name: upload target Go unit test coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
         fail_ci_if_error: true
-        files: unit-coverage-target/coverage.out, unit-coverage-latest/coverage.out
-        flags: unittests
+        files: unit-coverage-target/coverage.out
+        flags: unittests,target-go
         verbose: true
         override_pr: ${{ github.event.inputs.pr_id }}
 
-    - name: upload test coverage to Codecov
+    - name: upload latest Go unit test coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
         fail_ci_if_error: true
-        files: integration-coverage-target/coverage.out, integration-coverage-latest/coverage.out
-        flags: integration
+        files: unit-coverage-latest/coverage.out
+        flags: unittests,latest-go
+        verbose: true
+        override_pr: ${{ github.event.inputs.pr_id }}
+
+    - name: upload target Go integration test coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        files: integration-coverage-target/coverage.out
+        flags: integration,target-go
+        verbose: true
+        override_pr: ${{ github.event.inputs.pr_id }}
+
+    - name: upload latest Go integration test coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        files: integration-coverage-latest/coverage.out
+        flags: integration,latest-go
         verbose: true
         override_pr: ${{ github.event.inputs.pr_id }}
