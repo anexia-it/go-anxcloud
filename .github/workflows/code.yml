@@ -164,7 +164,7 @@ jobs:
         path: coverage.out
 
   upload-results:
-    needs: integration-tests
+    needs: unit-tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v2
@@ -176,5 +176,3 @@ jobs:
         coverageLocations: |
           ${{ github.workspace }}/unit-coverage-target/coverage.out:gocov
           ${{ github.workspace }}/unit-coverage-latest/coverage.out:gocov
-          ${{ github.workspace }}/integration-coverage-target/coverage.out:gocov
-          ${{ github.workspace }}/integration-coverage-latest/coverage.out:gocov
