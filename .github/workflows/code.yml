@@ -169,38 +169,12 @@ jobs:
     steps:
     - uses: actions/download-artifact@v2
 
-    - name: upload target Go unit test coverage to Codecov
-      uses: codecov/codecov-action@v2
+    - uses: paambaati/codeclimate-action@v3.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secret.CC_TEST_REPORTER_ID }}
       with:
-        fail_ci_if_error: true
-        files: unit-coverage-target/coverage.out
-        flags: unittests,target-go
-        verbose: true
-        override_pr: ${{ github.event.inputs.pr_id }}
-
-    - name: upload latest Go unit test coverage to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        fail_ci_if_error: true
-        files: unit-coverage-latest/coverage.out
-        flags: unittests,latest-go
-        verbose: true
-        override_pr: ${{ github.event.inputs.pr_id }}
-
-    - name: upload target Go integration test coverage to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        fail_ci_if_error: true
-        files: integration-coverage-target/coverage.out
-        flags: integration,target-go
-        verbose: true
-        override_pr: ${{ github.event.inputs.pr_id }}
-
-    - name: upload latest Go integration test coverage to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        fail_ci_if_error: true
-        files: integration-coverage-latest/coverage.out
-        flags: integration,latest-go
-        verbose: true
-        override_pr: ${{ github.event.inputs.pr_id }}
+        coverageLocations: |
+          ${{ github.workspace }}/unit-coverage-target/coverage.out:gocov
+          ${{ github.workspace }}/unit-coverage-latest/coverage.out:gocov
+          ${{ github.workspace }}/integration-coverage-target/coverage.out:gocov
+          ${{ github.workspace }}/integration-coverage-latest/coverage.out:gocov
