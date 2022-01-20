@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -34,13 +35,13 @@ const (
 	locationID = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
 	vlanID     = "02f39d20ca0f4adfb5032f88dbc26c39"
 
-	templateType  = "templates"
-	templateName  = "Flatcar Linux Stable"
-	cpus          = 2
-	sockets       = 1
-	changedMemory = 4096
-	memory        = 2048
-	disk          = 10
+	templateType       = "templates"
+	templateNamePrefix = "Flatcar Linux"
+	cpus               = 2
+	sockets            = 1
+	changedMemory      = 4096
+	memory             = 2048
+	disk               = 10
 )
 
 func BeBuiltFromTemplate(id string) gomegaTypes.GomegaMatcher {
@@ -166,7 +167,7 @@ var _ = Describe("vsphere API client", Ordered, func() {
 
 		selected := make([]templates.Template, 0, 1)
 		for _, tpl := range tpls {
-			if tpl.Name == templateName {
+			if strings.HasPrefix(tpl.Name, templateNamePrefix) {
 				selected = append(selected, tpl)
 			}
 		}
