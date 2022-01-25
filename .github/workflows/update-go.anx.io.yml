@@ -2,11 +2,6 @@ name: Trigger go.anx.io update
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   trigger:
