@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"reflect"
 
+	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 
 	"github.com/onsi/ginkgo/v2"
@@ -16,9 +17,15 @@ type hookErrorCheck func(context.Context) error
 
 // ObjectTests contains the logic to test any Object implementation with the hooks it implements, checking
 // * if the Object actually implements the interface of the hook
+// * if the Object has an identifier field
 // * calling the hook function with incomplete contexts gives none or the correct error (meaning the error is handled correctly)
 //
 func ObjectTests(o types.Object, hooks ...interface{}) {
+	ginkgo.It("has an identifier", func() {
+		_, err := api.GetObjectIdentifier(o, false)
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+	})
+
 	for _, hook := range hooks {
 		name := reflect.TypeOf(hook).Elem().Name()
 

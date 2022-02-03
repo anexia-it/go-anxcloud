@@ -85,71 +85,71 @@ func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context
 	return url.Parse("/resource/v1")
 }
 
-var _ = Describe("getObjectIdentifier function", func() {
+var _ = Describe("GetObjectIdentifier function", func() {
 	It("errors out on invalid Object types", func() {
 		nso := api_test_nonstruct_object(false)
-		identifier, err := getObjectIdentifier(&nso, false)
+		identifier, err := GetObjectIdentifier(&nso, false)
 		Expect(err).To(MatchError(ErrTypeNotSupported))
 		Expect(err.Error()).To(ContainSubstring("must be implemented as structs"))
 		Expect(identifier).To(BeEmpty())
 
 		npo := api_test_nonpointer_object(false)
-		identifier, err = getObjectIdentifier(npo, false)
+		identifier, err = GetObjectIdentifier(npo, false)
 		Expect(err).To(MatchError(ErrTypeNotSupported))
 		Expect(err.Error()).To(ContainSubstring("must be implemented on a pointer to struct"))
 		Expect(identifier).To(BeEmpty())
 
 		nio := api_test_noident_object{"invalid"}
-		identifier, err = getObjectIdentifier(&nio, false)
+		identifier, err = GetObjectIdentifier(&nio, false)
 		Expect(err).To(MatchError(ErrObjectWithoutIdentifier))
 		Expect(identifier).To(BeEmpty())
 
 		iio := api_test_invalidident_object{32}
-		identifier, err = getObjectIdentifier(&iio, false)
+		identifier, err = GetObjectIdentifier(&iio, false)
 		Expect(err).To(MatchError(ErrObjectIdentifierTypeNotSupported))
 		Expect(identifier).To(BeEmpty())
 
 		mio := api_test_multiident_object{"identifier", "identifier2"}
-		identifier, err = getObjectIdentifier(&mio, false)
+		identifier, err = GetObjectIdentifier(&mio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
 		emio := api_test_embeddedmultiident_object{api_test_multiident_object{"identifier", "identifier2"}}
-		identifier, err = getObjectIdentifier(&emio, false)
+		identifier, err = GetObjectIdentifier(&emio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
 		memio := api_test_multiembeddedmultiident_object{api_test_object{"identifier"}, api_test_uuidident_object{uuid.NewV4()}}
-		identifier, err = getObjectIdentifier(&memio, false)
+		identifier, err = GetObjectIdentifier(&memio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 	})
 
 	It("accepts valid Object types", func() {
 		sio := api_test_object{"identifier"}
-		identifier, err := getObjectIdentifier(&sio, true)
+		identifier, err := GetObjectIdentifier(&sio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
 		uio := api_test_uuidident_object{uuid.FromStringOrNil("6010622e-3e14-11ec-a5c3-0f457821b3ba")}
-		identifier, err = getObjectIdentifier(&uio, true)
+		identifier, err = GetObjectIdentifier(&uio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("6010622e-3e14-11ec-a5c3-0f457821b3ba"))
 	})
 
 	It("accepts valid Object types where the identifier is in embedded fields", func() {
 		eio := api_test_embeddedident_object{api_test_object{"identifier"}}
-		identifier, err := getObjectIdentifier(&eio, true)
+		identifier, err := GetObjectIdentifier(&eio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
 		peio := api_test_ptrembeddedident_object{&api_test_object{"identifier"}}
-		identifier, err = getObjectIdentifier(&peio, true)
+		identifier, err = GetObjectIdentifier(&peio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
 		meio := api_test_multiembeddedident_object{uuid.NewV4(), api_test_object{"identifier"}}
-		identifier, err = getObjectIdentifier(&meio, true)
+		identifier, err = GetObjectIdentifier(&meio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 	})
@@ -157,14 +157,14 @@ var _ = Describe("getObjectIdentifier function", func() {
 	Context("when doing an operation on a specific object", func() {
 		It("errors out on valid Object type but empty identifier", func() {
 			o := api_test_object{""}
-			identifier, err := getObjectIdentifier(&o, true)
+			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).To(MatchError(ErrUnidentifiedObject))
 			Expect(identifier).To(BeEmpty())
 		})
 
 		It("returns the correct identifier", func() {
 			o := api_test_object{"test"}
-			identifier, err := getObjectIdentifier(&o, true)
+			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(identifier).To(Equal("test"))
 		})
