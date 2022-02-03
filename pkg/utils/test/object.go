@@ -1,8 +1,10 @@
 package test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"net/http/httptest"
 	"net/url"
 	"reflect"
 
@@ -36,6 +38,25 @@ func ObjectTests(o types.Object, hooks ...interface{}) {
 			},
 			"PaginationSupportHook": func(ctx context.Context) error {
 				_, err := o.(types.PaginationSupportHook).HasPagination(ctx)
+				return err
+			},
+			"RequestBodyHook": func(ctx context.Context) error {
+				_, err := o.(types.RequestBodyHook).FilterAPIRequestBody(ctx)
+				return err
+			},
+			"RequestFilterHook": func(ctx context.Context) error {
+				_, err := o.(types.RequestFilterHook).FilterAPIRequest(ctx, httptest.NewRequest("GET", "/", nil))
+				return err
+			},
+			"ResponseDecodeHook": func(ctx context.Context) error {
+				err := o.(types.ResponseDecodeHook).DecodeAPIResponse(ctx, bytes.NewBuffer([]byte(`{}`)))
+				return err
+			},
+			"ResponseFilterHook": func(ctx context.Context) error {
+				rec := httptest.NewRecorder()
+				rec.WriteHeader(200)
+				_, _ = rec.WriteString(`{}`)
+				_, err := o.(types.ResponseFilterHook).FilterAPIResponse(ctx, rec.Result())
 				return err
 			},
 		}
