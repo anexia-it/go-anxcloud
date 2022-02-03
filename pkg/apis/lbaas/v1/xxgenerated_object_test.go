@@ -2,73 +2,87 @@ package v1
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "go.anx.io/go-anxcloud/pkg/utils/test/gomega"
+	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 var _ = Describe("Object Backend", func() {
-	It("implements the interface types.Object", func() {
+	o := Backend{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
 		var i types.Object
-		o := Backend{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := Backend{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 
 var _ = Describe("Object Bind", func() {
-	It("implements the interface types.Object", func() {
+	o := Bind{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
 		var i types.Object
-		o := Bind{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := Bind{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 
 var _ = Describe("Object Frontend", func() {
-	It("implements the interface types.Object", func() {
+	o := Frontend{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
 		var i types.Object
-		o := Frontend{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := Frontend{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 
 var _ = Describe("Object LoadBalancer", func() {
-	It("implements the interface types.Object", func() {
+	o := LoadBalancer{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
 		var i types.Object
-		o := LoadBalancer{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := LoadBalancer{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 
 var _ = Describe("Object Server", func() {
-	It("implements the interface types.Object", func() {
+	o := Server{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
 		var i types.Object
-		o := Server{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := Server{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
