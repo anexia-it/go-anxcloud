@@ -66,13 +66,13 @@ in the project.
 
 ### pre-commit hook
 
-There is a `pre-commit` hook checking some things before you even make a commit, you can install it with
-`make install-precommit-hook`. It might occasionally warn you about it being not up to date, run that command
-again to update it.
+We use [`pre-commit`](https://pre-commit.com/) to run some things before you make a commit, making sure
+your code is clean before even added to your local history. It's probably available in your systems package
+manager, see the link for install instructions. When installed, run `pre-commit install` in the clones
+go-anxcloud sources to to activate it for you (or `pre-commit install -f` to replace the previous custom
+pre-commit script we had, if you had this installed).
 
-It's not very clever yet and in some cases might hinder working, for example when rebasing. You can always just
-uninstall it with `rm .git/hooks/pre-commit`.
-
+In its documentation you also find help if you have to skip a check for some reason.
 
 ## Testing
 

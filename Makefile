@@ -96,11 +96,3 @@ tools:
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd tools && go build -o . github.com/onsi/ginkgo/v2/ginkgo
 	cd tools && go build
-
-.PHONY: install-precommit-hook
-install-precommit-hook: .git/hooks/pre-commit
-
-.PHONY: .git/hooks/pre-commit
-.git/hooks/pre-commit: scripts/pre-commit
-	cp $< $@
-	chmod +x $@
