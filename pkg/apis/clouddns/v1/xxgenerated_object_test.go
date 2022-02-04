@@ -2,54 +2,55 @@ package v1
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "go.anx.io/go-anxcloud/pkg/utils/test/gomega"
+	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 var _ = Describe("Object Record", func() {
-	It("implements the interface types.Object", func() {
+	o := Record{}
+
+	ifaces := make([]interface{}, 0, 3)
+	{
 		var i types.Object
-		o := Record{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.ResponseDecodeHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.ResponseDecodeHook
-		o := Record{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.PaginationSupportHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.PaginationSupportHook
-		o := Record{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 
 var _ = Describe("Object Zone", func() {
-	It("implements the interface types.Object", func() {
+	o := Zone{}
+
+	ifaces := make([]interface{}, 0, 5)
+	{
 		var i types.Object
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestFilterHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestFilterHook
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.RequestBodyHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.RequestBodyHook
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.ResponseFilterHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.ResponseFilterHook
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
-	It("implements the interface types.PaginationSupportHook", func() {
+		ifaces = append(ifaces, &i)
+	}
+	{
 		var i types.PaginationSupportHook
-		o := Zone{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
 })

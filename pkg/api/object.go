@@ -9,7 +9,9 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
-func getObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, error) {
+// GetObjectIdentifier extracts the identifier of the given object, returning an error if no identifier field
+// is found or singleObjectOperation is true and an identifier field is found, but empty.
+func GetObjectIdentifier(obj types.Object, singleObjectOperation bool) (string, error) {
 	objectType := reflect.TypeOf(obj)
 
 	if objectType.Kind() != reflect.Ptr {

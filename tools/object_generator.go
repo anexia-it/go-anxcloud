@@ -120,8 +120,7 @@ func (gen *ObjectGenerator) writeHeader() {
 		fmt.Fprint(gen.out, `
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "go.anx.io/go-anxcloud/pkg/utils/test/gomega"
+	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
@@ -241,13 +240,17 @@ func (gen *ObjectGenerator) generateTestCode() {
 	const templates = `
 {{ define "objectTest" }}
 var _ = Describe("Object {{ .Name }}", func() {
+	o := {{ $.Name }}{}
+
+	ifaces := make([]interface{}, 0, {{ len .Interfaces }})
 	{{- range .Interfaces }}
-	It("implements the interface {{ . }}", func() {
+	{
 		var i {{ . }}
-		o := {{ $.Name }}{}
-		Expect(&o).To(ImplementInterface(&i))
-	})
+		ifaces = append(ifaces, &i)
+	}
 	{{- end }}
+
+	testutils.ObjectTests(&o, ifaces...)
 })
 {{ end }}`
 
