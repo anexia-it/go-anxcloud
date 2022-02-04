@@ -1,8 +1,10 @@
 package test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"net/http/httptest"
 	"net/url"
 	"reflect"
 
@@ -29,53 +31,85 @@ func ObjectTests(o types.Object, hooks ...interface{}) {
 	for _, hook := range hooks {
 		name := reflect.TypeOf(hook).Elem().Name()
 
-		supportedHooks := map[string]hookErrorCheck{
-			"Object": func(ctx context.Context) error {
-				_, err := o.EndpointURL(ctx)
-				return err
-			},
-			"PaginationSupportHook": func(ctx context.Context) error {
-				_, err := o.(types.PaginationSupportHook).HasPagination(ctx)
-				return err
-			},
-		}
+		ginkgo.Context(fmt.Sprintf("implementing %v", name), func() {
+			ginkgo.It("actually implements the interface", func() {
+				implementsHook := reflect.TypeOf(o).Implements(reflect.TypeOf(hook).Elem())
+				gomega.Expect(implementsHook).To(gomega.BeTrue())
+			})
 
-		if errorCheck, ok := supportedHooks[name]; ok {
-			ginkgo.Context(fmt.Sprintf("implementing %v", name), func() {
-				ginkgo.It("actually implements the interface", func() {
-					implementsHook := reflect.TypeOf(o).Implements(reflect.TypeOf(hook).Elem())
-					gomega.Expect(implementsHook).To(gomega.BeTrue())
-				})
+			testHookHandlingIncompleteContext(o, name)
+		})
+	}
+}
 
-				args := []interface{}{
-					func(ctx context.Context) {
-						err := errorCheck(ctx)
+// testHookHandlingIncompleteContext calls the function of a hook with incomplete contexts as argument,
+// checking if it either returns the expected ErrContextKeyNotSet or no error at all.
+//
+// If this randomly fails for a single or few Objects, maybe the Hook implementation of the Object(s) needs
+// actual data instead of an empty json Object - easiest workaround is to check all the context keys in the
+// hook implementation, I have no idea how I could generate sensible test data to pass to the hooks and when
+// I wrote this, all Objects were just fine with an empty json object. -- Mara @LittleFox94 Grosch, 2022-02-04
+func testHookHandlingIncompleteContext(o types.Object, hook string) {
+	// This is our map from hook name to a function calling its function and only returning the error returned by
+	// it. When new hooks are supported by the generic client, they'd have to be added here to be checked.
+	supportedHooks := map[string]hookErrorCheck{
+		"Object": func(ctx context.Context) error {
+			_, err := o.EndpointURL(ctx)
+			return err
+		},
+		"PaginationSupportHook": func(ctx context.Context) error {
+			_, err := o.(types.PaginationSupportHook).HasPagination(ctx)
+			return err
+		},
+		"RequestBodyHook": func(ctx context.Context) error {
+			_, err := o.(types.RequestBodyHook).FilterAPIRequestBody(ctx)
+			return err
+		},
+		"RequestFilterHook": func(ctx context.Context) error {
+			_, err := o.(types.RequestFilterHook).FilterAPIRequest(ctx, httptest.NewRequest("GET", "/", nil))
+			return err
+		},
+		"ResponseDecodeHook": func(ctx context.Context) error {
+			err := o.(types.ResponseDecodeHook).DecodeAPIResponse(ctx, bytes.NewBuffer([]byte(`{}`)))
+			return err
+		},
+		"ResponseFilterHook": func(ctx context.Context) error {
+			rec := httptest.NewRecorder()
+			rec.WriteHeader(200)
+			_, _ = rec.WriteString(`{}`)
+			_, err := o.(types.ResponseFilterHook).FilterAPIResponse(ctx, rec.Result())
+			return err
+		},
+	}
 
-						// It can be fine with incomplete context, but if it fails, than with the error indicating
-						// it checked for it - the one OperationFromContext and co. return
-						if err != nil {
-							gomega.Expect(err).To(
-								gomega.MatchError(types.ErrContextKeyNotSet),
-							)
-						}
-					},
+	if errorCheck, ok := supportedHooks[hook]; ok {
+		args := []interface{}{
+			func(ctx context.Context) {
+				err := errorCheck(ctx)
 
-					// technically we have to omit "url" for checking EndpointURL, as it is not set there, yet
-					// EndpointURL using URL from context should crash in other tests though, so we take the simplicity of only adding a test case
-					// for others, instead of generating different sets of test cases.
-					ginkgo.Entry("missing options", makeTestContext("operation", "url")),
-					ginkgo.Entry("missing operation", makeTestContext("options", "url")),
-				}
-
-				if name != "Object" {
-					args = append(args,
-						ginkgo.Entry("missing url", makeTestContext("options", "operation")),
+				// It can be fine with incomplete context, but if it fails, than with the error indicating
+				// it checked for it - the one OperationFromContext and co. return
+				if err != nil {
+					gomega.Expect(err).To(
+						gomega.MatchError(types.ErrContextKeyNotSet),
 					)
 				}
+			},
 
-				ginkgo.DescribeTable("handles being called with context", args...)
-			})
+			// technically we have to omit "url" for checking EndpointURL, as it is not set there, yet
+			// EndpointURL using URL from context should crash in other tests though, so we take the simplicity of only adding a test case
+			// for others, instead of generating different sets of test cases.
+			ginkgo.Entry("missing options", makeTestContext("operation", "url")),
+			ginkgo.Entry("missing operation", makeTestContext("options", "url")),
 		}
+
+		if hook != "Object" {
+			args = append(args,
+				ginkgo.Entry("missing url", makeTestContext("options", "operation")),
+			)
+		}
+
+		ginkgo.DescribeTable("handles being called with context", args...)
 	}
 }
 
