@@ -30,8 +30,8 @@ var _ = Describe("location E2E tests", func() {
 		Expect(loc.CountryCode).To(Equal("AT"))
 		Expect(loc.Latitude).NotTo(BeNil())
 		Expect(loc.Longitude).NotTo(BeNil())
-		Expect(*loc.Latitude).To(BeNumerically("~", 48.19300))
-		Expect(*loc.Longitude).To(BeNumerically("~", 16.35338))
+		Expect(*loc.Latitude).To(Equal("48.1930000000000"))
+		Expect(*loc.Longitude).To(Equal("16.3533800000000"))
 	}
 
 	matchesANX63 := func(loc Location) {
@@ -41,8 +41,8 @@ var _ = Describe("location E2E tests", func() {
 		Expect(loc.CountryCode).To(Equal("NL"))
 		Expect(loc.Latitude).NotTo(BeNil())
 		Expect(loc.Longitude).NotTo(BeNil())
-		Expect(*loc.Latitude).To(BeNumerically("~", 52.3702157))
-		Expect(*loc.Longitude).To(BeNumerically("~", 4.8951679))
+		Expect(*loc.Latitude).To(Equal("52.3702157000000"))
+		Expect(*loc.Longitude).To(Equal("4.8951679000000"))
 	}
 
 	DescribeTable("retrieves location with expected data",
