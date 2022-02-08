@@ -10,13 +10,9 @@ import (
 var _ = Describe("Object Location", func() {
 	o := Location{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.ResponseDecodeHook
 		ifaces = append(ifaces, &i)
 	}
 

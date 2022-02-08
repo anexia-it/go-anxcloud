@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -58,7 +57,7 @@ var _ = Describe("Location Object", func() {
 
 			loc := Location{}
 
-			reader := bytes.NewBufferString(
+			data := []byte(
 				fmt.Sprintf(
 					`{`+
 						`"identifier":"foo",`+
@@ -70,7 +69,7 @@ var _ = Describe("Location Object", func() {
 					bodySnippet,
 				),
 			)
-			err := loc.DecodeAPIResponse(context.TODO(), reader)
+			err := loc.UnmarshalJSON(data)
 
 			if expErr != nil {
 				Expect(err).To(Or(
