@@ -18,6 +18,11 @@ e.g.
 * vsphere/provisioning - added progress identifier
 -->
 
+### Added
+* new APIs supported with generic client:
+  - core/location
+  - vlan
+
 ## [0.4.0] - 2022-01-24
 
 ### Added
