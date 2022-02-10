@@ -11,18 +11,19 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
-// NewHelper creates a new instance of a filter.Helper from the given Object.
+// NewHelper creates a new instance of a filter.Helper from the given object.
 //
-// The Helper will be set up for the fields in the Object that have a `anxcloud:"filterable"` tag, retrieving
-// their values, allowing easy access and building the filter query out of them automatically.
+// The Helper will be set up for the fields in the given object (which commonly is a generic client Object, but
+// has to be a struct or pointer to one) that have a `anxcloud:"filterable"` tag, retrieving their values,
+// allowing easy access and building the filter query out of them automatically.
 //
 // The tag has an optional second field, `anxcloud:"filterable,foo", allowing to rename the field in the query
 // to "foo". If no name is given, the name given in the encoding/json tag is used, if that is not given either,
 // the name of the field is used.
 //
-// References to other Objects are resolved to their identifier, making the filter not set when the identifier
-// of the referenced Object is empty.
-func NewHelper(o types.Object) (Helper, error) {
+// References to generic client Objects are resolved to their identifier, making the filter not set when the
+// identifier of the referenced Object is empty.
+func NewHelper(o interface{}) (Helper, error) {
 	helper := filterHelper{
 		values: make(map[string]interface{}),
 		fields: make(map[string]bool),
@@ -66,11 +67,13 @@ func (f filterHelper) BuildQuery() url.Values {
 func (f *filterHelper) parseObject(v interface{}) error {
 	val := reflect.ValueOf(v)
 
-	if val.Type().Kind() != reflect.Ptr || val.Type().Elem().Kind() != reflect.Struct {
-		return api.ErrTypeNotSupported
+	if val.Type().Kind() == reflect.Ptr {
+		val = val.Elem()
 	}
 
-	val = val.Elem()
+	if val.Type().Kind() != reflect.Struct {
+		return fmt.Errorf("%w: filter.Helper only works with structs or pointers to them", api.ErrTypeNotSupported)
+	}
 
 	numFields := val.NumField()
 	for i := 0; i < numFields; i++ {
@@ -88,7 +91,7 @@ func (f *filterHelper) parseObject(v interface{}) error {
 			continue
 		}
 
-		if len(tagParts) >= 2 {
+		if len(tagParts) >= 2 && tagParts[1] != "" {
 			fieldName = tagParts[1]
 		} else {
 			if jsonTag, ok := field.Tag.Lookup("json"); ok {
