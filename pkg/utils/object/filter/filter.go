@@ -106,7 +106,24 @@ func (f *filterHelper) parseObject(v interface{}) error {
 		f.fields[fieldName] = true
 
 		fieldValue := val.Field(i)
-		fieldKind := field.Type.Kind()
+		fieldType := fieldValue.Type()
+		fieldKind := fieldType.Kind()
+
+		if fieldKind == reflect.Slice || fieldKind == reflect.Array {
+			// only filter on first entry of an array
+			if len(tagParts) >= 3 && tagParts[2] == "single" {
+				if fieldValue.Len() == 1 {
+					fieldValue = fieldValue.Index(0)
+				} else if fieldValue.Len() == 0 {
+					fieldValue = reflect.New(fieldType.Elem()).Elem()
+				} else {
+					return fmt.Errorf("%w: only a single value can be filtered for %q", types.ErrInvalidFilter, fieldName)
+				}
+
+				fieldType = fieldValue.Type()
+				fieldKind = fieldType.Kind()
+			}
+		}
 
 		if isSupportedPrimitive(fieldKind) {
 			if !fieldValue.IsZero() {
@@ -118,7 +135,7 @@ func (f *filterHelper) parseObject(v interface{}) error {
 					continue
 				}
 
-				if isSupportedPrimitive(field.Type.Elem().Kind()) {
+				if isSupportedPrimitive(fieldType.Elem().Kind()) {
 					f.values[fieldName] = fieldValue.Elem().Interface()
 				}
 			}

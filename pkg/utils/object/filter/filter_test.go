@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -47,6 +48,34 @@ var _ = Describe("filter.Helper", func() {
 		Entry("type alias from bool", aliasedBool(true), "true"),
 
 		Entry("example testObject", testObject{Identifier: "foobarbaz"}, "foobarbaz"),
+	)
+
+	DescribeTable("supports filtering on single array entry",
+		func(data []string, expectedQuery string, expectedError error) {
+			type t struct {
+				// also tests empty name override field in tag
+				Foo []string `json:"bar" anxcloud:"filterable,,single"`
+			}
+
+			fh, err := NewHelper(t{Foo: data})
+
+			if expectedError != nil {
+				Expect(err).To(MatchError(expectedError))
+			} else {
+				Expect(err).NotTo(HaveOccurred())
+
+				q := fh.BuildQuery()
+
+				if expectedQuery == "" {
+					Expect(q).To(BeEmpty())
+				} else {
+					Expect(q).To(Equal(url.Values{"bar": []string{expectedQuery}}))
+				}
+			}
+		},
+		Entry("no filter value set", []string{}, "", nil),
+		Entry("one filter value set", []string{"what does the fox say?"}, "what does the fox say?", nil),
+		Entry("multiple filter values set", []string{"what does the fox say?", "eat the rich"}, "", types.ErrInvalidFilter),
 	)
 
 	Context("testing against the example testObject", func() {
