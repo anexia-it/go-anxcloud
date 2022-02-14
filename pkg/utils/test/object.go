@@ -28,12 +28,13 @@ func ObjectTests(o types.Object, hooks ...interface{}) {
 		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 	})
 
-	for _, hook := range hooks {
-		name := reflect.TypeOf(hook).Elem().Name()
+	for _, hookPtr := range hooks {
+		hook := reflect.TypeOf(hookPtr).Elem()
+		name := hook.Name()
 
 		ginkgo.Context(fmt.Sprintf("implementing %v", name), func() {
 			ginkgo.It("actually implements the interface", func() {
-				implementsHook := reflect.TypeOf(o).Implements(reflect.TypeOf(hook).Elem())
+				implementsHook := reflect.TypeOf(o).Implements(hook)
 				gomega.Expect(implementsHook).To(gomega.BeTrue())
 			})
 
