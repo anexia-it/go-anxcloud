@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/url"
 
-	uuid "github.com/satori/go.uuid"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -38,14 +36,6 @@ func (o api_test_invalidident_object) EndpointURL(ctx context.Context) (*url.URL
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_uuidident_object struct {
-	Identifier uuid.UUID `json:"identifier" anxcloud:"identifier"`
-}
-
-func (o api_test_uuidident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
 type api_test_embeddedident_object struct {
 	api_test_object
 }
@@ -55,8 +45,12 @@ type api_test_ptrembeddedident_object struct {
 }
 
 type api_test_multiembeddedident_object struct {
-	uuid.UUID
+	url.Values
 	api_test_object
+}
+
+func (o api_test_multiembeddedident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+	return url.Parse("/resource/v1")
 }
 
 type api_test_multiident_object struct {
@@ -78,7 +72,7 @@ func (o api_test_embeddedmultiident_object) EndpointURL(ctx context.Context) (*u
 
 type api_test_multiembeddedmultiident_object struct {
 	api_test_object
-	api_test_uuidident_object
+	api_test_embeddedident_object
 }
 
 func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
@@ -119,7 +113,7 @@ var _ = Describe("GetObjectIdentifier function", func() {
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
-		memio := api_test_multiembeddedmultiident_object{api_test_object{"identifier"}, api_test_uuidident_object{uuid.NewV4()}}
+		memio := api_test_multiembeddedmultiident_object{api_test_object{"identifier"}, api_test_embeddedident_object{api_test_object{"another identifier"}}}
 		identifier, err = GetObjectIdentifier(&memio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
@@ -130,11 +124,6 @@ var _ = Describe("GetObjectIdentifier function", func() {
 		identifier, err := GetObjectIdentifier(&sio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
-
-		uio := api_test_uuidident_object{uuid.FromStringOrNil("6010622e-3e14-11ec-a5c3-0f457821b3ba")}
-		identifier, err = GetObjectIdentifier(&uio, true)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(identifier).To(Equal("6010622e-3e14-11ec-a5c3-0f457821b3ba"))
 	})
 
 	It("accepts valid Object types where the identifier is in embedded fields", func() {
@@ -148,7 +137,7 @@ var _ = Describe("GetObjectIdentifier function", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
-		meio := api_test_multiembeddedident_object{uuid.NewV4(), api_test_object{"identifier"}}
+		meio := api_test_multiembeddedident_object{url.Values{}, api_test_object{"identifier"}}
 		identifier, err = GetObjectIdentifier(&meio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
