@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -263,14 +261,14 @@ func mock_create_record(zone string, record Record) {
 			IsMaster: true,
 
 			Revisions: []Revision{{
-				Identifier: uuid.NewV4().String(),
+				Identifier: "random revision identifier",
 				Records: []Record{{
 					Name:       record.Name,
 					Type:       record.Type,
 					RData:      record.RData,
 					Region:     record.Region,
 					TTL:        record.TTL,
-					Identifier: uuid.NewV4().String(),
+					Identifier: "random record identifier",
 				}},
 				ModifiedAt: time.Now(),
 				Serial:     1,
@@ -292,7 +290,7 @@ func mock_update_record(zone string, recordIdentifier string, record Record) {
 			Name:     zone,
 			IsMaster: true,
 			Revisions: []Revision{{
-				Identifier: uuid.NewV4().String(),
+				Identifier: "random revision identifier",
 				Records: []Record{{
 					Name:       record.Name,
 					Type:       record.Type,
