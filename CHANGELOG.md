@@ -23,6 +23,14 @@ e.g.
   - core/location
   - vlan
 
+### Changed
+* github.com/satori/go.uuid updated to latest master
+  - fixes a security issue for random UUIDs being not that random (CVE-2021-3538, https://github.com/satori/go.uuid/issues/73)
+    + although this is a real security issue, it's not relevant for go-anxcloud as it only consumes UUIDs in production code
+    + UUIDs were generated in test code, but those not being as random as they should be isn't a real problem
+  - the library seems dead and all usages not part of a public interface have been removed from go-anxcloud to
+    prepare removing it completely when the legacy CloudDNS client is gone
+
 ## [0.4.0] - 2022-01-24
 
 ### Added
