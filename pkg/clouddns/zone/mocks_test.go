@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	uuid "github.com/satori/go.uuid"
 )
 
 var mock *mockserver
@@ -167,7 +166,7 @@ func mock_apply_changeset(zone string, changes ChangeSet) {
 				Region:     changes.Create[0].Region,
 				RData:      changes.Create[0].RData,
 				TTL:        &changes.Create[0].TTL,
-				Identifier: uuid.NewV4(),
+				Identifier: mock_identifier(),
 				Immutable:  false,
 			},
 		}),
@@ -184,7 +183,7 @@ func mock_import_zone(zone string, data Import) {
 		ghttp.VerifyJSONRepresenting(data),
 		ghttp.RespondWithJSONEncoded(200, Revision{
 			CreatedAt:  time.Now(),
-			Identifier: uuid.NewV4(),
+			Identifier: mock_identifier(),
 			ModifiedAt: time.Now(),
 			Serial:     1,
 			State:      "active",
@@ -224,14 +223,14 @@ func mock_create_record(zone string, record RecordRequest) {
 				IsMaster: true,
 			},
 			Revisions: []Revision{{
-				Identifier: uuid.NewV4(),
+				Identifier: mock_identifier(),
 				Records: []Record{{
 					Name:       record.Name,
 					Type:       record.Type,
 					RData:      record.RData,
 					Region:     record.Region,
 					TTL:        &record.TTL,
-					Identifier: uuid.NewV4(),
+					Identifier: mock_identifier(),
 				}},
 				ModifiedAt: time.Now(),
 				Serial:     1,
@@ -256,7 +255,7 @@ func mock_update_record(zone string, recordIdentifier uuid.UUID, record RecordRe
 				IsMaster: true,
 			},
 			Revisions: []Revision{{
-				Identifier: uuid.NewV4(),
+				Identifier: mock_identifier(),
 				Records: []Record{{
 					Name:       record.Name,
 					Type:       record.Type,
@@ -282,4 +281,10 @@ func mock_delete_record(zone string, recordIdentifier uuid.UUID) {
 		ghttp.VerifyRequest("DELETE", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records/%s", zone, recordIdentifier)),
 		ghttp.RespondWith(200, nil),
 	))
+}
+
+func mock_identifier() uuid.UUID {
+	u, err := uuid.NewV4()
+	Expect(err).NotTo(HaveOccurred())
+	return u
 }
