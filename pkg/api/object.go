@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 
-	uuid "github.com/satori/go.uuid"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
@@ -70,8 +69,7 @@ fields:
 				}
 
 				allowedIdentifierTypes := map[reflect.Type]func(interface{}) string{
-					reflect.TypeOf(""):       func(v interface{}) string { return v.(string) },
-					reflect.TypeOf(uuid.Nil): func(v interface{}) string { return v.(uuid.UUID).String() },
+					reflect.TypeOf(""): func(v interface{}) string { return v.(string) },
 				}
 
 				for ft, vf := range allowedIdentifierTypes {
