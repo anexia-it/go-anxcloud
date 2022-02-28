@@ -37,6 +37,7 @@ test: tools
 		-timeout 0 					\
 		-race 						\
 		-coverprofile coverage.out 	\
+		--keep-going 				\
 		./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
@@ -48,6 +49,7 @@ func-test: tools
 		-tags integration 			\
 		-coverpkg ./...				\
 		-coverprofile coverage.out	\
+		--keep-going 				\
 	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
