@@ -9,7 +9,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
-func (i Info) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (r Resource) EndpointURL(ctx context.Context) (*url.URL, error) {
 	u, err := url.ParseRequestURI("/api/core/v1/resource.json")
 	if err != nil {
 		return nil, err
@@ -29,12 +29,12 @@ func (i Info) EndpointURL(ctx context.Context) (*url.URL, error) {
 	if op == types.OperationList {
 		query := u.Query()
 
-		if len(i.Tags) > 1 {
+		if len(r.Tags) > 1 {
 			logr.FromContextOrDiscard(ctx).Info("Listing with multiple tags isn't supported. Only first one used")
 		}
 
-		if len(i.Tags) > 0 {
-			query.Add("tag_name", i.Tags[0])
+		if len(r.Tags) > 0 {
+			query.Add("tag_name", r.Tags[0])
 		}
 		u.RawQuery = query.Encode()
 	}

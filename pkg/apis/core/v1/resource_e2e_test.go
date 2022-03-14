@@ -32,10 +32,10 @@ var _ = Describe("resource E2E tests", func() {
 
 		It("should list resource using generic API client", func() {
 			var pageIter types.PageInfo
-			err := apiClient.List(ctx, &Info{}, api.Paged(1, 100, &pageIter))
+			err := apiClient.List(ctx, &Resource{}, api.Paged(1, 100, &pageIter))
 			Expect(err).ToNot(HaveOccurred())
 
-			var resInfo []Info
+			var resInfo []Resource
 			Expect(pageIter.Next(&resInfo)).To(BeTrue())
 			Expect(resInfo).ToNot(BeEmpty())
 			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
