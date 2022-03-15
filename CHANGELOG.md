@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+* **breaking**: renamed corev1.Info to corev1.Resource (#113, @LittleFox94)
+
 <!--
 Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
 guideline:

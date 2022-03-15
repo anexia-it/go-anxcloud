@@ -15,7 +15,7 @@ const pathPrefix = "/api/core/v1/resource.json"
 
 type (
 	Type = v1.Type
-	Info = v1.Info
+	Info = v1.Resource
 )
 
 // Summary describes a resource in short.

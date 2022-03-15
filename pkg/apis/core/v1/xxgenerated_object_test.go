@@ -19,8 +19,8 @@ var _ = Describe("Object Location", func() {
 	testutils.ObjectTests(&o, ifaces...)
 })
 
-var _ = Describe("Object Info", func() {
-	o := Info{}
+var _ = Describe("Object Resource", func() {
+	o := Resource{}
 
 	ifaces := make([]interface{}, 0, 1)
 	{

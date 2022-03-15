@@ -1,5 +1,7 @@
 package v1
 
+import "encoding/json"
+
 // Type is part of info.
 type Type struct {
 	Identifier string `json:"identifier"`
@@ -8,10 +10,11 @@ type Type struct {
 
 // anxcloud:object
 
-// Info contains all information about a resource.
-type Info struct {
-	Identifier string   `json:"identifier" anxcloud:"identifier"`
-	Name       string   `json:"name"`
-	Type       Type     `json:"resource_type"`
-	Tags       []string `json:"tags"`
+// Resource contains all information about a resource.
+type Resource struct {
+	Identifier string          `json:"identifier" anxcloud:"identifier"`
+	Name       string          `json:"name"`
+	Type       Type            `json:"resource_type"`
+	Tags       []string        `json:"tags"`
+	Attributes json.RawMessage `json:"attributes"`
 }

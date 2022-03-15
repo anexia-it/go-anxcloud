@@ -21,15 +21,15 @@ var _ = Describe("resource.Info", func() {
 		})
 
 		It("throws an error for Create operation", func() {
-			err := apiClient.Create(context.TODO(), &Info{Identifier: "foo"})
+			err := apiClient.Create(context.TODO(), &Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Update operation", func() {
-			err := apiClient.Update(context.TODO(), &Info{Identifier: "foo"})
+			err := apiClient.Update(context.TODO(), &Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Destroy operation", func() {
-			err := apiClient.Destroy(context.TODO(), &Info{Identifier: "foo"})
+			err := apiClient.Destroy(context.TODO(), &Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 	})
