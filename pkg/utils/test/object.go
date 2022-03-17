@@ -91,9 +91,10 @@ func testHookHandlingIncompleteContext(o types.Object, hook string) {
 				// It can be fine with incomplete context, but if it fails, than with the error indicating
 				// it checked for it - the one OperationFromContext and co. return
 				if err != nil {
-					gomega.Expect(err).To(
+					gomega.Expect(err).To(gomega.Or(
 						gomega.MatchError(types.ErrContextKeyNotSet),
-					)
+						gomega.MatchError(api.ErrOperationNotSupported),
+					))
 				}
 			},
 
