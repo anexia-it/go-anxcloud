@@ -105,7 +105,7 @@ var _ = Describe("HTTPError", func() {
 	})
 })
 
-var _ = Describe("errorFromResponse function", func() {
+var _ = Describe("ErrorFromResponse function", func() {
 	req := httptest.NewRequest("GET", "/", nil)
 
 	var statusCode int
@@ -123,7 +123,7 @@ var _ = Describe("errorFromResponse function", func() {
 		})
 
 		It("returns ErrNotFound as expected", func() {
-			err := errorFromResponse(req, res)
+			err := ErrorFromResponse(req, res)
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(ErrNotFound))
 		})
@@ -135,7 +135,7 @@ var _ = Describe("errorFromResponse function", func() {
 		})
 
 		It("returns ErrAccessDenied as expected", func() {
-			err := errorFromResponse(req, res)
+			err := ErrorFromResponse(req, res)
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(MatchError(ErrAccessDenied))
 		})
@@ -147,7 +147,7 @@ var _ = Describe("errorFromResponse function", func() {
 		})
 
 		It("returns a matching HTTPError as expected", func() {
-			err := errorFromResponse(req, res)
+			err := ErrorFromResponse(req, res)
 			Expect(err).To(HaveOccurred())
 
 			var he HTTPError
