@@ -2,6 +2,8 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/url"
 
 	"github.com/go-logr/logr"
@@ -39,4 +41,38 @@ func (r Resource) EndpointURL(ctx context.Context) (*url.URL, error) {
 		u.RawQuery = query.Encode()
 	}
 	return u, err
+}
+
+func (r *Resource) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	if op != types.OperationGet {
+		return json.NewDecoder(data).Decode(r)
+	} else {
+		type apiResource struct {
+			*Resource
+			Tags []struct {
+				Name       string
+				Identifier string
+			} `json:"tags"`
+		}
+
+		res := apiResource{
+			Resource: r,
+		}
+
+		if err := json.NewDecoder(data).Decode(&res); err != nil {
+			return err
+		}
+
+		r.Tags = make([]string, 0, len(res.Tags))
+		for _, tag := range res.Tags {
+			r.Tags = append(r.Tags, tag.Name)
+		}
+	}
+
+	return nil
 }

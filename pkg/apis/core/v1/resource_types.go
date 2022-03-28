@@ -8,7 +8,7 @@ type Type struct {
 	Name       string `json:"name"`
 }
 
-// anxcloud:object
+// anxcloud:object:hooks=ResponseDecodeHook
 
 // Resource contains all information about a resource.
 type Resource struct {
