@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * generic client: ErrorFromResponse and NewHTTPError to allow easier mocking (#118, @LittleFox94)
 * lbaas/v1: add state getters (StateSuccess, StateProgressing, StateFailure) (#116, @LittleFox94)
+* utilities for comparing, searching and reconciling Objects by a list of (nested) attribute names (#117, @LittleFox94)
+  - `pkg/utils/object/compare`
 
 ### Changed
 * **breaking**: renamed corev1.Info to corev1.Resource (#113, @LittleFox94)
