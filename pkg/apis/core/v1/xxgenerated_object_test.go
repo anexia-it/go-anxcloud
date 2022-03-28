@@ -22,9 +22,33 @@ var _ = Describe("Object Location", func() {
 var _ = Describe("Object Resource", func() {
 	o := Resource{}
 
-	ifaces := make([]interface{}, 0, 1)
+	ifaces := make([]interface{}, 0, 2)
 	{
 		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.ResponseDecodeHook
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})
+
+var _ = Describe("Object ResourceWithTag", func() {
+	o := ResourceWithTag{}
+
+	ifaces := make([]interface{}, 0, 3)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.RequestFilterHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.ResponseFilterHook
 		ifaces = append(ifaces, &i)
 	}
 
