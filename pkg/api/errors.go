@@ -123,7 +123,8 @@ func (e HTTPError) Error() string {
 	return e.message
 }
 
-func errorFromResponse(req *http.Request, res *http.Response) error {
+// ErrorFromResponse creates a new HTTPError from the given response.
+func ErrorFromResponse(req *http.Request, res *http.Response) error {
 	var specificError error
 
 	switch res.StatusCode {
@@ -139,4 +140,15 @@ func errorFromResponse(req *http.Request, res *http.Response) error {
 	}
 
 	return nil
+}
+
+// NewHTTPError creates a new HTTPError instance with the given values, which is mostly useful for mock-testing.
+func NewHTTPError(status int, method string, url *url.URL, wrapped error) error {
+	return HTTPError{
+		message:    http.StatusText(status),
+		wrapped:    wrapped,
+		statusCode: status,
+		url:        url,
+		method:     method,
+	}
 }

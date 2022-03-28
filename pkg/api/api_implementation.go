@@ -386,7 +386,7 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 
 	defer response.Body.Close()
 
-	if err := errorFromResponse(req, response); err != nil {
+	if err := ErrorFromResponse(req, response); err != nil {
 		return err
 	}
 
