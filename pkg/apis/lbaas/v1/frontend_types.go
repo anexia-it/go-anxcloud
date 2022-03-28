@@ -4,13 +4,14 @@ package v1
 
 // Frontend represents a LBaaS Frontend.
 type Frontend struct {
+	HasState
+
 	CustomerIdentifier string     `json:"customer_identifier"`
 	ResellerIdentifier string     `json:"reseller_identifier"`
 	Identifier         string     `json:"identifier" anxcloud:"identifier"`
 	Name               string     `json:"name"`
 	Mode               Mode       `json:"mode"`
 	ClientTimeout      string     `json:"client_timeout"`
-	State              State      `json:"state"`
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.

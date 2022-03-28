@@ -4,6 +4,8 @@ package v1
 
 // Server holds the information of a load balancers backend server
 type Server struct {
+	HasState
+
 	CustomerIdentifier string     `json:"customer_identifier"`
 	ResellerIdentifier string     `json:"reseller_identifier"`
 	Identifier         string     `json:"identifier" anxcloud:"identifier"`
@@ -11,7 +13,6 @@ type Server struct {
 	IP                 string     `json:"ip"`
 	Port               int        `json:"port"`
 	Check              string     `json:"check"`
-	State              State      `json:"state"`
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
