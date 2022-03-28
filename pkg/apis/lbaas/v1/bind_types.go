@@ -4,6 +4,8 @@ package v1
 
 // Bind represents an LBaaS FrontendBind
 type Bind struct {
+	HasState
+
 	CustomerIdentifier string     `json:"customer_identifier"`
 	ResellerIdentifier string     `json:"reseller_identifier"`
 	Identifier         string     `json:"identifier" anxcloud:"identifier"`
@@ -12,7 +14,6 @@ type Bind struct {
 	Port               int        `json:"port"`
 	SSL                bool       `json:"ssl"`
 	SslCertificatePath string     `json:"ssl_certificate_path,omitempty"`
-	State              State      `json:"state"`
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
