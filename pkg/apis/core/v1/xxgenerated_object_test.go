@@ -34,3 +34,23 @@ var _ = Describe("Object Resource", func() {
 
 	testutils.ObjectTests(&o, ifaces...)
 })
+
+var _ = Describe("Object ResourceWithTag", func() {
+	o := ResourceWithTag{}
+
+	ifaces := make([]interface{}, 0, 3)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.RequestFilterHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.ResponseFilterHook
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})

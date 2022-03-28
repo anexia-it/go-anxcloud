@@ -18,3 +18,14 @@ type Resource struct {
 	Tags       []string        `json:"tags"`
 	Attributes json.RawMessage `json:"attributes"`
 }
+
+// anxcloud:object:hooks=RequestFilterHook,ResponseFilterHook
+
+// ResourceWithTag is a virtual Object used to add (Create) or remove (Destroy) a tag to/from a Resource.
+type ResourceWithTag struct {
+	// Identifier of the Resource which tags to change
+	Identifier string `anxcloud:"identifier"`
+
+	// Name of the Tag to add or remove from the resource
+	Tag string
+}

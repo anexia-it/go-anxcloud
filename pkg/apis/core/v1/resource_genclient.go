@@ -1,10 +1,15 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"go.anx.io/go-anxcloud/pkg/api"
@@ -75,4 +80,53 @@ func (r *Resource) DecodeAPIResponse(ctx context.Context, data io.Reader) error 
 	}
 
 	return nil
+}
+
+func (rwt ResourceWithTag) EndpointURL(ctx context.Context) (*url.URL, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if op != types.OperationCreate && op != types.OperationDestroy {
+		return nil, fmt.Errorf("%w: ResourceWithTag only support Create and Destroy operations", api.ErrOperationNotSupported)
+	}
+
+	return url.Parse(fmt.Sprintf("/api/core/v1/resource.json/%v/tags/%v", rwt.Identifier, rwt.Tag))
+}
+
+func (rwt ResourceWithTag) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+	endpointURL, err := rwt.EndpointURL(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	baseURL := strings.TrimSuffix(req.URL.String(), endpointURL.String())
+
+	url := fmt.Sprintf("%v/api/core/v1/resource.json/%v/tags/%v", baseURL, rwt.Identifier, rwt.Tag)
+
+	newRequest, err := http.NewRequest(req.Method, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating modified Request: %w", err)
+	}
+
+	for h, vs := range req.Header {
+		if h != "Content-Type" && h != "Content-Length" {
+			for _, v := range vs {
+				newRequest.Header.Add(h, v)
+			}
+		}
+	}
+
+	return newRequest, nil
+}
+
+func (rwt ResourceWithTag) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+	if res.StatusCode == http.StatusOK {
+		res.StatusCode = http.StatusNoContent
+		res.Body.Close()
+		res.Body = ioutil.NopCloser(&bytes.Buffer{})
+	}
+
+	return res, nil
 }
