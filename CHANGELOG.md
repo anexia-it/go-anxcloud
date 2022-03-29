@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-* generic client: ErrorFromResponse and NewHTTPError to allow easier mocking (#118, @LittleFox94)
-* lbaas/v1: add state getters (StateSuccess, StateProgressing, StateFailure) (#116, @LittleFox94)
-* utilities for comparing, searching and reconciling Objects by a list of (nested) attribute names (#117, @LittleFox94)
-  - `pkg/utils/object/compare`
-
-### Changed
-* **breaking**: renamed corev1.Info to corev1.Resource (#113, @LittleFox94)
-
 <!--
 Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
 guideline:
@@ -26,6 +17,17 @@ e.g.
 
 * vsphere/provisioning - added progress identifier
 -->
+
+## [0.4.2] - 2022-03-29
+
+### Added
+* generic client: ErrorFromResponse and NewHTTPError to allow easier mocking (#118, @LittleFox94)
+* lbaas/v1: add state getters (StateSuccess, StateProgressing, StateFailure) (#116, @LittleFox94)
+* utilities for comparing, searching and reconciling Objects by a list of (nested) attribute names (#117, @LittleFox94)
+  - `pkg/utils/object/compare`
+
+### Changed
+* **breaking**: renamed corev1.Info to corev1.Resource (#113, @LittleFox94)
 
 ## [0.4.1] - 2022-03-04
 
