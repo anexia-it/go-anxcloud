@@ -23,6 +23,7 @@ e.g.
 ### Added
 * generic client: ErrorFromResponse and NewHTTPError to allow easier mocking (#118, @LittleFox94)
 * lbaas/v1: add state getters (StateSuccess, StateProgressing, StateFailure) (#116, @LittleFox94)
+  - **breaking**: changes the `State` attribute of all resources to be added via embedded `HasState`
 * utilities for comparing, searching and reconciling Objects by a list of (nested) attribute names (#117, @LittleFox94)
   - `pkg/utils/object/compare`
 
