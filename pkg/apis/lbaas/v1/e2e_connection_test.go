@@ -6,6 +6,7 @@ package v1
 import (
 	"io/ioutil"
 	"net/http"
+	"syscall"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -40,5 +41,12 @@ func unavailableServerConnectionCheck(url string) {
 			g.Expect(err).NotTo(HaveOccurred())
 			g.Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
 		}, 5*time.Second, 1*time.Second).Should(Succeed())
+	})
+}
+
+func connectionResetByPeerCheck(url string) {
+	It("resets connection", func() {
+		_, err := http.Get(url)
+		Expect(err).To(MatchError(syscall.ECONNRESET))
 	})
 }

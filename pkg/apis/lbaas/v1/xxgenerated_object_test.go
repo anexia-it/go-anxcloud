@@ -7,6 +7,22 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
+var _ = Describe("Object ACL", func() {
+	o := ACL{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.RequestBodyHook
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})
+
 var _ = Describe("Object Backend", func() {
 	o := Backend{}
 
@@ -69,6 +85,22 @@ var _ = Describe("Object LoadBalancer", func() {
 	}
 	{
 		var i types.ResponseFilterHook
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})
+
+var _ = Describe("Object Rule", func() {
+	o := Rule{}
+
+	ifaces := make([]interface{}, 0, 2)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 

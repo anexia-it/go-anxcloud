@@ -41,7 +41,59 @@ import (
 // Maybe we can extract some of those e2e helpers for use by other API bindings?
 //   -- Mara @LittleFox94 Grosch, 2022-05-03
 
-func serverChecks(testrun LBaaSE2ETestRun, backend *Backend) {
+func ruleChecks(testrun LBaaSE2ETestRun, frontend *Frontend, acl *ACL, testURL string) {
+	Context("with a fresh Rule", Ordered, func() {
+		var rule Rule
+
+		defer createObject(func() types.Object {
+			rule = Rule{
+				Name:          fmt.Sprintf("go-anxcloud-%s", testrun.Name),
+				ParentType:    "frontend",
+				Index:         0,
+				Frontend:      *frontend,
+				Condition:     "if",
+				ConditionTest: acl.Name,
+				Type:          "connection",
+				Action:        "reject",
+			}
+			return &rule
+		}, true)()
+
+		Context("rule blocks port", func() {
+			connectionResetByPeerCheck(testURL)
+		})
+
+		Context("rule allows port", func() {
+			updateObject(func() types.Object {
+				rule.Action = "accept"
+				return &rule
+			}, true)
+			successfulConnectionCheck(testURL)
+		})
+	})
+}
+
+func aclChecks(testrun LBaaSE2ETestRun, frontend *Frontend, testURL string) {
+	Context("with a fresh ACL", Ordered, func() {
+		var acl ACL
+
+		defer createObject(func() types.Object {
+			acl = ACL{
+				Name:       fmt.Sprintf("go-anxcloud-%s", testrun.Name),
+				ParentType: "frontend",
+				Index:      0,
+				Criterion:  "dst_port",
+				Value:      fmt.Sprintf("%d", testrun.Port),
+				Frontend:   *frontend,
+			}
+			return &acl
+		}, true)()
+
+		ruleChecks(testrun, frontend, &acl, testURL)
+	})
+}
+
+func serverChecks(testrun LBaaSE2ETestRun, backend *Backend, frontend *Frontend) {
 	Context("with a fresh Server", Ordered, func() {
 		var server Server
 
@@ -61,6 +113,8 @@ func serverChecks(testrun LBaaSE2ETestRun, backend *Backend) {
 		Context("correct server port", func() {
 			successfulConnectionCheck(url)
 		})
+
+		aclChecks(testrun, frontend, url)
 
 		Context("invalid server port", Ordered, func() {
 			updateObject(func() types.Object {
@@ -86,7 +140,7 @@ func bindChecks(testrun LBaaSE2ETestRun, frontend *Frontend, backend *Backend) {
 			return &bind
 		}, true)()
 
-		serverChecks(testrun, backend)
+		serverChecks(testrun, backend, frontend)
 
 		updateObject(func() types.Object {
 			bind.Port = testrun.Port + 1
