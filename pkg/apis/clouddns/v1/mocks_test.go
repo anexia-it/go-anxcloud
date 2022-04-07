@@ -257,15 +257,17 @@ func mock_create_record(zone string, record Record) {
 		ghttp.VerifyRequest("POST", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
 		ghttp.VerifyJSONRepresenting(record),
 		ghttp.RespondWithJSONEncoded(200, Zone{
-			Name:     zone,
-			IsMaster: true,
+			Name:            zone,
+			IsMaster:        true,
+			CurrentRevision: "random revision identifier",
 
 			Revisions: []Revision{{
 				Identifier: "random revision identifier",
 				Records: []Record{{
-					Name:       record.Name,
-					Type:       record.Type,
-					RData:      record.RData,
+					Name: record.Name,
+					Type: record.Type,
+					// we test with TXT records, for which the Engine returns RData enclosed in quotes
+					RData:      fmt.Sprintf("%q", record.RData),
 					Region:     record.Region,
 					TTL:        record.TTL,
 					Identifier: "random record identifier",
@@ -287,14 +289,17 @@ func mock_update_record(zone string, recordIdentifier string, record Record) {
 		ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records/%s", zone, recordIdentifier)),
 		ghttp.VerifyJSONRepresenting(record),
 		ghttp.RespondWithJSONEncoded(200, Zone{
-			Name:     zone,
-			IsMaster: true,
+			Name:            zone,
+			IsMaster:        true,
+			CurrentRevision: "random revision identifier",
+
 			Revisions: []Revision{{
 				Identifier: "random revision identifier",
 				Records: []Record{{
-					Name:       record.Name,
-					Type:       record.Type,
-					RData:      record.RData,
+					Name: record.Name,
+					Type: record.Type,
+					// we test with TXT records, for which the Engine returns RData enclosed in quotes
+					RData:      fmt.Sprintf("%q", record.RData),
 					Region:     record.Region,
 					TTL:        record.TTL,
 					Identifier: record.Identifier,

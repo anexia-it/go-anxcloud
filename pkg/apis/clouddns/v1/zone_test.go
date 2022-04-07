@@ -290,6 +290,8 @@ var _ = Describe("CloudDNS API client", func() {
 
 			err := a.Create(ctx, &record)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(record.Identifier).NotTo(BeEmpty())
+			Expect(record.RData).To(Equal(`"test record"`))
 
 			mock_expect_request_count(1)
 		})
