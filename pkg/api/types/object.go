@@ -55,3 +55,7 @@ type PaginationSupportHook interface {
 type ResponseDecodeHook interface {
 	DecodeAPIResponse(ctx context.Context, data io.Reader) error
 }
+
+type FilterRequestURLHook interface {
+	FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error)
+}

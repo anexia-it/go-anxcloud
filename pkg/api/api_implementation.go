@@ -298,6 +298,14 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 		// Fragment is never sent to a server
 	}
 
+	if obj, ok := obj.(types.FilterRequestURLHook); ok {
+		filteredURL, err := obj.FilterRequestURL(ctx, &fullURL)
+		if err != nil {
+			return nil, err
+		}
+		fullURL = *filteredURL
+	}
+
 	var method string
 	hasRequestBody := false
 

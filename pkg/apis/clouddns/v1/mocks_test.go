@@ -187,9 +187,9 @@ func mock_list_records(zone string) {
 		ghttp.RespondWithJSONEncoded(200, []Record{
 			{Name: "", Type: "A", RData: "127.0.0.1"},
 			{Name: "", Type: "AAAA", RData: "::1"},
-			{Name: "www", Type: "A", RData: "127.0.0.1"},
+			{Name: "www", Type: "A", RData: "127.0.0.1", Identifier: "abcd-efgh-ijkl-mnop"},
 			{Name: "www", Type: "AAAA", RData: "::1"},
-			{Name: "test1", Type: "TXT", RData: "\"test record\""},
+			{Name: "test1", Type: "TXT", RData: "\"test record\"", Identifier: "test-record-identifier"},
 		}),
 	))
 }

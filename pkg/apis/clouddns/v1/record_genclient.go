@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 
-	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/utils/object/compare"
 )
@@ -36,11 +35,6 @@ func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
 		return nil, err
 	}
 
-	// There is no endpoint to get details of a single record
-	if op == types.OperationGet {
-		return nil, api.ErrOperationNotSupported
-	}
-
 	if op == types.OperationList {
 		query := u.Query()
 
@@ -58,6 +52,21 @@ func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
 		u.RawQuery = query.Encode()
 	}
 	return u, err
+}
+
+func (r *Record) FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if op == types.OperationGet {
+		// remove id from URL since there is no endpoint for individual records
+		// single record is extracted in DecodeAPIResponse
+		url.Path = path.Dir(url.Path)
+	}
+
+	return url, nil
 }
 
 func (r *Record) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
@@ -90,13 +99,30 @@ func (r *Record) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 	}
 
 	d := json.NewDecoder(data)
-	err = d.Decode(r)
-	if err != nil {
-		return err
+
+	if op != types.OperationGet {
+		err = d.Decode(r)
+		if err != nil {
+			return err
+		}
+	}
+
+	if op == types.OperationGet {
+		var decoded []*Record
+		err = d.Decode(&decoded)
+		if err != nil {
+			return err
+		}
+		rec, err := r.findInRecordsByIdentifier(decoded)
+		if err != nil {
+			return err
+		}
+
+		*r = *rec
 	}
 
 	// Get zoneName from URL and put that into r.ZoneName
-	if op == types.OperationList {
+	if op == types.OperationList || op == types.OperationGet {
 		url, err := types.URLFromContext(ctx)
 		if err != nil {
 			return err
@@ -137,4 +163,19 @@ func (r *Record) findInZone(zone *Zone) (*Record, error) {
 	}
 
 	return &rev.Records[idx], nil
+}
+
+func (r *Record) findInRecordsByIdentifier(records []*Record) (*Record, error) {
+	if r.Identifier == "" {
+		return nil, fmt.Errorf("identifier not specified in record")
+	}
+
+	idx, err := compare.Search(r, records, "Identifier")
+	if err != nil {
+		return nil, fmt.Errorf("error searching record in list: %w", err)
+	} else if idx == -1 {
+		return nil, fmt.Errorf("record with id not found")
+	}
+
+	return records[idx], nil
 }

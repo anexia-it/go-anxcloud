@@ -81,6 +81,10 @@ func testHookHandlingIncompleteContext(o types.Object, hook string) {
 			_, err := o.(types.ResponseFilterHook).FilterAPIResponse(ctx, rec.Result())
 			return err
 		},
+		"FilterRequestURLHook": func(ctx context.Context) error {
+			_, err := o.(types.FilterRequestURLHook).FilterRequestURL(ctx, &url.URL{})
+			return err
+		},
 	}
 
 	if errorCheck, ok := supportedHooks[hook]; ok {

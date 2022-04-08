@@ -10,7 +10,7 @@ import (
 var _ = Describe("Object Record", func() {
 	o := Record{}
 
-	ifaces := make([]interface{}, 0, 3)
+	ifaces := make([]interface{}, 0, 4)
 	{
 		var i types.Object
 		ifaces = append(ifaces, &i)
@@ -21,6 +21,10 @@ var _ = Describe("Object Record", func() {
 	}
 	{
 		var i types.PaginationSupportHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.FilterRequestURLHook
 		ifaces = append(ifaces, &i)
 	}
 

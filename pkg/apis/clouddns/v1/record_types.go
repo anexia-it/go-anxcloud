@@ -1,6 +1,6 @@
 package v1
 
-// anxcloud:object:hooks=ResponseDecodeHook,PaginationSupportHook
+// anxcloud:object:hooks=ResponseDecodeHook,PaginationSupportHook,FilterRequestURLHook
 
 type Record struct {
 	Identifier string `json:"identifier,omitempty" anxcloud:"identifier"`

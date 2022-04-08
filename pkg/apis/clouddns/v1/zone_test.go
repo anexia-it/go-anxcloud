@@ -347,10 +347,12 @@ var _ = Describe("CloudDNS API client", func() {
 	})
 
 	Context("with some records existing", func() {
+		var firstRecordIdentifier string
+
 		JustBeforeEach(func() {
 			ensureTestZone(a, zoneName, times)
 
-			_ = ensureTestRecord(a, Record{
+			firstRecordIdentifier = ensureTestRecord(a, Record{
 				Name:     "test1",
 				ZoneName: zoneName,
 				Type:     "TXT",
@@ -394,6 +396,21 @@ var _ = Describe("CloudDNS API client", func() {
 				Region:   "default",
 				TTL:      300,
 			})
+		})
+
+		It("gets a record by it's identifier", func() {
+			mock_list_records(zoneName)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			record := &Record{Identifier: firstRecordIdentifier, ZoneName: zoneName}
+			if !isIntegrationTest {
+				record.Identifier = "test-record-identifier"
+			}
+			err := a.Get(ctx, record)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(record.Name).To(Equal("test1"))
+			Expect(record.Type).To(Equal("TXT"))
 		})
 
 		It("lists all records of the zone", func() {
