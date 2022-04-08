@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * clouddns/v1: creating a Record didn't retrieve its Identifier (#120, @LittleFox94)
 
+### Added
+* generic client: introduce FilterRequestURLHook to allow URL modification of the resource endpoint (#121, @marioreggiori)
+* clouddns/v1: allow single dns records to be fetched by identifier (#121, @marioreggiori)
+
 <!--
 Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
 guideline:
