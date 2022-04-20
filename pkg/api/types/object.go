@@ -52,6 +52,14 @@ type PaginationSupportHook interface {
 	HasPagination(ctx context.Context) (bool, error)
 }
 
+// ResponseDecodeHook is an interface Objects can optionally implement to change the API response decode behavior
 type ResponseDecodeHook interface {
+	// Decodes the API response
 	DecodeAPIResponse(ctx context.Context, data io.Reader) error
+}
+
+// FilterRequestURLHook is an interface Objects can optionally implement to modify the request URL
+type FilterRequestURLHook interface {
+	// FilterRequestURL returns the modified URL
+	FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error)
 }

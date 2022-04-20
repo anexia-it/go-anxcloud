@@ -13,6 +13,32 @@ import (
 )
 
 var _ = Describe("resource.Resource", func() {
+	Context("ResourceWithTags", func() {
+		var apiClient api.API
+		var rwt *ResourceWithTag
+
+		BeforeEach(func() {
+			if !isIntegrationTest {
+				Skip("integration build-flag not set")
+			}
+
+			a, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
+			Expect(err).ToNot(HaveOccurred())
+			apiClient = a
+			rwt = &ResourceWithTag{Identifier: "94a4e6561ba944dfb9f5d2dfd7f10d78", Tag: "abc"}
+		})
+
+		It("tags a resource", func() {
+			err := apiClient.Create(context.TODO(), rwt)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("untags a resource", func() {
+			err := apiClient.Destroy(context.TODO(), rwt)
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
 	Context("doing unsupported operations on Info objects", func() {
 		var apiClient api.API
 

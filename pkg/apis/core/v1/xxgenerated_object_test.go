@@ -38,17 +38,21 @@ var _ = Describe("Object Resource", func() {
 var _ = Describe("Object ResourceWithTag", func() {
 	o := ResourceWithTag{}
 
-	ifaces := make([]interface{}, 0, 3)
+	ifaces := make([]interface{}, 0, 4)
 	{
 		var i types.Object
 		ifaces = append(ifaces, &i)
 	}
 	{
-		var i types.RequestFilterHook
+		var i types.ResponseFilterHook
 		ifaces = append(ifaces, &i)
 	}
 	{
-		var i types.ResponseFilterHook
+		var i types.RequestBodyHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.FilterRequestURLHook
 		ifaces = append(ifaces, &i)
 	}
 
