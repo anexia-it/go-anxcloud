@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * clouddns/v1: creating a Record didn't retrieve its Identifier (#120, @LittleFox94)
 
+### Added
+* generic client: FilterRequestURLHook for modifying request URLs
+
+### Changed
+* core/v1: ResourceWithTag uses RequestBodyHook and FilterRequestURLHook instead of RequestFilterHook
+
 <!--
 Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
 guideline:
