@@ -101,6 +101,10 @@ func (rwt ResourceWithTag) FilterRequestURL(ctx context.Context, url *url.URL) (
 		return nil, err
 	}
 
+	if op != types.OperationCreate && op != types.OperationDestroy {
+		return nil, fmt.Errorf("%w: ResourceWithTag only support Create and Destroy operations", api.ErrOperationNotSupported)
+	}
+
 	if op == types.OperationDestroy {
 		url.Path = path.Dir(url.Path)
 	}
@@ -109,6 +113,9 @@ func (rwt ResourceWithTag) FilterRequestURL(ctx context.Context, url *url.URL) (
 }
 
 func (rwt ResourceWithTag) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	// nil translates to json null which results in 400 response from engine
+	// "" (empty json string) is accepted
+	// there is currently no easy way to omit the request body
 	return "", nil
 }
 

@@ -54,7 +54,7 @@ type PaginationSupportHook interface {
 
 // ResponseDecodeHook is an interface Objects can optionally implement to change the API response decode behavior
 type ResponseDecodeHook interface {
-	// Decodes the API response
+	// Decodes the API response into the Object this function is called on
 	DecodeAPIResponse(ctx context.Context, data io.Reader) error
 }
 
