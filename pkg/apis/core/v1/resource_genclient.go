@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
+	"path"
 
 	"github.com/go-logr/logr"
 	"go.anx.io/go-anxcloud/pkg/api"
@@ -95,30 +95,28 @@ func (rwt ResourceWithTag) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse(fmt.Sprintf("/api/core/v1/resource.json/%v/tags/%v", rwt.Identifier, rwt.Tag))
 }
 
-func (rwt ResourceWithTag) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
-	endpointURL, err := rwt.EndpointURL(ctx)
+func (rwt ResourceWithTag) FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error) {
+	op, err := types.OperationFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	baseURL := strings.TrimSuffix(req.URL.String(), endpointURL.String())
-
-	url := fmt.Sprintf("%v/api/core/v1/resource.json/%v/tags/%v", baseURL, rwt.Identifier, rwt.Tag)
-
-	newRequest, err := http.NewRequest(req.Method, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating modified Request: %w", err)
+	if op != types.OperationCreate && op != types.OperationDestroy {
+		return nil, fmt.Errorf("%w: ResourceWithTag only support Create and Destroy operations", api.ErrOperationNotSupported)
 	}
 
-	for h, vs := range req.Header {
-		if h != "Content-Type" && h != "Content-Length" {
-			for _, v := range vs {
-				newRequest.Header.Add(h, v)
-			}
-		}
+	if op == types.OperationDestroy {
+		url.Path = path.Dir(url.Path)
 	}
 
-	return newRequest, nil
+	return url, nil
+}
+
+func (rwt ResourceWithTag) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	// nil translates to json null which results in 400 response from engine
+	// "" (empty json string) is accepted
+	// there is currently no easy way to omit the request body
+	return "", nil
 }
 
 func (rwt ResourceWithTag) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
