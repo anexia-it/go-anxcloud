@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+    - LittleFox94
+  - package-ecosystem: "gomod"
+    directory: "/tools/"
+    schedule:
+      interval: "daily"
+    assignees:
+    - LittleFox94
