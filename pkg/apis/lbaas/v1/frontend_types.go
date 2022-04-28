@@ -4,6 +4,7 @@ package v1
 
 // Frontend represents a LBaaS Frontend.
 type Frontend struct {
+	commonMethods
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`

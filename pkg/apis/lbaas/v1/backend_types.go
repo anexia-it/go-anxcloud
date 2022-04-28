@@ -4,6 +4,7 @@ package v1
 
 // The Backend resource configures settings common for all specific backend Server resources linked to it.
 type Backend struct {
+	commonMethods
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`

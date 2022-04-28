@@ -4,6 +4,7 @@ package v1
 
 // Bind represents an LBaaS FrontendBind
 type Bind struct {
+	commonMethods
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`

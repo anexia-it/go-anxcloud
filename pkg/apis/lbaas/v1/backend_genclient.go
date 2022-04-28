@@ -1,10 +1,7 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"net/http"
 	"net/url"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
@@ -42,45 +39,16 @@ func (b *Backend) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return u, err
 }
 
-// FilterAPIRequestBody generates the request body for creating a new Backend, which differs from the Backend object.
+// FilterAPIRequestBody generates the request body for Backends, replacing linked Objects with just their identifier.
 func (b *Backend) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if op == types.OperationCreate || op == types.OperationUpdate {
-		ret := struct {
+	return requestBody(ctx, func() interface{} {
+		return &struct {
+			commonRequestBody
 			Backend
 			LoadBalancer string `json:"load_balancer"`
-
-			// we never want to send the state field, so making sure to omit it here
-			State string `json:"state,omitempty"`
 		}{
 			Backend:      *b,
 			LoadBalancer: b.LoadBalancer.Identifier,
 		}
-
-		return ret, nil
-	}
-
-	return b, nil
-}
-
-func (b *Backend) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return res, err
-	}
-
-	if op == types.OperationDestroy {
-		err = res.Body.Close()
-		if err != nil {
-			return res, err
-		}
-
-		res.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
-		return res, nil
-	}
-	return res, nil
+	})
 }

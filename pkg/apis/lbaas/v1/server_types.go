@@ -4,6 +4,7 @@ package v1
 
 // Server holds the information of a load balancers backend server
 type Server struct {
+	commonMethods
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
