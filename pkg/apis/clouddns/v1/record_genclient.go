@@ -22,7 +22,7 @@ var (
 	// ErrModifyRecordNotFound is returned for Create and Update requests when the modified Record is not found in
 	// the zones current Revision. This is probably an Engine problem and not your code, but might be a problem in
 	// these API bindings.
-	ErrModifyRecordNotFound = errors.New("revision not found")
+	ErrModifyRecordNotFound = errors.New("record not found")
 )
 
 func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
