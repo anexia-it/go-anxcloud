@@ -49,22 +49,14 @@ func (f *Frontend) FilterAPIRequestBody(ctx context.Context) (interface{}, error
 		return nil, err
 	}
 
-	if op == types.OperationCreate {
-		f.State = NewlyCreated
+	if op == types.OperationCreate || op == types.OperationUpdate {
 		return struct {
 			Frontend
 			LoadBalancer   string `json:"load_balancer"`
 			DefaultBackend string `json:"default_backend"`
-		}{
-			Frontend:       *f,
-			LoadBalancer:   f.LoadBalancer.Identifier,
-			DefaultBackend: f.DefaultBackend.Identifier,
-		}, nil
-	} else if op == types.OperationUpdate {
-		return struct {
-			Frontend
-			LoadBalancer   string `json:"load_balancer"`
-			DefaultBackend string `json:"default_backend"`
+
+			// we never want to send the state field, so making sure to omit it here
+			State string `json:"state,omitempty"`
 		}{
 			Frontend:       *f,
 			LoadBalancer:   f.LoadBalancer.Identifier,

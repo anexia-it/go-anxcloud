@@ -3,10 +3,11 @@ package v1
 import (
 	"bytes"
 	"context"
-	"go.anx.io/go-anxcloud/pkg/api/types"
 	"io"
 	"net/http"
 	"net/url"
+
+	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // EndpointURL returns the URL where to retrieve objects of type Server and the identifier of the given Server.
@@ -43,25 +44,16 @@ func (s *Server) FilterAPIRequestBody(ctx context.Context) (interface{}, error) 
 		return nil, err
 	}
 
-	if op == types.OperationCreate {
+	if op == types.OperationCreate || op == types.OperationUpdate {
 		return struct {
 			Server
-			State   State  `json:"state"`
 			Backend string `json:"backend"`
-		}{
-			Server:  *s,
-			State:   NewlyCreated,
-			Backend: s.Backend.Identifier,
-		}, nil
-	} else if op == types.OperationUpdate {
-		return struct {
-			Server
-			State   State  `json:"state"`
-			Backend string `json:"backend"`
+
+			// we never want to send the state field, so making sure to omit it here
+			State string `json:"state,omitempty"`
 		}{
 			Server:  *s,
 			Backend: s.Backend.Identifier,
-			State:   Updating,
 		}, nil
 	}
 

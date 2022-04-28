@@ -49,26 +49,19 @@ func (b *Backend) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 		return nil, err
 	}
 
-	if op == types.OperationCreate {
-		return struct {
-			Name         string `json:"name"`
-			LoadBalancer string `json:"load_balancer"`
-			Mode         Mode   `json:"mode"`
-			State        State  `json:"state"`
-		}{
-			Name:         b.Name,
-			Mode:         b.Mode,
-			LoadBalancer: b.LoadBalancer.Identifier,
-			State:        NewlyCreated,
-		}, nil
-	} else if op == types.OperationUpdate {
-		return struct {
+	if op == types.OperationCreate || op == types.OperationUpdate {
+		ret := struct {
 			Backend
 			LoadBalancer string `json:"load_balancer"`
+
+			// we never want to send the state field, so making sure to omit it here
+			State string `json:"state,omitempty"`
 		}{
 			Backend:      *b,
 			LoadBalancer: b.LoadBalancer.Identifier,
-		}, nil
+		}
+
+		return ret, nil
 	}
 
 	return b, nil

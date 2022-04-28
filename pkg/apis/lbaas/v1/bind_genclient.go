@@ -45,25 +45,16 @@ func (b *Bind) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	if op == types.OperationCreate {
+	if op == types.OperationCreate || op == types.OperationUpdate {
 		return struct {
 			Bind
 			Frontend string `json:"frontend"`
-			State    State  `json:"state"`
+
+			// we never want to send the state field, so making sure to omit it here
+			State string `json:"state,omitempty"`
 		}{
 			Bind:     *b,
 			Frontend: b.Frontend.Identifier,
-			State:    NewlyCreated,
-		}, nil
-	} else if op == types.OperationUpdate {
-		return struct {
-			Bind
-			Frontend string `json:"frontend"`
-			State    State  `json:"state"`
-		}{
-			Bind:     *b,
-			Frontend: b.Frontend.Identifier,
-			State:    Updating,
 		}, nil
 	}
 
