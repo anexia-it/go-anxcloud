@@ -1,13 +1,8 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"net/http"
 	"net/url"
-
-	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
 // EndpointURL returns the URL where to retrieve objects of type LoadBalancer and the identifier of the given Loadbalancer.
@@ -19,36 +14,12 @@ func (lb *LoadBalancer) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 // FilterAPIRequestBody generates the request body for creating a new LoadBalancer, which differs from the LoadBalancer object.
 func (lb *LoadBalancer) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if op == types.OperationCreate {
-		return map[string]string{
-			"name":       lb.Name,
-			"ip_address": lb.IpAddress,
-			"state":      "2",
-		}, nil
-	}
-
-	return lb, nil
-}
-
-func (l *LoadBalancer) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return res, err
-	}
-
-	if op == types.OperationDestroy {
-		err = res.Body.Close()
-		if err != nil {
-			return res, err
+	return requestBody(ctx, func() interface{} {
+		return &struct {
+			commonRequestBody
+			LoadBalancer
+		}{
+			LoadBalancer: *lb,
 		}
-
-		res.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
-		return res, nil
-	}
-	return res, nil
+	})
 }

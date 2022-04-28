@@ -4,6 +4,7 @@ package v1
 
 // LoadBalancer holds the information of a load balancer instance.
 type LoadBalancer struct {
+	commonMethods
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
