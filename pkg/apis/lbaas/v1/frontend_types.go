@@ -6,12 +6,12 @@ package v1
 type Frontend struct {
 	HasState
 
-	CustomerIdentifier string     `json:"customer_identifier"`
-	ResellerIdentifier string     `json:"reseller_identifier"`
-	Identifier         string     `json:"identifier" anxcloud:"identifier"`
+	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string     `json:"reseller_identifier,omitempty"`
+	Identifier         string     `json:"identifier,omitempty" anxcloud:"identifier"`
 	Name               string     `json:"name"`
 	Mode               Mode       `json:"mode"`
-	ClientTimeout      string     `json:"client_timeout"`
+	ClientTimeout      string     `json:"client_timeout,omitempty"`
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
