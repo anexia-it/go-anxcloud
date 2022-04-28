@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 * clouddns/v1: creating a Record didn't retrieve its Identifier (#120, @LittleFox94)
+* lbaas/v1: fix some attributes not being sent to the Engine when creating Backends (#135, @LittleFox94)
 
 ### Added
 * generic client: FilterRequestURLHook for modifying request URLs (#123, @marioreggiori)
