@@ -34,6 +34,9 @@ func (s State) StateFailure() bool {
 }
 
 func (s State) MarshalJSON() ([]byte, error) {
+	// it would be great if one of the proposals in https://github.com/golang/go/issues/11939 would be
+	// accepted and we could do something like `if s.ID == "" { omitThisField }` ... but it isn't, so
+	// we have to override the field for every LBaaS Object for Create and Update operations.
 	return json.Marshal(s.ID)
 }
 
