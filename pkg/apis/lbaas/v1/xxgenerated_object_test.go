@@ -58,13 +58,17 @@ var _ = Describe("Object Frontend", func() {
 var _ = Describe("Object LoadBalancer", func() {
 	o := LoadBalancer{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 3)
 	{
 		var i types.Object
 		ifaces = append(ifaces, &i)
 	}
 	{
 		var i types.RequestBodyHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.ResponseFilterHook
 		ifaces = append(ifaces, &i)
 	}
 

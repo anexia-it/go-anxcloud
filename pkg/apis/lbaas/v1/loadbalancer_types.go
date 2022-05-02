@@ -1,6 +1,6 @@
 package v1
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object:hooks=RequestBodyHook,ResponseFilterHook
 
 // LoadBalancer holds the information of a load balancer instance.
 type LoadBalancer struct {
