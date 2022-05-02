@@ -17,9 +17,18 @@ func (lb *LoadBalancer) FilterAPIRequestBody(ctx context.Context) (interface{}, 
 	return requestBody(ctx, func() interface{} {
 		return &struct {
 			commonRequestBody
+
+			// nolint:govet
 			LoadBalancer
 		}{
 			LoadBalancer: *lb,
 		}
 	})
 }
+
+// We need the three methods below to have LoadBalancer implement the StateRetriever interface, too. All other
+// Objects get them via the embedded HasState instead.
+
+func (l LoadBalancer) StateSuccess() bool     { return l.State.StateSuccess() }
+func (l LoadBalancer) StateProgressing() bool { return l.State.StateProgressing() }
+func (l LoadBalancer) StateFailure() bool     { return l.State.StateFailure() }
