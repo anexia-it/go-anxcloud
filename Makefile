@@ -33,23 +33,24 @@ benchmark:
 
 .PHONY: test
 test: tools
-	tools/ginkgo run -p 			\
-		-timeout 0 					\
-		-race 						\
-		-coverprofile coverage.out 	\
-		--keep-going 				\
-		./pkg/...
+	tools/ginkgo run -p             \
+	    -timeout 0                  \
+	    -race                       \
+	    -coverprofile coverage.out  \
+	    --keep-going                \
+	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
 func-test: tools
-	tools/ginkgo run -p  			\
-		-timeout 180m				\
-		-race 						\
-		-tags integration 			\
-		-coverpkg ./...				\
-		-coverprofile coverage.out	\
-		--keep-going 				\
+	tools/ginkgo run -p                        \
+	    -timeout 180m                          \
+	    -race                                  \
+	    -tags integration                      \
+	    -coverpkg ./...                        \
+	    -coverprofile coverage.out             \
+	    --keep-going                           \
+	    --label-filter="!(old client && slow)" \
 	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
