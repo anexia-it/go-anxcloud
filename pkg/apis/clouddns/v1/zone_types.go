@@ -2,6 +2,8 @@ package v1
 
 import "time"
 
+// anxcloud:deepcopy
+
 type Revision struct {
 	CreatedAt  time.Time `json:"created_at"`
 	Identifier string    `json:"identifier"`
@@ -10,6 +12,8 @@ type Revision struct {
 	Serial     int       `json:"serial"`
 	State      string    `json:"state"`
 }
+
+// anxcloud:deepcopy
 
 type DNSServer struct {
 	// Required - DNS Server name (FQDN).

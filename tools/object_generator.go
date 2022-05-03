@@ -20,11 +20,24 @@ import (
 const magicCommentPrefix = "// anxcloud:"
 
 type typeDefinition struct {
-	Name     string   `json:"name"`
-	IsObject bool     `json:"isObject"`
-	Hooks    []string `json:"hooks"`
-	File     string   `json:"file"`
-	Line     int      `json:"line"`
+	Name           string                `json:"name"`
+	IsObject       bool                  `json:"isObject"`
+	IsDeepCopyable bool                  `json:"isDeepCopyable"`
+	Fields         []typeDefinitionField `json:"fields"`
+	Hooks          []string              `json:"hooks"`
+	File           string                `json:"file"`
+	Line           int                   `json:"line"`
+}
+
+type typeDefinitionField struct {
+	Name    string
+	Type    string
+	KeyType string
+
+	IsPrimitive bool
+	IsArray     bool
+	IsMap       bool
+	IsPointer   bool
 }
 
 // objectGenerator parses a single file or package to produce a single output.
@@ -88,6 +101,9 @@ func (gen *ObjectGenerator) run() {
 		gen.generateTestCode()
 	case "data":
 		json.NewEncoder(gen.out).Encode(gen.types)
+	case "runtime":
+		gen.writeHeader()
+		gen.generateRuntimeCode()
 	default:
 		log.Printf("Mode %v is not yet implemented", gen.mode)
 	}
@@ -122,6 +138,21 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 
+	"go.anx.io/go-anxcloud/pkg/api/types"
+)
+`)
+	}
+
+	if gen.mode == "runtime" {
+		//pkgImportString := ""
+		//for _, genType := range gen.types {
+		//	if !strings.HasPrefix(genType.File, gen.in) {
+		//		pkgImportString += fmt.Sprintf("\"_ go.anx.io/go-anxcloud%s\"\n", genType.File[2:])
+		//	}
+		//}
+		//fmt.Println(pkgImportString)
+		fmt.Fprint(gen.out, `
+import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 `)
@@ -219,18 +250,89 @@ func (gen *ObjectGenerator) processComment(comment string, decl *ast.GenDecl, fi
 			ts := s.(*ast.TypeSpec)
 
 			_, isObject := specs["object"]
+			_, isDeepCopy := specs["deepcopy"]
 
 			var hooks []string
 			if h, ok := specs["hooks"]; ok {
 				hooks = strings.Split(h, ",")
 			}
 
+			var typeDefinitionFields []typeDefinitionField
+			if st, ok := ts.Type.(*ast.StructType); ok {
+				for _, field := range st.Fields.List {
+					if len(field.Names) < 1 {
+						continue
+					}
+
+					tdf := typeDefinitionField{
+						Name: field.Names[0].Name,
+					}
+
+					switch t := field.Type.(type) {
+					case *ast.Ident:
+						{
+							tdf.IsPrimitive = true
+							tdf.Type = t.Name
+							break
+						}
+					case *ast.ArrayType:
+						{
+							if id, ok := t.Elt.(*ast.Ident); ok {
+								tdf.IsArray = true
+								tdf.Type = id.Name
+							} else {
+								//continue
+								log.Fatalf("[ArrayType] not supported %s", tdf.Name)
+							}
+							break
+						}
+					case *ast.StarExpr:
+						{
+							tdf.IsPointer = true
+							if id, ok := t.X.(*ast.Ident); ok {
+								tdf.Type = id.Name
+								tdf.IsPointer = true
+							} else {
+								log.Fatalf("[StarExpr] not supported %s", tdf.Name)
+							}
+							break
+						}
+					case *ast.SelectorExpr:
+						{
+							if id, ok := t.X.(*ast.Ident); ok {
+								if id.Name == "time" && t.Sel.Name == "Time" || id.Name == "json" && t.Sel.Name == "RawMessage" { // todo clone json.RawMessage
+									// handle like primitive
+									tdf.IsPrimitive = true
+								} else if id.Name == "core" {
+
+								} else {
+
+									//continue
+									log.Fatalf("[SelectorExpr] not supported %s", tdf.Name)
+								}
+							} else {
+								log.Fatalf("[SelectorExpr] not supported %s", tdf.Name)
+							}
+						}
+					default:
+						{
+							fmt.Println("-------- " + tdf.Name)
+							break
+						}
+					}
+
+					typeDefinitionFields = append(typeDefinitionFields, tdf)
+				}
+			}
+
 			gen.types = append(gen.types, typeDefinition{
-				Name:     ts.Name.Name,
-				IsObject: isObject,
-				Hooks:    hooks,
-				File:     file,
-				Line:     line,
+				Name:           ts.Name.Name,
+				IsObject:       isObject,
+				IsDeepCopyable: isObject || isDeepCopy,
+				Hooks:          hooks,
+				File:           file,
+				Line:           line,
+				Fields:         typeDefinitionFields,
 			})
 		}
 	}
@@ -280,11 +382,119 @@ var _ = Describe("Object {{ .Name }}", func() {
 	}
 }
 
-func isGoFile(file string) bool {
-	return strings.HasSuffix(file, ".go") && !strings.HasSuffix(file, "_test.go") && !strings.HasPrefix(file, ".")
+func (gen *ObjectGenerator) generateRuntimeCode() {
+	const templates = `
+{{ define "DeepCopy" }}
+func (obj *{{ .Name }}) DeepCopy() {{if .IsObject}}types.Object{{else}}*{{.Name}}{{end}} {
+	// Initialize arrays
+	{{ range $a := .Arrays }}copyOf{{ $a.Name }} := make([]{{ $a.Type }}, 0, len(obj.{{ $a.Name }}))
+	for _, v := range obj.{{ $a.Name }} {
+		copyOf{{ $a.Name }} = append(copyOf{{ $a.Name }}, {{ if $a.DeepCopyable -}}  {{- if $a.IsObject -}}  *v.DeepCopy().(*{{$a.Type}})  {{- else -}}  *v.DeepCopy()  {{- end -}}  {{- else -}}  v  {{- end }})
+	}
+	{{ end }}
+
+	out := &{{ .Name }} {
+		// Primitives
+		{{ range $p := .Primitives }}{{ $p }}: obj.{{ $p }},
+		{{ end }}
+
+		// DeepCopyable
+		{{ range $p := .DeepCopyable }}{{ $p.Name }}: obj.{{ $p.Name }}.DeepCopy().(*{{$p.Type}}),
+		{{ end }}
+		
+		// Arrays
+		{{ range $a := .Arrays }}{{ $a.Name }}: copyOf{{ $a.Name }},
+		{{ end }}
+	}
+
+	{{ range $a := .Pointers }}*out.{{ $a.Name }} = *obj.{{ $a.Name }}
+	{{ end }}
+
+	return out
+}
+{{ end }}`
+
+	t, err := template.New("templates").Parse(templates)
+	if err != nil {
+		log.Fatalf("Error parsing templates: %v", err)
+	}
+
+	for _, td := range gen.types {
+		if !td.IsDeepCopyable {
+			continue
+		}
+
+		type Typed struct {
+			Name         string
+			Type         string
+			IsPointer    bool
+			DeepCopyable bool
+			IsObject     bool
+		}
+
+		var primitives []string
+		var arrays []Typed
+		var deepCopyable []Typed
+		var pointers []Typed
+
+		var getFieldTypeDef = func(typeString string) (*typeDefinition, bool) {
+			for _, t := range gen.types {
+				if t.Name == typeString && t.IsDeepCopyable {
+					return &t, true
+				}
+			}
+			return nil, false
+		}
+
+		for _, field := range td.Fields {
+			fieldTypeDef, ok := getFieldTypeDef(field.Type)
+
+			if field.IsArray {
+				arrays = append(arrays, Typed{
+					Name:         field.Name,
+					Type:         field.Type,
+					IsPointer:    field.IsPointer,
+					DeepCopyable: ok && fieldTypeDef.IsDeepCopyable,
+					IsObject:     ok && fieldTypeDef.IsObject,
+				})
+			} else {
+				if field.IsPrimitive {
+					primitives = append(primitives, field.Name)
+				} else if ok && fieldTypeDef.IsDeepCopyable {
+					deepCopyable = append(deepCopyable, Typed{
+						Name:      field.Name,
+						Type:      field.Type,
+						IsPointer: field.IsPointer,
+					})
+				} else if field.IsPointer {
+					pointers = append(pointers, Typed{
+						Name: field.Name,
+					})
+				} else {
+					fmt.Println("++++++++++ " + field.Name)
+				}
+			}
+		}
+
+		err := t.ExecuteTemplate(gen.out, "DeepCopy", map[string]interface{}{
+			"Name":         td.Name,
+			"IsObject":     td.IsObject,
+			"Primitives":   primitives,
+			"Arrays":       arrays,
+			"DeepCopyable": deepCopyable,
+			"Pointers":     pointers,
+		})
+		if err != nil {
+			log.Fatalf("Error executing template for object tests: %v", err)
+		}
+	}
 }
 
-var _ = func() interface{} {
+func isGoFile(file string) bool {
+	return strings.HasSuffix(file, ".go") && !strings.HasSuffix(file, "_test.go") && !strings.HasPrefix(file, ".") && !strings.HasPrefix(file, "xxgenerated_")
+}
+
+func init() {
 	tools["object-generator"] = func() {
 		in := flag.String("in", "", "path to file or package directory to process, if it ends with /..., every directory below the given (and including the given) will be processed, as long as they have *.go file inside")
 		outfile := flag.String("out", "", "output file path, relative to the source path")
@@ -334,6 +544,4 @@ var _ = func() interface{} {
 			gen.run()
 		}
 	}
-
-	return nil
-}()
+}

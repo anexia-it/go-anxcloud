@@ -8,6 +8,8 @@ type StateRetriever interface {
 	StateFailure() bool
 }
 
+// anxcloud:deepcopy
+
 type State struct {
 	// programatically usable enum value
 	ID string `json:"id"`
@@ -44,6 +46,8 @@ var (
 	Deployed        = State{ID: "3", Text: "Deployed", Type: 3}
 	NewlyCreated    = State{ID: "4", Text: "NewlyCreated", Type: 4}
 )
+
+// anxcloud:deepcopy
 
 type HasState struct {
 	State State `json:"state"`

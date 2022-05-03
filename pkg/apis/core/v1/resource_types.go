@@ -2,6 +2,8 @@ package v1
 
 import "encoding/json"
 
+// anxcloud:deepcopy
+
 // Type is part of info.
 type Type struct {
 	Identifier string `json:"identifier"`

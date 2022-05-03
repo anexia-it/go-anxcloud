@@ -8,6 +8,8 @@ const (
 	HTTP Mode = "http"
 )
 
+// anxcloud:deepcopy
+
 // RuleInfo holds the name and identifier of a rule.
 type RuleInfo struct {
 	Identifier string `json:"identifier" anxcloud:"identifier"`

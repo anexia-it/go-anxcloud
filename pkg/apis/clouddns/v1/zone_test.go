@@ -15,6 +15,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/object/compare"
 	"go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
@@ -512,6 +513,40 @@ var _ = Describe("CloudDNS API client", func() {
 				Expect(r.Type).To(Equal("A"))
 			}
 			Expect(recordCount).To(Equal(1))
+		})
+	})
+
+	Context("DeepCopy", func() {
+		It("should deepcopy a DNS Zone", func() {
+			zone := &Zone{
+				Name:             "zone.test",
+				AdminEmail:       "admin@zone.test",
+				NotifyAllowedIPs: []string{"1.1.1.1", "1.1.1.2"},
+				Revisions: []Revision{
+					{Identifier: "123", Records: []Record{{Identifier: "123"}}},
+					{Identifier: "456", Records: []Record{{Identifier: "456"}}},
+				},
+			}
+
+			zoneCopy := zone.DeepCopy().(*Zone)
+
+			diff, err := compare.Compare(zone, zoneCopy, "Name", "AdminEmail")
+			Expect(err).ToNot(HaveOccurred())
+
+			Expect(diff).To(HaveLen(0))
+			Expect(zone.NotifyAllowedIPs).To(BeEquivalentTo(zoneCopy.NotifyAllowedIPs))
+			Expect(zone.Revisions).To(BeEquivalentTo(zoneCopy.Revisions))
+
+			zoneCopy.AdminEmail = "abc"
+			diff, err = compare.Compare(zone, zoneCopy, "Name", "AdminEmail")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(diff).To(HaveLen(1))
+
+			zoneCopy.NotifyAllowedIPs[1] += "abc"
+			Expect(zone.NotifyAllowedIPs).ToNot(BeEquivalentTo(zoneCopy.NotifyAllowedIPs))
+
+			zone.Revisions[0].Records[0].Identifier += "..."
+			Expect(zone.Revisions).ToNot(BeEquivalentTo(zoneCopy.Revisions))
 		})
 	})
 })
