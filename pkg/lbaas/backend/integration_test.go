@@ -17,7 +17,7 @@ import (
 
 const loadbalancerIdentifier = "fc5d7390e9e4400a9efc73b4d8e0613a"
 
-var _ = Describe("lbaas/backend client", func() {
+var _ = Describe("lbaas/backend client", Label("old client", "slow"), func() {
 	var cli client.Client
 	var api API
 
