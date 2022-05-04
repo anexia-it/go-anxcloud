@@ -35,11 +35,14 @@ func waitObject(ctx *context.Context, msg string, o *types.Object, handler func(
 
 func waitObjectReady(ctx *context.Context, o *types.Object) {
 	waitObject(ctx, "eventually is ready", o, func(g Gomega, err error) {
+		// we do not expect an error at all, if one occures, fail immediately
 		Expect(err).NotTo(HaveOccurred())
 
 		hasState, ok := (*o).(StateRetriever)
+		// this function only expects to wait for LBaaS resources, fail immediately otherwise
 		Expect(ok).To(BeTrue())
 
+		// fail immediately for failure states, but only fail when not going to success state before timeout
 		Expect(hasState.StateFailure()).To(BeFalse())
 		g.Expect(hasState.StateSuccess()).To(BeTrue())
 	})
@@ -47,11 +50,13 @@ func waitObjectReady(ctx *context.Context, o *types.Object) {
 
 func waitObjectGone(ctx *context.Context, o *types.Object) {
 	waitObject(ctx, "eventually is gone", o, func(g Gomega, err error) {
+		// it eventually returns an error ...
 		g.Expect(err).To(HaveOccurred())
 
+		// ... but if that error isn't an HTTP error or it's not a NotFoundError, fail immediately
 		var he api.HTTPError
-		g.Expect(errors.As(err, &he)).To(BeTrue())
-		g.Expect(he.StatusCode()).To(Equal(http.StatusNotFound))
+		Expect(errors.As(err, &he)).To(BeTrue())
+		Expect(he.StatusCode()).To(Equal(http.StatusNotFound))
 	})
 }
 
