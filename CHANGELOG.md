@@ -7,16 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-* clouddns/v1: creating a Record didn't retrieve its Identifier (#120, @LittleFox94)
-* lbaas/v1: fix some attributes not being sent to the Engine when creating Backends (#135, @LittleFox94)
-
-### Added
-* generic client: FilterRequestURLHook for modifying request URLs (#123, @marioreggiori)
-
-### Changed
-* core/v1: ResourceWithTag uses RequestBodyHook and FilterRequestURLHook instead of RequestFilterHook (#123, @marioreggiori)
-
 <!--
 Please add your changelog entry under this comment in the correct category (Security, Fixed, Added, Changed, Deprecated, Removed - in this order).
 
@@ -32,6 +22,18 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+
+## [0.4.3] - 2022-05-04
+
+### Fixed
+* clouddns/v1: creating a Record didn't retrieve its Identifier (#120, @LittleFox94)
+* lbaas/v1: fix some attributes not being sent to the Engine when creating Backends (#135, @LittleFox94)
+
+### Added
+* (internal) generic client: FilterRequestURLHook for modifying request URLs (#123, @marioreggiori)
+
+### Changed
+* (internal) core/v1: ResourceWithTag uses RequestBodyHook and FilterRequestURLHook instead of RequestFilterHook (#123, @marioreggiori)
 
 ## [0.4.2] - 2022-03-29
 
