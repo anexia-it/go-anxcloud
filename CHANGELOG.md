@@ -18,14 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * core/v1: ResourceWithTag uses RequestBodyHook and FilterRequestURLHook instead of RequestFilterHook (#123, @marioreggiori)
 
 <!--
-Please add your release notes under the correct category (Added, Changed, ...) and use the following format as a
-guideline:
+Please add your changelog entry under this comment in the correct category (Security, Fixed, Added, Changed, Deprecated, Removed - in this order).
 
-* <api-scope>[/<sub-api-scope] - <a short description of what changed>
+Changelog entries are best in the following format, where scope is something like "generic client" or "lbaas/v1"
+(for LBaaS API bindings). If the change isn't user-facing but still relevant enough for a changelog entry, add
+"(internal)" before the scope.
 
-e.g.
+* (internal)? scope: short description (pull request, author)
 
-* vsphere/provisioning - added progress identifier
+Some examples, more below in the actual changelog (newer entries are more likely to be good entries):
+* generic client: List resources with a channel (#42, @LittleFox94)
+* core/v1: added helper methods to tag resources (#122, @marioreggiori)
+* (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
+
 -->
 
 ## [0.4.2] - 2022-03-29
