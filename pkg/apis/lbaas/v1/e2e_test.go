@@ -5,10 +5,7 @@ package v1
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
-	"net/http"
-	"time"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
@@ -62,17 +59,7 @@ func serverChecks(testrun LBaaSE2ETestRun, backend *Backend) {
 		url := fmt.Sprintf("http://go-anxcloud-lbaas-e2e.se.anx.io:%d", testrun.Port)
 
 		Context("correct server port", func() {
-			It("delivers HAProxy status page", func() {
-				Eventually(func(g Gomega) {
-					resp, err := http.Get(url)
-					g.Expect(err).NotTo(HaveOccurred())
-					g.Expect(resp.StatusCode).To(Equal(http.StatusOK))
-
-					body, err := ioutil.ReadAll(resp.Body)
-					g.Expect(err).NotTo(HaveOccurred())
-					g.Expect(string(body)).To(ContainSubstring("<title>Statistics Report for HAProxy</title>"))
-				}, 5*time.Second, 1*time.Second).Should(Succeed())
-			})
+			successfulConnectionCheck(url)
 		})
 
 		Context("invalid server port", Ordered, func() {
@@ -81,13 +68,7 @@ func serverChecks(testrun LBaaSE2ETestRun, backend *Backend) {
 				return &server
 			}, true)
 
-			It("delivers a 503 error", func() {
-				Eventually(func(g Gomega) {
-					resp, err := http.Get(url)
-					g.Expect(err).NotTo(HaveOccurred())
-					g.Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
-				}, 5*time.Second, 1*time.Second).Should(Succeed())
-			})
+			unavailableServerConnectionCheck(url)
 		})
 	})
 }
