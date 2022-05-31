@@ -64,98 +64,133 @@ func (f filterHelper) BuildQuery() url.Values {
 	return values
 }
 
-func (f *filterHelper) parseObject(v interface{}) error {
-	val := reflect.ValueOf(v)
+func parseFilterableTag(field reflect.StructField) (isFilterable bool, filterName string, option string) {
+	filterName = field.Name
 
-	if val.Type().Kind() == reflect.Ptr {
-		val = val.Elem()
+	tag, ok := field.Tag.Lookup("anxcloud")
+	if !ok {
+		return false, "", ""
 	}
 
-	if val.Type().Kind() != reflect.Struct {
+	tagParts := strings.Split(tag, ",")
+
+	if len(tagParts) == 0 || tagParts[0] != "filterable" {
+		return false, "", ""
+	}
+
+	isFilterable = true
+
+	if len(tagParts) >= 2 && tagParts[1] != "" {
+		filterName = tagParts[1]
+	} else {
+		if jsonTag, ok := field.Tag.Lookup("json"); ok {
+			parts := strings.Split(jsonTag, ",")
+
+			if parts[0] != "" || len(parts) > 1 {
+				filterName = parts[0]
+			}
+		}
+	}
+
+	if len(tagParts) >= 3 {
+		option = tagParts[2]
+	}
+
+	return isFilterable, filterName, option
+}
+
+func parseOptionSingle(fieldValue reflect.Value) (reflect.Value, error) {
+	fieldType := fieldValue.Type()
+	fieldKind := fieldType.Kind()
+
+	if fieldKind == reflect.Slice || fieldKind == reflect.Array {
+		if fieldValue.Len() == 1 {
+			return fieldValue.Index(0), nil
+		} else if fieldValue.Len() == 0 {
+			return reflect.New(fieldType.Elem()).Elem(), nil
+		} else {
+			return reflect.Value{}, fmt.Errorf("%w: only a single value can be filtered", types.ErrInvalidFilter)
+		}
+	} else {
+		return reflect.Value{}, fmt.Errorf("%w: option 'single' can only be used on array or slice attributes", types.ErrInvalidFilter)
+	}
+}
+
+func extractFilterValue(fieldValue reflect.Value) (reflect.Value, error) {
+	fieldType := fieldValue.Type()
+	fieldKind := fieldType.Kind()
+
+	if fieldKind == reflect.Ptr {
+		fieldType = fieldType.Elem()
+		fieldKind = fieldType.Kind()
+
+		if fieldValue.IsNil() || fieldValue.IsZero() {
+			return reflect.Zero(fieldType), nil
+		}
+
+		fieldValue = fieldValue.Elem()
+	}
+
+	if fieldKind == reflect.Struct {
+		if object, ok := fieldValue.Addr().Interface().(types.Object); ok {
+			identifier, err := api.GetObjectIdentifier(object, false)
+			if err != nil {
+				return reflect.Value{}, fmt.Errorf("Object referenced: %w", err)
+			}
+
+			fieldValue = reflect.ValueOf(identifier)
+		}
+	}
+
+	return fieldValue, nil
+}
+
+func (f *filterHelper) parseField(fieldValue reflect.Value, field reflect.StructField) error {
+	filterable, filterName, option := parseFilterableTag(field)
+
+	if !filterable {
+		return nil
+	}
+
+	f.fields[filterName] = true
+
+	if option == "single" {
+		if val, err := parseOptionSingle(fieldValue); err != nil {
+			return fmt.Errorf("field %q: %w", filterName, err)
+		} else {
+			fieldValue = val
+		}
+	}
+
+	fieldValue, err := extractFilterValue(fieldValue)
+	if err != nil {
+		return err
+	}
+
+	if isSupportedPrimitive(fieldValue.Type().Kind()) && !fieldValue.IsZero() {
+		f.values[filterName] = fieldValue.Interface()
+	}
+
+	return nil
+}
+
+func (f *filterHelper) parseObject(v interface{}) error {
+	val := reflect.ValueOf(v)
+	valType := val.Type()
+
+	if valType.Kind() == reflect.Ptr {
+		val = val.Elem()
+		valType = val.Type()
+	}
+
+	if valType.Kind() != reflect.Struct {
 		return fmt.Errorf("%w: filter.Helper only works with structs or pointers to them", api.ErrTypeNotSupported)
 	}
 
 	numFields := val.NumField()
 	for i := 0; i < numFields; i++ {
-		field := val.Type().Field(i)
-		fieldName := field.Name
-
-		tag, ok := field.Tag.Lookup("anxcloud")
-		if !ok {
-			continue
-		}
-
-		tagParts := strings.Split(tag, ",")
-
-		if len(tagParts) == 0 || tagParts[0] != "filterable" {
-			continue
-		}
-
-		if len(tagParts) >= 2 && tagParts[1] != "" {
-			fieldName = tagParts[1]
-		} else {
-			if jsonTag, ok := field.Tag.Lookup("json"); ok {
-				parts := strings.Split(jsonTag, ",")
-
-				if parts[0] != "" || len(parts) > 1 {
-					fieldName = parts[0]
-				}
-			}
-		}
-
-		f.fields[fieldName] = true
-
-		fieldValue := val.Field(i)
-		fieldType := fieldValue.Type()
-		fieldKind := fieldType.Kind()
-
-		if fieldKind == reflect.Slice || fieldKind == reflect.Array {
-			// only filter on first entry of an array
-			if len(tagParts) >= 3 && tagParts[2] == "single" {
-				if fieldValue.Len() == 1 {
-					fieldValue = fieldValue.Index(0)
-				} else if fieldValue.Len() == 0 {
-					fieldValue = reflect.New(fieldType.Elem()).Elem()
-				} else {
-					return fmt.Errorf("%w: only a single value can be filtered for %q", types.ErrInvalidFilter, fieldName)
-				}
-
-				fieldType = fieldValue.Type()
-				fieldKind = fieldType.Kind()
-			}
-		}
-
-		if isSupportedPrimitive(fieldKind) {
-			if !fieldValue.IsZero() {
-				f.values[fieldName] = fieldValue.Interface()
-			}
-		} else if fieldKind == reflect.Ptr || fieldKind == reflect.Struct {
-			if fieldKind == reflect.Ptr {
-				if fieldValue.IsNil() || fieldValue.IsZero() {
-					continue
-				}
-
-				if isSupportedPrimitive(fieldType.Elem().Kind()) {
-					f.values[fieldName] = fieldValue.Elem().Interface()
-				}
-			}
-
-			maybeObject := fieldValue
-
-			if fieldKind == reflect.Struct {
-				maybeObject = maybeObject.Addr()
-			}
-
-			if object, ok := maybeObject.Interface().(types.Object); ok {
-				identifier, err := api.GetObjectIdentifier(object, false)
-				if err != nil {
-					return fmt.Errorf("Object referenced in %v: %w", fieldName, err)
-				}
-
-				if identifier != "" {
-					f.values[fieldName] = identifier
-				}
-			}
+		if err := f.parseField(val.Field(i), valType.Field(i)); err != nil {
+			return err
 		}
 	}
 
