@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
@@ -133,7 +132,7 @@ func extractFilterValue(fieldValue reflect.Value) (reflect.Value, error) {
 
 	if fieldKind == reflect.Struct {
 		if object, ok := fieldValue.Addr().Interface().(types.Object); ok {
-			identifier, err := api.GetObjectIdentifier(object, false)
+			identifier, err := types.GetObjectIdentifier(object, false)
 			if err != nil {
 				return reflect.Value{}, fmt.Errorf("Object referenced: %w", err)
 			}
@@ -184,7 +183,7 @@ func (f *filterHelper) parseObject(v interface{}) error {
 	}
 
 	if valType.Kind() != reflect.Struct {
-		return fmt.Errorf("%w: filter.Helper only works with structs or pointers to them", api.ErrTypeNotSupported)
+		return fmt.Errorf("%w: filter.Helper only works with structs or pointers to them", types.ErrTypeNotSupported)
 	}
 
 	numFields := val.NumField()

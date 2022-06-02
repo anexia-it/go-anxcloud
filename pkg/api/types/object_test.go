@@ -1,4 +1,4 @@
-package api
+package types
 
 import (
 	"context"
@@ -7,6 +7,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
+
+type api_test_object struct {
+	Val string `json:"value" anxcloud:"identifier"`
+}
+
+func (o *api_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+	return url.Parse("/invalid_anyway")
+}
 
 type api_test_nonstruct_object bool
 
