@@ -91,7 +91,7 @@ func createObject(retriever func() types.Object, waitReady bool) func() {
 		err := apiClient.Create(ctx, object)
 		Expect(err).NotTo(HaveOccurred())
 
-		identifier, err = api.GetObjectIdentifier(object, true)
+		identifier, err = types.GetObjectIdentifier(object, true)
 		Expect(err).NotTo(HaveOccurred())
 
 		identifiedObjectValue := reflect.New(objectType)
@@ -113,7 +113,7 @@ func createObject(retriever func() types.Object, waitReady bool) func() {
 			err := retriever(emptyObject)
 			Expect(err).NotTo(HaveOccurred())
 
-			id, err := api.GetObjectIdentifier(emptyObject, true)
+			id, err := types.GetObjectIdentifier(emptyObject, true)
 			Expect(err).NotTo(HaveOccurred())
 
 			identifiers = append(identifiers, id)
