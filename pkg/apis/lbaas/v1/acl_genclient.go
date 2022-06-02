@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/utils/object/filter"
 )
 
 // EndpointURL returns the URL where to retrieve objects of type ACL and the identifier of the given ACL.
@@ -21,21 +22,18 @@ func (a *ACL) EndpointURL(ctx context.Context) (*url.URL, error) {
 	}
 
 	if op == types.OperationList {
-		filters := make(url.Values)
-
-		if a.ParentType != "" {
-			filters.Add("parent_type", a.ParentType)
-		}
-		if a.Backend.Identifier != "" {
-			filters.Add("backend", a.Backend.Identifier)
-		}
-		if a.Frontend.Identifier != "" {
-			filters.Add("frontend", a.Frontend.Identifier)
+		helper, err := filter.NewHelper(a)
+		if err != nil {
+			return nil, err
 		}
 
-		query := u.Query()
-		query.Add("filters", filters.Encode())
-		u.RawQuery = query.Encode()
+		filters := helper.BuildQuery().Encode()
+
+		if filters != "" {
+			query := u.Query()
+			query.Set("filters", filters)
+			u.RawQuery = query.Encode()
+		}
 	}
 
 	return u, nil

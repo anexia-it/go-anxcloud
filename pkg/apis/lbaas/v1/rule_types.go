@@ -12,18 +12,18 @@ type Rule struct {
 
 	Identifier       string `json:"identifier,omitempty" anxcloud:"identifier"`
 	Name             string `json:"name,omitempty"`
-	ParentType       string `json:"parent_type,omitempty"`
+	ParentType       string `json:"parent_type,omitempty" anxcloud:"filterable"`
 	Index            int    `json:"index,omitempty"`
-	Condition        string `json:"condition,omitempty"`
+	Condition        string `json:"condition,omitempty" anxcloud:"filterable"`
 	ConditionTest    string `json:"condition_test,omitempty"`
-	Type             string `json:"type,omitempty"`
-	Action           string `json:"action,omitempty"`
-	RedirectionType  string `json:"redirection_type,omitempty"`
+	Type             string `json:"type,omitempty" anxcloud:"filterable"`
+	Action           string `json:"action,omitempty" anxcloud:"filterable"`
+	RedirectionType  string `json:"redirection_type,omitempty" anxcloud:"filterable"`
 	RedirectionValue string `json:"redirection_value,omitempty"`
-	RedirectionCode  string `json:"redirection_code,omitempty"`
-	RuleType         string `json:"rule_type,omitempty"`
+	RedirectionCode  string `json:"redirection_code,omitempty" anxcloud:"filterable"`
+	RuleType         string `json:"rule_type,omitempty" anxcloud:"filterable"`
 
 	// Only the name and identifier fields are used and returned.
-	Frontend Frontend `json:"frontend,omitempty"`
-	Backend  Backend  `json:"backend,omitempty"`
+	Frontend Frontend `json:"frontend,omitempty" anxcloud:"filterable"`
+	Backend  Backend  `json:"backend,omitempty" anxcloud:"filterable"`
 }

@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/utils/object/filter"
 )
 
 // EndpointURL returns the URL where to retrieve objects of type Rule and the identifier of the given Rule.
@@ -21,47 +22,21 @@ func (r *Rule) EndpointURL(ctx context.Context) (*url.URL, error) {
 	}
 
 	if op == types.OperationList {
-		filters := r.buildListFilters()
-		query := u.Query()
-		query.Add("filters", filters.Encode())
-		u.RawQuery = query.Encode()
+		helper, err := filter.NewHelper(r)
+		if err != nil {
+			return nil, err
+		}
+
+		filters := helper.BuildQuery().Encode()
+
+		if filters != "" {
+			query := u.Query()
+			query.Set("filters", filters)
+			u.RawQuery = query.Encode()
+		}
 	}
 
 	return u, nil
-}
-
-func (r *Rule) buildListFilters() url.Values {
-	filters := make(url.Values)
-
-	if r.RuleType != "" {
-		filters.Add("rule_type", r.RuleType)
-	}
-	if r.ParentType != "" {
-		filters.Add("parent_type", r.ParentType)
-	}
-	if r.Frontend.Identifier != "" {
-		filters.Add("frontend", r.Frontend.Identifier)
-	}
-	if r.Backend.Identifier != "" {
-		filters.Add("backend", r.Backend.Identifier)
-	}
-	if r.Condition != "" {
-		filters.Add("condition", r.Condition)
-	}
-	if r.Type != "" {
-		filters.Add("type", r.Type)
-	}
-	if r.Action != "" {
-		filters.Add("action", r.Action)
-	}
-	if r.RedirectionType != "" {
-		filters.Add("redirection_type", r.RedirectionType)
-	}
-	if r.RedirectionCode != "" {
-		filters.Add("redirection_code", r.RedirectionCode)
-	}
-
-	return filters
 }
 
 // FilterAPIRequestBody generates the request body for Rules, replacing linked Objects with just their identifier.

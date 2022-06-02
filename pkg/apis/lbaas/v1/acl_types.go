@@ -12,13 +12,13 @@ type ACL struct {
 
 	Identifier      string     `json:"identifier,omitempty" anxcloud:"identifier"`
 	Name            string     `json:"name,omitempty"`
-	ParentType      string     `json:"parent_type,omitempty"`
+	ParentType      string     `json:"parent_type,omitempty" anxcloud:"filterable"`
 	Criterion       string     `json:"criterion,omitempty"`
 	Value           string     `json:"value,omitempty"`
 	Index           int        `json:"index,omitempty"`
 	AutomationRules []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	Frontend Frontend `json:"frontend,omitempty"`
-	Backend  Backend  `json:"backend,omitempty"`
+	Frontend Frontend `json:"frontend,omitempty" anxcloud:"filterable"`
+	Backend  Backend  `json:"backend,omitempty" anxcloud:"filterable"`
 }
