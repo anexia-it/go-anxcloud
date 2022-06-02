@@ -24,7 +24,7 @@ type hookErrorCheck func(context.Context) error
 //
 func ObjectTests(o types.Object, hooks ...interface{}) {
 	ginkgo.It("has an identifier", func() {
-		_, err := api.GetObjectIdentifier(o, false)
+		_, err := types.GetObjectIdentifier(o, false)
 		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 	})
 
