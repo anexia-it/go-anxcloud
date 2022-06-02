@@ -8,7 +8,15 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+type RandomEmbeddedData struct {
+	Foo string `json:"foo"`
+	Bar string `json:"bar"`
+}
+
 type api_test_object struct {
+	// mimicks a bug triggered by lbaas/v1, where all Objects embed HasState at top of the object
+	RandomEmbeddedData
+
 	Val string `json:"value" anxcloud:"identifier"`
 }
 
@@ -121,31 +129,31 @@ var _ = Describe("GetObjectIdentifier function", func() {
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
-		memio := api_test_multiembeddedmultiident_object{api_test_object{"identifier"}, api_test_embeddedident_object{api_test_object{"another identifier"}}}
+		memio := api_test_multiembeddedmultiident_object{api_test_object{RandomEmbeddedData{}, "identifier"}, api_test_embeddedident_object{api_test_object{RandomEmbeddedData{}, "another identifier"}}}
 		identifier, err = GetObjectIdentifier(&memio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 	})
 
 	It("accepts valid Object types", func() {
-		sio := api_test_object{"identifier"}
+		sio := api_test_object{RandomEmbeddedData{}, "identifier"}
 		identifier, err := GetObjectIdentifier(&sio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 	})
 
 	It("accepts valid Object types where the identifier is in embedded fields", func() {
-		eio := api_test_embeddedident_object{api_test_object{"identifier"}}
+		eio := api_test_embeddedident_object{api_test_object{RandomEmbeddedData{}, "identifier"}}
 		identifier, err := GetObjectIdentifier(&eio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
-		peio := api_test_ptrembeddedident_object{&api_test_object{"identifier"}}
+		peio := api_test_ptrembeddedident_object{&api_test_object{RandomEmbeddedData{}, "identifier"}}
 		identifier, err = GetObjectIdentifier(&peio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
-		meio := api_test_multiembeddedident_object{url.Values{}, api_test_object{"identifier"}}
+		meio := api_test_multiembeddedident_object{url.Values{}, api_test_object{RandomEmbeddedData{}, "identifier"}}
 		identifier, err = GetObjectIdentifier(&meio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
@@ -153,14 +161,14 @@ var _ = Describe("GetObjectIdentifier function", func() {
 
 	Context("when doing an operation on a specific object", func() {
 		It("errors out on valid Object type but empty identifier", func() {
-			o := api_test_object{""}
+			o := api_test_object{RandomEmbeddedData{}, ""}
 			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).To(MatchError(ErrUnidentifiedObject))
 			Expect(identifier).To(BeEmpty())
 		})
 
 		It("returns the correct identifier", func() {
-			o := api_test_object{"test"}
+			o := api_test_object{RandomEmbeddedData{}, "test"}
 			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(identifier).To(Equal("test"))
