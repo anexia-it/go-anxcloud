@@ -82,76 +82,77 @@ func GetObjectIdentifier(obj Object, singleObjectOperation bool) (string, error)
 	return findIdentifierInStruct(objectStructType, reflect.ValueOf(obj).Elem(), singleObjectOperation)
 }
 
+func extractIdentifierFromEmbedded(field reflect.StructField, fieldValue reflect.Value) (*string, error) {
+	embeddedType := field.Type
+	embeddedValue := fieldValue
+
+	for embeddedType.Kind() == reflect.Ptr {
+		embeddedType = embeddedType.Elem()
+		embeddedValue = embeddedValue.Elem()
+	}
+
+	if embeddedType.Kind() == reflect.Struct {
+		id, err := findIdentifierInStruct(embeddedType, embeddedValue, true)
+
+		if err == nil {
+			return &id, nil
+		} else if !errors.Is(err, ErrObjectWithoutIdentifier) {
+			return nil, fmt.Errorf("type %q: %w", embeddedType, err)
+		}
+	}
+
+	return nil, nil
+}
+
+func extractIdentifierFromField(field reflect.StructField, fieldValue reflect.Value) (*string, error) {
+	if val, ok := field.Tag.Lookup("anxcloud"); !ok || val != "identifier" {
+		return nil, nil
+	}
+
+	switch v := fieldValue.Interface().(type) {
+	case string:
+		return &v, nil
+	default:
+		return nil, fmt.Errorf("%w: has an identifier of type %v)", ErrObjectIdentifierTypeNotSupported, field.Type)
+	}
+}
+
 func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool) (string, error) {
 	// we also use this to track if we found an identifier already
 	var returnIdentifier *string
 
 	numFields := t.NumField()
 
-fields:
 	for i := 0; i < numFields; i++ {
 		field := t.Field(i)
 
+		var fieldIdentifier *string
+		var err error
+
 		if field.Anonymous {
-			embeddedType := field.Type
-			embeddedValue := v.Field(i)
-
-			for embeddedType.Kind() == reflect.Ptr {
-				embeddedType = embeddedType.Elem()
-				embeddedValue = embeddedValue.Elem()
-			}
-
-			if embeddedType.Kind() == reflect.Struct {
-				if ret, err := findIdentifierInStruct(embeddedType, embeddedValue, singleObjectOp); err == nil {
-					if returnIdentifier == nil {
-						returnIdentifier = &ret
-					} else {
-						return "", fmt.Errorf("%w (type %v has multiple fields tagged as identifier)", ErrObjectWithMultipleIdentifier, t)
-					}
-				} else if errors.Is(err, ErrObjectWithMultipleIdentifier) || errors.Is(err, ErrObjectIdentifierTypeNotSupported) {
-					return "", err
-				}
-			}
-
-			continue
+			fieldIdentifier, err = extractIdentifierFromEmbedded(field, v.Field(i))
+		} else {
+			fieldIdentifier, err = extractIdentifierFromField(field, v.Field(i))
 		}
 
-		if val, ok := field.Tag.Lookup("anxcloud"); ok {
-			if val == "identifier" {
-				identifierValue := v.Field(i)
-
-				// We check on the value to have a type-independent zero check, in case we later allow other
-				// types for identifier. A int identifier is zero with value 0, which encoded to string "0",
-				// so a later identifier == "" check would not work.
-				if singleObjectOp && identifierValue.IsZero() {
-					return "", ErrUnidentifiedObject
-				}
-
-				allowedIdentifierTypes := map[reflect.Type]func(interface{}) string{
-					reflect.TypeOf(""): func(v interface{}) string { return v.(string) },
-				}
-
-				for ft, vf := range allowedIdentifierTypes {
-					if identifierValue.Type() == ft {
-						if returnIdentifier == nil {
-							val := vf(identifierValue.Interface())
-							returnIdentifier = &val
-
-							continue fields
-						} else {
-							return "", fmt.Errorf("%w (type %v has multiple fields tagged as identifier)", ErrObjectWithMultipleIdentifier, t)
-						}
-					}
-				}
-
-				return "", fmt.Errorf("%w (type %v has an identifier of type %v)", ErrObjectIdentifierTypeNotSupported, t, field.Type)
+		if fieldIdentifier != nil && err == nil {
+			if returnIdentifier != nil {
+				err = fmt.Errorf("type %q: %w: multiple fields tagged as identifier", t, ErrObjectWithMultipleIdentifier)
+			} else if *fieldIdentifier == "" && singleObjectOp {
+				err = ErrUnidentifiedObject
 			}
+
+			returnIdentifier = fieldIdentifier
+		}
+
+		if err != nil {
+			return "", fmt.Errorf("type %q: %w", t, err)
 		}
 	}
 
-	if returnIdentifier != nil {
-		return *returnIdentifier, nil
+	if returnIdentifier == nil {
+		return "", fmt.Errorf("%w (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrObjectWithoutIdentifier, t)
 	}
 
-	return "", fmt.Errorf("%w (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrObjectWithoutIdentifier, t)
+	return *returnIdentifier, nil
 }
