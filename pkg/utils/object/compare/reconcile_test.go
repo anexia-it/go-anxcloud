@@ -96,4 +96,43 @@ var _ = Describe("Reconcile", func() {
 		// -- Mara @LittleFox94 Grosch, 2022-03-28
 		Entry("invalid attribute", ErrKeyNotFound, []lbaasv1.Frontend{{}}, []lbaasv1.Frontend{{}}, "Test"),
 	)
+
+	DescribeTable("works with target being array to ...",
+		func(target interface{}, expected []types.Object) {
+			var actual []types.Object
+			err := Reconcile(target, []types.Object{}, &actual, nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(actual).To(ContainElements(expected))
+		},
+		Entry("structs",
+			[]lbaasv1.Frontend{
+				{Name: "foo"},
+				{Name: "bar"},
+			},
+			[]types.Object{
+				&lbaasv1.Frontend{Name: "foo"},
+				&lbaasv1.Frontend{Name: "bar"},
+			},
+		),
+		Entry("pointers to structs",
+			[]*lbaasv1.Frontend{
+				{Name: "foo"},
+				{Name: "bar"},
+			},
+			[]types.Object{
+				&lbaasv1.Frontend{Name: "foo"},
+				&lbaasv1.Frontend{Name: "bar"},
+			},
+		),
+		Entry("objects",
+			[]types.Object{
+				&lbaasv1.Frontend{Name: "foo"},
+				&lbaasv1.Frontend{Name: "bar"},
+			},
+			[]types.Object{
+				&lbaasv1.Frontend{Name: "foo"},
+				&lbaasv1.Frontend{Name: "bar"},
+			},
+		),
+	)
 })
