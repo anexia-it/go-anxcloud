@@ -148,11 +148,11 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 	singlePageMode := false
 
 	if psh, ok := o.(types.PaginationSupportHook); ok {
-		if v, err := psh.HasPagination(ctx); err != nil {
+		v, err := psh.HasPagination(ctx)
+		if err != nil {
 			return err
-		} else {
-			singlePageMode = !v
 		}
+		singlePageMode = !v
 	}
 
 	if options.Paged {
@@ -399,11 +399,12 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	}
 
 	if response.StatusCode != http.StatusNoContent {
-		if mediaType, err := getResponseType(response); err == nil {
-			return decodeResponse(ctx, mediaType, response.Body, body)
-		} else {
+		mediaType, err := getResponseType(response)
+		if err != nil {
 			return err
 		}
+
+		return decodeResponse(ctx, mediaType, response.Body, body)
 	}
 
 	return nil

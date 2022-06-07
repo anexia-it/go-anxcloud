@@ -53,11 +53,11 @@ func Compare(a, b interface{}, attributes ...string) ([]Difference, error) {
 		indexes := make([]int, 0, len(keyParts))
 
 		for _, keyPart := range keyParts {
-			if field, ok := typeA.FieldByName(keyPart); !ok {
+			field, ok := typeA.FieldByName(keyPart)
+			if !ok {
 				return nil, fmt.Errorf("%w: key %v", ErrKeyNotFound, keyPart)
-			} else {
-				indexes = append(indexes, field.Index...)
 			}
+			indexes = append(indexes, field.Index...)
 		}
 
 		attributeIndexes = append(attributeIndexes, indexes)
