@@ -13,147 +13,147 @@ type RandomEmbeddedData struct {
 	Bar string `json:"bar"`
 }
 
-type api_test_object struct {
+type apiTestObject struct {
 	// mimicks a bug triggered by lbaas/v1, where all Objects embed HasState at top of the object
 	RandomEmbeddedData
 
 	Val string `json:"value" anxcloud:"identifier"`
 }
 
-func (o *api_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o *apiTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_nonstruct_object bool
+type apiTestNonstructObject bool
 
-func (o *api_test_nonstruct_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o *apiTestNonstructObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_nonpointer_object bool
+type apiTestNonpointerObject bool
 
-func (o api_test_nonpointer_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestNonpointerObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_noident_object struct {
+type apiTestNoidentObject struct {
 	Value string `json:"value"`
 }
 
-func (o api_test_noident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestNoidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_invalidident_object struct {
+type apiTestInvalididentObject struct {
 	Value int `json:"value" anxcloud:"identifier"`
 }
 
-func (o api_test_invalidident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestInvalididentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type api_test_embeddedident_object struct {
-	api_test_object
+type apiTestEmbeddedidentObject struct {
+	apiTestObject
 }
 
-type api_test_ptrembeddedident_object struct {
-	*api_test_object
+type apiTestPtrembeddedidentObject struct {
+	*apiTestObject
 }
 
-type api_test_multiembeddedident_object struct {
+type apiTestMultiembeddedidentObject struct {
 	url.Values
-	api_test_object
+	apiTestObject
 }
 
-func (o api_test_multiembeddedident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestMultiembeddedidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
-type api_test_multiident_object struct {
+type apiTestMultiidentObject struct {
 	Identifier  string `json:"identifier" anxcloud:"identifier"`
 	Identifier2 string `json:"identifier2" anxcloud:"identifier"`
 }
 
-func (o api_test_multiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestMultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
-type api_test_embeddedmultiident_object struct {
-	api_test_multiident_object
+type apiTestEmbeddedmultiidentObject struct {
+	apiTestMultiidentObject
 }
 
-func (o api_test_embeddedmultiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestEmbeddedmultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
-type api_test_multiembeddedmultiident_object struct {
-	api_test_object
-	api_test_embeddedident_object
+type apiTestMultiembeddedmultiidentObject struct {
+	apiTestObject
+	apiTestEmbeddedidentObject
 }
 
-func (o api_test_multiembeddedmultiident_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o apiTestMultiembeddedmultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
 
 var _ = Describe("GetObjectIdentifier function", func() {
 	It("errors out on invalid Object types", func() {
-		nso := api_test_nonstruct_object(false)
+		nso := apiTestNonstructObject(false)
 		identifier, err := GetObjectIdentifier(&nso, false)
 		Expect(err).To(MatchError(ErrTypeNotSupported))
 		Expect(err.Error()).To(ContainSubstring("must be implemented as structs"))
 		Expect(identifier).To(BeEmpty())
 
-		npo := api_test_nonpointer_object(false)
+		npo := apiTestNonpointerObject(false)
 		identifier, err = GetObjectIdentifier(npo, false)
 		Expect(err).To(MatchError(ErrTypeNotSupported))
 		Expect(err.Error()).To(ContainSubstring("must be implemented on a pointer to struct"))
 		Expect(identifier).To(BeEmpty())
 
-		nio := api_test_noident_object{"invalid"}
+		nio := apiTestNoidentObject{"invalid"}
 		identifier, err = GetObjectIdentifier(&nio, false)
 		Expect(err).To(MatchError(ErrObjectWithoutIdentifier))
 		Expect(identifier).To(BeEmpty())
 
-		iio := api_test_invalidident_object{32}
+		iio := apiTestInvalididentObject{32}
 		identifier, err = GetObjectIdentifier(&iio, false)
 		Expect(err).To(MatchError(ErrObjectIdentifierTypeNotSupported))
 		Expect(identifier).To(BeEmpty())
 
-		mio := api_test_multiident_object{"identifier", "identifier2"}
+		mio := apiTestMultiidentObject{"identifier", "identifier2"}
 		identifier, err = GetObjectIdentifier(&mio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
-		emio := api_test_embeddedmultiident_object{api_test_multiident_object{"identifier", "identifier2"}}
+		emio := apiTestEmbeddedmultiidentObject{apiTestMultiidentObject{"identifier", "identifier2"}}
 		identifier, err = GetObjectIdentifier(&emio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 
-		memio := api_test_multiembeddedmultiident_object{api_test_object{RandomEmbeddedData{}, "identifier"}, api_test_embeddedident_object{api_test_object{RandomEmbeddedData{}, "another identifier"}}}
+		memio := apiTestMultiembeddedmultiidentObject{apiTestObject{RandomEmbeddedData{}, "identifier"}, apiTestEmbeddedidentObject{apiTestObject{RandomEmbeddedData{}, "another identifier"}}}
 		identifier, err = GetObjectIdentifier(&memio, false)
 		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
 		Expect(identifier).To(BeEmpty())
 	})
 
 	It("accepts valid Object types", func() {
-		sio := api_test_object{RandomEmbeddedData{}, "identifier"}
+		sio := apiTestObject{RandomEmbeddedData{}, "identifier"}
 		identifier, err := GetObjectIdentifier(&sio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 	})
 
 	It("accepts valid Object types where the identifier is in embedded fields", func() {
-		eio := api_test_embeddedident_object{api_test_object{RandomEmbeddedData{}, "identifier"}}
+		eio := apiTestEmbeddedidentObject{apiTestObject{RandomEmbeddedData{}, "identifier"}}
 		identifier, err := GetObjectIdentifier(&eio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
-		peio := api_test_ptrembeddedident_object{&api_test_object{RandomEmbeddedData{}, "identifier"}}
+		peio := apiTestPtrembeddedidentObject{&apiTestObject{RandomEmbeddedData{}, "identifier"}}
 		identifier, err = GetObjectIdentifier(&peio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
 
-		meio := api_test_multiembeddedident_object{url.Values{}, api_test_object{RandomEmbeddedData{}, "identifier"}}
+		meio := apiTestMultiembeddedidentObject{url.Values{}, apiTestObject{RandomEmbeddedData{}, "identifier"}}
 		identifier, err = GetObjectIdentifier(&meio, true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(identifier).To(Equal("identifier"))
@@ -161,14 +161,14 @@ var _ = Describe("GetObjectIdentifier function", func() {
 
 	Context("when doing an operation on a specific object", func() {
 		It("errors out on valid Object type but empty identifier", func() {
-			o := api_test_object{RandomEmbeddedData{}, ""}
+			o := apiTestObject{RandomEmbeddedData{}, ""}
 			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).To(MatchError(ErrUnidentifiedObject))
 			Expect(identifier).To(BeEmpty())
 		})
 
 		It("returns the correct identifier", func() {
-			o := api_test_object{RandomEmbeddedData{}, "test"}
+			o := apiTestObject{RandomEmbeddedData{}, "test"}
 			identifier, err := GetObjectIdentifier(&o, true)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(identifier).To(Equal("test"))
