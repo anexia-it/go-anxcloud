@@ -169,6 +169,7 @@ func IgnoreMissingToken() Option {
 	}
 }
 
+// WithMetricReceiver can be used to configure a receiver for client metrics (timing, request/response sizes, .. that kind of metrics).
 func WithMetricReceiver(r MetricReceiver) Option {
 	return func(o *clientOptions) error {
 		o.metricReceiver = r

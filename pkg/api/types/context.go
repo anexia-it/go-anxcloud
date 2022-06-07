@@ -17,14 +17,17 @@ const (
 // ErrContextKeyNotSet is returned when trying to retrieve an unset value from a context.
 var ErrContextKeyNotSet = errors.New("requested context key is not set")
 
+// ContextWithOperation returns a new context based on the given one with the operation added to it.
 func ContextWithOperation(ctx context.Context, op Operation) context.Context {
 	return context.WithValue(ctx, contextKeyOperation, op)
 }
 
+// ContextWithOptions returns a new context based on the given one with the options added to it.
 func ContextWithOptions(ctx context.Context, opts Options) context.Context {
 	return context.WithValue(ctx, contextKeyOptions, opts)
 }
 
+// ContextWithURL returns a new context based on the given one with the URL added to it.
 func ContextWithURL(ctx context.Context, url url.URL) context.Context {
 	return context.WithValue(ctx, contextKeyURL, url)
 }

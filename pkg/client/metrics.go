@@ -33,10 +33,10 @@ const (
 	// the same resource-kind.
 	MetricLabelResource MetricLabel = "resource"
 
-	// MetricTagMethod contains the HTTP verb used in the request.
+	// MetricLabelMethod contains the HTTP verb used in the request.
 	MetricLabelMethod MetricLabel = "method"
 
-	// MetricTagStatus contains the status code we received for the request.
+	// MetricLabelStatus contains the status code we received for the request.
 	MetricLabelStatus MetricLabel = "status"
 )
 
