@@ -10,6 +10,7 @@ const (
 	randomHostnameLength = 8
 )
 
+// RandomHostname generates a random hostname, useful for e2e tests and primarily used there.
 func RandomHostname() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec // No crypto needed here.
 	hostname := make([]byte, randomHostnameLength)

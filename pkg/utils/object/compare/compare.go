@@ -8,10 +8,13 @@ import (
 )
 
 var (
+	// ErrInvalidType is returned when the given data type cannot be used.
 	ErrInvalidType = errors.New("invalid type given")
 
+	// ErrDifferentTypes is returned by functions given multiple inputs when those inputs are of different types.
 	ErrDifferentTypes = fmt.Errorf("%w: cannot compare structs of different types", ErrInvalidType)
 
+	// ErrKeyNotFound is returned when a named field is not found in a struct.
 	ErrKeyNotFound = fmt.Errorf("key not found in struct")
 )
 
