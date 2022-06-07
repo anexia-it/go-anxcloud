@@ -11,11 +11,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type pagination_test_object struct {
+type paginationTestObject struct {
 	Message string `json:"message"`
 }
 
-func (p pagination_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (p paginationTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return nil, ErrOperationNotSupported
 }
 
@@ -117,7 +117,7 @@ var _ = Describe("PageInfo implementation pageIter", func() {
 			expectedError := 0
 
 			for ok {
-				var out []pagination_test_object
+				var out []paginationTestObject
 				ok = pi.Next(&out)
 
 				if err := pi.Error(); !ok && err != nil {

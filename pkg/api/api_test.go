@@ -72,39 +72,39 @@ var _ = Describe("getResponseType function", func() {
 	})
 })
 
-type api_test_anyop_option string
+type apiTestAnyopOption string
 
-func (o api_test_anyop_option) ApplyToGet(opts *types.GetOptions) {
+func (o apiTestAnyopOption) ApplyToGet(opts *types.GetOptions) {
 	_ = opts.Set("api_test_option", o, false)
 }
 
-func (o api_test_anyop_option) ApplyToList(opts *types.ListOptions) {
+func (o apiTestAnyopOption) ApplyToList(opts *types.ListOptions) {
 	_ = opts.Set("api_test_option", o, false)
 }
 
-func (o api_test_anyop_option) ApplyToCreate(opts *types.CreateOptions) {
+func (o apiTestAnyopOption) ApplyToCreate(opts *types.CreateOptions) {
 	_ = opts.Set("api_test_option", o, false)
 }
 
-func (o api_test_anyop_option) ApplyToUpdate(opts *types.UpdateOptions) {
+func (o apiTestAnyopOption) ApplyToUpdate(opts *types.UpdateOptions) {
 	_ = opts.Set("api_test_option", o, false)
 }
 
-func (o api_test_anyop_option) ApplyToDestroy(opts *types.DestroyOptions) {
+func (o apiTestAnyopOption) ApplyToDestroy(opts *types.DestroyOptions) {
 	_ = opts.Set("api_test_option", o, false)
 }
 
-type api_test_object struct {
+type apiTestObject struct {
 	Val string `json:"value" anxcloud:"identifier"`
 }
 
-var api_test_error = errors.New("we shall fail")
+var errAPITest = errors.New("we shall fail")
 
-func (o *api_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
+func (o *apiTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	if o.Val == "failing" {
-		return nil, api_test_error
+		return nil, errAPITest
 	} else if o.Val == "option-check" {
-		expected_option_value := ctx.Value(api_test_error)
+		expectedOptionValue := ctx.Value(errAPITest)
 
 		opts, err := types.OptionsFromContext(ctx)
 		if err != nil {
@@ -113,37 +113,37 @@ func (o *api_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 		if v, err := opts.Get("api_test_option"); err != nil {
 			return nil, err
-		} else if v != expected_option_value {
-			return nil, api_test_error
+		} else if v != expectedOptionValue {
+			return nil, errAPITest
 		}
 	}
 
 	logger := logr.FromContextOrDiscard(ctx)
-	logger.Info("Hello from api_test_object!")
+	logger.Info("Hello from apiTestObject!")
 
 	u, _ := url.ParseRequestURI("/resource/v1")
 	return u, nil
 }
 
-func (o *api_test_object) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+func (o *apiTestObject) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
 	if o.Val == "failing_filter_request" {
-		return nil, api_test_error
+		return nil, errAPITest
 	}
 
 	return req, nil
 }
 
-func (o *api_test_object) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+func (o *apiTestObject) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
 	if o.Val == "failing_filter_response" {
-		return nil, api_test_error
+		return nil, errAPITest
 	}
 
 	return res, nil
 }
 
-func (o *api_test_object) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+func (o *apiTestObject) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 	if o.Val == "failing_filter_request_body" {
-		return nil, api_test_error
+		return nil, errAPITest
 	} else if o.Val == "function_filter_request_body" {
 		return func() {}, nil
 	}
@@ -151,17 +151,17 @@ func (o *api_test_object) FilterAPIRequestBody(ctx context.Context) (interface{}
 	return o, nil
 }
 
-func (o *api_test_object) HasPagination(ctx context.Context) (bool, error) {
+func (o *apiTestObject) HasPagination(ctx context.Context) (bool, error) {
 	if o.Val == "failing_has_pagination" {
-		return false, api_test_error
+		return false, errAPITest
 	}
 
 	return o.Val != "no_pagination", nil
 }
 
-func (o *api_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
+func (o *apiTestObject) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 	if o.Val == "failing_decode_response" {
-		return api_test_error
+		return errAPITest
 	} else if o.Val == "success_decode_response" {
 		o.Val = "Decode hook called!"
 		return nil
@@ -170,10 +170,10 @@ func (o *api_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader)
 	return json.NewDecoder(data).Decode(o)
 }
 
-type api_test_error_roundtripper bool
+type apiTestErrorRoundtripper bool
 
-func (rt api_test_error_roundtripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	return nil, api_test_error
+func (rt apiTestErrorRoundtripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return nil, errAPITest
 }
 
 var _ = Describe("decodeResponse function", func() {
@@ -206,7 +206,7 @@ var _ = Describe("decodeResponse function", func() {
 	})
 
 	It("decodes json message using the Objects response decode hook", func() {
-		obj := api_test_object{"success_decode_response"}
+		obj := apiTestObject{"success_decode_response"}
 		err := decodeResponse(ctx, "application/json", bytes.NewReader([]byte(`{"value": "decode hook not called :("}`)), &obj)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(obj.Val).To(Equal("Decode hook called!"))
@@ -238,7 +238,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Create(context.TODO(), &o)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("error parsing client's BaseURL"))
@@ -266,11 +266,11 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Create(context.TODO(), &o)
 		Expect(err).To(HaveOccurred())
 
-		Expect(log.String()).To(ContainSubstring("Hello from api_test_object!"))
+		Expect(log.String()).To(ContainSubstring("Hello from apiTestObject!"))
 	})
 
 	It("uses a logger already on the context", func() {
@@ -296,11 +296,11 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Create(ctx, &o)
 		Expect(err).To(HaveOccurred())
 
-		Expect(log.String()).To(ContainSubstring("Hello from api_test_object!"))
+		Expect(log.String()).To(ContainSubstring("Hello from apiTestObject!"))
 	})
 
 	It("handles the Object returning an error on EndpointURL", func() {
@@ -313,12 +313,12 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing"}
+		o := apiTestObject{"failing"}
 		err = api.Create(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 
 		err = api.List(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Object returning an empty identifier on EndpointURL for operations requiring an IdentifiedObject", func() {
@@ -331,7 +331,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{""}
+		o := apiTestObject{""}
 		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(ErrUnidentifiedObject))
 	})
@@ -346,9 +346,9 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_filter_request"}
+		o := apiTestObject{"failing_filter_request"}
 		err = api.Create(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Object returning an error on FilterAPIRequestBody", func() {
@@ -361,9 +361,9 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_filter_request_body"}
+		o := apiTestObject{"failing_filter_request_body"}
 		err = api.Create(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Object returning a request body that cannot be encoded in json on FilterAPIRequestBody", func() {
@@ -376,7 +376,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"function_filter_request_body"}
+		o := apiTestObject{"function_filter_request_body"}
 		err = api.Create(context.TODO(), &o)
 
 		var e *json.UnsupportedTypeError
@@ -395,14 +395,14 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_filter_response"}
+		o := apiTestObject{"failing_filter_response"}
 		err = api.Create(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Object returning an error on DecodeAPIResponse", func() {
 		server.AppendHandlers(
-			ghttp.RespondWithJSONEncoded(200, api_test_object{"indentifier"}),
+			ghttp.RespondWithJSONEncoded(200, apiTestObject{"indentifier"}),
 		)
 
 		api, err := NewAPI(
@@ -414,9 +414,9 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_decode_response"}
+		o := apiTestObject{"failing_decode_response"}
 		err = api.Get(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Engine returning a weird response content-type", func() {
@@ -431,7 +431,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(ErrUnsupportedResponseFormat))
 	})
@@ -448,7 +448,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Destroy(context.TODO(), &o)
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -470,7 +470,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 
 		var pi types.PageInfo
 		err = api.List(context.TODO(), &o, Paged(1, 1, &pi))
@@ -481,7 +481,7 @@ var _ = Describe("using an API object", func() {
 		err = api.List(context.TODO(), &o, Paged(1, 1, &pi))
 		Expect(err).NotTo(HaveOccurred())
 
-		var os []api_test_object
+		var os []apiTestObject
 		ok := pi.Next(&os)
 		Expect(pi.Error()).NotTo(HaveOccurred())
 		Expect(ok).To(BeTrue())
@@ -533,7 +533,7 @@ var _ = Describe("using an API object", func() {
 			}
 
 			It("returns correct data with List operation used with pagination", func() {
-				o := api_test_object{}
+				o := apiTestObject{}
 
 				var pi types.PageInfo
 				// we use the same page size as for channel to make testing easier and to not have to
@@ -542,23 +542,23 @@ var _ = Describe("using an API object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 
-				var objects []api_test_object
+				var objects []apiTestObject
 				for pi.Next(&objects) {
 					Expect(objects).To(HaveLen(2))
 
 					switch pi.CurrentPage() {
 					case 1:
-						Expect(objects).To(BeEquivalentTo([]api_test_object{
+						Expect(objects).To(BeEquivalentTo([]apiTestObject{
 							{namePrefix + "foo 1"},
 							{namePrefix + "foo 2"},
 						}))
 					case 2:
-						Expect(objects).To(BeEquivalentTo([]api_test_object{
+						Expect(objects).To(BeEquivalentTo([]apiTestObject{
 							{namePrefix + "foo 3"},
 							{namePrefix + "foo 4"},
 						}))
 					case 3:
-						Expect(objects).To(BeEquivalentTo([]api_test_object{}))
+						Expect(objects).To(BeEquivalentTo([]apiTestObject{}))
 					default:
 						Fail("Unexpected current page")
 					}
@@ -569,7 +569,7 @@ var _ = Describe("using an API object", func() {
 			})
 
 			It("returns correct data with List operation used with a channel", func() {
-				o := api_test_object{}
+				o := apiTestObject{}
 
 				channel := make(types.ObjectChannel)
 				err := api.List(context.TODO(), &o, ObjectChannel(&channel), FullObjects(fullObjects))
@@ -601,9 +601,9 @@ var _ = Describe("using an API object", func() {
 		Context("FullObjects disabled", func() {
 			BeforeEach(func() {
 				responses = []response{
-					{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
-					{200, "/resource/v1", "page=2&limit=10", []api_test_object{{"foo 3"}, {"foo 4"}}},
-					{200, "/resource/v1", "page=3&limit=10", []api_test_object{}},
+					{200, "/resource/v1", "page=1&limit=10", []apiTestObject{{"foo 1"}, {"foo 2"}}},
+					{200, "/resource/v1", "page=2&limit=10", []apiTestObject{{"foo 3"}, {"foo 4"}}},
+					{200, "/resource/v1", "page=3&limit=10", []apiTestObject{}},
 				}
 			})
 
@@ -614,17 +614,17 @@ var _ = Describe("using an API object", func() {
 			Context("requests all succeeding", func() {
 				BeforeEach(func() {
 					responses = []response{
-						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+						{200, "/resource/v1", "page=1&limit=10", []apiTestObject{{"foo 1"}, {"foo 2"}}},
 
-						{200, "/resource/v1/foo 1", "", api_test_object{"full foo 1"}},
-						{200, "/resource/v1/foo 2", "", api_test_object{"full foo 2"}},
+						{200, "/resource/v1/foo 1", "", apiTestObject{"full foo 1"}},
+						{200, "/resource/v1/foo 2", "", apiTestObject{"full foo 2"}},
 
-						{200, "/resource/v1", "page=2&limit=10", []api_test_object{{"foo 3"}, {"foo 4"}}},
+						{200, "/resource/v1", "page=2&limit=10", []apiTestObject{{"foo 3"}, {"foo 4"}}},
 
-						{200, "/resource/v1/foo 3", "", api_test_object{"full foo 3"}},
-						{200, "/resource/v1/foo 4", "", api_test_object{"full foo 4"}},
+						{200, "/resource/v1/foo 3", "", apiTestObject{"full foo 3"}},
+						{200, "/resource/v1/foo 4", "", apiTestObject{"full foo 4"}},
 
-						{200, "/resource/v1", "page=3&limit=10", []api_test_object{}},
+						{200, "/resource/v1", "page=3&limit=10", []apiTestObject{}},
 					}
 				})
 
@@ -634,28 +634,28 @@ var _ = Describe("using an API object", func() {
 			Context("list request succeeding but get request failing", func() {
 				BeforeEach(func() {
 					responses = []response{
-						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+						{200, "/resource/v1", "page=1&limit=10", []apiTestObject{{"foo 1"}, {"foo 2"}}},
 
 						{400, "/resource/v1/foo 1", "", map[string]string{"error": "something went wrong"}}, // a very realistic error, sadly.
 					}
 				})
 
 				It("returns the error via page iterator", func() {
-					o := api_test_object{}
+					o := apiTestObject{}
 
 					var pi types.PageInfo
 					err := api.List(context.TODO(), &o, Paged(1, 10, &pi), FullObjects(true))
 					Expect(err).NotTo(HaveOccurred())
 					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 
-					var objects []api_test_object
+					var objects []apiTestObject
 					Expect(pi.Next(&objects)).To(BeFalse())
 					Expect(pi.Error()).To(HaveOccurred())
 					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 				})
 
 				It("returns the error via channel", func() {
-					o := api_test_object{}
+					o := apiTestObject{}
 					ctx, cancel := context.WithCancel(context.TODO())
 
 					var c types.ObjectChannel
@@ -671,28 +671,28 @@ var _ = Describe("using an API object", func() {
 			Context("list request succeeding but decoding fails", func() {
 				BeforeEach(func() {
 					responses = []response{
-						{200, "/resource/v1", "page=1&limit=10", []api_test_object{{"foo 1"}, {"foo 2"}}},
+						{200, "/resource/v1", "page=1&limit=10", []apiTestObject{{"foo 1"}, {"foo 2"}}},
 
 						{200, "/resource/v1/foo 1", "", "foo"},
 					}
 				})
 
 				It("returns the error via page iterator", func() {
-					o := api_test_object{}
+					o := apiTestObject{}
 
 					var pi types.PageInfo
 					err := api.List(context.TODO(), &o, Paged(1, 10, &pi), FullObjects(true))
 					Expect(err).NotTo(HaveOccurred())
 					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 
-					var objects []api_test_object
+					var objects []apiTestObject
 					Expect(pi.Next(&objects)).To(BeFalse())
 					Expect(pi.Error()).To(HaveOccurred())
 					Expect(pi.CurrentPage()).To(BeEquivalentTo(0))
 				})
 
 				It("returns the error via channel", func() {
-					o := api_test_object{}
+					o := apiTestObject{}
 					ctx, cancel := context.WithCancel(context.TODO())
 
 					var c types.ObjectChannel
@@ -717,7 +717,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 
 		var pi types.PageInfo
 		oc := make(types.ObjectChannel)
@@ -754,7 +754,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 
 		var pi types.PageInfo
 		err = api.List(context.TODO(), &o, Paged(0, 2, &pi))
@@ -773,9 +773,9 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_has_pagination"}
+		o := apiTestObject{"failing_has_pagination"}
 		err = api.List(context.TODO(), &o, Paged(1, 10, nil))
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles the Object not being able to be Listed with pagination", func() {
@@ -794,13 +794,13 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"no_pagination"}
+		o := apiTestObject{"no_pagination"}
 
 		var pi types.PageInfo
 		err = api.List(context.TODO(), &o, Paged(1, 10, &pi))
 		Expect(err).NotTo(HaveOccurred())
 
-		var os []api_test_object
+		var os []apiTestObject
 		Expect(pi.Next(&os)).To(BeTrue())
 		Expect(os).To(HaveLen(2))
 
@@ -822,7 +822,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"no_pagination"}
+		o := apiTestObject{"no_pagination"}
 
 		var ch types.ObjectChannel
 		err = api.List(context.TODO(), &o, ObjectChannel(&ch))
@@ -862,7 +862,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"failing_decode_response"}
+		o := apiTestObject{"failing_decode_response"}
 
 		ctx, cancel := context.WithCancel(context.TODO())
 		var ch types.ObjectChannel
@@ -873,7 +873,7 @@ var _ = Describe("using an API object", func() {
 		cancel()
 
 		err = retriever(&o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 
 		Eventually(ch).Should(BeClosed())
 		Expect(server.ReceivedRequests()).To(HaveLen(1))
@@ -892,7 +892,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"no_pagination"}
+		o := apiTestObject{"no_pagination"}
 
 		ctx, cancel := context.WithCancel(context.TODO())
 		var ch types.ObjectChannel
@@ -914,7 +914,7 @@ var _ = Describe("using an API object", func() {
 
 	It("handles http.Client.Do() returning an error", func() {
 		hc := http.Client{
-			Transport: api_test_error_roundtripper(false),
+			Transport: apiTestErrorRoundtripper(false),
 		}
 
 		api, err := NewAPI(
@@ -926,9 +926,9 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Get(context.TODO(), &o)
-		Expect(err).To(MatchError(api_test_error))
+		Expect(err).To(MatchError(errAPITest))
 	})
 
 	It("handles not being given a context", func() {
@@ -942,7 +942,7 @@ var _ = Describe("using an API object", func() {
 
 		// the two nolint comments are for passing nil context, which is the behavior we want to test here.
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		err = api.Get(nil, &o) //nolint:golint,staticcheck
 		Expect(err).To(MatchError(ErrContextRequired))
 
@@ -959,15 +959,15 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"identifier"}
+		o := apiTestObject{"identifier"}
 		req, err := api.(defaultAPI).makeRequest(context.TODO(), &o, &o, types.Operation("bogus operation"))
 		Expect(err).To(MatchError(ErrOperationNotSupported))
 		Expect(req).To(BeNil())
 	})
 
 	It("consumes the given options for all operations", func() {
-		opt := api_test_anyop_option("hello world")
-		ctx := context.WithValue(context.TODO(), api_test_error, opt)
+		opt := apiTestAnyopOption("hello world")
+		ctx := context.WithValue(context.TODO(), errAPITest, opt)
 
 		server.AppendHandlers(
 			ghttp.RespondWithJSONEncoded(200, map[string]string{"value": "option-check"}),
@@ -986,7 +986,7 @@ var _ = Describe("using an API object", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		o := api_test_object{"option-check"}
+		o := apiTestObject{"option-check"}
 
 		err = api.Create(ctx, &o, opt)
 		Expect(err).NotTo(HaveOccurred())
@@ -1005,9 +1005,9 @@ var _ = Describe("using an API object", func() {
 	})
 })
 
-const context_test_object_baseurl = "/v1/context_test_object"
+const contextTestObjectBaseurl = "/v1/context_test_object"
 
-type context_test_object struct {
+type contextTestObject struct {
 	Test string `anxcloud:"identifier"`
 
 	endpointURLCalled    bool
@@ -1017,7 +1017,7 @@ type context_test_object struct {
 	responseBodyCalled   bool
 }
 
-func (o context_test_object) checkContext(hasURL bool, ctx context.Context) {
+func (o contextTestObject) checkContext(ctx context.Context, hasURL bool) {
 	switch o.Test {
 	case "Hooks":
 		// nothing to do
@@ -1040,36 +1040,36 @@ func (o context_test_object) checkContext(hasURL bool, ctx context.Context) {
 	}
 }
 
-func (o *context_test_object) EndpointURL(ctx context.Context) (*url.URL, error) {
-	o.checkContext(false, ctx)
+func (o *contextTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
+	o.checkContext(ctx, false)
 	o.endpointURLCalled = true
 
-	return url.Parse(context_test_object_baseurl)
+	return url.Parse(contextTestObjectBaseurl)
 }
 
-func (o *context_test_object) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
-	o.checkContext(true, ctx)
+func (o *contextTestObject) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+	o.checkContext(ctx, true)
 	o.filterRequestCalled = true
 
 	return req, nil
 }
 
-func (o *context_test_object) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
-	o.checkContext(true, ctx)
+func (o *contextTestObject) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
+	o.checkContext(ctx, true)
 	o.filterResponseCalled = true
 
 	return res, nil
 }
 
-func (o *context_test_object) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	o.checkContext(true, ctx)
+func (o *contextTestObject) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	o.checkContext(ctx, true)
 	o.requestBodyCalled = true
 
 	return o, nil
 }
 
-func (o *context_test_object) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
-	o.checkContext(true, ctx)
+func (o *contextTestObject) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
+	o.checkContext(ctx, true)
 	o.responseBodyCalled = true
 	return json.NewDecoder(data).Decode(o)
 }
@@ -1093,10 +1093,10 @@ var _ = Describe("context passed to Object methods", func() {
 	})
 
 	It("has all hooks called on it", func() {
-		o := context_test_object{"Hooks", false, false, false, false, false}
+		o := contextTestObject{"Hooks", false, false, false, false, false}
 
 		server.AppendHandlers(ghttp.CombineHandlers(
-			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", contextTestObjectBaseurl, o.Test)),
 			ghttp.RespondWithJSONEncoded(200, o),
 		))
 
@@ -1111,10 +1111,10 @@ var _ = Describe("context passed to Object methods", func() {
 	})
 
 	It("has operation in context for every method call", func() {
-		o := context_test_object{"Operation", false, false, false, false, false}
+		o := contextTestObject{"Operation", false, false, false, false, false}
 
 		server.AppendHandlers(ghttp.CombineHandlers(
-			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", contextTestObjectBaseurl, o.Test)),
 			ghttp.RespondWithJSONEncoded(200, o),
 		))
 
@@ -1123,10 +1123,10 @@ var _ = Describe("context passed to Object methods", func() {
 	})
 
 	It("has options in context for every method call", func() {
-		o := context_test_object{"Options", false, false, false, false, false}
+		o := contextTestObject{"Options", false, false, false, false, false}
 
 		server.AppendHandlers(ghttp.CombineHandlers(
-			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", contextTestObjectBaseurl, o.Test)),
 			ghttp.RespondWithJSONEncoded(200, o),
 		))
 
@@ -1135,10 +1135,10 @@ var _ = Describe("context passed to Object methods", func() {
 	})
 
 	It("has URL in context for every method call except EndpointURL", func() {
-		o := context_test_object{"URL", false, false, false, false, false}
+		o := contextTestObject{"URL", false, false, false, false, false}
 
 		server.AppendHandlers(ghttp.CombineHandlers(
-			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", context_test_object_baseurl, o.Test)),
+			ghttp.VerifyRequest("PUT", fmt.Sprintf("%v/%v", contextTestObjectBaseurl, o.Test)),
 			ghttp.RespondWithJSONEncoded(200, o),
 		))
 
