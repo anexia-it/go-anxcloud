@@ -154,11 +154,11 @@ func (f *filterHelper) parseField(fieldValue reflect.Value, field reflect.Struct
 	f.fields[filterName] = true
 
 	if option == "single" {
-		if val, err := parseOptionSingle(fieldValue); err != nil {
+		val, err := parseOptionSingle(fieldValue)
+		if err != nil {
 			return fmt.Errorf("field %q: %w", filterName, err)
-		} else {
-			fieldValue = val
 		}
+		fieldValue = val
 	}
 
 	fieldValue, err := extractFilterValue(fieldValue)
