@@ -15,8 +15,11 @@ type ACL struct {
 	ParentType      string     `json:"parent_type,omitempty" anxcloud:"filterable"`
 	Criterion       string     `json:"criterion,omitempty"`
 	Value           string     `json:"value,omitempty"`
-	Index           int        `json:"index,omitempty"`
 	AutomationRules []RuleInfo `json:"automation_rules,omitempty"`
+
+	// Index is *int to allow zero values but also omitempty
+	// pkg/utils/pointer can be used to create pointers from primitives
+	Index *int `json:"index,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
 	Frontend Frontend `json:"frontend,omitempty" anxcloud:"filterable"`

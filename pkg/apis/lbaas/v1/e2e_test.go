@@ -10,6 +10,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -49,7 +50,7 @@ func ruleChecks(testrun LBaaSE2ETestRun, frontend *Frontend, acl *ACL, testURL s
 			rule = Rule{
 				Name:          fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				ParentType:    "frontend",
-				Index:         0,
+				Index:         pointer.Int(0),
 				Frontend:      *frontend,
 				Condition:     "if",
 				ConditionTest: acl.Name,
@@ -81,7 +82,7 @@ func aclChecks(testrun LBaaSE2ETestRun, frontend *Frontend, testURL string) {
 			acl = ACL{
 				Name:       fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				ParentType: "frontend",
-				Index:      0,
+				Index:      pointer.Int(0),
 				Criterion:  "dst_port",
 				Value:      fmt.Sprintf("%d", testrun.Port),
 				Frontend:   *frontend,
