@@ -26,6 +26,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 ### Fixed
 * pkg/utils/object/compare.Reconcile now accepts arrays of `*struct` and `types.Object` as target/existing input (#145, @LittleFox94)
 
+### Added
+* core/v1: helper methods Tag, Untag and ListTags (#122, @marioreggiori)
+
 ### Changed
 * moved pkg/api.GetObjectIdentifier and related errors to pkg/api/types (#144, @LittleFox94)
   - the previous locations are still available, but marked as deprecated
