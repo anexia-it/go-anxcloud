@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.4.4] - 2022-06-10
+
 ### Fixed
 * pkg/utils/object/compare.Reconcile now accepts arrays of `*struct` and `types.Object` as target/existing input (#145, @LittleFox94)
 
