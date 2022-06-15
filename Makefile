@@ -67,7 +67,7 @@ docs-lint: tools
 		echo "Unexpected misspelling found in docs files."; \
 		echo "To automatically fix the misspelling, run 'make docs-lint-fix' and commit the changes."; \
 		exit 1)
-	@docker run -v $(PWD):/markdown 06kellyjac/markdownlint-cli docs/ || (echo; \
+	@docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli docs/ || (echo; \
 		echo "Unexpected issues found in docs Markdown files."; \
 		echo "To apply any automatic fixes, run 'make docs-lint-fix' and commit the changes."; \
 		exit 1)
@@ -76,7 +76,7 @@ docs-lint: tools
 docs-lint-fix: tools
 	@echo "==> Applying automatic docs linter fixes..."
 	@tools/misspell -w -source=text docs/
-	@docker run -v $(PWD):/markdown 06kellyjac/markdownlint-cli --fix docs/
+	@docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli --fix docs/
 
 .PHONY: lint
 lint: go-lint docs-lint
