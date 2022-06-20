@@ -2,7 +2,10 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -34,14 +37,30 @@ var _ = Describe("Template API bindings", func() {
 
 	Context("with mocked server", func() {
 		var a api.API
+
 		location := corev1.Location{Identifier: "mock-location-id"}
+
+		locationWithIncompatibleJSONSchema := corev1.Location{Identifier: "location-with-incompatible-json-schema"}
+		locationWithBrokenJSONResponse := corev1.Location{Identifier: "location-with-broken-json-response"}
+		locationWithPlaintextResponse := corev1.Location{Identifier: "location-with-plaintext-response"}
 
 		BeforeEach(func() {
 			srv := ghttp.NewServer()
+
 			srv.AppendHandlers(ghttp.CombineHandlers(
-				ghttp.VerifyRequest("GET", fmt.Sprintf("/api/vsphere/v1/provisioning/templates.json/%s/templates", location.Identifier), "page=1&limit=1000"),
+				ghttp.VerifyRequest("GET", fmt.Sprintf("/api/vsphere/v1/provisioning/templates.json/%s/templates", location.Identifier), "limit=1000&page=1"),
 				ghttp.RespondWithJSONEncoded(200, mockedTemplateList()),
 			))
+
+			srv.RouteToHandler("GET", fmt.Sprintf("/api/vsphere/v1/provisioning/templates.json/%s/templates", locationWithIncompatibleJSONSchema.Identifier),
+				ghttp.RespondWithJSONEncoded(200, []map[string]interface{}{{"id": 123}}))
+
+			srv.RouteToHandler("GET", fmt.Sprintf("/api/vsphere/v1/provisioning/templates.json/%s/templates", locationWithBrokenJSONResponse.Identifier),
+				ghttp.RespondWith(200, "not json", http.Header{"content-type": []string{"application/json"}}))
+
+			srv.RouteToHandler("GET", fmt.Sprintf("/api/vsphere/v1/provisioning/templates.json/%s/templates", locationWithPlaintextResponse.Identifier),
+				ghttp.RespondWith(200, "not json", http.Header{"content-type": []string{"text/plain"}}),
+			)
 
 			var err error
 			a, err = api.NewAPI(api.WithClientOptions(
@@ -72,6 +91,45 @@ var _ = Describe("Template API bindings", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(tpl.Name).To(Equal("Flatcar Linux Stable"))
 		})
+
+		It("returns api.ErrNotFound when template with id was not found", func() {
+			err := a.Get(context.TODO(), &Template{Identifier: "this-id-does-not-exist", Location: location, Type: TypeTemplate})
+			Expect(err).To(MatchError(api.ErrNotFound))
+		})
+
+		It("covers non-json responses", func() {
+			err := a.Get(context.TODO(), &Template{Identifier: "random-identifier", Location: locationWithPlaintextResponse, Type: TypeTemplate})
+			Expect(err).To(MatchError(api.ErrUnsupportedResponseFormat))
+		})
+
+		It("handles broken json in response", func() {
+			err := a.Get(context.TODO(), &Template{Identifier: "random-identifier", Location: locationWithBrokenJSONResponse, Type: TypeTemplate})
+			var e *json.SyntaxError
+			Expect(errors.As(err, &e)).To(BeTrue())
+		})
+
+		Context("FindNamedTemplate helper", func() {
+			It("handles non-json responses", func() {
+				_, err := FindNamedTemplate(context.TODO(), a, "Debian 11", LatestTemplateBuild, locationWithPlaintextResponse)
+				Expect(err).To(MatchError(api.ErrUnsupportedResponseFormat))
+			})
+
+			It("handles wrong json schemas in response", func() {
+				_, err := FindNamedTemplate(context.TODO(), a, "Debian 11", LatestTemplateBuild, locationWithIncompatibleJSONSchema)
+				var e *json.UnmarshalTypeError
+				Expect(errors.As(err, &e)).To(BeTrue())
+			})
+		})
+
+		DescribeTable("Template->EndpointURL returns ErrOperationNotSupported when it was called with an unsupported operation", func(op types.Operation) {
+			tpl := &Template{Identifier: "this-id-does-not-exist", Location: location, Type: TypeTemplate}
+			_, err := tpl.EndpointURL(types.ContextWithOperation(context.TODO(), op))
+			Expect(err).To(MatchError(api.ErrOperationNotSupported))
+		},
+			Entry("with operation Create", types.OperationCreate),
+			Entry("with operation Destroy", types.OperationDestroy),
+			Entry("with operation Update", types.OperationUpdate),
+		)
 
 		DescribeTable("find named template", func(name, build, expectedID string) {
 			template, err := FindNamedTemplate(context.TODO(), a, name, build, location)
