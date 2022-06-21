@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* vsphere/v1: Template bindings and FindNamedTemplate helper added to retrieve templates by name (#148, @marioreggiori)
+
 ## [0.4.4] - 2022-06-10
 
 ### Fixed
