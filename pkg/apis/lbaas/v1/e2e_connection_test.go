@@ -46,7 +46,9 @@ func unavailableServerConnectionCheck(url string) {
 
 func connectionResetByPeerCheck(url string) {
 	It("resets connection", func() {
-		_, err := http.Get(url)
-		Expect(err).To(MatchError(syscall.ECONNRESET))
+		Eventually(func(g Gomega) {
+			_, err := http.Get(url)
+			g.Expect(err).To(MatchError(syscall.ECONNRESET))
+		}, 30*time.Second, 1*time.Second).Should(Succeed())
 	})
 }
