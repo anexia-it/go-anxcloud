@@ -257,7 +257,7 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 
 	// We do this right on top because this checks if the Object has a correct type which is more strictly defined than just the interface.
 	// In a perfect world this would be a compile-time check.
-	identifier, err := GetObjectIdentifier(obj, singleObjectOperation)
+	identifier, err := types.GetObjectIdentifierWithContext(ctx, obj, singleObjectOperation)
 	if err != nil {
 		return nil, err
 	}

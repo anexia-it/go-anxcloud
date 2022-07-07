@@ -67,9 +67,31 @@ type FilterRequestURLHook interface {
 	FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error)
 }
 
+// HasGetIdentifier is an interface Objects can optionally implement to return a context sensitive identifier
+type HasGetIdentifier interface {
+	// GetIdentifier returns a context sensitive identifier
+	GetIdentifier(ctx context.Context) (string, error)
+}
+
 // GetObjectIdentifier extracts the identifier of the given object, returning an error if no identifier field
 // is found or singleObjectOperation is true and an identifier field is found, but empty.
 func GetObjectIdentifier(obj Object, singleObjectOperation bool) (string, error) {
+	return GetObjectIdentifierWithContext(context.TODO(), obj, singleObjectOperation)
+}
+
+// GetObjectIdentifierWithContext extracts the identifier of the given object
+func GetObjectIdentifierWithContext(ctx context.Context, obj Object, singleObjectOperation bool) (string, error) {
+	if obj, ok := obj.(HasGetIdentifier); ok {
+		identifier, err := obj.GetIdentifier(ctx)
+		if err != nil {
+			return "", err
+		}
+		if identifier == "" && singleObjectOperation {
+			return "", ErrUnidentifiedObject
+		}
+		return identifier, nil
+	}
+
 	objectType := reflect.TypeOf(obj)
 
 	if objectType.Kind() != reflect.Ptr {
