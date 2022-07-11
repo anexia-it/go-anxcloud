@@ -10,9 +10,13 @@ import (
 var _ = Describe("Object Location", func() {
 	o := Location{}
 
-	ifaces := make([]interface{}, 0, 1)
+	ifaces := make([]interface{}, 0, 2)
 	{
 		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.FilterRequestURLHook
 		ifaces = append(ifaces, &i)
 	}
 

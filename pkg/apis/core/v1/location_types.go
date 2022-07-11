@@ -6,7 +6,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
 
-// anxcloud:object
+// anxcloud:object:hooks=FilterRequestURLHook
 
 // Location describes a Anexia site where resources can be deployed.
 type Location struct {
@@ -34,5 +34,5 @@ func (l *Location) GetIdentifier(ctx context.Context) (string, error) {
 		return l.Code, nil
 	}
 
-	return "", types.ErrUnidentifiedObject
+	return "", nil
 }
