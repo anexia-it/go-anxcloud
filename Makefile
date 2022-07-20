@@ -15,8 +15,8 @@ build: fmtcheck go-lint
 generate: tools
 	# generate object tests
 	tools/tools object-generator --mode tests --in ./pkg/... --out xxgenerated_object_test.go
-	# generate object GetIdentifier methods for objects
-	tools/tools object-identifier
+	# generate GetIdentifier methods for objects
+	tools/tools object-generator --mode runtime --in ./pkg/... --out xxgenerated_object.go
 	# run golang default generator
 	go generate ./...
 

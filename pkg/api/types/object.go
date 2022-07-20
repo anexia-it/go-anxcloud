@@ -2,12 +2,9 @@ package types
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 )
 
 // Object is the interface all objects to be retrieved by the generic API client are required to implement.
@@ -20,6 +17,10 @@ type Object interface {
 	// The request URL is formed of `client.BaseURL() + first return value of this function`, requests for a single object get
 	// the object identifier appended to the path, a / added as needed. APIs using other URL schemes need to implement RequestFilterHook.
 	EndpointURL(ctx context.Context) (*url.URL, error)
+
+	// GetIdentifier returns the objects identifier
+	// The returned value might depend on the provided operation (via context)
+	GetIdentifier(ctx context.Context) (string, error)
 }
 
 // IdentifiedObject is the same as Object and is intended as a doc-helper. Objects are IdentifiedObjects when their
@@ -67,114 +68,15 @@ type FilterRequestURLHook interface {
 	FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error)
 }
 
-// HasGetIdentifier is an interface Objects can optionally implement to return a context sensitive identifier
-type HasGetIdentifier interface {
-	// GetIdentifier returns a context sensitive identifier
-	GetIdentifier(ctx context.Context) (string, error)
-}
-
-// GetObjectIdentifier extracts the identifier of the given object, returning an error if no identifier field
-// is found or singleObjectOperation is true and an identifier field is found, but empty.
+// GetObjectIdentifier extracts the identifier of the given object, returning an error if objects GetIdentifier
+// call fails or singleObjectOperation is true and an identifier field is found, but empty.
 func GetObjectIdentifier(obj Object, singleObjectOperation bool) (string, error) {
-	return GetObjectIdentifierWithContext(context.TODO(), obj, singleObjectOperation)
-}
-
-// GetObjectIdentifierWithContext extracts the identifier of the given object
-func GetObjectIdentifierWithContext(ctx context.Context, obj Object, singleObjectOperation bool) (string, error) {
-	if obj, ok := obj.(HasGetIdentifier); ok {
-		identifier, err := obj.GetIdentifier(ctx)
-		if err != nil {
-			return "", err
-		}
-		if identifier == "" && singleObjectOperation {
-			return "", ErrUnidentifiedObject
-		}
-		return identifier, nil
+	id, err := obj.GetIdentifier(context.TODO())
+	if err != nil {
+		return "", err
+	} else if id == "" && singleObjectOperation {
+		return "", ErrUnidentifiedObject
 	}
 
-	objectType := reflect.TypeOf(obj)
-
-	if objectType.Kind() != reflect.Ptr {
-		return "", fmt.Errorf("%w: the Object interface must be implemented on a pointer to struct", ErrTypeNotSupported)
-	} else if objectType.Elem().Kind() != reflect.Struct {
-		return "", fmt.Errorf("%w: Objects must be implemented as structs", ErrTypeNotSupported)
-	}
-
-	objectStructType := objectType.Elem()
-	return findIdentifierInStruct(objectStructType, reflect.ValueOf(obj).Elem(), singleObjectOperation)
-}
-
-func extractIdentifierFromEmbedded(field reflect.StructField, fieldValue reflect.Value) (*string, error) {
-	embeddedType := field.Type
-	embeddedValue := fieldValue
-
-	for embeddedType.Kind() == reflect.Ptr {
-		embeddedType = embeddedType.Elem()
-		embeddedValue = embeddedValue.Elem()
-	}
-
-	if embeddedType.Kind() == reflect.Struct {
-		id, err := findIdentifierInStruct(embeddedType, embeddedValue, true)
-
-		if err == nil {
-			return &id, nil
-		} else if !errors.Is(err, ErrObjectWithoutIdentifier) {
-			return nil, fmt.Errorf("type %q: %w", embeddedType, err)
-		}
-	}
-
-	return nil, nil
-}
-
-func extractIdentifierFromField(field reflect.StructField, fieldValue reflect.Value) (*string, error) {
-	if val, ok := field.Tag.Lookup("anxcloud"); !ok || val != "identifier" {
-		return nil, nil
-	}
-
-	switch v := fieldValue.Interface().(type) {
-	case string:
-		return &v, nil
-	default:
-		return nil, fmt.Errorf("%w: has an identifier of type %v)", ErrObjectIdentifierTypeNotSupported, field.Type)
-	}
-}
-
-func findIdentifierInStruct(t reflect.Type, v reflect.Value, singleObjectOp bool) (string, error) {
-	// we also use this to track if we found an identifier already
-	var returnIdentifier *string
-
-	numFields := t.NumField()
-
-	for i := 0; i < numFields; i++ {
-		field := t.Field(i)
-
-		var fieldIdentifier *string
-		var err error
-
-		if field.Anonymous {
-			fieldIdentifier, err = extractIdentifierFromEmbedded(field, v.Field(i))
-		} else {
-			fieldIdentifier, err = extractIdentifierFromField(field, v.Field(i))
-		}
-
-		if fieldIdentifier != nil && err == nil {
-			if returnIdentifier != nil {
-				err = fmt.Errorf("type %q: %w: multiple fields tagged as identifier", t, ErrObjectWithMultipleIdentifier)
-			} else if *fieldIdentifier == "" && singleObjectOp {
-				err = ErrUnidentifiedObject
-			}
-
-			returnIdentifier = fieldIdentifier
-		}
-
-		if err != nil {
-			return "", fmt.Errorf("type %q: %w", t, err)
-		}
-	}
-
-	if returnIdentifier == nil {
-		return "", fmt.Errorf("%w (type %v does not have a field with `anxcloud:\"identifier\"` tag)", ErrObjectWithoutIdentifier, t)
-	}
-
-	return *returnIdentifier, nil
+	return id, nil
 }

@@ -17,6 +17,10 @@ func (o *parentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/v1/parent")
 }
 
+func (o *parentObject) GetIdentifier(context.Context) (string, error) {
+	return o.Identifier, nil
+}
+
 // testObject is the definition of our test object. We define Name and Parent to be filterable. The filter for
 // Name is named "something" instead of "name". When having an Object marked as filterable, the identifier of
 // the Object is used, if it is set at all.
@@ -55,6 +59,10 @@ func (o *testObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	}
 
 	return u, nil
+}
+
+func (o *testObject) GetIdentifier(context.Context) (string, error) {
+	return o.Identifier, nil
 }
 
 func ExampleHelper_extended() {

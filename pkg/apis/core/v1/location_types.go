@@ -1,12 +1,6 @@
 package v1
 
-import (
-	"context"
-
-	"go.anx.io/go-anxcloud/pkg/api/types"
-)
-
-// anxcloud:object:hooks=FilterRequestURLHook
+// anxcloud:object
 
 // Location describes a Anexia site where resources can be deployed.
 type Location struct {
@@ -17,22 +11,4 @@ type Location struct {
 	CityCode    string  `json:"city_code"`
 	Latitude    *string `json:"lat"`
 	Longitude   *string `json:"lon"`
-}
-
-// GetIdentifier returns the objects identifier
-func (l *Location) GetIdentifier(ctx context.Context) (string, error) {
-	if l.Identifier != "" {
-		return l.Identifier, nil
-	}
-
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	if op == types.OperationGet {
-		return l.Code, nil
-	}
-
-	return "", nil
 }

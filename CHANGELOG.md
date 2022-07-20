@@ -26,6 +26,11 @@ Some examples, more below in the actual changelog (newer entries are more likely
 ### Added
 * vsphere/v1: Template bindings and FindNamedTemplate helper added to retrieve templates by name (#148, @marioreggiori)
 * generic client: mock implementation (#139, @marioreggiori)
+* (internal) object-generator: generate GetIdentifier method in `runtime` mode (#150, @marioreggiori)
+
+### Changed
+* generic client: GetIdentifier method added to types.Object interface (#150, @marioreggiori)
+* (internal) generic client: uses types.Object.GetIdentifier method (#150, @marioreggiori)
 
 ## [0.4.4] - 2022-06-10
 
