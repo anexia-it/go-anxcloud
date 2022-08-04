@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"errors"
 	"net/url"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -24,32 +25,8 @@ func (o *apiTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/invalid_anyway")
 }
 
-type apiTestNonstructObject bool
-
-func (o *apiTestNonstructObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type apiTestNonpointerObject bool
-
-func (o apiTestNonpointerObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type apiTestNoidentObject struct {
-	Value string `json:"value"`
-}
-
-func (o apiTestNoidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
-}
-
-type apiTestInvalididentObject struct {
-	Value int `json:"value" anxcloud:"identifier"`
-}
-
-func (o apiTestInvalididentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/invalid_anyway")
+func (o *apiTestObject) GetIdentifier(context.Context) (string, error) {
+	return o.Val, nil
 }
 
 type apiTestEmbeddedidentObject struct {
@@ -69,70 +46,27 @@ func (o apiTestMultiembeddedidentObject) EndpointURL(ctx context.Context) (*url.
 	return url.Parse("/resource/v1")
 }
 
-type apiTestMultiidentObject struct {
-	Identifier  string `json:"identifier" anxcloud:"identifier"`
-	Identifier2 string `json:"identifier2" anxcloud:"identifier"`
-}
+var errTestFailingGetIdentifier = errors.New("failed to get identifier")
 
-func (o apiTestMultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
+type apiTestObjectWithFailingGetIdentifier struct{}
+
+func (apiTestObjectWithFailingGetIdentifier) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return url.Parse("/resource/v1")
 }
-
-type apiTestEmbeddedmultiidentObject struct {
-	apiTestMultiidentObject
-}
-
-func (o apiTestEmbeddedmultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/resource/v1")
-}
-
-type apiTestMultiembeddedmultiidentObject struct {
-	apiTestObject
-	apiTestEmbeddedidentObject
-}
-
-func (o apiTestMultiembeddedmultiidentObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/resource/v1")
+func (apiTestObjectWithFailingGetIdentifier) GetIdentifier(context.Context) (string, error) {
+	return "", errTestFailingGetIdentifier
 }
 
 var _ = Describe("GetObjectIdentifier function", func() {
-	It("errors out on invalid Object types", func() {
-		nso := apiTestNonstructObject(false)
-		identifier, err := GetObjectIdentifier(&nso, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("must be implemented as structs"))
-		Expect(identifier).To(BeEmpty())
-
-		npo := apiTestNonpointerObject(false)
-		identifier, err = GetObjectIdentifier(npo, false)
-		Expect(err).To(MatchError(ErrTypeNotSupported))
-		Expect(err.Error()).To(ContainSubstring("must be implemented on a pointer to struct"))
-		Expect(identifier).To(BeEmpty())
-
-		nio := apiTestNoidentObject{"invalid"}
-		identifier, err = GetObjectIdentifier(&nio, false)
-		Expect(err).To(MatchError(ErrObjectWithoutIdentifier))
-		Expect(identifier).To(BeEmpty())
-
-		iio := apiTestInvalididentObject{32}
-		identifier, err = GetObjectIdentifier(&iio, false)
-		Expect(err).To(MatchError(ErrObjectIdentifierTypeNotSupported))
-		Expect(identifier).To(BeEmpty())
-
-		mio := apiTestMultiidentObject{"identifier", "identifier2"}
-		identifier, err = GetObjectIdentifier(&mio, false)
-		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
-		Expect(identifier).To(BeEmpty())
-
-		emio := apiTestEmbeddedmultiidentObject{apiTestMultiidentObject{"identifier", "identifier2"}}
-		identifier, err = GetObjectIdentifier(&emio, false)
-		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
-		Expect(identifier).To(BeEmpty())
-
-		memio := apiTestMultiembeddedmultiidentObject{apiTestObject{RandomEmbeddedData{}, "identifier"}, apiTestEmbeddedidentObject{apiTestObject{RandomEmbeddedData{}, "another identifier"}}}
-		identifier, err = GetObjectIdentifier(&memio, false)
-		Expect(err).To(MatchError(ErrObjectWithMultipleIdentifier))
-		Expect(identifier).To(BeEmpty())
+	It("errors when an object is not set on singleObjectOperation", func() {
+		sio := apiTestObject{}
+		_, err := GetObjectIdentifier(&sio, true)
+		Expect(err).To(MatchError(ErrUnidentifiedObject))
+	})
+	It("errors when object.GetIdentifier fails", func() {
+		sio := apiTestObjectWithFailingGetIdentifier{}
+		_, err := GetObjectIdentifier(&sio, true)
+		Expect(err).To(MatchError(errTestFailingGetIdentifier))
 	})
 
 	It("accepts valid Object types", func() {

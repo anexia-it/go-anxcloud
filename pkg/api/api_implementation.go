@@ -255,11 +255,12 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body interface{}, op types.Operation) (*http.Request, error) {
 	singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
 
-	// We do this right on top because this checks if the Object has a correct type which is more strictly defined than just the interface.
-	// In a perfect world this would be a compile-time check.
-	identifier, err := GetObjectIdentifier(obj, singleObjectOperation)
+	// We do this right on top to checks if the Object has a suitible identifier set (when required by the operation type).
+	identifier, err := obj.GetIdentifier(ctx)
 	if err != nil {
 		return nil, err
+	} else if singleObjectOperation && identifier == "" {
+		return nil, ErrUnidentifiedObject
 	}
 
 	resourceURL, err := obj.EndpointURL(ctx)

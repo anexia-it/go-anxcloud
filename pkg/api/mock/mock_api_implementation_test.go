@@ -133,7 +133,7 @@ var _ = Describe("Mock API implementation", func() {
 
 		It("supports empty responses", func() {
 			var oc types.ObjectChannel
-			err := a.List(context.TODO(), &testObjectWithoutIdentifier{}, api.ObjectChannel(&oc))
+			err := a.List(context.TODO(), &testObject2{}, api.ObjectChannel(&oc))
 			Expect(err).ToNot(HaveOccurred())
 			Eventually(oc).Should(BeClosed())
 		})
@@ -192,9 +192,9 @@ var _ = Describe("Mock API implementation", func() {
 			Expect(err).To(MatchError(api.ErrNotFound))
 		})
 
-		It("returns api.ErrObjectWithoutIdentifier if object does not have an identifier", func() {
-			err := a.Update(context.TODO(), &testObjectWithoutIdentifier{})
-			Expect(err).To(MatchError(types.ErrObjectWithoutIdentifier))
+		It("returns an error when object.GetIdentifier fails", func() {
+			err := a.Update(context.TODO(), &testObjectWithFailingGetIdentifier{})
+			Expect(err).To(HaveOccurred())
 		})
 
 		It("returns error when merge fails", func() {
@@ -236,9 +236,9 @@ var _ = Describe("Mock API implementation", func() {
 			Expect(err).To(MatchError(api.ErrNotFound))
 		})
 
-		It("returns api.ErrObjectWithoutIdentifier if object does not have an identifier", func() {
-			err := a.Destroy(context.TODO(), &testObjectWithoutIdentifier{})
-			Expect(err).To(MatchError(types.ErrObjectWithoutIdentifier))
+		It("returns an error when object.GetIdentifier fails", func() {
+			err := a.Destroy(context.TODO(), &testObjectWithFailingGetIdentifier{})
+			Expect(err).To(HaveOccurred())
 		})
 	})
 })

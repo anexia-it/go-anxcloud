@@ -125,6 +125,13 @@ func (o *apiTestObject) EndpointURL(ctx context.Context) (*url.URL, error) {
 	return u, nil
 }
 
+func (o *apiTestObject) GetIdentifier(context.Context) (string, error) {
+	if o.Val == "failing-identifier" {
+		return "", errAPITest
+	}
+	return o.Val, nil
+}
+
 func (o *apiTestObject) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
 	if o.Val == "failing_filter_request" {
 		return nil, errAPITest
@@ -318,6 +325,21 @@ var _ = Describe("using an API object", func() {
 		Expect(err).To(MatchError(errAPITest))
 
 		err = api.List(context.TODO(), &o)
+		Expect(err).To(MatchError(errAPITest))
+	})
+
+	It("handles the Object returning an error on GetIdentifier", func() {
+		api, err := NewAPI(
+			WithLogger(logger),
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := apiTestObject{"failing-identifier"}
+		err = api.Get(context.TODO(), &o)
 		Expect(err).To(MatchError(errAPITest))
 	})
 
@@ -1015,6 +1037,10 @@ type contextTestObject struct {
 	filterResponseCalled bool
 	requestBodyCalled    bool
 	responseBodyCalled   bool
+}
+
+func (o *contextTestObject) GetIdentifier(context.Context) (string, error) {
+	return o.Test, nil
 }
 
 func (o contextTestObject) checkContext(ctx context.Context, hasURL bool) {

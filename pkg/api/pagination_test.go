@@ -19,6 +19,10 @@ func (p paginationTestObject) EndpointURL(ctx context.Context) (*url.URL, error)
 	return nil, ErrOperationNotSupported
 }
 
+func (p paginationTestObject) GetIdentifier(context.Context) (string, error) {
+	return p.Message, nil
+}
+
 var _ = Describe("PageInfo implementation pageIter", func() {
 	var responses []json.RawMessage
 	var afterErrorResponse json.RawMessage

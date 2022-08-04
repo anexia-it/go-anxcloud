@@ -19,8 +19,9 @@ import (
 //
 // Objects must have tags for json encoding/decoding and exactly one must be tagged as anxcloud:"identifier".
 type ExampleObject struct {
-	Identifier string `json:"identifier" anxcloud:"identifier"`
-	Name       string `json:"name"`
+	Identifier          string `json:"identifier" anxcloud:"identifier"`
+	SecondaryIdentifier string `json:"secondary_identifier"`
+	Name                string `json:"name"`
 }
 
 // This is the most-basic implementation for EndpointURL, only returning the URL. This is the case for resources
@@ -39,7 +40,39 @@ type ExampleObject struct {
 // identifier is appended by default for Get, Update and Destroy operations. You can implement the interface
 // types.RequestFilterHook to have full control over the requests done for your object.
 func (o *ExampleObject) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return url.Parse("/example/v1")
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't get operation from context: %w", err)
+	}
+
+	endpointSuffix := "foo.json"
+	if op == types.OperationGet && o.Identifier == "" && o.SecondaryIdentifier != "" {
+		endpointSuffix = "foo/by-secondary-identifier.json"
+	}
+
+	return url.Parse(fmt.Sprintf("/example/v1/%s", endpointSuffix))
+}
+
+// GetIdentifier returns the identifier of an object.
+// The Makefiles `generate` target creates this method for objects that have a anxcloud:"identifier" tagged field.
+// Objects with multiple identifying fields can have this method overwritten to return an operation dependent identifier.
+// The provided context might not always have the operation set. In this case the method must return the primary identifier.
+//
+// For example: `corev1.Location` has the (primary) `Identifier` attribute, which is required by many API endpoints.
+// Additionally locations are identified by the human readable `Code` attribute (e.g. ANX04).
+//
+// Handling of secondary identifiers usually requires additional logic in the objects EndpointURL method.
+func (o *ExampleObject) GetIdentifier(ctx context.Context) (string, error) {
+	op, err := types.OperationFromContext(ctx)
+	if o.Identifier != "" || err != nil {
+		return o.Identifier, nil
+	}
+
+	if op == types.OperationGet {
+		return o.SecondaryIdentifier, nil
+	}
+
+	return "", nil
 }
 
 // This is a more complex example, supporting to List with a filter
@@ -47,6 +80,11 @@ type ExampleFilterableObject struct {
 	Identifier string `json:"identifier" anxcloud:"identifier"`
 	Name       string `json:"name"`
 	Mode       string `json:"mode"`
+}
+
+// GetIdentifier returns the objects identifier
+func (o *ExampleFilterableObject) GetIdentifier(context.Context) (string, error) {
+	return o.Identifier, nil
 }
 
 // This is an example for the EndpointURL method for an Object that can use a filter for List operations.
@@ -93,7 +131,7 @@ func (h *ExampleObjectMockHandler) ServeHTTP(res http.ResponseWriter, req *http.
 	res.Header().Add("Content-Type", "application/json; charset=utf-8")
 
 	switch req.URL.Path {
-	case "/example/v1":
+	case "/example/v1/foo.json":
 		o := ExampleObject{}
 		_ = json.NewDecoder(req.Body).Decode(&o)
 

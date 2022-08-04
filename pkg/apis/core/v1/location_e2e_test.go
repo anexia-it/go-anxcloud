@@ -81,4 +81,14 @@ var _ = Describe("location E2E tests", func() {
 		Expect(found).To(ContainElement("ANX04"))
 		Expect(found).To(ContainElement("ANX63"))
 	})
+
+	DescribeTable("Gets locations by code", func(code string, check func(l Location)) {
+		loc := Location{Code: code}
+		err := apiClient.Get(context.TODO(), &loc)
+		Expect(err).ToNot(HaveOccurred())
+		check(loc)
+	},
+		Entry("ANX04", "ANX04", matchesANX04),
+		Entry("ANX63", "ANX63", matchesANX63),
+	)
 })
