@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.4.5] - 2022-08-08
+
 ### Added
 * vsphere/v1: Template bindings and FindNamedTemplate helper added to retrieve templates by name (#148, @marioreggiori)
 * generic client: mock implementation (#139, @marioreggiori)
