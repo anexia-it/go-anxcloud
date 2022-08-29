@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -76,7 +76,7 @@ var _ = Describe("client", func() {
 
 		Expect(response.Body).NotTo(BeNil())
 
-		body, err := ioutil.ReadAll(response.Body)
+		body, err := io.ReadAll(response.Body)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(body)).To(Equal("bar"))

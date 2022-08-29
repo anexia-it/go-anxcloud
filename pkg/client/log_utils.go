@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"sort"
 	"strings"
@@ -93,11 +92,11 @@ func logResponse(res *http.Response, logger logr.Logger) {
 
 func stringifyBody(body *io.ReadCloser, log logr.Logger) *string {
 	if body != nil && *body != nil {
-		b, err := ioutil.ReadAll(*body)
+		b, err := io.ReadAll(*body)
 		if err != nil {
 			log.Error(err, "Error while preparing to log body, not logging it")
 		} else {
-			*body = ioutil.NopCloser(bytes.NewBuffer(b))
+			*body = io.NopCloser(bytes.NewBuffer(b))
 
 			ret := string(b)
 			return &ret

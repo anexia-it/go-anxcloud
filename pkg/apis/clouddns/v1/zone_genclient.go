@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -61,7 +61,7 @@ func (z *Zone) FilterAPIResponse(ctx context.Context, res *http.Response) (*http
 	// CloudDNS API's List response contains some non-functional pagination remnants, which are stripped here
 	// Actual array of Zones is in the key 'results'
 	if op == types.OperationList {
-		data, err := ioutil.ReadAll(res.Body)
+		data, err := io.ReadAll(res.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +73,7 @@ func (z *Zone) FilterAPIResponse(ctx context.Context, res *http.Response) (*http
 		}
 
 		data = m["results"]
-		res.Body = ioutil.NopCloser(bytes.NewReader(data))
+		res.Body = io.NopCloser(bytes.NewReader(data))
 		res.ContentLength = int64(len(data))
 	}
 	return res, nil
