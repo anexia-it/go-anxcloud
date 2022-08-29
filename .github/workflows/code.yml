@@ -17,9 +17,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "1.16"
+        - version: "1.18"
           name: target
-        - version: "1.17"
+        - version: "1.19"
           name: latest
     name: "Linting with ${{ matrix.go.name }} Go"
     steps:
@@ -36,9 +36,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "1.16"
+        - version: "1.18"
           name: target
-        - version: "1.17"
+        - version: "1.19"
           name: latest
     name: "Code generator with ${{ matrix.go.name }} Go"
     steps:
