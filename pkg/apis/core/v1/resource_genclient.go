@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -123,7 +122,7 @@ func (rwt ResourceWithTag) FilterAPIResponse(ctx context.Context, res *http.Resp
 	if res.StatusCode == http.StatusOK {
 		res.StatusCode = http.StatusNoContent
 		res.Body.Close()
-		res.Body = ioutil.NopCloser(&bytes.Buffer{})
+		res.Body = io.NopCloser(&bytes.Buffer{})
 	}
 
 	return res, nil

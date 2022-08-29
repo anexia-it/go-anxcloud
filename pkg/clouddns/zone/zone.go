@@ -270,7 +270,7 @@ func (a api) Update(ctx context.Context, name string, update Definition) (Zone, 
 	return responsePayload, nil
 }
 
-//Delete zone API method
+// Delete zone API method
 func (a api) Delete(ctx context.Context, name string) error {
 	url := fmt.Sprintf(
 		"%s%s/%s",

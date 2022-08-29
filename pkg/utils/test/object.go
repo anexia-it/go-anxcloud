@@ -21,7 +21,6 @@ type hookErrorCheck func(context.Context) error
 // * if the Object actually implements the interface of the hook
 // * if the Object has an identifier field
 // * calling the hook function with incomplete contexts gives none or the correct error (meaning the error is handled correctly)
-//
 func ObjectTests(o types.Object, hooks ...interface{}) {
 	ginkgo.It("has an identifier", func() {
 		_, err := types.GetObjectIdentifier(o, false)

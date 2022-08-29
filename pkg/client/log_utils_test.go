@@ -3,7 +3,7 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -78,7 +78,7 @@ var _ = Describe("logRequest and logResponse", func() {
 
 			logRequest(req, logger)
 
-			body, err := ioutil.ReadAll(req.Body)
+			body, err := io.ReadAll(req.Body)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(body).To(Equal([]byte("OK")))
 		})

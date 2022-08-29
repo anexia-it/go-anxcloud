@@ -4,7 +4,7 @@
 package v1
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"syscall"
 	"time"
@@ -27,7 +27,7 @@ func successfulConnectionCheck(url string) {
 			g.Expect(err).NotTo(HaveOccurred())
 			g.Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			g.Expect(err).NotTo(HaveOccurred())
 			g.Expect(string(body)).To(ContainSubstring("<title>Statistics Report for HAProxy</title>"))
 		}, 5*time.Second, 1*time.Second).Should(Succeed())
