@@ -42,3 +42,11 @@ type FullObjectsOption bool
 func (foo FullObjectsOption) ApplyToList(o *types.ListOptions) {
 	o.FullObjects = bool(foo)
 }
+
+// AutoTagOption configures the Create operation to automatically tag objects after creation
+type AutoTagOption []string
+
+// ApplyToCreate applies the AutoTagOption to the ListOptions
+func (ato AutoTagOption) ApplyToCreate(o *types.CreateOptions) {
+	o.AutoTags = ato
+}

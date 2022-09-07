@@ -16,6 +16,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
@@ -92,7 +93,15 @@ func (a defaultAPI) Create(ctx context.Context, o types.Object, opts ...types.Cr
 		opt.ApplyToCreate(&options)
 	}
 
-	return a.do(ctx, o, o, &options, types.OperationCreate)
+	if err := a.do(ctx, o, o, &options, types.OperationCreate); err != nil {
+		return fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if err := corev1.Tag(ctx, a, o, options.AutoTags...); err != nil {
+		return fmt.Errorf("failed to auto tag resource: %w", err)
+	}
+
+	return nil
 }
 
 // Update the object on the engine.
