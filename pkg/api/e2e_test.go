@@ -1,48 +1,25 @@
 //go:build integration
 // +build integration
 
-package v1_test
+package api_test
 
 import (
 	"context"
-
-	"go.anx.io/go-anxcloud/pkg/api"
-	"go.anx.io/go-anxcloud/pkg/api/types"
-	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
-	"go.anx.io/go-anxcloud/pkg/client"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.anx.io/go-anxcloud/pkg/api"
+	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
+	vlanv1 "go.anx.io/go-anxcloud/pkg/apis/vlan/v1"
+	"go.anx.io/go-anxcloud/pkg/client"
+	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
-var _ = Describe("resource E2E tests", func() {
-	var apiClient api.API
-
-	BeforeEach(func() {
-		a, err := api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
-		Expect(err).ToNot(HaveOccurred())
-		apiClient = a
-	})
-
-	Context("with at least one resource existing", func() {
-		ctx := context.TODO()
-
-		JustBeforeEach(func() {
-			// TODO: create a resource and take care to remove it after the test
-		})
-
-		It("should list resource using generic API client", func() {
-			var pageIter types.PageInfo
-			err := apiClient.List(ctx, &corev1.Resource{}, api.Paged(1, 100, &pageIter))
-			Expect(err).ToNot(HaveOccurred())
-
-			var resInfo []corev1.Resource
-			Expect(pageIter.Next(&resInfo)).To(BeTrue())
-			Expect(resInfo).ToNot(BeEmpty())
-			Expect(resInfo[0].Identifier).ToNot(BeEmpty())
-		})
-	})
-})
+const (
+	waitTimeout  = 5 * time.Minute
+	retryTimeout = 15 * time.Second
+)
 
 var _ = Describe("api.Create AutoTag", func() {
 	var a api.API
@@ -59,7 +36,7 @@ var _ = Describe("api.Create AutoTag", func() {
 		It("can auto tag resources on api.Create", func() {
 			vlan := vlanv1.VLAN{
 				DescriptionCustomer: "go-anxcloud test api.Create AutoTag " + testutils.RandomHostname(),
-				Locations: []Location{
+				Locations: []corev1.Location{
 					{Identifier: "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"},
 				},
 			}
@@ -69,7 +46,7 @@ var _ = Describe("api.Create AutoTag", func() {
 			err := a.Create(ctx, &vlan, api.AutoTag("foo", "bar", "baz"))
 			Expect(err).ToNot(HaveOccurred())
 
-			tags, err := ListTags(ctx, a, &vlan)
+			tags, err := corev1.ListTags(ctx, a, &vlan)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(tags).To(ContainElements("foo", "bar", "baz"))
 

@@ -59,15 +59,15 @@ var _ = Describe("resource.Resource", func() {
 
 		It("throws an error for Create operation", func() {
 			err := apiClient.Create(context.TODO(), &corev1.Resource{Identifier: "foo"})
-			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+			Expect(err).To(MatchError(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Update operation", func() {
 			err := apiClient.Update(context.TODO(), &corev1.Resource{Identifier: "foo"})
-			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+			Expect(err).To(MatchError(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Destroy operation", func() {
 			err := apiClient.Destroy(context.TODO(), &corev1.Resource{Identifier: "foo"})
-			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
+			Expect(err).To(MatchError(api.ErrOperationNotSupported))
 		})
 	})
 

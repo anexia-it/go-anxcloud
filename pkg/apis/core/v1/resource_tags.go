@@ -6,10 +6,11 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/core/v1/helper"
 )
 
 // Tag adds tags to an object resource
-func Tag(ctx context.Context, a api.API, obj types.IdentifiedObject, tags ...string) error {
+func Tag(ctx context.Context, a types.API, obj types.IdentifiedObject, tags ...string) error {
 	objects, err := resourceWithTagObjects(obj, tags...)
 	if err != nil {
 		return fmt.Errorf("generating ResourceWithTag objects failed: %w", err)
@@ -29,7 +30,7 @@ func Tag(ctx context.Context, a api.API, obj types.IdentifiedObject, tags ...str
 }
 
 // Untag removes tags from an object resource
-func Untag(ctx context.Context, a api.API, obj types.IdentifiedObject, tags ...string) error {
+func Untag(ctx context.Context, a types.API, obj types.IdentifiedObject, tags ...string) error {
 	objects, err := resourceWithTagObjects(obj, tags...)
 	if err != nil {
 		return fmt.Errorf("generating ResourceWithTag objects failed: %w", err)
@@ -59,7 +60,7 @@ func resourceWithTagObjects(obj types.IdentifiedObject, tags ...string) ([]*Reso
 }
 
 // ListTags retrieves tags of given object
-func ListTags(ctx context.Context, a api.API, obj types.IdentifiedObject) ([]string, error) {
+func ListTags(ctx context.Context, a types.API, obj types.IdentifiedObject) ([]string, error) {
 	identifier, err := types.GetObjectIdentifier(obj, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed retrieving Object identifier: %w", err)
@@ -71,4 +72,22 @@ func ListTags(ctx context.Context, a api.API, obj types.IdentifiedObject) ([]str
 	}
 
 	return r.Tags, nil
+}
+
+type taggerImplementation int
+
+func (ti taggerImplementation) Tag(ctx context.Context, a types.API, obj types.IdentifiedObject, tags ...string) error {
+	return Tag(ctx, a, obj, tags...)
+}
+
+func (ti taggerImplementation) Untag(ctx context.Context, a types.API, obj types.IdentifiedObject, tags ...string) error {
+	return Untag(ctx, a, obj, tags...)
+}
+
+func (ti taggerImplementation) ListTags(ctx context.Context, a types.API, obj types.IdentifiedObject) ([]string, error) {
+	return ListTags(ctx, a, obj)
+}
+
+func init() {
+	helper.TaggerImplementation = taggerImplementation(42)
 }
