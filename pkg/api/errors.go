@@ -137,3 +137,22 @@ func NewHTTPError(status int, method string, url *url.URL, wrapped error) error 
 		method:     method,
 	}
 }
+
+// ErrTaggingFailed is returned when resource tagging failed
+type ErrTaggingFailed struct {
+	wrapped error
+}
+
+// Unwrap returns the error which caused this one.
+func (e ErrTaggingFailed) Unwrap() error {
+	return e.wrapped
+}
+
+// Error returns the error message.
+func (e ErrTaggingFailed) Error() string {
+	return fmt.Sprintf("failed tagging resource: %s", e.wrapped)
+}
+
+func newErrTaggingFailed(wrapped error) error {
+	return &ErrTaggingFailed{wrapped}
+}

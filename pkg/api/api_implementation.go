@@ -16,7 +16,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
+	corev1helper "go.anx.io/go-anxcloud/pkg/apis/core/v1/helper"
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
@@ -97,8 +97,20 @@ func (a defaultAPI) Create(ctx context.Context, o types.Object, opts ...types.Cr
 		return fmt.Errorf("failed to execute request: %w", err)
 	}
 
-	if err := corev1.Tag(ctx, a, o, options.AutoTags...); err != nil {
-		return fmt.Errorf("failed to auto tag resource: %w", err)
+	if err := a.handlePostCreateOptions(ctx, o, options); err != nil {
+		return fmt.Errorf("failed running post create options: %w", err)
+	}
+
+	return nil
+}
+
+// handlePostCreateOptions executes configured Create options
+// which should be handled after the object was successfully created
+func (a defaultAPI) handlePostCreateOptions(ctx context.Context, o types.IdentifiedObject, options types.CreateOptions) error {
+	if options.AutoTags != nil {
+		if err := corev1helper.TaggerImplementation.Tag(ctx, a, o, options.AutoTags...); err != nil {
+			return newErrTaggingFailed(err)
+		}
 	}
 
 	return nil
