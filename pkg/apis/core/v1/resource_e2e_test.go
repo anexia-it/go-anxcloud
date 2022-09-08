@@ -5,14 +5,23 @@ package v1_test
 
 import (
 	"context"
+	"time"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
+	vlanv1 "go.anx.io/go-anxcloud/pkg/apis/vlan/v1"
+	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
+
 	"go.anx.io/go-anxcloud/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+)
+
+const (
+	waitTimeout  = 5 * time.Minute
+	retryTimeout = 15 * time.Second
 )
 
 var _ = Describe("resource E2E tests", func() {
@@ -59,7 +68,7 @@ var _ = Describe("api.Create AutoTag", func() {
 		It("can auto tag resources on api.Create", func() {
 			vlan := vlanv1.VLAN{
 				DescriptionCustomer: "go-anxcloud test api.Create AutoTag " + testutils.RandomHostname(),
-				Locations: []Location{
+				Locations: []corev1.Location{
 					{Identifier: "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"},
 				},
 			}
@@ -69,7 +78,7 @@ var _ = Describe("api.Create AutoTag", func() {
 			err := a.Create(ctx, &vlan, api.AutoTag("foo", "bar", "baz"))
 			Expect(err).ToNot(HaveOccurred())
 
-			tags, err := ListTags(ctx, a, &vlan)
+			tags, err := corev1.ListTags(ctx, a, &vlan)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(tags).To(ContainElements("foo", "bar", "baz"))
 

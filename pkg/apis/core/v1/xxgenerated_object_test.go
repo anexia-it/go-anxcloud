@@ -5,13 +5,13 @@ package v1_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
-	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	apipkg "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 )
 
 var _ = Describe("Object Location", func() {
-	o := corev1.Location{}
+	o := apipkg.Location{}
 
 	ifaces := make([]interface{}, 0, 1)
 	{
@@ -23,7 +23,7 @@ var _ = Describe("Object Location", func() {
 })
 
 var _ = Describe("Object Resource", func() {
-	o := corev1.Resource{}
+	o := apipkg.Resource{}
 
 	ifaces := make([]interface{}, 0, 2)
 	{
@@ -39,7 +39,7 @@ var _ = Describe("Object Resource", func() {
 })
 
 var _ = Describe("Object ResourceWithTag", func() {
-	o := corev1.ResourceWithTag{}
+	o := apipkg.ResourceWithTag{}
 
 	ifaces := make([]interface{}, 0, 4)
 	{
