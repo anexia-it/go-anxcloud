@@ -303,6 +303,26 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 
 			mock_expect_request_count(1)
 		})
+
+		It("should return an error when trying to create record with empty name", func() {
+			record := RecordRequest{
+				Name:   "",
+				Type:   "TXT",
+				RData:  "test record",
+				Region: "default",
+				TTL:    300,
+			}
+
+			mock_create_record(zoneName, record)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			_, err := NewAPI(c).NewRecord(ctx, zoneName, record)
+			Expect(err).To(MatchError(ErrEmptyRecordNameNotSupported))
+
+			mock_expect_request_count(0)
+		})
 	})
 
 	Context("with an A record for test1 present", func() {
@@ -408,7 +428,7 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 			})
 
 			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "",
+				Name:   "@",
 				Type:   "A",
 				RData:  "127.0.0.1",
 				Region: "default",
@@ -416,7 +436,7 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 			})
 
 			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "",
+				Name:   "@",
 				Type:   "AAAA",
 				RData:  "::1",
 				Region: "default",
@@ -459,19 +479,19 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 				rmap[r.Name][r.Type] = r
 			}
 
-			Expect(rmap).To(HaveKey(""))
+			Expect(rmap).To(HaveKey("@"))
 			Expect(rmap).To(HaveKey("www"))
 			Expect(rmap).To(HaveKey("test1"))
 
-			Expect(rmap[""]).To(HaveKey("A"))
-			Expect(rmap[""]).To(HaveKey("AAAA"))
+			Expect(rmap["@"]).To(HaveKey("A"))
+			Expect(rmap["@"]).To(HaveKey("AAAA"))
 			Expect(rmap["www"]).To(HaveKey("A"))
 			Expect(rmap["www"]).To(HaveKey("AAAA"))
 			Expect(rmap["test1"]).To(HaveKey("TXT"))
 
-			Expect(rmap[""]["A"].RData).To(Equal("127.0.0.1"))
+			Expect(rmap["@"]["A"].RData).To(Equal("127.0.0.1"))
 			Expect(rmap["www"]["A"].RData).To(Equal("127.0.0.1"))
-			Expect(rmap[""]["AAAA"].RData).To(Equal("::1"))
+			Expect(rmap["@"]["AAAA"].RData).To(Equal("::1"))
 			Expect(rmap["www"]["AAAA"].RData).To(Equal("::1"))
 
 			Expect(rmap["test1"]["TXT"].RData).To(Equal("\"test record\"")) // I love the engine. Mara @LittleFox94 Grosch

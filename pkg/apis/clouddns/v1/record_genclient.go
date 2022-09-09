@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"path"
 
@@ -23,6 +24,10 @@ var (
 	// the zones current Revision. This is probably an Engine problem and not your code, but might be a problem in
 	// these API bindings.
 	ErrModifyRecordNotFound = errors.New("record not found")
+
+	// ErrEmptyRecordNameNotSupported is returned for Create requests when the record has no name set.
+	// Instead "@" must be used to target the domain root.
+	ErrEmptyRecordNameNotSupported = errors.New("empty record name not supported - use \"@\" instead")
 )
 
 func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
@@ -108,6 +113,21 @@ func (r *Record) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 
 func (r *Record) HasPagination(ctx context.Context) (bool, error) {
 	return false, nil
+}
+
+// FilterAPIRequest checks whether a name was set on create operations
+// and returns ErrEmptyRecordNameNotSupported if not.
+func (r *Record) FilterAPIRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if op == types.OperationCreate && r.Name == "" {
+		return nil, ErrEmptyRecordNameNotSupported
+	}
+
+	return req, nil
 }
 
 func (r *Record) findInZone(zone *Zone) (*Record, error) {

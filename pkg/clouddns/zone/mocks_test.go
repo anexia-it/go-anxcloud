@@ -67,8 +67,8 @@ func mock_list_zones(zone string, times randomTimes) {
 					Revisions: []Revision{
 						{}, {},
 						{Records: []Record{
-							{Name: "", Type: "A", RData: "127.0.0.1"},
-							{Name: "", Type: "AAAA", RData: "::1"},
+							{Name: "@", Type: "A", RData: "127.0.0.1"},
+							{Name: "@", Type: "AAAA", RData: "::1"},
 							{Name: "www", Type: "A", RData: "127.0.0.1"},
 							{Name: "www", Type: "AAAA", RData: "::1"},
 							{Name: "test1", Type: "TXT", RData: "\"test record\""},
@@ -100,8 +100,8 @@ func mock_get_zone(zone string, times randomTimes) {
 			Revisions: []Revision{
 				{}, {},
 				{Records: []Record{
-					{Name: "", Type: "A", RData: "127.0.0.1"},
-					{Name: "", Type: "AAAA", RData: "::1"},
+					{Name: "@", Type: "A", RData: "127.0.0.1"},
+					{Name: "@", Type: "AAAA", RData: "::1"},
 					{Name: "www", Type: "A", RData: "127.0.0.1"},
 					{Name: "www", Type: "AAAA", RData: "::1"},
 					{Name: "test1", Type: "TXT", RData: "\"test record\""},
@@ -199,8 +199,8 @@ func mock_list_records(zone string) {
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
 		ghttp.RespondWithJSONEncoded(200, []Record{
-			{Name: "", Type: "A", RData: "127.0.0.1"},
-			{Name: "", Type: "AAAA", RData: "::1"},
+			{Name: "@", Type: "A", RData: "127.0.0.1"},
+			{Name: "@", Type: "AAAA", RData: "::1"},
 			{Name: "www", Type: "A", RData: "127.0.0.1"},
 			{Name: "www", Type: "AAAA", RData: "::1"},
 			{Name: "test1", Type: "TXT", RData: "\"test record\""},
