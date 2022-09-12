@@ -4,13 +4,22 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
 	uuid "github.com/satori/go.uuid"
 )
 
+var (
+	// ErrEmptyRecordNameNotSupported is returned for Create requests when the record has no name set.
+	// Instead "@" must be used to target the domain root.
+	ErrEmptyRecordNameNotSupported = errors.New("empty record name not supported - use \"@\" instead")
+)
+
 type RecordRequest struct {
+	// Name of the DNS record.
+	// Use "@" to select the domain root. Creation of records with an empty Name field is not supported.
 	Name   string `json:"name"`
 	Type   string `json:"type"`
 	RData  string `json:"rdata"`
@@ -53,6 +62,10 @@ func (a api) ListRecords(ctx context.Context, zone string) ([]Record, error) {
 
 // NewRecord new record API method
 func (a api) NewRecord(ctx context.Context, zone string, record RecordRequest) (Zone, error) {
+	if record.Name == "" {
+		return Zone{}, ErrEmptyRecordNameNotSupported
+	}
+
 	url := fmt.Sprintf(
 		"%s%s/%s/records",
 		a.client.BaseURL(),

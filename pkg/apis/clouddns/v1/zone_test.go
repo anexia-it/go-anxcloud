@@ -295,6 +295,27 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_expect_request_count(1)
 		})
+
+		It("should return an error when trying to create record with empty name", func() {
+			record := Record{
+				Name:     "",
+				ZoneName: zoneName,
+				Type:     "TXT",
+				RData:    "test record",
+				Region:   "default",
+				TTL:      300,
+			}
+
+			mock_create_record(zoneName, record)
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
+
+			err := a.Create(ctx, &record)
+			Expect(err).To(MatchError(ErrEmptyRecordNameNotSupported))
+
+			mock_expect_request_count(0)
+		})
 	})
 
 	Context("with the record already existing", func() {
@@ -360,7 +381,7 @@ var _ = Describe("CloudDNS API client", func() {
 			})
 
 			_ = ensureTestRecord(a, Record{
-				Name:     "",
+				Name:     "@",
 				ZoneName: zoneName,
 				Type:     "A",
 				RData:    "127.0.0.1",
@@ -369,7 +390,7 @@ var _ = Describe("CloudDNS API client", func() {
 			})
 
 			_ = ensureTestRecord(a, Record{
-				Name:     "",
+				Name:     "@",
 				ZoneName: zoneName,
 				Type:     "AAAA",
 				RData:    "::1",
@@ -418,26 +439,26 @@ var _ = Describe("CloudDNS API client", func() {
 				rmap[r.Name][r.Type] = r
 			}
 
-			Expect(rmap).To(HaveKey(""))
+			Expect(rmap).To(HaveKey("@"))
 			Expect(rmap).To(HaveKey("www"))
 			Expect(rmap).To(HaveKey("test1"))
 
-			Expect(rmap[""]).To(HaveKey("A"))
-			Expect(rmap[""]).To(HaveKey("AAAA"))
+			Expect(rmap["@"]).To(HaveKey("A"))
+			Expect(rmap["@"]).To(HaveKey("AAAA"))
 			Expect(rmap["www"]).To(HaveKey("A"))
 			Expect(rmap["www"]).To(HaveKey("AAAA"))
 			Expect(rmap["test1"]).To(HaveKey("TXT"))
 
-			Expect(rmap[""]["A"].RData).To(Equal("127.0.0.1"))
+			Expect(rmap["@"]["A"].RData).To(Equal("127.0.0.1"))
 			Expect(rmap["www"]["A"].RData).To(Equal("127.0.0.1"))
-			Expect(rmap[""]["AAAA"].RData).To(Equal("::1"))
+			Expect(rmap["@"]["AAAA"].RData).To(Equal("::1"))
 			Expect(rmap["www"]["AAAA"].RData).To(Equal("::1"))
 
 			Expect(rmap["test1"]["TXT"].RData).To(Equal("\"test record\"")) // I love the engine. Mara @LittleFox94 Grosch
 
-			Expect(rmap[""]["A"].ZoneName).To(Equal(zoneName))
+			Expect(rmap["@"]["A"].ZoneName).To(Equal(zoneName))
 			Expect(rmap["www"]["A"].ZoneName).To(Equal(zoneName))
-			Expect(rmap[""]["AAAA"].ZoneName).To(Equal(zoneName))
+			Expect(rmap["@"]["AAAA"].ZoneName).To(Equal(zoneName))
 			Expect(rmap["www"]["AAAA"].ZoneName).To(Equal(zoneName))
 
 			Expect(rmap["test1"]["TXT"].ZoneName).To(Equal(zoneName))
