@@ -26,6 +26,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 ### Changed
 * upgraded to target Go 1.18, so now testing with Go versions 1.18 and 1.19 (#161, @LittleFox94)
 * clouddns: prevent creation of DNS records with empty names due to API change -> use "@" to target domain root instead (#168, @marioreggiori)
+* (internal) generic client apis: change pkg of tests to `v1_test` to mitigate import cycle issues (#169, @marioreggiori)
 
 ## [0.4.5] - 2022-08-08
 
