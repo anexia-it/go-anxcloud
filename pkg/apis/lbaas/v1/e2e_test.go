@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package v1
+package v1_test
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
@@ -42,12 +43,12 @@ import (
 // Maybe we can extract some of those e2e helpers for use by other API bindings?
 //   -- Mara @LittleFox94 Grosch, 2022-05-03
 
-func ruleChecks(testrun LBaaSE2ETestRun, frontend *Frontend, acl *ACL, testURL string) {
+func ruleChecks(testrun LBaaSE2ETestRun, frontend *lbaasv1.Frontend, acl *lbaasv1.ACL, testURL string) {
 	Context("with a fresh Rule", Ordered, func() {
-		var rule Rule
+		var rule lbaasv1.Rule
 
 		defer createObject(func() types.Object {
-			rule = Rule{
+			rule = lbaasv1.Rule{
 				Name:          fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				ParentType:    "frontend",
 				Index:         pointer.Int(0),
@@ -74,12 +75,12 @@ func ruleChecks(testrun LBaaSE2ETestRun, frontend *Frontend, acl *ACL, testURL s
 	})
 }
 
-func aclChecks(testrun LBaaSE2ETestRun, frontend *Frontend, testURL string) {
+func aclChecks(testrun LBaaSE2ETestRun, frontend *lbaasv1.Frontend, testURL string) {
 	Context("with a fresh ACL", Ordered, func() {
-		var acl ACL
+		var acl lbaasv1.ACL
 
 		defer createObject(func() types.Object {
-			acl = ACL{
+			acl = lbaasv1.ACL{
 				Name:       fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				ParentType: "frontend",
 				Index:      pointer.Int(0),
@@ -94,12 +95,12 @@ func aclChecks(testrun LBaaSE2ETestRun, frontend *Frontend, testURL string) {
 	})
 }
 
-func serverChecks(testrun LBaaSE2ETestRun, backend *Backend, frontend *Frontend) {
+func serverChecks(testrun LBaaSE2ETestRun, backend *lbaasv1.Backend, frontend *lbaasv1.Frontend) {
 	Context("with a fresh Server", Ordered, func() {
-		var server Server
+		var server lbaasv1.Server
 
 		defer createObject(func() types.Object {
-			server = Server{
+			server = lbaasv1.Server{
 				Name:    fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				IP:      "127.0.0.1",
 				Port:    8080,
@@ -128,12 +129,12 @@ func serverChecks(testrun LBaaSE2ETestRun, backend *Backend, frontend *Frontend)
 	})
 }
 
-func bindChecks(testrun LBaaSE2ETestRun, frontend *Frontend, backend *Backend) {
+func bindChecks(testrun LBaaSE2ETestRun, frontend *lbaasv1.Frontend, backend *lbaasv1.Backend) {
 	Context("with a fresh Bind", Ordered, func() {
-		var bind Bind
+		var bind lbaasv1.Bind
 
 		defer createObject(func() types.Object {
-			bind = Bind{
+			bind = lbaasv1.Bind{
 				Name:     fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				Port:     testrun.Port,
 				Frontend: *frontend,
@@ -147,19 +148,19 @@ func bindChecks(testrun LBaaSE2ETestRun, frontend *Frontend, backend *Backend) {
 			bind.Port = testrun.Port + 1
 			return &bind
 		}, true, func(o types.Object) {
-			Expect(o.(*Bind).Port).To(Equal(testrun.Port + 1))
+			Expect(o.(*lbaasv1.Bind).Port).To(Equal(testrun.Port + 1))
 		})
 	})
 }
 
-func frontendChecks(testrun LBaaSE2ETestRun, lb *LoadBalancer, backend *Backend) {
+func frontendChecks(testrun LBaaSE2ETestRun, lb *lbaasv1.LoadBalancer, backend *lbaasv1.Backend) {
 	Context("with a fresh Frontend", Ordered, func() {
-		var frontend Frontend
+		var frontend lbaasv1.Frontend
 
 		defer createObject(func() types.Object {
-			frontend = Frontend{
+			frontend = lbaasv1.Frontend{
 				Name:           fmt.Sprintf("go-anxcloud-%s", testrun.Name),
-				Mode:           TCP,
+				Mode:           lbaasv1.TCP,
 				LoadBalancer:   lb,
 				DefaultBackend: backend,
 			}
@@ -167,35 +168,35 @@ func frontendChecks(testrun LBaaSE2ETestRun, lb *LoadBalancer, backend *Backend)
 		}, true)()
 
 		updateObject(func() types.Object {
-			frontend.Mode = HTTP
+			frontend.Mode = lbaasv1.HTTP
 			return &frontend
 		}, true, func(o types.Object) {
-			Expect(o.(*Frontend).Mode).To(Equal(HTTP))
+			Expect(o.(*lbaasv1.Frontend).Mode).To(Equal(lbaasv1.HTTP))
 		})
 
 		bindChecks(testrun, &frontend, backend)
 	})
 }
 
-func backendChecks(testrun LBaaSE2ETestRun, lb *LoadBalancer) {
+func backendChecks(testrun LBaaSE2ETestRun, lb *lbaasv1.LoadBalancer) {
 	Context("with a fresh Backend", Ordered, func() {
-		var backend Backend
+		var backend lbaasv1.Backend
 
 		// create Backend instance in test execution phase as lb is not filled with an Identifier before
 		defer createObject(func() types.Object {
-			backend = Backend{
+			backend = lbaasv1.Backend{
 				Name:         fmt.Sprintf("go-anxcloud-%s", testrun.Name),
-				Mode:         TCP,
+				Mode:         lbaasv1.TCP,
 				LoadBalancer: *lb,
 			}
 			return &backend
 		}, true)()
 
 		updateObject(func() types.Object {
-			backend.Mode = HTTP
+			backend.Mode = lbaasv1.HTTP
 			return &backend
 		}, true, func(o types.Object) {
-			Expect(o.(*Backend).Mode).To(Equal(HTTP))
+			Expect(o.(*lbaasv1.Backend).Mode).To(Equal(lbaasv1.HTTP))
 		})
 
 		frontendChecks(testrun, lb, &backend)
@@ -204,10 +205,10 @@ func backendChecks(testrun LBaaSE2ETestRun, lb *LoadBalancer) {
 
 func loadbalancerChecks(testrun LBaaSE2ETestRun) {
 	Context("with a fresh LoadBalancer", Ordered, func() {
-		var lb LoadBalancer
+		var lb lbaasv1.LoadBalancer
 
 		defer createObject(func() types.Object {
-			lb = LoadBalancer{
+			lb = lbaasv1.LoadBalancer{
 				Name:      fmt.Sprintf("go-anxcloud-%s", testrun.Name),
 				IpAddress: "go-anxcloud-lbaas-e2e.se.anx.io",
 			}
@@ -218,7 +219,7 @@ func loadbalancerChecks(testrun LBaaSE2ETestRun) {
 			lb.Name += " (updated)"
 			return &lb
 		}, false, func(o types.Object) {
-			Expect(o.(*LoadBalancer).Name).To(HaveSuffix(" (updated)"))
+			Expect(o.(*lbaasv1.LoadBalancer).Name).To(HaveSuffix(" (updated)"))
 		})
 
 		backendChecks(testrun, &lb)

@@ -1,4 +1,4 @@
-package v1
+package v1_test
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	clouddnsv1 "go.anx.io/go-anxcloud/pkg/apis/clouddns/v1"
 )
 
 var mock *mockserver
@@ -34,10 +35,10 @@ func mock_list_zones(zone string, times randomTimes) {
 		return
 	}
 
-	zones := make(map[string][]Zone)
+	zones := make(map[string][]clouddnsv1.Zone)
 
 	zones["results"] =
-		[]Zone{
+		[]clouddnsv1.Zone{
 			{
 				Name:       "example.com",
 				AdminEmail: "root@" + zone,
@@ -46,10 +47,10 @@ func mock_list_zones(zone string, times randomTimes) {
 				Expire:     times.expire * 4,
 				TTL:        times.ttl * 4,
 
-				Revisions: []Revision{
+				Revisions: []clouddnsv1.Revision{
 					{},
-					{Records: []Record{}},
-					{Records: []Record{
+					{Records: []clouddnsv1.Record{}},
+					{Records: []clouddnsv1.Record{
 						{Name: "@", Type: "A", RData: "127.0.0.2"},
 					}},
 					{}, {},
@@ -63,9 +64,9 @@ func mock_list_zones(zone string, times randomTimes) {
 				Expire:     times.expire,
 				TTL:        times.ttl,
 
-				Revisions: []Revision{
+				Revisions: []clouddnsv1.Revision{
 					{}, {},
-					{Records: []Record{
+					{Records: []clouddnsv1.Record{
 						{Name: "@", Type: "A", RData: "127.0.0.1"},
 						{Name: "@", Type: "AAAA", RData: "::1"},
 						{Name: "www", Type: "A", RData: "127.0.0.1"},
@@ -96,7 +97,7 @@ func mock_get_zone(zone string, times randomTimes, updated bool) {
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s", zone)),
-		ghttp.RespondWithJSONEncoded(200, Zone{
+		ghttp.RespondWithJSONEncoded(200, clouddnsv1.Zone{
 			Name:       zone,
 			AdminEmail: adminEmail,
 			Refresh:    times.refresh,
@@ -104,9 +105,9 @@ func mock_get_zone(zone string, times randomTimes, updated bool) {
 			Expire:     times.expire,
 			TTL:        times.ttl,
 
-			Revisions: []Revision{
+			Revisions: []clouddnsv1.Revision{
 				{}, {},
-				{Records: []Record{
+				{Records: []clouddnsv1.Record{
 					{Name: "@", Type: "A", RData: "127.0.0.1"},
 					{Name: "@", Type: "AAAA", RData: "::1"},
 					{Name: "www", Type: "A", RData: "127.0.0.1"},
@@ -119,7 +120,7 @@ func mock_get_zone(zone string, times randomTimes, updated bool) {
 	))
 }
 
-func mock_create_zone(z Zone) {
+func mock_create_zone(z clouddnsv1.Zone) {
 	if mock == nil {
 		return
 	}
@@ -130,13 +131,13 @@ func mock_create_zone(z Zone) {
 	))
 }
 
-func mock_update_zone(z Zone) {
+func mock_update_zone(z clouddnsv1.Zone) {
 	if mock == nil {
 		return
 	}
 
 	expectedData := struct {
-		Zone
+		clouddnsv1.Zone
 		Name string `json:"zoneName"`
 	}{
 		Zone: z,
@@ -184,7 +185,7 @@ func mock_list_records(zone string) {
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
-		ghttp.RespondWithJSONEncoded(200, []Record{
+		ghttp.RespondWithJSONEncoded(200, []clouddnsv1.Record{
 			{Name: "@", Type: "A", RData: "127.0.0.1"},
 			{Name: "@", Type: "AAAA", RData: "::1"},
 			{Name: "www", Type: "A", RData: "127.0.0.1"},
@@ -201,7 +202,7 @@ func mock_search_records_by_name(zone string, name string) {
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
-		ghttp.RespondWithJSONEncoded(200, []Record{
+		ghttp.RespondWithJSONEncoded(200, []clouddnsv1.Record{
 			{Name: name, Type: "A", RData: "127.0.0.1"},
 			{Name: name, Type: "AAAA", RData: "::1"},
 		}),
@@ -215,7 +216,7 @@ func mock_search_records_by_rdata(zone string, rdata string) {
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
-		ghttp.RespondWithJSONEncoded(200, []Record{
+		ghttp.RespondWithJSONEncoded(200, []clouddnsv1.Record{
 			{Name: "@", Type: "AAAA", RData: rdata},
 			{Name: "www", Type: "AAAA", RData: rdata},
 		}),
@@ -229,7 +230,7 @@ func mock_search_records_by_type(zone string, t string) {
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
-		ghttp.RespondWithJSONEncoded(200, []Record{
+		ghttp.RespondWithJSONEncoded(200, []clouddnsv1.Record{
 			{Name: "test1", Type: t, RData: "\"test record\""},
 		}),
 	))
@@ -242,13 +243,13 @@ func mock_search_records_by_all(zone string, name string, rdata string, t string
 
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
-		ghttp.RespondWithJSONEncoded(200, []Record{
+		ghttp.RespondWithJSONEncoded(200, []clouddnsv1.Record{
 			{Name: name, Type: t, RData: rdata},
 		}),
 	))
 }
 
-func mock_create_record(zone string, record Record) {
+func mock_create_record(zone string, record clouddnsv1.Record) {
 	if mock == nil {
 		return
 	}
@@ -256,14 +257,14 @@ func mock_create_record(zone string, record Record) {
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("POST", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
 		ghttp.VerifyJSONRepresenting(record),
-		ghttp.RespondWithJSONEncoded(200, Zone{
+		ghttp.RespondWithJSONEncoded(200, clouddnsv1.Zone{
 			Name:            zone,
 			IsMaster:        true,
 			CurrentRevision: "random revision identifier",
 
-			Revisions: []Revision{{
+			Revisions: []clouddnsv1.Revision{{
 				Identifier: "random revision identifier",
-				Records: []Record{{
+				Records: []clouddnsv1.Record{{
 					Name: record.Name,
 					Type: record.Type,
 					// we test with TXT records, for which the Engine returns RData enclosed in quotes
@@ -280,7 +281,7 @@ func mock_create_record(zone string, record Record) {
 	))
 }
 
-func mock_update_record(zone string, recordIdentifier string, record Record) {
+func mock_update_record(zone string, recordIdentifier string, record clouddnsv1.Record) {
 	if mock == nil {
 		return
 	}
@@ -288,14 +289,14 @@ func mock_update_record(zone string, recordIdentifier string, record Record) {
 	mock.server.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records/%s", zone, recordIdentifier)),
 		ghttp.VerifyJSONRepresenting(record),
-		ghttp.RespondWithJSONEncoded(200, Zone{
+		ghttp.RespondWithJSONEncoded(200, clouddnsv1.Zone{
 			Name:            zone,
 			IsMaster:        true,
 			CurrentRevision: "random revision identifier",
 
-			Revisions: []Revision{{
+			Revisions: []clouddnsv1.Revision{{
 				Identifier: "random revision identifier",
-				Records: []Record{{
+				Records: []clouddnsv1.Record{{
 					Name: record.Name,
 					Type: record.Type,
 					// we test with TXT records, for which the Engine returns RData enclosed in quotes

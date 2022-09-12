@@ -1,10 +1,11 @@
-package v1
+package v1_test
 
 import (
 	"context"
 	"log"
 
 	"go.anx.io/go-anxcloud/pkg/api"
+	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 )
@@ -15,13 +16,13 @@ func ExampleACL() {
 		log.Fatalf("failed to initialize api client: %s", err)
 	}
 
-	acl := &ACL{
+	acl := &lbaasv1.ACL{
 		Name:       "destination port 8080",
 		ParentType: "frontend",
 		Index:      pointer.Int(5),
 		Criterion:  "dst_port",
 		Value:      "8080",
-		Frontend: Frontend{
+		Frontend: lbaasv1.Frontend{
 			Identifier: "<frontend-identifier>",
 		},
 	}

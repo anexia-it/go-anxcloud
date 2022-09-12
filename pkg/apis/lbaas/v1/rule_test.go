@@ -1,10 +1,11 @@
-package v1
+package v1_test
 
 import (
 	"context"
 	"net/url"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -12,7 +13,7 @@ import (
 
 var _ = Describe("Rule filtering", func() {
 	DescribeTable("filter parameters",
-		func(r Rule, expectedKey string, expectedValue string) {
+		func(r lbaasv1.Rule, expectedKey string, expectedValue string) {
 			ctx := types.ContextWithOperation(context.TODO(), types.OperationList)
 			u, err := r.EndpointURL(ctx)
 			Expect(err).NotTo(HaveOccurred())
@@ -32,15 +33,15 @@ var _ = Describe("Rule filtering", func() {
 				Expect(q).To(BeEmpty())
 			}
 		},
-		Entry("no filters at all", Rule{}, "", ""),
-		Entry("parent_type", Rule{ParentType: "backend"}, "parent_type", "backend"),
-		Entry("condition", Rule{Condition: "if"}, "condition", "if"),
-		Entry("type", Rule{Type: "connection"}, "type", "connection"),
-		Entry("action ", Rule{Action: "accept"}, "action", "accept"),
-		Entry("redirection_type", Rule{RedirectionType: "foo"}, "redirection_type", "foo"),
-		Entry("redirection_code", Rule{RedirectionCode: "403"}, "redirection_code", "403"),
-		Entry("rule_type", Rule{RuleType: "foo"}, "rule_type", "foo"),
-		Entry("frontend", Rule{Frontend: Frontend{Identifier: "some frontend identifier"}}, "frontend", "some frontend identifier"),
-		Entry("backend", Rule{Backend: Backend{Identifier: "some backend identifier"}}, "backend", "some backend identifier"),
+		Entry("no filters at all", lbaasv1.Rule{}, "", ""),
+		Entry("parent_type", lbaasv1.Rule{ParentType: "backend"}, "parent_type", "backend"),
+		Entry("condition", lbaasv1.Rule{Condition: "if"}, "condition", "if"),
+		Entry("type", lbaasv1.Rule{Type: "connection"}, "type", "connection"),
+		Entry("action ", lbaasv1.Rule{Action: "accept"}, "action", "accept"),
+		Entry("redirection_type", lbaasv1.Rule{RedirectionType: "foo"}, "redirection_type", "foo"),
+		Entry("redirection_code", lbaasv1.Rule{RedirectionCode: "403"}, "redirection_code", "403"),
+		Entry("rule_type", lbaasv1.Rule{RuleType: "foo"}, "rule_type", "foo"),
+		Entry("frontend", lbaasv1.Rule{Frontend: lbaasv1.Frontend{Identifier: "some frontend identifier"}}, "frontend", "some frontend identifier"),
+		Entry("backend", lbaasv1.Rule{Backend: lbaasv1.Backend{Identifier: "some backend identifier"}}, "backend", "some backend identifier"),
 	)
 })

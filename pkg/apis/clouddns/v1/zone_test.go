@@ -1,4 +1,4 @@
-package v1
+package v1_test
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	clouddnsv1 "go.anx.io/go-anxcloud/pkg/apis/clouddns/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/utils/test"
 )
@@ -32,7 +33,7 @@ func ensureTestZone(api api.API, name string, times randomTimes) {
 		return
 	}
 
-	zone := Zone{
+	zone := clouddnsv1.Zone{
 		Name:       name,
 		IsMaster:   true,
 		DNSSecMode: "unvalidated",
@@ -63,7 +64,7 @@ func cleanupZones(a api.API) error {
 		lastTryErrors := make([]error, 0, len(createdZones))
 
 		for _, zoneName := range createdZones {
-			err := a.Destroy(context.TODO(), &Zone{Name: zoneName})
+			err := a.Destroy(context.TODO(), &clouddnsv1.Zone{Name: zoneName})
 
 			if err != nil {
 				re := api.HTTPError{}
@@ -98,7 +99,7 @@ func cleanupZones(a api.API) error {
 	return nil
 }
 
-func ensureTestRecord(a api.API, record Record) string {
+func ensureTestRecord(a api.API, record clouddnsv1.Record) string {
 	if !isIntegrationTest {
 		return uuid.Nil.String()
 	}
@@ -113,7 +114,7 @@ func ensureTestRecord(a api.API, record Record) string {
 		return uuid.Nil.String()
 	}
 
-	r := Record{}
+	r := clouddnsv1.Record{}
 	for res := range channel {
 		err = res(&r)
 		if err != nil {
@@ -152,7 +153,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 	Context("without the zone existing", func() {
 		It("should make a valid create zone request", func() {
-			zone := Zone{
+			zone := clouddnsv1.Zone{
 				Name:       zoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
@@ -183,7 +184,7 @@ var _ = Describe("CloudDNS API client", func() {
 			ensureTestZone(a, zoneName, times)
 		})
 
-		CheckZoneData := func(zone Zone) {
+		CheckZoneData := func(zone clouddnsv1.Zone) {
 			Expect(zone.AdminEmail).To(Equal("admin@" + zoneName))
 			Expect(zone.Refresh).To(Equal(times.refresh))
 			Expect(zone.Retry).To(Equal(times.retry))
@@ -198,10 +199,10 @@ var _ = Describe("CloudDNS API client", func() {
 			defer cancel()
 
 			channel := make(types.ObjectChannel)
-			err := a.List(ctx, &Zone{}, api.ObjectChannel(&channel))
+			err := a.List(ctx, &clouddnsv1.Zone{}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
-			zone := Zone{}
+			zone := clouddnsv1.Zone{}
 			for res := range channel {
 				err = res(&zone)
 				Expect(err).NotTo(HaveOccurred())
@@ -218,7 +219,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
-			zone := Zone{Name: zoneName}
+			zone := clouddnsv1.Zone{Name: zoneName}
 			err := a.Get(ctx, &zone)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -228,7 +229,7 @@ var _ = Describe("CloudDNS API client", func() {
 		})
 
 		It("should make a valid update zone request", func() {
-			zone := Zone{
+			zone := clouddnsv1.Zone{
 				Name:       zoneName,
 				IsMaster:   true,
 				DNSSecMode: "unvalidated",
@@ -250,7 +251,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_get_zone(zoneName, times, true)
 
-			retrievedZone := Zone{Name: zoneName}
+			retrievedZone := clouddnsv1.Zone{Name: zoneName}
 			err = a.Get(ctx, &retrievedZone)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -265,7 +266,7 @@ var _ = Describe("CloudDNS API client", func() {
 			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 			defer cancel()
 
-			zone := Zone{Name: zoneName}
+			zone := clouddnsv1.Zone{Name: zoneName}
 			err := a.Destroy(ctx, &zone)
 
 			Expect(err).NotTo(HaveOccurred())
@@ -274,7 +275,7 @@ var _ = Describe("CloudDNS API client", func() {
 		})
 
 		It("should make a valid create record request", func() {
-			record := Record{
+			record := clouddnsv1.Record{
 				Name:     "test1",
 				ZoneName: zoneName,
 				Type:     "TXT",
@@ -297,7 +298,7 @@ var _ = Describe("CloudDNS API client", func() {
 		})
 
 		It("should return an error when trying to create record with empty name", func() {
-			record := Record{
+			record := clouddnsv1.Record{
 				Name:     "",
 				ZoneName: zoneName,
 				Type:     "TXT",
@@ -312,7 +313,7 @@ var _ = Describe("CloudDNS API client", func() {
 			defer cancel()
 
 			err := a.Create(ctx, &record)
-			Expect(err).To(MatchError(ErrEmptyRecordNameNotSupported))
+			Expect(err).To(MatchError(clouddnsv1.ErrEmptyRecordNameNotSupported))
 
 			mock_expect_request_count(0)
 		})
@@ -323,7 +324,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 		JustBeforeEach(func() {
 			ensureTestZone(a, zoneName, times)
-			identifier = ensureTestRecord(a, Record{
+			identifier = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "test1",
 				ZoneName: zoneName,
 				Type:     "TXT",
@@ -334,7 +335,7 @@ var _ = Describe("CloudDNS API client", func() {
 		})
 
 		It("should make a valid update record request", func() {
-			record := Record{
+			record := clouddnsv1.Record{
 				Identifier: identifier,
 				Name:       "test1",
 				ZoneName:   zoneName,
@@ -360,7 +361,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 			defer cancel()
-			err := a.Destroy(ctx, &Record{Identifier: identifier, ZoneName: zoneName})
+			err := a.Destroy(ctx, &clouddnsv1.Record{Identifier: identifier, ZoneName: zoneName})
 			Expect(err).NotTo(HaveOccurred())
 
 			mock_expect_request_count(1)
@@ -371,7 +372,7 @@ var _ = Describe("CloudDNS API client", func() {
 		JustBeforeEach(func() {
 			ensureTestZone(a, zoneName, times)
 
-			_ = ensureTestRecord(a, Record{
+			_ = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "test1",
 				ZoneName: zoneName,
 				Type:     "TXT",
@@ -380,7 +381,7 @@ var _ = Describe("CloudDNS API client", func() {
 				TTL:      300,
 			})
 
-			_ = ensureTestRecord(a, Record{
+			_ = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "@",
 				ZoneName: zoneName,
 				Type:     "A",
@@ -389,7 +390,7 @@ var _ = Describe("CloudDNS API client", func() {
 				TTL:      300,
 			})
 
-			_ = ensureTestRecord(a, Record{
+			_ = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "@",
 				ZoneName: zoneName,
 				Type:     "AAAA",
@@ -398,7 +399,7 @@ var _ = Describe("CloudDNS API client", func() {
 				TTL:      300,
 			})
 
-			_ = ensureTestRecord(a, Record{
+			_ = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "www",
 				ZoneName: zoneName,
 				Type:     "A",
@@ -407,7 +408,7 @@ var _ = Describe("CloudDNS API client", func() {
 				TTL:      300,
 			})
 
-			_ = ensureTestRecord(a, Record{
+			_ = ensureTestRecord(a, clouddnsv1.Record{
 				Name:     "www",
 				ZoneName: zoneName,
 				Type:     "AAAA",
@@ -424,16 +425,16 @@ var _ = Describe("CloudDNS API client", func() {
 			defer cancel()
 
 			channel := make(types.ObjectChannel)
-			err := a.List(ctx, &Record{ZoneName: zoneName}, api.ObjectChannel(&channel))
+			err := a.List(ctx, &clouddnsv1.Record{ZoneName: zoneName}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
-			r := Record{}
-			rmap := make(map[string]map[string]Record, 3)
+			r := clouddnsv1.Record{}
+			rmap := make(map[string]map[string]clouddnsv1.Record, 3)
 			for res := range channel {
 				err := res(&r)
 				Expect(err).NotTo(HaveOccurred())
 				if _, ok := rmap[r.Name]; !ok {
-					rmap[r.Name] = make(map[string]Record, 2)
+					rmap[r.Name] = make(map[string]clouddnsv1.Record, 2)
 				}
 
 				rmap[r.Name][r.Type] = r
@@ -473,10 +474,10 @@ var _ = Describe("CloudDNS API client", func() {
 			channel := make(types.ObjectChannel)
 
 			mock_search_records_by_name(zoneName, "www")
-			err := a.List(ctx, &Record{ZoneName: zoneName, Name: "www"}, api.ObjectChannel(&channel))
+			err := a.List(ctx, &clouddnsv1.Record{ZoneName: zoneName, Name: "www"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
-			r := Record{}
+			r := clouddnsv1.Record{}
 			recordCount := 0
 			for res := range channel {
 				err := res(&r)
@@ -489,7 +490,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_rdata(zoneName, "::1")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, RData: "::1"}, api.ObjectChannel(&channel))
+			err = a.List(ctx, &clouddnsv1.Record{ZoneName: zoneName, RData: "::1"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
@@ -504,7 +505,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_type(zoneName, "TXT")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, Type: "TXT"}, api.ObjectChannel(&channel))
+			err = a.List(ctx, &clouddnsv1.Record{ZoneName: zoneName, Type: "TXT"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
@@ -519,7 +520,7 @@ var _ = Describe("CloudDNS API client", func() {
 
 			mock_search_records_by_all(zoneName, "www", "127.0.0.1", "A")
 			channel = make(types.ObjectChannel)
-			err = a.List(ctx, &Record{ZoneName: zoneName, Name: "www", RData: "127.0.0.1", Type: "A"}, api.ObjectChannel(&channel))
+			err = a.List(ctx, &clouddnsv1.Record{ZoneName: zoneName, Name: "www", RData: "127.0.0.1", Type: "A"}, api.ObjectChannel(&channel))
 			Expect(err).NotTo(HaveOccurred())
 
 			recordCount = 0
