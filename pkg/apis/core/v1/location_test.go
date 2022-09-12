@@ -1,4 +1,4 @@
-package v1
+package v1_test
 
 import (
 	"context"
@@ -8,13 +8,14 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 )
 
 var _ = Describe("Location Object", func() {
-	var o *Location
+	var o *corev1.Location
 
 	BeforeEach(func() {
-		o = &Location{}
+		o = &corev1.Location{}
 	})
 
 	DescribeTable("gives ErrOperationNotSupported",

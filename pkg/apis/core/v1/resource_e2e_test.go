@@ -1,13 +1,14 @@
 //go:build integration
 // +build integration
 
-package v1
+package v1_test
 
 import (
 	"context"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -32,10 +33,10 @@ var _ = Describe("resource E2E tests", func() {
 
 		It("should list resource using generic API client", func() {
 			var pageIter types.PageInfo
-			err := apiClient.List(ctx, &Resource{}, api.Paged(1, 100, &pageIter))
+			err := apiClient.List(ctx, &corev1.Resource{}, api.Paged(1, 100, &pageIter))
 			Expect(err).ToNot(HaveOccurred())
 
-			var resInfo []Resource
+			var resInfo []corev1.Resource
 			Expect(pageIter.Next(&resInfo)).To(BeTrue())
 			Expect(resInfo).ToNot(BeEmpty())
 			Expect(resInfo[0].Identifier).ToNot(BeEmpty())

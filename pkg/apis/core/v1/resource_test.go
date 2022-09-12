@@ -1,4 +1,4 @@
-package v1
+package v1_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 	"go.anx.io/go-anxcloud/pkg/client"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -16,7 +17,7 @@ import (
 
 var _ = Describe("resource.Resource", func() {
 	Context("ResourceWithTags", func() {
-		rwt := &ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
+		rwt := &corev1.ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
 
 		DescribeTable("Test EndpointURL and FilterRequestURL for all operations", func(op types.Operation, errorMatcher gomegaTypes.GomegaMatcher, expectedPath string) {
 			singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
@@ -57,15 +58,15 @@ var _ = Describe("resource.Resource", func() {
 		})
 
 		It("throws an error for Create operation", func() {
-			err := apiClient.Create(context.TODO(), &Resource{Identifier: "foo"})
+			err := apiClient.Create(context.TODO(), &corev1.Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Update operation", func() {
-			err := apiClient.Update(context.TODO(), &Resource{Identifier: "foo"})
+			err := apiClient.Update(context.TODO(), &corev1.Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 		It("throws an error for Destroy operation", func() {
-			err := apiClient.Destroy(context.TODO(), &Resource{Identifier: "foo"})
+			err := apiClient.Destroy(context.TODO(), &corev1.Resource{Identifier: "foo"})
 			Expect(err).To(BeEquivalentTo(api.ErrOperationNotSupported))
 		})
 	})
@@ -116,7 +117,7 @@ var _ = Describe("resource.Resource", func() {
 	]
 }`
 
-		r := Resource{}
+		r := corev1.Resource{}
 		err := r.DecodeAPIResponse(
 			types.ContextWithOperation(context.TODO(), types.OperationGet),
 			strings.NewReader(msg),

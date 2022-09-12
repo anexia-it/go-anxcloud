@@ -1,4 +1,4 @@
-package v1
+package v1_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/api/types"
 
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
+	vlanv1 "go.anx.io/go-anxcloud/pkg/apis/vlan/v1"
 
 	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
 
@@ -38,7 +39,7 @@ var _ = Describe("VLAN E2E tests", func() {
 			desc = "go-anxcloud test " + testutils.RandomHostname()
 			prepareCreate(desc)
 
-			vlan := VLAN{
+			vlan := vlanv1.VLAN{
 				DescriptionCustomer: desc,
 				Locations:           []corev1.Location{{Identifier: locationIdentifier}},
 			}
@@ -49,7 +50,7 @@ var _ = Describe("VLAN E2E tests", func() {
 
 			DeferCleanup(func() {
 				if !deleted {
-					err := apiClient.Destroy(context.TODO(), &VLAN{Identifier: identifier})
+					err := apiClient.Destroy(context.TODO(), &vlanv1.VLAN{Identifier: identifier})
 					if err != nil {
 						Fail(fmt.Sprintf("Error destroying VLAN %q created for testing: %v", identifier, err))
 					}
@@ -60,7 +61,7 @@ var _ = Describe("VLAN E2E tests", func() {
 		It("should retrieve the VLAN", func() {
 			prepareGet(desc, false)
 
-			vlan := VLAN{Identifier: identifier}
+			vlan := vlanv1.VLAN{Identifier: identifier}
 			err := apiClient.Get(context.TODO(), &vlan)
 
 			Expect(err).NotTo(HaveOccurred())
@@ -71,12 +72,12 @@ var _ = Describe("VLAN E2E tests", func() {
 			prepareList(desc, false)
 
 			var oc types.ObjectChannel
-			err := apiClient.List(context.TODO(), &VLAN{}, api.ObjectChannel(&oc))
+			err := apiClient.List(context.TODO(), &vlanv1.VLAN{}, api.ObjectChannel(&oc))
 			Expect(err).ToNot(HaveOccurred())
 
 			found := false
 			for r := range oc {
-				vlan := VLAN{}
+				vlan := vlanv1.VLAN{}
 				err := r(&vlan)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -93,18 +94,18 @@ var _ = Describe("VLAN E2E tests", func() {
 			Eventually(func(g Gomega) {
 				prepareEventuallyActive(desc, false)
 
-				vlan := VLAN{Identifier: identifier}
+				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
 
 				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(vlan.Status).To(Equal(StatusActive))
+				g.Expect(vlan.Status).To(Equal(vlanv1.StatusActive))
 			}, waitTimeout, retryTimeout).Should(Succeed())
 		})
 
 		It("updates to VM provisioning enabled", func() {
 			prepareUpdate(desc, true)
 
-			vlan := VLAN{
+			vlan := vlanv1.VLAN{
 				Identifier:          identifier,
 				DescriptionCustomer: desc,
 				VMProvisioning:      true,
@@ -117,7 +118,7 @@ var _ = Describe("VLAN E2E tests", func() {
 			Eventually(func(g Gomega) {
 				prepareGet(desc, true)
 
-				vlan := VLAN{Identifier: identifier}
+				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
 
 				g.Expect(err).NotTo(HaveOccurred())
@@ -128,25 +129,25 @@ var _ = Describe("VLAN E2E tests", func() {
 		It("should destroy the VLAN", func() {
 			prepareDelete()
 
-			err := apiClient.Destroy(context.TODO(), &VLAN{Identifier: identifier})
+			err := apiClient.Destroy(context.TODO(), &vlanv1.VLAN{Identifier: identifier})
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("has StatusMarkedForDeletion", func() {
 			prepareDeleting()
 
-			vlan := VLAN{Identifier: identifier}
+			vlan := vlanv1.VLAN{Identifier: identifier}
 			err := apiClient.Get(context.TODO(), &vlan)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(vlan.Status).To(Equal(StatusMarkedForDeletion))
+			Expect(vlan.Status).To(Equal(vlanv1.StatusMarkedForDeletion))
 		})
 
 		It("eventually is gone", func() {
 			Eventually(func(g Gomega) {
 				prepareEventuallyDeleted(desc, true)
 
-				vlan := VLAN{Identifier: identifier}
+				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
 				g.Expect(err).To(HaveOccurred())
 
