@@ -94,14 +94,10 @@ func (a defaultAPI) Create(ctx context.Context, o types.Object, opts ...types.Cr
 	}
 
 	if err := a.do(ctx, o, o, &options, types.OperationCreate); err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
+		return fmt.Errorf("API request failed: %w", err)
 	}
 
-	if err := a.handlePostCreateOptions(ctx, o, options); err != nil {
-		return fmt.Errorf("failed running post create options: %w", err)
-	}
-
-	return nil
+	return a.handlePostCreateOptions(ctx, o, options)
 }
 
 // handlePostCreateOptions executes configured Create options

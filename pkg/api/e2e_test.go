@@ -65,7 +65,6 @@ var _ = Describe("options", func() {
 			tags, err := corev1.ListTags(context.TODO(), a, &vlan)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(tags).To(ContainElements("foo", "bar", "baz"))
-
 		})
 
 		It("returns an error when resource tagging failed", func() {
@@ -84,6 +83,8 @@ var _ = Describe("options", func() {
 				_ = a.Destroy(context.TODO(), &zone)
 			})
 
+			// Note: AutoTag fails, because CloudDNS zones cannot be tagged with the Name identifier
+			// See ENGSUP-5900
 			err := a.Create(context.TODO(), &zone, api.AutoTag("foo", "bar", "baz"))
 			Expect(err).To(HaveOccurred())
 			var e *api.ErrTaggingFailed

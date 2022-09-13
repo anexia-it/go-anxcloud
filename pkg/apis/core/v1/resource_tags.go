@@ -89,5 +89,7 @@ func (ti taggerImplementation) ListTags(ctx context.Context, a types.API, obj ty
 }
 
 func init() {
+	// This is a workaround to solve import cycles between `pkg/apis/core/v1` <--> `pkg/api`
+	// initially caused by the AutoTag Create option.
 	helper.TaggerImplementation = taggerImplementation(42)
 }
