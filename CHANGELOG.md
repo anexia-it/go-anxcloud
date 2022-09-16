@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* generic client: AutoTag create option added (#167, @marioreggiori)
+
 ### Changed
 * upgraded to target Go 1.18, so now testing with Go versions 1.18 and 1.19 (#161, @LittleFox94)
 * clouddns: prevent creation of DNS records with empty names due to API change -> use "@" to target domain root instead (#168, @marioreggiori)

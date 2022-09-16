@@ -168,6 +168,11 @@ outer:
 // When the provided Object has no Identifier set, a random one is set.
 // An already set Identifier is kept as-is, without any validation.
 func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.CreateOption) error {
+	options := types.CreateOptions{}
+	for _, opt := range opts {
+		opt.ApplyToCreate(&options)
+	}
+
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
@@ -181,6 +186,12 @@ func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.Crea
 	if !exists {
 		apiObject = &APIObject{tags: make(map[string]interface{})}
 		a.data[identifier] = apiObject
+	}
+
+	if options.AutoTags != nil {
+		for _, tag := range options.AutoTags {
+			a.data[identifier].tags[tag] = true
+		}
 	}
 
 	cloned, err := copystructure.Copy(o)

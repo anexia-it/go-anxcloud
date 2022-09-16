@@ -16,6 +16,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	corev1helper "go.anx.io/go-anxcloud/pkg/apis/core/v1/helper"
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
@@ -92,7 +93,23 @@ func (a defaultAPI) Create(ctx context.Context, o types.Object, opts ...types.Cr
 		opt.ApplyToCreate(&options)
 	}
 
-	return a.do(ctx, o, o, &options, types.OperationCreate)
+	if err := a.do(ctx, o, o, &options, types.OperationCreate); err != nil {
+		return fmt.Errorf("API request failed: %w", err)
+	}
+
+	return a.handlePostCreateOptions(ctx, o, options)
+}
+
+// handlePostCreateOptions executes configured Create options
+// which should be handled after the object was successfully created
+func (a defaultAPI) handlePostCreateOptions(ctx context.Context, o types.IdentifiedObject, options types.CreateOptions) error {
+	if options.AutoTags != nil {
+		if err := corev1helper.TaggerImplementation.Tag(ctx, a, o, options.AutoTags...); err != nil {
+			return newErrTaggingFailed(err)
+		}
+	}
+
+	return nil
 }
 
 // Update the object on the engine.

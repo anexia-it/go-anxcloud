@@ -29,3 +29,8 @@ func Paged(page, limit uint, info *types.PageInfo) ListOption {
 func FullObjects(fullObjects bool) ListOption {
 	return internal.FullObjectsOption(fullObjects)
 }
+
+// AutoTag can be used to automatically tag objects after creation
+func AutoTag(tags ...string) CreateOption {
+	return internal.AutoTagOption(tags)
+}

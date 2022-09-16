@@ -44,6 +44,8 @@ type ListOptions struct {
 // CreateOptions contains options valid for Create operations.
 type CreateOptions struct {
 	commonOptions
+
+	AutoTags []string
 }
 
 // UpdateOptions contains options valid for Update operations.
