@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.4.6] - 2022-10-04
+
 ### Added
 * generic client: AutoTag create option added (#167, @marioreggiori)
 
