@@ -25,6 +25,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 ### Added
 * kubernetes/v1: add Cluster and NodePool bindings (#151, @marioreggiori)
+* kubernetes/v1: add kubeconfig helper (#175, @marioreggiori)
 
 ### Changed
 * lbaas/v1: changed state retriever interface `StateSuccess`, `StateProgressing` & `StateFailure` to `StateOK`, `StatePending` & `StateError` (#185, @marioreggiori)
