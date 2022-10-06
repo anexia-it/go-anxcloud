@@ -7,7 +7,7 @@ import (
 
 // EndpointURL returns the common URL for operations on Cluster resource
 func (c *Cluster) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return endpointURL(ctx, "/api/kubernetes/v1/cluster.json")
+	return endpointURL(ctx, c, "/api/kubernetes/v1/cluster.json")
 }
 
 // FilterAPIRequestBody adds the CommonRequestBody

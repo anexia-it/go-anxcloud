@@ -20,7 +20,7 @@ type NodePool struct {
 	// Name of the node pool. Must be an RFC 1123 hostname in lowercase
 	Name string `json:"name,omitempty"`
 	// Cluster in which the node pool is deployed
-	Cluster Cluster `json:"cluster,omitempty"`
+	Cluster Cluster `json:"cluster,omitempty" anxcloud:"filterable"`
 
 	// Number of replicas. Can be changed via machine controller.
 	// Default: 3 (see FAQ for more details) Optional value can be set via pkg/utils/pointer.Int

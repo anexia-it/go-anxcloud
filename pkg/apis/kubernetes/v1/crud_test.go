@@ -297,6 +297,13 @@ var _ = Describe("CRUD", Ordered, func() {
 				Expect(nodePools[1].Name).To(Equal("name-1"))
 				Expect(nodePools[2].Name).To(Equal("name-2"))
 			})
+
+			It("can filter by cluster", func() {
+				np := &NodePool{Cluster: Cluster{Identifier: "foo"}}
+				url, err := np.EndpointURL(types.ContextWithOperation(context.TODO(), types.OperationList))
+				Expect(err).ToNot(HaveOccurred())
+				Expect(url.Query().Encode()).To(Equal("filters=cluster%3Dfoo"))
+			})
 		})
 
 		Context("Update operation", Ordered, func() {
