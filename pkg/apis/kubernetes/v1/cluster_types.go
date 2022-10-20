@@ -27,6 +27,13 @@ type Cluster struct {
 	// If set to true, Service VMs providing load balancers and outbound masquerade are created for this cluster.
 	// Default: true. Optional value can be set via pkg/utils/pointer.Bool
 	NeedsServiceVMs *bool `json:"needs_service_vms,omitempty"`
+	// If enabled, Service VMs are configured as NAT gateways connecting the internal cluster network to the internet.
+	// Requires Service VMs.
+	EnableNATGateways *bool `json:"enable_nat_gateways,omitempty"`
+	// If enabled, Service VMs are set up as LBaaS hosts enabling K8s services of type LoadBalancer.
+	// Requires Service VMs.
+	EnableLBaaS *bool `json:"enable_lbaas,omitempty"`
+
 	// Contains a kubeconfig if available
 	KubeConfig string `json:"kubeconfig,omitempty"`
 }
