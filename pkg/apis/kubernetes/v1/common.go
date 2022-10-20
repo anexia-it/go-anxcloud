@@ -50,7 +50,7 @@ type HasState struct {
 func (hs HasState) StateSuccess() bool { return hs.State.ID == "0" }
 
 // StateProgressing checks if the state is marking any change currently being applied
-func (hs HasState) StateProgressing() bool { return hs.State.ID == "2" }
+func (hs HasState) StateProgressing() bool { return hs.State.ID == "2" || hs.State.ID == "3" }
 
 // StateFailure checks if the state is marking any failure
 func (hs HasState) StateFailure() bool { return hs.State.ID == "1" }
