@@ -93,7 +93,6 @@ var _ = Describe("CRUD", Ordered, func() {
 			})
 
 			It("returns an error when updating the state fails", func() {
-				// Updating a Cluster is currently not supported at all
 				cluster := Cluster{}
 				err := cluster.AwaitCompletion(context.TODO(), a)
 				Expect(err).To(MatchError(types.ErrUnidentifiedObject))
@@ -175,7 +174,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				}
 
 				var pi types.PageInfo
-				err := a.List(context.TODO(), &Cluster{}, api.Paged(1, 1, &pi), api.FullObjects(true))
+				err := a.List(context.TODO(), &Cluster{}, api.Paged(1, 3, &pi), api.FullObjects(true))
 				Expect(err).ToNot(HaveOccurred())
 
 				var clusters []Cluster
@@ -284,7 +283,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				}
 
 				var pi types.PageInfo
-				err := a.List(context.TODO(), &NodePool{}, api.Paged(1, 1, &pi), api.FullObjects(true))
+				err := a.List(context.TODO(), &NodePool{}, api.Paged(1, 3, &pi), api.FullObjects(true))
 				Expect(err).ToNot(HaveOccurred())
 
 				var nodePools []NodePool
@@ -296,13 +295,6 @@ var _ = Describe("CRUD", Ordered, func() {
 				Expect(nodePools[0].Name).To(Equal("name-0"))
 				Expect(nodePools[1].Name).To(Equal("name-1"))
 				Expect(nodePools[2].Name).To(Equal("name-2"))
-			})
-
-			It("can filter by cluster", func() {
-				np := &NodePool{Cluster: Cluster{Identifier: "foo"}}
-				url, err := np.EndpointURL(types.ContextWithOperation(context.TODO(), types.OperationList))
-				Expect(err).ToNot(HaveOccurred())
-				Expect(url.Query().Encode()).To(Equal("filters=cluster%3Dfoo"))
 			})
 		})
 
