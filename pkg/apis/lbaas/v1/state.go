@@ -1,22 +1,12 @@
 package v1
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-type StateRetriever interface {
-	StateSuccess() bool
-	StateProgressing() bool
-	StateFailure() bool
-}
+	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+)
 
-type State struct {
-	// programatically usable enum value
-	ID string `json:"id"`
-
-	// human readable status text
-	Text string `json:"text"`
-
-	Type int `json:"type"`
-}
+type State gs.State
 
 // StateSuccess checks if the state is one of the successful ones
 func (s State) StateSuccess() bool {

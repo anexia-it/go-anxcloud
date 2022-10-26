@@ -1,10 +1,12 @@
 package v1
 
+import "go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+
 // anxcloud:object:hooks=RequestBodyHook
 
 // Frontend represents a LBaaS Frontend.
 type Frontend struct {
-	commonMethods
+	gs.GenericService
 	HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`

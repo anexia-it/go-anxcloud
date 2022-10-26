@@ -1,34 +1,10 @@
 package v1
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"net/http"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
-
-// commonMethods has methods overridden for all LBaaS objects in the same way
-type commonMethods struct{}
-
-func (cm *commonMethods) FilterAPIResponse(ctx context.Context, res *http.Response) (*http.Response, error) {
-	op, err := types.OperationFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if op == types.OperationDestroy {
-		err = res.Body.Close()
-		if err != nil {
-			return nil, err
-		}
-
-		res.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
-		return res, nil
-	}
-	return res, nil
-}
 
 // commonRequestBody is embedded in the request body types of LBaaS objects.
 type commonRequestBody struct {

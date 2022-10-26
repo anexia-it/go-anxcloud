@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Changed
+* generic client: common Generic Service interfaces and utils have been extracted into a new shared package (#185, @marioreggiori)
+
 ## [0.4.6] - 2022-10-04
 
 ### Added

@@ -1,12 +1,16 @@
 package v1
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+)
 
 // anxcloud:object:hooks=RequestBodyHook,ResponseFilterHook
 
 // LoadBalancer holds the information of a load balancer instance.
 type LoadBalancer struct {
-	commonMethods
+	gs.GenericService
 	State LoadBalancerState `json:"state"`
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
