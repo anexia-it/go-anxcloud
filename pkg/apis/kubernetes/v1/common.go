@@ -6,7 +6,6 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 	"go.anx.io/go-anxcloud/pkg/utils/object/filter"
 )
 
@@ -40,20 +39,6 @@ func endpointURL(ctx context.Context, o types.Object, apiPath string) (*url.URL,
 
 	return u, nil
 }
-
-// HasState can be embedded to add the state object to a resource
-type HasState struct {
-	State gs.State `json:"state"`
-}
-
-// StateSuccess checks if the state is one of the successful ones
-func (hs HasState) StateSuccess() bool { return hs.State.ID == "0" }
-
-// StateProgressing checks if the state is marking any change currently being applied
-func (hs HasState) StateProgressing() bool { return hs.State.ID == "2" || hs.State.ID == "3" }
-
-// StateFailure checks if the state is marking any failure
-func (hs HasState) StateFailure() bool { return hs.State.ID == "1" }
 
 // commonRequestBody is embedded in the request body types of kubernetes resources
 type commonRequestBody struct {

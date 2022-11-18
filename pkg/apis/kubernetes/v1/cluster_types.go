@@ -14,7 +14,7 @@ import (
 // This resource does not support updates
 type Cluster struct {
 	gs.GenericService
-	HasState
+	gs.HasState
 
 	// Identifier of the cluster
 	Identifier string `json:"identifier,omitempty" anxcloud:"identifier"`

@@ -13,7 +13,7 @@ import (
 // This resource does not support updates
 type NodePool struct {
 	gs.GenericService
-	HasState
+	gs.HasState
 
 	// Identifier of the node pool
 	Identifier string `json:"identifier,omitempty" anxcloud:"identifier"`

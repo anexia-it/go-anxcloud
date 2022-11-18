@@ -71,7 +71,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(cluster.Identifier).NotTo(BeEmpty())
 				clusterIdentifier = cluster.Identifier
-				Expect(cluster.StateProgressing()).To(BeTrue())
+				Expect(cluster.StatePending()).To(BeTrue())
 				Expect(pointer.BoolVal(cluster.NeedsServiceVMs)).To(BeTrue()) // Default if not set on Create
 			})
 		})
@@ -85,7 +85,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				cluster := Cluster{Identifier: clusterIdentifier}
 				err := cluster.AwaitCompletion(context.TODO(), a)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(cluster.StateSuccess()).To(BeTrue())
+				Expect(cluster.StateOK()).To(BeTrue())
 
 				if !isIntegrationTest {
 					Expect(srv.ReceivedRequests()).To(HaveLen(3))
@@ -112,7 +112,7 @@ var _ = Describe("CRUD", Ordered, func() {
 					cluster := Cluster{Identifier: clusterIdentifier}
 					err := cluster.AwaitCompletion(context.TODO(), a)
 					Expect(err).To(MatchError(gs.ErrStateError))
-					Expect(cluster.StateFailure()).To(BeTrue())
+					Expect(cluster.StateError()).To(BeTrue())
 					Expect(srv.ReceivedRequests()).To(HaveLen(2))
 				})
 
@@ -230,7 +230,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(nodePool.Identifier).NotTo(BeEmpty())
 				nodePoolIdentifier = nodePool.Identifier
-				Expect(nodePool.StateProgressing()).To(BeTrue())
+				Expect(nodePool.StatePending()).To(BeTrue())
 
 				appendGetNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
 
