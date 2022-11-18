@@ -11,11 +11,12 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
+	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 type backend v1.Backend
-type state v1.State
+type state gs.State
 
 func NewMockServer() *ghttp.Server {
 	type errorResponseData struct {
@@ -259,7 +260,7 @@ func (b *backend) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	clientData.Backend.State = getStateByID(clientData.State)
+	clientData.Backend.State = gs.State(getStateByID(clientData.State))
 	clientData.Backend.LoadBalancer.Identifier = clientData.LoadBalancer
 
 	*b = backend(clientData.Backend)

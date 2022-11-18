@@ -7,7 +7,7 @@ import "go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 // The Backend resource configures settings common for all specific backend Server resources linked to it.
 type Backend struct {
 	gs.GenericService
-	HasState
+	gs.HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string     `json:"reseller_identifier,omitempty"`

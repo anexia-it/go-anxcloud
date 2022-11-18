@@ -11,10 +11,10 @@ import (
 
 var (
 	// ErrStateError is returned if a resource could not be provisioned (state "Error")
-	ErrStateError = errors.New(`resource has state "Error"`)
+	ErrStateError = errors.New("resource is in an error state")
 
 	// ErrStateUnknown is returned if a resource has an unknown state
-	ErrStateUnknown = errors.New("resource has an unknown state")
+	ErrStateUnknown = errors.New("resource is in an unknown state")
 )
 
 const awaitCompletionPollInterval = 30 * time.Second
@@ -26,14 +26,14 @@ func AwaitCompletion(ctx context.Context, a types.API, o objectWithStateRetrieve
 
 	for {
 		if err := a.Get(ctx, o); err != nil {
-			return fmt.Errorf("failed to get cluster: %w", err)
+			return fmt.Errorf("failed to get resource: %w", err)
 		}
 
-		if o.StateSuccess() {
+		if o.StateOK() {
 			return nil
-		} else if o.StateFailure() {
+		} else if o.StateError() {
 			return ErrStateError
-		} else if !o.StateProgressing() {
+		} else if !o.StatePending() {
 			return ErrStateUnknown
 		}
 

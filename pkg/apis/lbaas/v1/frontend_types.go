@@ -7,7 +7,7 @@ import "go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 // Frontend represents a LBaaS Frontend.
 type Frontend struct {
 	gs.GenericService
-	HasState
+	gs.HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string     `json:"reseller_identifier,omitempty"`

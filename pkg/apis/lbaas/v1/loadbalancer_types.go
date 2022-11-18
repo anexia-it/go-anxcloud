@@ -33,19 +33,19 @@ type LoadBalancerState struct {
 	Type int `json:"type"`
 }
 
-// StateSuccess checks if the state is one of the successful ones
-func (s LoadBalancerState) StateSuccess() bool {
-	return s.ID == LoadBalancerStateOK.ID
+// StateOK checks if the state is one of the successful ones
+func (s LoadBalancerState) StateOK() bool {
+	return s.Type == gs.StateTypeOK
 }
 
-// StateProgressing checks if the state is marking any change currently being applied
-func (s LoadBalancerState) StateProgressing() bool {
-	return s.ID == LoadBalancerStatePending.ID || s.ID == LoadBalancerStateCreated.ID
+// StatePending checks if the state is marking any change currently being applied
+func (s LoadBalancerState) StatePending() bool {
+	return s.Type == gs.StateTypePending
 }
 
-// StateFailure checks if the state is marking any failure
-func (s LoadBalancerState) StateFailure() bool {
-	return s.ID == LoadBalancerStateError.ID
+// StateError checks if the state is marking any failure
+func (s LoadBalancerState) StateError() bool {
+	return s.Type == gs.StateTypeError
 }
 
 func (s LoadBalancerState) MarshalJSON() ([]byte, error) {
@@ -53,8 +53,8 @@ func (s LoadBalancerState) MarshalJSON() ([]byte, error) {
 }
 
 var (
-	LoadBalancerStateOK      = LoadBalancerState{ID: "0", Text: "OK", Type: 0}
-	LoadBalancerStateError   = LoadBalancerState{ID: "1", Text: "Error", Type: 1}
-	LoadBalancerStatePending = LoadBalancerState{ID: "2", Text: "Pending", Type: 2}
-	LoadBalancerStateCreated = LoadBalancerState{ID: "3", Text: "Created", Type: 3}
+	LoadBalancerStateOK      = LoadBalancerState{ID: "0", Text: "OK", Type: gs.StateTypeOK}
+	LoadBalancerStateError   = LoadBalancerState{ID: "1", Text: "Error", Type: gs.StateTypeError}
+	LoadBalancerStatePending = LoadBalancerState{ID: "2", Text: "Pending", Type: gs.StateTypePending}
+	LoadBalancerStateCreated = LoadBalancerState{ID: "3", Text: "Created", Type: gs.StateTypePending}
 )

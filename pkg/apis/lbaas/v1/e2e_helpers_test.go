@@ -44,8 +44,8 @@ func waitObjectReady(ctx *context.Context, o *types.Object) {
 		Expect(ok).To(BeTrue())
 
 		// fail immediately for failure states, but only fail when not going to success state before timeout
-		Expect(hasState.StateFailure()).To(BeFalse())
-		g.Expect(hasState.StateSuccess()).To(BeTrue())
+		Expect(hasState.StateError()).To(BeFalse())
+		g.Expect(hasState.StateOK()).To(BeTrue())
 	})
 }
 
