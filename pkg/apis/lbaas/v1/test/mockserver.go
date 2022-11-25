@@ -11,7 +11,7 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 

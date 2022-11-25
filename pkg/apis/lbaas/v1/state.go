@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
 var (

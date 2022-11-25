@@ -1,6 +1,6 @@
 package v1
 
-import "go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
 // anxcloud:object:hooks=RequestBodyHook
 

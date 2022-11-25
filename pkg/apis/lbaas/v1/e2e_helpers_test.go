@@ -12,7 +12,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

@@ -3,7 +3,7 @@ package v1
 import (
 	"encoding/json"
 
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
 // anxcloud:object:hooks=RequestBodyHook,ResponseFilterHook
