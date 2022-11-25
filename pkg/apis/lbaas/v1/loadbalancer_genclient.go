@@ -25,10 +25,3 @@ func (lb *LoadBalancer) FilterAPIRequestBody(ctx context.Context) (interface{}, 
 		}
 	})
 }
-
-// We need the three methods below to have LoadBalancer implement the StateRetriever interface, too. All other
-// Objects get them via the embedded HasState instead.
-
-func (l LoadBalancer) StateOK() bool      { return l.State.StateOK() }
-func (l LoadBalancer) StatePending() bool { return l.State.StatePending() }
-func (l LoadBalancer) StateError() bool   { return l.State.StateError() }

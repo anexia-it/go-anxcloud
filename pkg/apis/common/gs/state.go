@@ -29,13 +29,14 @@ type StateRetriever interface {
 	StateError() bool
 }
 
+// State types defined for GS resources by the Engine
 const (
 	// StateTypeError is used for states of type error
-	StateTypeError = iota
+	StateTypeError = 0
 	// StateTypeOK is used for states of type OK
-	StateTypeOK
+	StateTypeOK = 1
 	// StateTypePending is used for states of type Pending
-	StateTypePending
+	StateTypePending = 2
 )
 
 // StateOK checks if the state is one of the successful ones

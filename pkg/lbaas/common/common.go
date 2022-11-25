@@ -1,12 +1,13 @@
 package common
 
 import (
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 type (
 	Mode  = v1.Mode
-	State = v1.State
+	State = gs.State
 )
 
 const (

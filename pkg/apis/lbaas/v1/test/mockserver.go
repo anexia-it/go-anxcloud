@@ -260,7 +260,7 @@ func (b *backend) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	clientData.Backend.State = gs.State(getStateByID(clientData.State))
+	clientData.Backend.State = getStateByID(clientData.State)
 	clientData.Backend.LoadBalancer.Identifier = clientData.LoadBalancer
 
 	*b = backend(clientData.Backend)
@@ -293,7 +293,7 @@ func (s state) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func getStateByID(stateID string) v1.State {
+func getStateByID(stateID string) gs.State {
 	switch stateID {
 	case v1.NewlyCreated.ID, "":
 		return v1.NewlyCreated
