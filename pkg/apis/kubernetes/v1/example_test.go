@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 )
@@ -21,7 +22,7 @@ func Example() {
 		log.Fatalf("failed to create cluster: %s", err)
 	}
 
-	if err := cluster.AwaitCompletion(context.TODO(), a); err != nil {
+	if err := gs.AwaitCompletion(context.TODO(), a, &cluster); err != nil {
 		log.Fatalf("failed to await cluster creation: %s", err)
 	}
 
@@ -31,7 +32,7 @@ func Example() {
 		log.Fatalf("failed to create nodepool: %s", err)
 	}
 
-	if err := nodePool.AwaitCompletion(context.TODO(), a); err != nil {
+	if err := gs.AwaitCompletion(context.TODO(), a, &nodePool); err != nil {
 		log.Fatalf("failed to await nodepool creation: %s", err)
 	}
 }

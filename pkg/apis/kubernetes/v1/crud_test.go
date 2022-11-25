@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 	testutils "go.anx.io/go-anxcloud/pkg/utils/test"
@@ -22,6 +21,8 @@ const (
 	mockKubernetesVersion = "1.23.6"
 	nonExistingIdentifier = "non-existing-identifier"
 )
+
+var mockStateOK = map[string]interface{}{"type": gs.StateTypeOK}
 
 var _ = Describe("CRUD", Ordered, func() {
 	var (
@@ -36,19 +37,18 @@ var _ = Describe("CRUD", Ordered, func() {
 		location     = corev1.Location{Identifier: "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"} // ANX04
 	)
 
-	mockStateOK := map[string]interface{}{"id": "0"}
-	mockStateError := map[string]interface{}{"id": "1"}
-	mockStatePending := map[string]interface{}{"id": "2"}
-
 	BeforeEach(func() {
-		srv = ghttp.NewServer()
-
 		var err error
 
 		if isIntegrationTest {
 			a, err = api.NewAPI(api.WithClientOptions(client.AuthFromEnv(false)))
 			Expect(err).ToNot(HaveOccurred())
 		} else {
+			srv = ghttp.NewServer()
+			DeferCleanup(func() {
+				srv.Close()
+			})
+
 			a, err = api.NewAPI(api.WithClientOptions(
 				client.BaseURL(srv.URL()),
 				client.IgnoreMissingToken(),
@@ -73,59 +73,6 @@ var _ = Describe("CRUD", Ordered, func() {
 				clusterIdentifier = cluster.Identifier
 				Expect(cluster.StatePending()).To(BeTrue())
 				Expect(pointer.BoolVal(cluster.NeedsServiceVMs)).To(BeTrue()) // Default if not set on Create
-			})
-		})
-
-		Context("AwaitCompletion", Ordered, func() {
-			It("can wait until state is ready", func() {
-				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
-
-				cluster := Cluster{Identifier: clusterIdentifier}
-				err := cluster.AwaitCompletion(context.TODO(), a)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(cluster.StateOK()).To(BeTrue())
-
-				if !isIntegrationTest {
-					Expect(srv.ReceivedRequests()).To(HaveLen(3))
-				}
-			})
-
-			It("returns an error when updating the state fails", func() {
-				cluster := Cluster{}
-				err := cluster.AwaitCompletion(context.TODO(), a)
-				Expect(err).To(MatchError(types.ErrUnidentifiedObject))
-			})
-
-			Context("mock test", Ordered, func() {
-				BeforeEach(func() {
-					if isIntegrationTest {
-						Skip("Can't be tested with integration tests")
-					}
-				})
-
-				It("returns ErrClusterProvisioning when state is Error", func() {
-					appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-					appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateError})
-
-					cluster := Cluster{Identifier: clusterIdentifier}
-					err := cluster.AwaitCompletion(context.TODO(), a)
-					Expect(err).To(MatchError(gs.ErrStateError))
-					Expect(cluster.StateError()).To(BeTrue())
-					Expect(srv.ReceivedRequests()).To(HaveLen(2))
-				})
-
-				It("supports Context cancelation", func() {
-					appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-
-					ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
-					defer cancel()
-
-					cluster := Cluster{Identifier: clusterIdentifier}
-					err := cluster.AwaitCompletion(ctx, a)
-					Expect(err).To(MatchError(context.DeadlineExceeded))
-				})
 			})
 		})
 
@@ -234,7 +181,7 @@ var _ = Describe("CRUD", Ordered, func() {
 
 				appendGetNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
 
-				err = nodePool.AwaitCompletion(context.TODO(), a)
+				err = gs.AwaitCompletion(context.TODO(), a, &nodePool)
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
@@ -317,7 +264,7 @@ var _ = Describe("CRUD", Ordered, func() {
 			err := a.Destroy(context.TODO(), &nodePool)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = nodePool.AwaitCompletion(context.TODO(), a)
+			err = gs.AwaitCompletion(context.TODO(), a, &nodePool)
 			Expect(api.IgnoreNotFound(err)).ToNot(HaveOccurred())
 		})
 
@@ -337,7 +284,7 @@ var _ = Describe("CRUD", Ordered, func() {
 			err := a.Destroy(context.TODO(), &cluster)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = cluster.AwaitCompletion(context.TODO(), a)
+			err = gs.AwaitCompletion(context.TODO(), a, &cluster)
 			Expect(api.IgnoreNotFound(err)).ToNot(HaveOccurred())
 		})
 

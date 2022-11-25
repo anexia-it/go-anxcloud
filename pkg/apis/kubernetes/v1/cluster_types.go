@@ -1,11 +1,8 @@
 package v1
 
 import (
-	"context"
-
-	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
 )
 
 // anxcloud:object
@@ -35,10 +32,5 @@ type Cluster struct {
 	EnableLBaaS *bool `json:"enable_lbaas,omitempty"`
 
 	// Contains a kubeconfig if available
-	KubeConfig string `json:"kubeconfig,omitempty"`
-}
-
-// AwaitCompletion blocks until the Cluster state is "OK"
-func (c *Cluster) AwaitCompletion(ctx context.Context, a api.API) error {
-	return gs.AwaitCompletion(ctx, a, c)
+	KubeConfig *string `json:"kubeconfig,omitempty"`
 }

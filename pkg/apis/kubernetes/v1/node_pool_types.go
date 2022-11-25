@@ -1,10 +1,15 @@
 package v1
 
 import (
-	"context"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
+)
 
-	"go.anx.io/go-anxcloud/pkg/api"
-	"go.anx.io/go-anxcloud/pkg/apis/internal/gs"
+// OperatingSystem is a typed string for available OS templates
+type OperatingSystem string
+
+const (
+	// FlatcarLinux is currently the only available OS template available for Kubernetes Node Pools
+	FlatcarLinux OperatingSystem = "Flatcar Linux"
 )
 
 // anxcloud:object:hooks=RequestBodyHook
@@ -34,10 +39,5 @@ type NodePool struct {
 	DiskSize int `json:"disk_size,omitempty"`
 
 	// Operating system for deployment on the nodes. Default: Flatcar Linux
-	OperatingSystem string `json:"operating_system,omitempty"`
-}
-
-// AwaitCompletion blocks until the NodePool state is "OK"
-func (np *NodePool) AwaitCompletion(ctx context.Context, a api.API) error {
-	return gs.AwaitCompletion(ctx, a, np)
+	OperatingSystem OperatingSystem `json:"operating_system,omitempty"`
 }
