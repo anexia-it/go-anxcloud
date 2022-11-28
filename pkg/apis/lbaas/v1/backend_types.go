@@ -1,11 +1,13 @@
 package v1
 
+import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
+
 // anxcloud:object:hooks=RequestBodyHook
 
 // The Backend resource configures settings common for all specific backend Server resources linked to it.
 type Backend struct {
-	commonMethods
-	HasState
+	gs.GenericService
+	gs.HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string     `json:"reseller_identifier,omitempty"`

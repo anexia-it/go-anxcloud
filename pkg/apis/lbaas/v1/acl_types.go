@@ -1,11 +1,13 @@
 package v1
 
+import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
+
 // anxcloud:object:hooks=RequestBodyHook
 
 // ACL represents an LBaaS ACL
 type ACL struct {
-	commonMethods
-	HasState
+	gs.GenericService
+	gs.HasState
 
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`

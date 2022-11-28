@@ -11,11 +11,12 @@ import (
 
 	"github.com/onsi/gomega/ghttp"
 
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 type backend v1.Backend
-type state v1.State
+type state gs.State
 
 func NewMockServer() *ghttp.Server {
 	type errorResponseData struct {
@@ -292,7 +293,7 @@ func (s state) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func getStateByID(stateID string) v1.State {
+func getStateByID(stateID string) gs.State {
 	switch stateID {
 	case v1.NewlyCreated.ID, "":
 		return v1.NewlyCreated

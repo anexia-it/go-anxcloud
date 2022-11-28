@@ -12,7 +12,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	lbaasv1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -39,13 +39,13 @@ func waitObjectReady(ctx *context.Context, o *types.Object) {
 		// we do not expect an error at all, if one occures, fail immediately
 		Expect(err).NotTo(HaveOccurred())
 
-		hasState, ok := (*o).(lbaasv1.StateRetriever)
+		hasState, ok := (*o).(gs.StateRetriever)
 		// this function only expects to wait for LBaaS resources, fail immediately otherwise
 		Expect(ok).To(BeTrue())
 
 		// fail immediately for failure states, but only fail when not going to success state before timeout
-		Expect(hasState.StateFailure()).To(BeFalse())
-		g.Expect(hasState.StateSuccess()).To(BeTrue())
+		Expect(hasState.StateError()).To(BeFalse())
+		g.Expect(hasState.StateOK()).To(BeTrue())
 	})
 }
 

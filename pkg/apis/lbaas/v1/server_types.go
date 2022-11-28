@@ -1,11 +1,13 @@
 package v1
 
+import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
+
 // anxcloud:object:hooks=RequestBodyHook
 
 // Server holds the information of a load balancers backend server
 type Server struct {
-	commonMethods
-	HasState
+	gs.GenericService
+	gs.HasState
 
 	CustomerIdentifier string     `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string     `json:"reseller_identifier,omitempty"`
