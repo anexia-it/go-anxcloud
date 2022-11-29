@@ -113,3 +113,23 @@ func appendListNodePoolsHandler(srv *ghttp.Server, nodePools ...partialNodePool)
 		))
 	})
 }
+
+// KubeConfig handlers
+
+func appendRequestKubeConfigHandler(srv *ghttp.Server, clusterID string) {
+	withExistingServer(srv, func(srv *ghttp.Server) {
+		srv.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s/rule/%s", clusterID, requesetKubeConfigRuleIdentifier)),
+			ghttp.VerifyBody(nil),
+		))
+	})
+}
+
+func appendRemoveKubeConfigHandler(srv *ghttp.Server, clusterID string) {
+	withExistingServer(srv, func(srv *ghttp.Server) {
+		srv.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s/rule/%s", clusterID, removeKubeConfigRuleIdentifier)),
+			ghttp.VerifyBody(nil),
+		))
+	})
+}

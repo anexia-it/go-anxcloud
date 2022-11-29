@@ -280,6 +280,33 @@ var _ = Describe("CRUD", Ordered, func() {
 		})
 	})
 
+	Context("KubeConfig", Ordered, func() {
+		It("can RequestKubeConfig", func() {
+			appendRequestKubeConfigHandler(srv, clusterIdentifier)
+
+			err := RequestKubeConfig(context.TODO(), a, clusterIdentifier)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("can GetKubeConfig", func() {
+			appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"kubeconfig": nil})
+			appendRequestKubeConfigHandler(srv, clusterIdentifier)
+			appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"kubeconfig": nil})
+			appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"kubeconfig": "<kubeconfig>"})
+
+			config, err := GetKubeConfig(context.TODO(), a, clusterIdentifier)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(config).ToNot(BeEmpty())
+		})
+
+		It("can RemoveKubeConfig", func() {
+			appendRemoveKubeConfigHandler(srv, clusterIdentifier)
+
+			err := RemoveKubeConfig(context.TODO(), a, clusterIdentifier)
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
 	Context("Cluster and NodePool deletion", Ordered, func() {
 		It("can destroy existing NodePools", func() {
 			appendDeleteNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK)
