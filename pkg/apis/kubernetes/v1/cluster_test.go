@@ -37,18 +37,6 @@ var _ = Describe("AwaitCompletion", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	It("can wait until state is ready", func() {
-		appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-		appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
-		appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
-
-		cluster := Cluster{Identifier: clusterIdentifier}
-		err := gs.AwaitCompletion(context.TODO(), a, &cluster)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(cluster.StateOK()).To(BeTrue())
-		Expect(srv.ReceivedRequests()).To(HaveLen(3))
-	})
-
 	It("returns an error when updating the state fails", func() {
 		cluster := Cluster{}
 		err := gs.AwaitCompletion(context.TODO(), a, &cluster)
