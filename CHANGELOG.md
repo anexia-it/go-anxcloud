@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* kubernetes/v1: add Cluster and NodePool bindings (#151, @marioreggiori)
+
 ### Changed
 * lbaas/v1: changed state retriever interface `StateSuccess`, `StateProgressing` & `StateFailure` to `StateOK`, `StatePending` & `StateError` (#185, @marioreggiori)
 * (internal) generic client: common Generic Service interfaces and utils have been extracted into a new shared package (#185, @marioreggiori)
