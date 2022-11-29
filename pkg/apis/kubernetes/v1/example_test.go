@@ -26,6 +26,7 @@ func Example() {
 		log.Fatalf("failed to await cluster creation: %s", err)
 	}
 
+	// define node pool with a single replica, 2 GiB of system memory and 10 GiB of disk space
 	nodePool := NodePool{Name: "example-np-00", Cluster: cluster, Replicas: pointer.Int(1), Memory: 2 * 1073741824, DiskSize: 10 * 1073741824}
 
 	if err := a.Create(context.TODO(), &nodePool); err != nil {
