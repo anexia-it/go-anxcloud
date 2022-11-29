@@ -76,6 +76,19 @@ var _ = Describe("CRUD", Ordered, func() {
 			})
 		})
 
+		Context("AwaitCompletion", func() {
+			It("can wait until state is ready", func() {
+				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
+				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
+				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
+
+				cluster := Cluster{Identifier: clusterIdentifier}
+				err := gs.AwaitCompletion(context.TODO(), a, &cluster)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(cluster.StateOK()).To(BeTrue())
+			})
+		})
+
 		Context("Get operation", Ordered, func() {
 			It("can Get existing Clusters", func() {
 				appendGetClusterHandler(srv, clusterIdentifier, http.StatusOK, mockedClusterResponse(Cluster{
@@ -183,6 +196,19 @@ var _ = Describe("CRUD", Ordered, func() {
 
 				err = gs.AwaitCompletion(context.TODO(), a, &nodePool)
 				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		Context("AwaitCompletion", func() {
+			It("can wait until state is ready", func() {
+				appendGetNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
+				appendGetNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK, map[string]interface{}{"state": mockStatePending})
+				appendGetNodePoolHandler(srv, nodePoolIdentifier, http.StatusOK, map[string]interface{}{"state": mockStateOK})
+
+				nodePool := NodePool{Identifier: nodePoolIdentifier}
+				err := gs.AwaitCompletion(context.TODO(), a, &nodePool)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(nodePool.StateOK()).To(BeTrue())
 			})
 		})
 
