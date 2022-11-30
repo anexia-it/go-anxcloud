@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.5.0] - 2022-11-30
+
 ### Added
 * kubernetes/v1: add Cluster and NodePool bindings (#151, @marioreggiori)
 * kubernetes/v1: add kubeconfig helper (#175, @marioreggiori)
