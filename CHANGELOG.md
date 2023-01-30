@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Changed
+* trace logging in pkg/client now goes to a logr.Logger attached to the request context, falling back to the logger configured on the client (#212, @LittleFox94)
+
 ### Fixed
 * trace logging in pkg/client now really includes the request/response bodies (#211, @LittleFox94)
 
