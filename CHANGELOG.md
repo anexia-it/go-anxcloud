@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Fixed
+* trace logging in pkg/client now really includes the request/response bodies (#211, @LittleFox94)
+
 ## [0.5.0] - 2022-11-30
 
 ### Added

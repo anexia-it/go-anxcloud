@@ -53,7 +53,7 @@ func logRequest(req *http.Request, logger logr.Logger) {
 	headers.Set("Authorization", "REDACTED")
 
 	if body := stringifyBody(&req.Body, logger); body != nil {
-		log = log.WithValues("body", body)
+		log = log.WithValues("body", *body)
 	}
 
 	log.Info("Sending request to Engine",
@@ -74,7 +74,7 @@ func logResponse(res *http.Response, logger logr.Logger) {
 	headers.Set("Set-Cookie", "REDACTED")
 
 	if body := stringifyBody(&res.Body, logger); body != nil {
-		log = log.WithValues("body", body)
+		log = log.WithValues("body", *body)
 	}
 
 	if res.Request != nil {
