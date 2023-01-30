@@ -248,7 +248,12 @@ func (c client) Do(req *http.Request) (*http.Response, error) {
 }
 
 func (c client) handleRequest(req *http.Request) (*http.Response, error) {
-	logRequest(req, c.logger)
+	logger := c.logger
+	if l, err := logr.FromContext(req.Context()); err == nil {
+		logger = l
+	}
+
+	logRequest(req, logger)
 
 	client := c.httpClient
 
@@ -269,7 +274,7 @@ func (c client) handleRequest(req *http.Request) (*http.Response, error) {
 		return response, err
 	}
 
-	logResponse(response, c.logger)
+	logResponse(response, logger)
 
 	return response, err
 }
