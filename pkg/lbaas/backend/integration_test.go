@@ -68,7 +68,7 @@ var _ = Describe("lbaas/backend client", Label("old client", "slow"), func() {
 
 			for !found {
 				bs, err := api.Get(context.TODO(), page, 20)
-				Expect(err).To(BeNil())
+				Expect(err).NotTo(HaveOccurred())
 				Expect(bs).NotTo(BeEmpty())
 
 				for _, b := range bs {
@@ -85,7 +85,7 @@ var _ = Describe("lbaas/backend client", Label("old client", "slow"), func() {
 		It("retrieves test backend with expected values", func() {
 			b, err := api.GetByID(context.TODO(), backend.Identifier)
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(b).To(Equal(backend))
 		})
 
@@ -97,7 +97,7 @@ var _ = Describe("lbaas/backend client", Label("old client", "slow"), func() {
 				LoadBalancer: backend.LoadBalancer.Identifier,
 			}
 			b, err := api.Update(context.TODO(), backend.Identifier, definition)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(b.Identifier).To(Equal(backend.Identifier))
 			Expect(b.Name).To(Equal(definition.Name))

@@ -28,7 +28,7 @@ var _ = Describe("client", func() {
 
 	AfterEach(func() {
 		if s != nil {
-			Expect(len(s.ReceivedRequests())).To(Equal(numRequests))
+			Expect(s.ReceivedRequests()).To(HaveLen(numRequests))
 		}
 	})
 
