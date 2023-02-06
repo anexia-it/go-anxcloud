@@ -55,7 +55,7 @@ var _ = Describe("vlan client", func() {
 
 			for !found {
 				vs, err := api.List(context.TODO(), page, 20, "")
-				Expect(err).To(BeNil())
+				Expect(err).NotTo(HaveOccurred())
 				Expect(vs).NotTo(BeEmpty())
 
 				for _, v := range vs {

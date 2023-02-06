@@ -94,7 +94,7 @@ var _ = Describe("ipam/address client", func() {
 
 		It("lists addresses in test prefix", func() {
 			ips, err := api.List(context.TODO(), 1, 20, "")
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(ips).NotTo(BeEmpty())
 		})
 	})

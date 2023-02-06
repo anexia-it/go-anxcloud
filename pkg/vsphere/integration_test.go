@@ -189,7 +189,7 @@ var _ = Describe("vsphere API client", Ordered, func() {
 			Count:      1,
 		})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(len(res.Data)).To(Equal(1))
+		Expect(res.Data).To(HaveLen(1))
 
 		ipAddress = res.Data[0].Address
 	})
@@ -236,7 +236,7 @@ var _ = Describe("vsphere API client", Ordered, func() {
 
 		for !found {
 			vms, err := vmlist.NewAPI(cli).Get(context.TODO(), page, 20)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(vms).NotTo(BeEmpty())
 
 			for _, vm := range vms {

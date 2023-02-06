@@ -99,7 +99,7 @@ var _ = Describe("lbaas/bind client", Label("old client", "slow"), func() {
 
 			for !found {
 				bs, err := api.Get(context.TODO(), page, 20)
-				Expect(err).To(BeNil())
+				Expect(err).NotTo(HaveOccurred())
 				Expect(bs).NotTo(BeEmpty())
 
 				for _, b := range bs {
@@ -115,7 +115,7 @@ var _ = Describe("lbaas/bind client", Label("old client", "slow"), func() {
 
 		It("retrieves test Bind with expected values", func() {
 			b, err := api.GetByID(context.TODO(), bind.Identifier)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(b).To(Equal(bind))
 		})
 
@@ -127,7 +127,7 @@ var _ = Describe("lbaas/bind client", Label("old client", "slow"), func() {
 			}
 
 			b, err := api.Update(context.TODO(), bind.Identifier, definition)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(b.Identifier).To(Equal(bind.Identifier))
 			Expect(b.Name).To(Equal(definition.Name))
