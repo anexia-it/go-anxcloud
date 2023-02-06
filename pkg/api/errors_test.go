@@ -166,7 +166,7 @@ var _ = Describe("EngineError", func() {
 
 	Context("when created without a wrapping error", func() {
 		It("does not return a wrapped error", func() {
-			Expect(ErrNotFound.Unwrap()).To(BeNil())
+			Expect(ErrNotFound.Unwrap()).To(Succeed())
 		})
 	})
 })

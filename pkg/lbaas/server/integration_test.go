@@ -38,11 +38,11 @@ var _ = Describe("lbaas/server client", Label("old client", "slow"), func() {
 			LoadBalancer: loadbalancerIdentifier,
 			Mode:         common.TCP,
 		})
-		Expect(err).To(BeNil())
+		Expect(err).NotTo(HaveOccurred())
 
 		DeferCleanup(func() {
 			err := backendAPI.DeleteByID(context.TODO(), b.Identifier)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		backend = b
@@ -88,7 +88,7 @@ var _ = Describe("lbaas/server client", Label("old client", "slow"), func() {
 
 			for !found {
 				ss, err := api.Get(context.TODO(), page, 20)
-				Expect(err).To(BeNil())
+				Expect(err).NotTo(HaveOccurred())
 				Expect(ss).NotTo(BeEmpty())
 
 				for _, s := range ss {
@@ -104,7 +104,7 @@ var _ = Describe("lbaas/server client", Label("old client", "slow"), func() {
 
 		It("retrieves test server with expected data", func() {
 			s, err := api.GetByID(context.TODO(), server.Identifier)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(s).To(Equal(server))
 		})
@@ -119,7 +119,7 @@ var _ = Describe("lbaas/server client", Label("old client", "slow"), func() {
 			}
 
 			s, err := api.Update(context.TODO(), server.Identifier, definition)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(s.Identifier).To(Equal(server.Identifier))
 			Expect(s.Name).To(Equal(definition.Name))

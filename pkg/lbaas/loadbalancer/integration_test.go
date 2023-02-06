@@ -32,7 +32,7 @@ var _ = Describe("lbaas/loadbalancer client", Label("old client", "slow"), func(
 
 		for !found {
 			lbs, err := api.Get(context.TODO(), page, 20)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(lbs).NotTo(BeEmpty())
 
 			for _, lb := range lbs {
@@ -48,7 +48,7 @@ var _ = Describe("lbaas/loadbalancer client", Label("old client", "slow"), func(
 
 	It("retrieves our test LoadBalancer with expected values", func() {
 		lb, err := api.GetByID(context.TODO(), loadbalancerIdentifier)
-		Expect(err).To(BeNil())
+		Expect(err).NotTo(HaveOccurred())
 		Expect(lb.Name).To(Equal("go-anxcloud-test"))
 		Expect(lb.Identifier).To(Equal(loadbalancerIdentifier))
 	})

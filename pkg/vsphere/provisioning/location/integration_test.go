@@ -27,7 +27,7 @@ var _ = Describe("vsphere/provisioning/location API client", func() {
 
 		for !found {
 			ls, err := api.List(context.TODO(), page, 20, "", "")
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(ls).NotTo(BeEmpty())
 
 			for _, l := range ls {

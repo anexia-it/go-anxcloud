@@ -38,11 +38,11 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 			LoadBalancer: loadbalancerIdentifier,
 			Mode:         common.TCP,
 		})
-		Expect(err).To(BeNil())
+		Expect(err).NotTo(HaveOccurred())
 
 		DeferCleanup(func() {
 			err := backendAPI.DeleteByID(context.TODO(), b.Identifier)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		backend = b
@@ -60,7 +60,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 		}
 
 		acl, err := api.Create(context.TODO(), *definition)
-		Expect(err).To(BeNil())
+		Expect(err).NotTo(HaveOccurred())
 
 		Expect(acl.Name).To(BeEquivalentTo(definition.Name))
 		Expect(acl.ParentType).To(BeEquivalentTo(definition.ParentType))
@@ -74,7 +74,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 
 	deleteACL := func(identifier string) {
 		err := api.DeleteByID(context.TODO(), identifier)
-		Expect(err).To(BeNil())
+		Expect(err).NotTo(HaveOccurred())
 	}
 
 	Context("working on a fresh ACL", Ordered, func() {
@@ -106,7 +106,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 
 			for !found {
 				acls, err := api.Get(context.TODO(), page, 20)
-				Expect(err).To(BeNil())
+				Expect(err).NotTo(HaveOccurred())
 				Expect(acls).NotTo(BeEmpty())
 
 				for _, acl := range acls {
@@ -122,7 +122,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 
 		It("retrieves test ACL with expected data", func() {
 			acl, err := api.GetByID(context.TODO(), aclIdentifier)
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(acl.ParentType).To(Equal("backend"))
 			Expect(acl.Criterion).To(Equal("src"))
@@ -142,7 +142,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 				Frontend:   nil,
 				Backend:    &backend.Identifier,
 			})
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 
 			Expect(acl.Identifier).To(BeEquivalentTo(aclIdentifier))
 
