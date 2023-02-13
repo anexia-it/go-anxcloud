@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.5.1] - 2023-02-13
+
 ### Changed
 * trace logging in pkg/client now goes to a logr.Logger attached to the request context, falling back to the logger configured on the client (#212, @LittleFox94)
 
