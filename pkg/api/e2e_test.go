@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	waitTimeout  = 5 * time.Minute
+	waitTimeout  = 10 * time.Minute
 	retryTimeout = 15 * time.Second
 )
 
