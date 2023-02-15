@@ -29,7 +29,7 @@ func GetKubeConfig(ctx context.Context, a api.API, clusterID string) (string, er
 			return "", fmt.Errorf("failed to get cluster: %w", err)
 		}
 
-		if cluster.KubeConfig != nil {
+		if pointer.StringVal(cluster.KubeConfig) != "" {
 			return pointer.StringVal(cluster.KubeConfig), nil
 		}
 
