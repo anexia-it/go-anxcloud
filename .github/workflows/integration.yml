@@ -23,8 +23,6 @@ jobs:
         go:
         - version: "1.18"
           name: target
-        - version: "1.19"
-          name: latest
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
       - name: Branch based PR checkout
