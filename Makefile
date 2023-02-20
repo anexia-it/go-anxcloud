@@ -34,25 +34,25 @@ benchmark:
 	go test -bench=. -benchmem ./...
 
 .PHONY: test
-test: tools
-	tools/ginkgo run -p             \
-	    -timeout 0                  \
-	    -race                       \
-	    -coverprofile coverage.out  \
-	    --keep-going                \
+test:
+	go run github.com/onsi/ginkgo/v2/ginkgo -p  \
+	    -timeout 0                              \
+	    -race                                   \
+	    -coverprofile coverage.out              \
+	    --keep-going                            \
 	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: func-test
-func-test: tools
-	tools/ginkgo run -p                        \
-	    -timeout 180m                          \
-	    -race                                  \
-	    -tags integration                      \
-	    -coverpkg ./...                        \
-	    -coverprofile coverage.out             \
-	    --keep-going                           \
-	    --label-filter="!(old client && slow)" \
+func-test:
+	go run github.com/onsi/ginkgo/v2/ginkgo -p	\
+	    -timeout 180m                          	\
+	    -race                                  	\
+	    -tags integration                      	\
+	    -coverpkg ./...                        	\
+	    -coverprofile coverage.out             	\
+	    --keep-going                           	\
+	    --label-filter="!(old client && slow)" 	\
 	    ./pkg/...
 	go tool cover -html=coverage.out -o coverage.html
 
@@ -99,5 +99,4 @@ fmtcheck:
 tools:
 	cd tools && go build -o . github.com/client9/misspell/cmd/misspell
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
-	cd tools && go build -o . github.com/onsi/ginkgo/v2/ginkgo
 	cd tools && go build
