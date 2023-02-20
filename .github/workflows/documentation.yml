@@ -15,7 +15,7 @@ jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: avto-dev/markdown-lint@v1
       with:
         config: '.markdownlint.yml'
@@ -31,8 +31,8 @@ jobs:
           name: latest
     name: "Spell check with ${{ matrix.go.name }} Go"
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go.version }}
     - run: |
