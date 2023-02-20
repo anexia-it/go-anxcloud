@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Changed
+* go-anxcloud is now tested with Go versions 1.19 and 1.20 and we might start using features only available since 1.19
+
 ## [0.5.1] - 2023-02-17
 
 ### Changed
