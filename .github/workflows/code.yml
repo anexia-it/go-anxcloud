@@ -23,8 +23,8 @@ jobs:
           name: latest
     name: "Linting with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go.version }}
       - name: run linters
@@ -42,8 +42,8 @@ jobs:
           name: latest
     name: "Code generator with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go.version }}
       - name: generate code
