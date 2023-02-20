@@ -11,6 +11,7 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
+	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
 var _ = Describe("VLAN Object", func() {
@@ -127,6 +128,8 @@ var _ = Describe("VLAN Object", func() {
 })
 
 func TestVLAN(t *testing.T) {
+	testutil.Seed(GinkgoRandomSeed())
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "test suite for VLAN API definition")
 }

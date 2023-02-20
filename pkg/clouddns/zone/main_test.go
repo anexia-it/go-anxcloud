@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"go.anx.io/go-anxcloud/pkg/client"
+	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -34,6 +35,8 @@ func getClient() client.Client {
 }
 
 func TestCloudDNS(t *testing.T) {
+	testutil.Seed(GinkgoRandomSeed())
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CloudDNS tests")
 

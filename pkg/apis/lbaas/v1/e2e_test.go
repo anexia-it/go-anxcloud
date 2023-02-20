@@ -238,7 +238,7 @@ var _ = Describe("lbaas/v1 bindings", Ordered, func() {
 		apiClient = ac
 	}
 
-	rand.Seed(GinkgoRandomSeed())
+	testutil.Seed(GinkgoRandomSeed())
 
 	testrun := LBaaSE2ETestRun{
 		Name: testutil.RandomHostname(),
