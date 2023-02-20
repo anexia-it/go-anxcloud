@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "1.18"
+        - version: "1.19"
           name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
@@ -52,10 +52,8 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "1.18"
-          name: target
         - version: "1.19"
-          name: latest
+          name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (ok-to-test)"
     steps:
       - name: Fork based /ok-to-test checkout
