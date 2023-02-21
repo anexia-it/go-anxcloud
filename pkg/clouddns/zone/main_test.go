@@ -39,8 +39,4 @@ func TestCloudDNS(t *testing.T) {
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "CloudDNS tests")
-
-	if err := cleanupZones(getClient()); err != nil {
-		t.Fatal(err)
-	}
 }

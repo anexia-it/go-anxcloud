@@ -12,7 +12,8 @@ import (
 var mock *mockserver
 
 type mockserver struct {
-	server *ghttp.Server
+	server              *ghttp.Server
+	numRequestsToIgnore int
 }
 
 func initMockServer() {
@@ -24,7 +25,9 @@ func initMockServer() {
 // nolint:golint,unparam
 func mock_expect_request_count(count int) {
 	if mock != nil {
-		Expect(mock.server.ReceivedRequests()).Should(HaveLen(count))
+		Expect(mock.server.ReceivedRequests()).Should(HaveLen(count + mock.numRequestsToIgnore))
+
+		mock.numRequestsToIgnore += count
 	}
 }
 
@@ -203,7 +206,7 @@ func mock_list_records(zone string) {
 			{Name: "@", Type: "AAAA", RData: "::1"},
 			{Name: "www", Type: "A", RData: "127.0.0.1"},
 			{Name: "www", Type: "AAAA", RData: "::1"},
-			{Name: "test1", Type: "TXT", RData: "\"test record\""},
+			{Name: "test5", Type: "TXT", RData: "\"test record\""},
 		}),
 	))
 }

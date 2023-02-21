@@ -23,31 +23,7 @@ type randomTimes struct {
 	ttl     int
 }
 
-var createdZones = make([]string, 0)
-
-func ensureTestZone(c client.Client, name string, times randomTimes) {
-	if mock != nil {
-		return
-	}
-
-	_, err := NewAPI(c).Create(context.TODO(), Definition{
-		Name:       "object for " + name,
-		ZoneName:   name,
-		IsMaster:   true,
-		DNSSecMode: "unvalidated",
-		AdminEmail: "admin@" + name,
-		Refresh:    times.refresh,
-		Retry:      times.retry,
-		Expire:     times.expire,
-		TTL:        times.ttl,
-	})
-
-	Expect(err).NotTo(HaveOccurred())
-
-	createdZones = append(createdZones, name)
-}
-
-func cleanupZones(c client.Client) error {
+func cleanupZone(c client.Client, zone string) error {
 	if mock != nil {
 		return nil
 	}
@@ -57,44 +33,29 @@ func cleanupZones(c client.Client) error {
 	retryAllowance := 5
 	retryTime := 5 * time.Second
 
-	for len(createdZones) > 0 {
-		notDone := make([]string, 0, len(createdZones))
-		lastTryErrors := make([]error, 0, len(createdZones))
-
-		for _, zone := range createdZones {
-			err := api.Delete(context.TODO(), zone)
-
-			if err != nil {
-				re := &client.ResponseError{}
-				if isResponseError := errors.As(err, &re); !isResponseError || re.Response.StatusCode != 404 {
-					notDone = append(notDone, zone)
-					lastTryErrors = append(lastTryErrors, err)
-				}
-			}
+	for {
+		err := api.Delete(context.TODO(), zone)
+		if err == nil {
+			return nil
 		}
 
-		createdZones = notDone
+		re := &client.ResponseError{}
+		if isResponseError := errors.As(err, &re); isResponseError && re.Response.StatusCode == 404 {
+			return nil
+		}
+
+		// Deleting the zone failed. Retry up to "initial value of retryAllowance" times,
+		// sleeping retryTime between each retry, with retryTime being doubled after each try.
 		retryAllowance--
 
-		// Deleting of at least one zone failed. Retry up to "initial value of retryAllowance" times,
-		// sleeping retryTime between each retry, with retryTime being doubled after each try.
-		if len(notDone) > 0 {
-			if retryAllowance >= 0 {
-				time.Sleep(retryTime)
+		if retryAllowance >= 0 {
+			time.Sleep(retryTime)
 
-				retryTime = retryTime * 2
-			} else {
-				messages := make([]string, 0, len(lastTryErrors))
-				for _, err := range lastTryErrors {
-					messages = append(messages, err.Error())
-				}
-
-				return fmt.Errorf("Error deleting the zones created for this request, remaining zones are %+v and last errors were %+v", notDone, messages)
-			}
+			retryTime = retryTime * 2
+		} else {
+			return fmt.Errorf("Error deleting the zone created for this test, delete zone %+v manually (last error was %+v)", zone, err)
 		}
 	}
-
-	return nil
 }
 
 func ensureTestRecord(c client.Client, zone string, record RecordRequest) uuid.UUID {
@@ -117,13 +78,13 @@ func ensureTestRecord(c client.Client, zone string, record RecordRequest) uuid.U
 	return uuid.Nil
 }
 
-var _ = Describe("CloudDNS API client", func() {
+var _ = Describe("CloudDNS API client", Ordered, func() {
 	var c client.Client
 
 	var zoneName string
 	var times randomTimes
 
-	BeforeEach(func() {
+	BeforeAll(func() {
 		zoneName = test.RandomHostname() + ".go-anxcloud.test"
 		c = getClient()
 
@@ -135,44 +96,44 @@ var _ = Describe("CloudDNS API client", func() {
 			rng.Intn(10) * 1000,
 			rng.Intn(10) * 100,
 		}
-	})
 
-	Context("without the zone existing", func() {
-		It("should make a valid create zone request", func() {
-			zoneDefinition := Definition{
-				Name:       zoneName,
-				ZoneName:   zoneName,
-				IsMaster:   true,
-				DNSSecMode: "unvalidated",
-				AdminEmail: "admin@" + zoneName,
-				Refresh:    times.refresh,
-				Retry:      times.retry,
-				Expire:     times.expire,
-				TTL:        times.ttl,
+		DeferCleanup(func() {
+			if zoneName != "" {
+				if err := cleanupZone(c, zoneName); err != nil {
+					GinkgoLogr.Error(err, "Error deleting zone")
+				}
 			}
-
-			mock_create_zone(zoneDefinition)
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
-
-			response, err := NewAPI(c).Create(ctx, zoneDefinition)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(response).To(Not(BeNil()))
-			Expect(response.Name).To(Equal(zoneName))
-
-			mock_expect_request_count(1)
-
-			createdZones = append(createdZones, zoneName)
 		})
 	})
 
-	Context("with the zone existing", func() {
-		JustBeforeEach(func() {
-			ensureTestZone(c, zoneName, times)
-		})
+	It("should successfully create the zone", func() {
+		zoneDefinition := Definition{
+			Name:       zoneName,
+			ZoneName:   zoneName,
+			IsMaster:   true,
+			DNSSecMode: "unvalidated",
+			AdminEmail: "admin@" + zoneName,
+			Refresh:    times.refresh,
+			Retry:      times.retry,
+			Expire:     times.expire,
+			TTL:        times.ttl,
+		}
 
+		mock_create_zone(zoneDefinition)
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+
+		response, err := NewAPI(c).Create(ctx, zoneDefinition)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response).To(Not(BeNil()))
+		Expect(response.Name).To(Equal(zoneName))
+
+		mock_expect_request_count(1)
+	})
+
+	Context("with the zone existing", Ordered, func() {
 		CheckZoneData := func(zone Zone) {
 			Expect(zone.AdminEmail).To(Equal("admin@" + zoneName))
 			Expect(zone.Refresh).To(Equal(times.refresh))
@@ -246,19 +207,6 @@ var _ = Describe("CloudDNS API client", func() {
 			mock_expect_request_count(1)
 		})
 
-		It("should make a valid delete zone request", func() {
-			mock_delete_zone(zoneName)
-
-			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
-			defer cancel()
-
-			err := NewAPI(c).Delete(ctx, zoneName)
-
-			Expect(err).NotTo(HaveOccurred())
-
-			mock_expect_request_count(1)
-		})
-
 		It("should make a valid zone import request", func() {
 			importZone := Import{
 				ZoneData: `; Zone file for example.org. - region global
@@ -313,8 +261,6 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 				TTL:    300,
 			}
 
-			mock_create_record(zoneName, record)
-
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
 
@@ -323,180 +269,195 @@ www 600 IN TXT "2021-02-05 15:40:57.486411"
 
 			mock_expect_request_count(0)
 		})
-	})
 
-	Context("with an A record for test1 present", func() {
-		JustBeforeEach(func() {
-			ensureTestZone(c, zoneName, times)
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "test1",
-				Type:   "A",
-				RData:  "127.0.0.1",
-				Region: "default",
-				TTL:    300,
-			})
-		})
-
-		It("should make a valid changeset apply request", func() {
-			changeset := ChangeSet{
-				Delete: []ResourceRecord{{
-					Name:   "test1",
-					Type:   "A",
-					Region: "default",
-					RData:  "127.0.0.1",
-					TTL:    300,
-				}},
-				Create: []ResourceRecord{{
+		Context("with an A record for test2 present", Ordered, func() {
+			BeforeAll(func() {
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
 					Name:   "test2",
 					Type:   "A",
+					RData:  "127.0.0.1",
 					Region: "default",
-					RData:  "192.168.0.1",
-					TTL:    600,
-				}},
-			}
+					TTL:    300,
+				})
+			})
 
-			mock_apply_changeset(zoneName, changeset)
+			It("should make a valid changeset apply request", func() {
+				changeset := ChangeSet{
+					Delete: []ResourceRecord{{
+						Name:   "test2",
+						Type:   "A",
+						Region: "default",
+						RData:  "127.0.0.1",
+						TTL:    300,
+					}},
+					Create: []ResourceRecord{{
+						Name:   "test3",
+						Type:   "A",
+						Region: "default",
+						RData:  "192.168.0.1",
+						TTL:    600,
+					}},
+				}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
+				mock_apply_changeset(zoneName, changeset)
 
-			response, err := NewAPI(c).Apply(ctx, zoneName, changeset)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(response).NotTo(BeNil())
+				ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+				defer cancel()
 
-			mock_expect_request_count(1)
-		})
-	})
+				response, err := NewAPI(c).Apply(ctx, zoneName, changeset)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response).NotTo(BeNil())
 
-	Context("with the record already existing", func() {
-		var identifier uuid.UUID
-
-		JustBeforeEach(func() {
-			ensureTestZone(c, zoneName, times)
-			identifier = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "test1",
-				Type:   "TXT",
-				RData:  "test record",
-				Region: "default",
-				TTL:    300,
+				mock_expect_request_count(1)
 			})
 		})
 
-		It("should make a valid update record request", func() {
-			record := RecordRequest{
-				Name:   "test1",
-				Type:   "TXT",
-				RData:  "test record",
-				Region: "default",
-				TTL:    300,
-			}
+		Context("with the record already existing", Ordered, func() {
+			var identifier uuid.UUID
+			BeforeEach(func() {
+				identifier = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "test4",
+					Type:   "TXT",
+					RData:  "test record",
+					Region: "default",
+					TTL:    300,
+				})
+			})
 
-			mock_update_record(zoneName, identifier, record)
+			It("should make a valid delete record request", func() {
+				mock_delete_record(zoneName, identifier)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
+				ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
+				defer cancel()
+				err := NewAPI(c).DeleteRecord(ctx, zoneName, identifier)
+				Expect(err).NotTo(HaveOccurred())
 
-			response, err := NewAPI(c).UpdateRecord(ctx, zoneName, identifier, record)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(response).NotTo(BeNil())
+				mock_expect_request_count(1)
+			})
 
-			mock_expect_request_count(1)
+			// Have the update test after the delete test in our Ordered
+			// context to ensure we don't have a record with the given name
+			// anymore when creating it for this test and without having to
+			// find the identifier of the record after it was updated to then
+			// delete it.
+			It("should make a valid update record request", func() {
+				record := RecordRequest{
+					Name:   "test4",
+					Type:   "TXT",
+					RData:  "test record",
+					Region: "default",
+					TTL:    300,
+				}
+
+				mock_update_record(zoneName, identifier, record)
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+				defer cancel()
+
+				response, err := NewAPI(c).UpdateRecord(ctx, zoneName, identifier, record)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response).NotTo(BeNil())
+
+				mock_expect_request_count(1)
+			})
 		})
 
-		It("should make a valid delete record request", func() {
-			mock_delete_record(zoneName, identifier)
+		Context("with some records existing", Ordered, func() {
+			BeforeAll(func() {
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "test5",
+					Type:   "TXT",
+					RData:  "test record",
+					Region: "default",
+					TTL:    300,
+				})
+
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "@",
+					Type:   "A",
+					RData:  "127.0.0.1",
+					Region: "default",
+					TTL:    300,
+				})
+
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "@",
+					Type:   "AAAA",
+					RData:  "::1",
+					Region: "default",
+					TTL:    300,
+				})
+
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "www",
+					Type:   "A",
+					RData:  "127.0.0.1",
+					Region: "default",
+					TTL:    300,
+				})
+
+				_ = ensureTestRecord(c, zoneName, RecordRequest{
+					Name:   "www",
+					Type:   "AAAA",
+					RData:  "::1",
+					Region: "default",
+					TTL:    300,
+				})
+			})
+
+			It("lists all records of the zone", func() {
+				mock_list_records(zoneName)
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+				defer cancel()
+
+				records, err := NewAPI(c).ListRecords(ctx, zoneName)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(records).NotTo(BeNil())
+
+				rmap := make(map[string]map[string]Record, 3)
+				for _, r := range records {
+					if _, ok := rmap[r.Name]; !ok {
+						rmap[r.Name] = make(map[string]Record, 2)
+					}
+
+					rmap[r.Name][r.Type] = r
+				}
+
+				Expect(rmap).To(HaveKey("@"))
+				Expect(rmap).To(HaveKey("www"))
+				Expect(rmap).To(HaveKey("test5"))
+
+				Expect(rmap["@"]).To(HaveKey("A"))
+				Expect(rmap["@"]).To(HaveKey("AAAA"))
+				Expect(rmap["www"]).To(HaveKey("A"))
+				Expect(rmap["www"]).To(HaveKey("AAAA"))
+				Expect(rmap["test5"]).To(HaveKey("TXT"))
+
+				Expect(rmap["@"]["A"].RData).To(Equal("127.0.0.1"))
+				Expect(rmap["www"]["A"].RData).To(Equal("127.0.0.1"))
+				Expect(rmap["@"]["AAAA"].RData).To(Equal("::1"))
+				Expect(rmap["www"]["AAAA"].RData).To(Equal("::1"))
+
+				Expect(rmap["test5"]["TXT"].RData).To(Equal("\"test record\"")) // I love the engine. Mara @LittleFox94 Grosch
+
+				mock_expect_request_count(1)
+			})
+		})
+
+		It("should make a valid delete zone request", func() {
+			mock_delete_zone(zoneName)
 
 			ctx, cancel := context.WithTimeout(context.Background(), client.DefaultRequestTimeout)
 			defer cancel()
-			err := NewAPI(c).DeleteRecord(ctx, zoneName, identifier)
+
+			err := NewAPI(c).Delete(ctx, zoneName)
+
 			Expect(err).NotTo(HaveOccurred())
 
 			mock_expect_request_count(1)
-		})
-	})
 
-	Context("with some records existing", func() {
-		JustBeforeEach(func() {
-			ensureTestZone(c, zoneName, times)
-
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "test1",
-				Type:   "TXT",
-				RData:  "test record",
-				Region: "default",
-				TTL:    300,
-			})
-
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "@",
-				Type:   "A",
-				RData:  "127.0.0.1",
-				Region: "default",
-				TTL:    300,
-			})
-
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "@",
-				Type:   "AAAA",
-				RData:  "::1",
-				Region: "default",
-				TTL:    300,
-			})
-
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "www",
-				Type:   "A",
-				RData:  "127.0.0.1",
-				Region: "default",
-				TTL:    300,
-			})
-
-			_ = ensureTestRecord(c, zoneName, RecordRequest{
-				Name:   "www",
-				Type:   "AAAA",
-				RData:  "::1",
-				Region: "default",
-				TTL:    300,
-			})
-		})
-
-		It("lists all records of the zone", func() {
-			mock_list_records(zoneName)
-
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
-
-			records, err := NewAPI(c).ListRecords(ctx, zoneName)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(records).NotTo(BeNil())
-
-			rmap := make(map[string]map[string]Record, 3)
-			for _, r := range records {
-				if _, ok := rmap[r.Name]; !ok {
-					rmap[r.Name] = make(map[string]Record, 2)
-				}
-
-				rmap[r.Name][r.Type] = r
-			}
-
-			Expect(rmap).To(HaveKey("@"))
-			Expect(rmap).To(HaveKey("www"))
-			Expect(rmap).To(HaveKey("test1"))
-
-			Expect(rmap["@"]).To(HaveKey("A"))
-			Expect(rmap["@"]).To(HaveKey("AAAA"))
-			Expect(rmap["www"]).To(HaveKey("A"))
-			Expect(rmap["www"]).To(HaveKey("AAAA"))
-			Expect(rmap["test1"]).To(HaveKey("TXT"))
-
-			Expect(rmap["@"]["A"].RData).To(Equal("127.0.0.1"))
-			Expect(rmap["www"]["A"].RData).To(Equal("127.0.0.1"))
-			Expect(rmap["@"]["AAAA"].RData).To(Equal("::1"))
-			Expect(rmap["www"]["AAAA"].RData).To(Equal("::1"))
-
-			Expect(rmap["test1"]["TXT"].RData).To(Equal("\"test record\"")) // I love the engine. Mara @LittleFox94 Grosch
-
-			mock_expect_request_count(1)
+			zoneName = ""
 		})
 	})
 })
