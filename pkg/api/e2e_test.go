@@ -25,6 +25,8 @@ const (
 )
 
 var _ = Describe("options", func() {
+	testutils.Seed(GinkgoRandomSeed())
+
 	var a api.API
 
 	BeforeEach(func() {
