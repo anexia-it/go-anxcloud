@@ -241,7 +241,7 @@ var _ = Describe("lbaas/v1 bindings", Ordered, func() {
 	testutil.Seed(GinkgoRandomSeed())
 
 	testrun := LBaaSE2ETestRun{
-		Name: testutil.RandomHostname(),
+		Name: testutil.RandomHostname() + "-genclient",
 
 		// there might come a time where we have to check if a port is already in use
 		// and throw another set of dice.
