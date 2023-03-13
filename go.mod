@@ -7,14 +7,14 @@ require (
 	github.com/go-logr/stdr v1.2.2
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/onsi/ginkgo/v2 v2.9.0
-	github.com/onsi/gomega v1.27.2
+	github.com/onsi/gomega v1.27.3
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	golang.org/x/crypto v0.7.0
 )
 
 require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
