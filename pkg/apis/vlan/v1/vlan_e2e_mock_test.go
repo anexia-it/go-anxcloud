@@ -146,7 +146,7 @@ func prepareList(desc string, vmProvisioning bool) {
 
 	Expect(pages[0]).To(HaveLen(10))
 	Expect(pages[1]).To(HaveLen(2))
-	Expect(pages[len(pages)-1]).To(HaveLen(0))
+	Expect(pages[len(pages)-1]).To(BeEmpty())
 
 	for i, data := range pages {
 		mockServer.AppendHandlers(CombineHandlers(
