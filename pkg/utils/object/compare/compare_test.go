@@ -71,11 +71,11 @@ var _ = Describe("Compare", func() {
 	It("works fine with one arg being a pointer and the other not", func() {
 		diff, err := Compare(lbaasv1.Frontend{Name: "test"}, &lbaasv1.Frontend{Name: "test"}, "Name")
 		Expect(err).NotTo(HaveOccurred())
-		Expect(diff).To(HaveLen(0))
+		Expect(diff).To(BeEmpty())
 
 		diff, err = Compare(&lbaasv1.Frontend{Name: "test"}, lbaasv1.Frontend{Name: "test"}, "Name")
 		Expect(err).NotTo(HaveOccurred())
-		Expect(diff).To(HaveLen(0))
+		Expect(diff).To(BeEmpty())
 	})
 
 	It("errors out on anything not a struct or pointer to a struct", func() {
