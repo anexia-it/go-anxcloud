@@ -119,6 +119,26 @@ func (a api) NewDefinition(location, templateType, templateID, hostname string, 
 	}
 }
 
+// NewDefinitionWithDNS create a VM definition with the mandatory values set and optional dns servers.
+func (a api) NewDefinitionWithDNS(location, templateType, templateID, hostname string, cpus, memory, disk int, network []Network, dnsServer []string) Definition {
+	def := a.NewDefinition(location, templateType, templateID, hostname, cpus, memory, disk, network)
+
+	for index, element := range dnsServer {
+		switch index {
+		case 0:
+			def.DNS1 = element
+		case 1:
+			def.DNS2 = element
+		case 2:
+			def.DNS3 = element
+		case 3:
+			def.DNS4 = element
+		}
+	}
+
+	return def
+}
+
 // Disk represents a disk of a VM.
 type Disk struct {
 	ID      int    `json:"disk_id,omitempty"`
