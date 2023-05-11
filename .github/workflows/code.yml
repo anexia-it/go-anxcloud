@@ -7,15 +7,12 @@ on:
   pull_request:
     branches:
       - main
-    types:
-      - labeled
-      - opened
-      - edited
+    types: [opened, synchronize, reopened, labeled]
     paths-ignore:
       - "*.md"
       - '*.yaml'
       - '*.yml'
-      - LICENCE
+      - LICENSE
       - 'docs/**'
 env:
   GO111MODULE: on
