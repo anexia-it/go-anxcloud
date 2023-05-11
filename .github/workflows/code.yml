@@ -5,15 +5,16 @@ on:
     branches:
       - 'main'
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
-    types: [opened, synchronize, reopened, labeled]
     paths-ignore:
       - "*.md"
       - '*.yaml'
       - '*.yml'
       - LICENSE
       - 'docs/**'
+
 env:
   GO111MODULE: on
 
@@ -94,7 +95,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
         with:
-          ref: 'refs/pull/${{ github.event.client_payload.pull_request.number }}/merge'
+          ref: 'refs/pull/${{ github.event.pull_request.number }}/merge'
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go.version }}
@@ -110,4 +111,4 @@ jobs:
           files: ./coverage.out
           flags: integration
           verbose: true
-          override_pr: ${{ github.event.client_payload.pull_request.number }}
+          override_pr: ${{ github.event.pull_request.number }}
