@@ -4,17 +4,19 @@ on:
   push:
     branches:
       - 'main'
+  pull_request:
+    branches:
+      - main
+    types:
+      - labeled
+      - opened
+      - edited
     paths-ignore:
       - "*.md"
       - '*.yaml'
       - '*.yml'
       - LICENCE
       - 'docs/**'
-  pull_request:
-    branches:
-      - main
-    types: [ labeled ]
-
 env:
   GO111MODULE: on
 
