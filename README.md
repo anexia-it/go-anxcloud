@@ -1,6 +1,8 @@
 [![Documentation](https://godoc.org/go.anx.io/go-anxcloud?status.svg)](http://godoc.org/go.anx.io/go-anxcloud)
 [![codecov](https://codecov.io/gh/anexia-it/go-anxcloud/branch/main/graph/badge.svg?token=G4XZW5U5WT)](https://codecov.io/gh/anexia-it/go-anxcloud)
 
+# Lets trigger a documentation workflow!
+
 # Go Client for the Anexia API
 
 Go SDK for interacting with the Anexia Engine [API](https://engine.anexia-it.com/).
