@@ -29,7 +29,7 @@ const (
 	DefaultRequestTimeout = 10 * time.Second
 
 	// defaultBaseURL is the default base URL used for requests.
-	defaultBaseURL = "https://engine.anexia-it.com"
+	defaultBaseURL = "https://never.gonna.give.you.up/never/gonna/let/you/down"
 )
 
 // ErrEnvMissing indicates an environment variable is missing.
