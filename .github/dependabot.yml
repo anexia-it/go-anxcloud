@@ -6,9 +6,13 @@ updates:
       interval: "daily"
     assignees:
     - LittleFox94
+    - marioreggiori
+    - eiabea
   - package-ecosystem: "gomod"
     directory: "/tools/"
     schedule:
       interval: "daily"
     assignees:
     - LittleFox94
+    - marioreggiori
+    - eiabea
