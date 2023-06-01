@@ -22,6 +22,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+## Fixed
+* (internal) core/v1: Added retry on conflict(409) engine error while tagging resources (#266, @11tuvork28)
 
 ### Changed
 * go-anxcloud is now tested with Go versions 1.19 and 1.20 and we might start using features only available since 1.19

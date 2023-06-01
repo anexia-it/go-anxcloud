@@ -2,26 +2,42 @@ package v1
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"time"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/apis/core/v1/helper"
+	"go.anx.io/go-anxcloud/pkg/utils/retry"
 )
 
-// Tag adds tags to an object resource
+// Tag adds tags to an object resource and internally retries 2 more times on conflict
 func Tag(ctx context.Context, a types.API, obj types.IdentifiedObject, tags ...string) error {
 	objects, err := resourceWithTagObjects(obj, tags...)
 	if err != nil {
 		return fmt.Errorf("generating ResourceWithTag objects failed: %w", err)
 	}
-
 	for _, obj := range objects {
-		if err := a.Create(ctx, obj); err != nil {
-			if err, ok := err.(api.HTTPError); ok && err.StatusCode() == 422 {
-				// already tagged -> skip
-				continue
+		tag := func() (bool, error) {
+			var (
+				httpError api.HTTPError
+				retryable bool
+				err       error
+			)
+			if err = a.Create(ctx, obj); err != nil && errors.As(err, &httpError) {
+				if httpError.StatusCode() == http.StatusUnprocessableEntity {
+					// already tagged -> skip
+					err = nil
+				} else if httpError.StatusCode() == http.StatusConflict {
+					retryable = true
+				}
 			}
+			return retryable, err
+		}
+
+		if err := retry.Retry(ctx, 3, time.Second, tag); err != nil {
 			return err
 		}
 	}
