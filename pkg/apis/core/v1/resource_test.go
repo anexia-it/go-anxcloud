@@ -12,6 +12,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 	gomegaTypes "github.com/onsi/gomega/types"
 )
 
@@ -46,6 +47,95 @@ var _ = Describe("resource.Resource", func() {
 			Entry("When operation is List", types.OperationList, MatchError(api.ErrOperationNotSupported), ""),
 			Entry("When operation is Update", types.OperationUpdate, MatchError(api.ErrOperationNotSupported), ""),
 		)
+	})
+
+	Context("RetryResourceTagging", func() {
+		var a api.API
+		var srv *ghttp.Server
+		BeforeEach(func() {
+			srv = ghttp.NewServer()
+			var err error
+			a, err = api.NewAPI(api.WithClientOptions(
+				client.BaseURL(srv.URL()),
+				client.IgnoreMissingToken(),
+			))
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		AfterEach(func() {
+			srv.Close()
+		})
+		It("Can retry tagging when first attempt fails", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Can retry tagging one tag when first 2 attempts fail", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Can retry tagging one failed tag", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(200, ""),
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag", "test-tagfail")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Can retry tagging multiple failed once tags in a row", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(200, ""),
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(200, ""),
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag-fail", "test-tag-fail", "test-tag-nofail")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Fails tagging one tag when 3 attempts fail", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(409, ""),
+				ghttp.RespondWith(409, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag")
+			Expect(err).To(HaveOccurred())
+		})
+		It("Can still tag when receiving 422 for multiple tags", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(422, ""),
+				ghttp.RespondWith(200, ""),
+				ghttp.RespondWith(422, ""),
+				ghttp.RespondWith(422, ""),
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag", "test-tag2", "test-tag3", "test-tag4", "test-tag5")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Does not retry when response code is 422 for one tag", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(422, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag")
+			Expect(err).ToNot(HaveOccurred())
+		})
+		It("Does not retry when it should not on tagging", func() {
+			srv.AppendHandlers(
+				ghttp.RespondWith(200, ""),
+			)
+			var err = corev1.Tag(context.TODO(), a, &corev1.Resource{Identifier: "Test"}, "test-tag")
+			Expect(err).ToNot(HaveOccurred())
+		})
 	})
 
 	Context("doing unsupported operations on Info objects", func() {
