@@ -266,8 +266,7 @@ func decodePaginationResponseBody(data json.RawMessage, opts types.ListOptions) 
 	}
 
 	if actualResponse == -1 {
-		err = ErrPageResponseNotSupported
-		return
+		return page, limit, totalPages, totalItems, ret, ErrPageResponseNotSupported
 	}
 
 	switch actualResponse {
