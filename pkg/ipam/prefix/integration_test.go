@@ -99,7 +99,7 @@ var _ = Describe("ipam/prefix client", func() {
 
 					g.Expect(info.PrefixType).To(BeEquivalentTo(TypePrivate))
 
-					g.Expect(info.Status, "Active")
+					g.Expect(info.Status).To(Equal("Active"))
 				}
 
 				Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())
