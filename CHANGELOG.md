@@ -22,6 +22,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+## [0.5.2] - 2023-06-06
+
 ## Fixed
 * (internal) core/v1: Added retry on conflict(409) engine error while tagging resources (#266, @11tuvork28)
 
