@@ -22,6 +22,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+### Added
+* vsphere/provisioning/vm: add AdditionalDisks field to definition (#275, @marioreggiori)
+
 ## [0.5.2] - 2023-06-06
 
 ## Fixed
