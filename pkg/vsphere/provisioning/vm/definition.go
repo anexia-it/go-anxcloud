@@ -31,6 +31,9 @@ type Definition struct {
 	// Default: as defined by data center.
 	DiskType string `json:"disk_type,omitempty"`
 
+	// Disks in addition to the primary disk
+	AdditionalDisks []AdditionalDisk `json:"additional_disks,omitempty"`
+
 	// CPU type
 	// Example: ("best-effort", "standard", "enterprise", "performance")
 	// Default: "standard".
@@ -124,6 +127,12 @@ type Disk struct {
 	ID      int    `json:"disk_id,omitempty"`
 	Type    string `json:"disk_type"`
 	SizeGBs int    `json:"disk_gb"`
+}
+
+// AdditionalDisk represents an additional disk which can be defined for provisioning
+type AdditionalDisk struct {
+	SizeGBs int    `json:"gb"`
+	Type    string `json:"type"`
 }
 
 // Change contains information about requested VM change request.
