@@ -22,12 +22,14 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+## [0.5.3] - 2023-06-16
+
 ### Added
 * vsphere/provisioning/vm: add AdditionalDisks field to definition (#275, @marioreggiori)
 
 ## [0.5.2] - 2023-06-06
 
-## Fixed
+### Fixed
 * (internal) core/v1: Added retry on conflict(409) engine error while tagging resources (#266, @11tuvork28)
 
 ### Changed
