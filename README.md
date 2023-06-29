@@ -50,7 +50,7 @@ func main() {
 
 	// let's list LBaaS backends of a known LoadBalancer
 	frontend := lbaasv1.Frontend{
-		LoadBalancer: lbaasv1.LoadBalancer{Identifier: "285b954fdf2a449c8fdae01cc6074025"},
+		LoadBalancer: &lbaasv1.LoadBalancer{Identifier: "285b954fdf2a449c8fdae01cc6074025"},
 	}
 
 	var frontends apiTypes.ObjectChannel
