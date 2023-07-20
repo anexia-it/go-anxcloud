@@ -15,6 +15,7 @@ type API interface {
 	Create(ctx context.Context, create Create) (Summary, error)
 	Update(ctx context.Context, id string, update Update) (Summary, error)
 	ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveRandomSummary, error)
+	ReserveSpecific(ctx context.Context, reserve ReserveSpecific) (ReserveSpecificSummary, error)
 }
 
 type api struct {
