@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	pathAddressPrefix         = "/api/ipam/v1/address.json"
-	pathReserveAddressPrefix  = "/api/ipam/v1/address/reserve/ip/count.json"
-	pathFilteredAddressPrefix = "/api/ipam/v1/address/filtered.json"
+	pathAddressPrefix                = "/api/ipam/v1/address.json"
+	pathReserveAddressPrefix         = "/api/ipam/v1/address/reserve/ip/count.json"
+	pathReserveSpecificAddressPrefix = "/api/ipam/v1/address/reserve/ip/specific.json"
+	pathFilteredAddressPrefix        = "/api/ipam/v1/address/filtered.json"
 )
 
 // Filters that can be applied to the GetFiltered request
@@ -91,6 +92,15 @@ type ReservedIP struct {
 	Address string `json:"text"`
 	Prefix  string `json:"prefix"`
 }
+
+type ReserveSpecific struct {
+	LocationID        string   `json:"location_identifier"`
+	VlanID            string   `json:"vlan_identifier"`
+	IPs               []string `json:"ips"`
+	ReservationPeriod int      `json:"reservation_period,omitempty"`
+}
+
+type ReserveSpecificSummary ReserveRandomSummary
 
 type listResponse struct {
 	Data struct {
@@ -305,6 +315,46 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	if err != nil {
 		return ReserveRandomSummary{}, fmt.Errorf("could not decode IP address reserve random post response: %w", err)
+	}
+
+	return summary, nil
+}
+
+func (a api) ReserveSpecific(ctx context.Context, reserve ReserveSpecific) (ReserveSpecificSummary, error) {
+	url := fmt.Sprintf(
+		"%s%s",
+		a.client.BaseURL(),
+		pathReserveSpecificAddressPrefix,
+	)
+
+	requestData := bytes.Buffer{}
+	if err := json.NewEncoder(&requestData).Encode(reserve); err != nil {
+		panic(fmt.Sprintf("could not create request data for IP address reservation: %v", err))
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
+	if err != nil {
+		return ReserveSpecificSummary{}, fmt.Errorf("could not create IP address reserve specific post request: %w", err)
+	}
+
+	// Workaround to avoid race-conditions on IP reservations for the same VLAN
+	randomDelay := time.Duration(rand.Intn(1000))
+	time.Sleep(randomDelay * time.Millisecond)
+
+	httpResponse, err := a.client.Do(req)
+	if err != nil {
+		return ReserveSpecificSummary{}, fmt.Errorf("could not execute IP address reserve specific post request: %w", err)
+	}
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
+		return ReserveSpecificSummary{}, fmt.Errorf("could not execute IP address reserve specific post request, got response %s", httpResponse.Status)
+	}
+
+	var summary ReserveSpecificSummary
+	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
+	if err != nil {
+		return ReserveSpecificSummary{}, fmt.Errorf("could not decode IP address reserve specific post response: %w", err)
 	}
 
 	return summary, nil
