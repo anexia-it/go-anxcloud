@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/golangci/golangci-lint v1.53.3
-	golang.org/x/tools v0.11.0
+	golang.org/x/tools v0.11.1
 )
 
 require (
