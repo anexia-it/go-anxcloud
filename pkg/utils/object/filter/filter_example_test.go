@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 )
 
 type parentObject struct {
@@ -29,8 +30,9 @@ type testObject struct {
 	Name        string  `json:"name" anxcloud:"filterable,something"`
 	Description *string `json:"desc" anxcloud:"filterable"`
 
-	Parent        parentObject  `json:"parent" anxcloud:"filterable"`
-	PointerParent *parentObject `json:"ptrParent" anxcloud:"filterable"`
+	Parent        parentObject           `json:"parent" anxcloud:"filterable"`
+	PointerParent *parentObject          `json:"ptrParent" anxcloud:"filterable"`
+	Partial       common.PartialResource `json:"partial" anxcloud:"filterable"`
 
 	// just a random non-special field
 	SomeString        string `json:"someString"`
