@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -162,6 +163,32 @@ var _ = Describe("filter.Helper", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(present).To(BeTrue())
 				Expect(val).To(Equal("pointerfoo"))
+			})
+		})
+
+		Context("with identifier set in PartialResource", func() {
+			JustBeforeEach(func() {
+				o.(*testObject).Partial = common.PartialResource{
+					Identifier: "partialfoo",
+				}
+			})
+
+			It("gives the expected query string", func() {
+				helper, err := NewHelper(o)
+				Expect(err).NotTo(HaveOccurred())
+
+				query := helper.BuildQuery().Encode()
+				Expect(query).To(Equal("partial=partialfoo"))
+			})
+
+			It("returns the filter value and it being set", func() {
+				helper, err := NewHelper(o)
+				Expect(err).NotTo(HaveOccurred())
+
+				val, present, err := helper.Get("partial")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(present).To(BeTrue())
+				Expect(val).To(Equal("partialfoo"))
 			})
 		})
 

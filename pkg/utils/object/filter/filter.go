@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 )
 
 // NewHelper creates a new instance of a filter.Helper from the given object.
@@ -131,7 +132,9 @@ func extractFilterValue(fieldValue reflect.Value) (reflect.Value, error) {
 	}
 
 	if fieldKind == reflect.Struct {
-		if object, ok := fieldValue.Addr().Interface().(types.Object); ok {
+		if fieldValue.Addr().Type() == reflect.TypeOf((*common.PartialResource)(nil)) {
+			fieldValue = fieldValue.FieldByName("Identifier")
+		} else if object, ok := fieldValue.Addr().Interface().(types.Object); ok {
 			identifier, err := types.GetObjectIdentifier(object, false)
 			if err != nil {
 				return reflect.Value{}, fmt.Errorf("Object referenced: %w", err)
