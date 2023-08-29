@@ -25,6 +25,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 * go-anxcloud is now tested with Go versions 1.20 and 1.21 and we might start using features only available since 1.20
 
+### Added
+* core/v1: add `created_at` and `updated_at` fields to Resource type
+
 ## [0.5.3] - 2023-06-16
 
 ### Added
