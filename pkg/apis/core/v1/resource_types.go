@@ -15,6 +15,8 @@ type Resource struct {
 	Identifier string          `json:"identifier" anxcloud:"identifier"`
 	Name       string          `json:"name"`
 	Type       Type            `json:"resource_type"`
+	CreatedAt  string          `json:"created_at"`
+	UpdatedAt  string          `json:"updated_at"`
 	Tags       []string        `json:"tags"`
 	Attributes json.RawMessage `json:"attributes"`
 }
