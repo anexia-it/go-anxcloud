@@ -28,6 +28,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 ### Added
 * core/v1: add `created_at` and `updated_at` fields to Resource type
 * generic client: make common.PartialResource filterable
+* lbaas/v2: added new `Cluster`, `Node` & `LoadBalancer` resources (#309, @anx-mschaefer)
 
 ## [0.5.3] - 2023-06-16
 
