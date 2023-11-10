@@ -35,7 +35,7 @@ type NodePool struct {
 	// RAM size for each node in bytes. Must be a multiple of 1 GiB, at least 2 GiB and no more than 64 GiB
 	Memory int `json:"memory,omitempty"`
 	// Size of the disk for each node in bytes. Its performance type will be the default Anexia Engine provides for the given location.
-	// Must be a multiple of 1 GiB, at least 10 GiB and no more than 1600 GiB
+	// Must be a multiple of 1 GiB, at least 20 GiB and no more than 1600 GiB
 	DiskSize int `json:"disk_size,omitempty"`
 
 	// Operating system for deployment on the nodes. Default: Flatcar Linux

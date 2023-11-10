@@ -169,7 +169,7 @@ var _ = Describe("CRUD", Ordered, func() {
 						"cluster":   clusterIdentifier,
 						"replicas":  1,
 						"memory":    2 * 1073741824,
-						"disk_size": 10 * 1073741824,
+						"disk_size": 20 * 1073741824,
 					},
 					mockedNodePoolResponse(NodePool{
 						Identifier: "mocked-cluster-identifier",
@@ -183,7 +183,7 @@ var _ = Describe("CRUD", Ordered, func() {
 					Cluster:  Cluster{Identifier: clusterIdentifier},
 					Replicas: pointer.Int(1),
 					Memory:   2 * 1073741824,  // 2 GiB
-					DiskSize: 10 * 1073741824, // 10 GiB
+					DiskSize: 20 * 1073741824, // 20 GiB
 				}
 
 				err := a.Create(context.TODO(), &nodePool)
@@ -226,7 +226,7 @@ var _ = Describe("CRUD", Ordered, func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(nodePool.Name).To(Equal(nodePoolName))
 				Expect(nodePool.Memory).To(Equal(2 * 1073741824))
-				Expect(nodePool.DiskSize).To(Equal(10 * 1073741824))
+				Expect(nodePool.DiskSize).To(Equal(20 * 1073741824))
 			})
 
 			It("returns api.ErrNotFound if node pool does not exist", func() {
@@ -384,7 +384,7 @@ func mockedNodePoolResponse(nodePool NodePool) map[string]interface{} {
 		"replicas":         1,
 		"cpus":             2,
 		"memory":           2147483648,
-		"disk_size":        10737418240,
+		"disk_size":        21474836480,
 		"operating_system": "Flatcar Linux",
 	}
 }
