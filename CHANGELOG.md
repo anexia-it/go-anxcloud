@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* e5e/v1: added new `Application` & `Function` resources (#317, @anx-mschaefer)
+
 ## [0.6.0] - 2023-11-10
 
 * go-anxcloud is now tested with Go versions 1.20 and 1.21 and we might start using features only available since 1.20
