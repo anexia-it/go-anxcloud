@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.6.1] - 2023-11-17
+
 ### Added
 * e5e/v1: added new `Application` & `Function` resources (#317, @anx-mschaefer)
 
