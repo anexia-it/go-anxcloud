@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* generic mock client: introduce pre-create hook (#322, @anx-mschaefer)
+
 ## [0.6.1] - 2023-11-17
 
 ### Added
