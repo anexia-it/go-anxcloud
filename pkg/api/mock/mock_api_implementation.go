@@ -16,15 +16,25 @@ import (
 )
 
 type mockAPI struct {
-	data mockDataView
-	mu   sync.Mutex
+	data  mockDataView
+	mu    sync.Mutex
+	hooks map[hookName][]hook
 }
 
+type APIOption func(*mockAPI)
+
 // NewMockAPI creates a new MockAPI instance
-func NewMockAPI() API {
-	return &mockAPI{
-		data: make(map[string]*APIObject),
+func NewMockAPI(opts ...APIOption) API {
+	a := &mockAPI{
+		data:  make(map[string]*APIObject),
+		hooks: make(map[hookName][]hook),
 	}
+
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	return a
 }
 
 // Get retrieves an Object from MockAPIs local storage by its identifier
@@ -168,6 +178,10 @@ outer:
 // When the provided Object has no Identifier set, a random one is set.
 // An already set Identifier is kept as-is, without any validation.
 func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.CreateOption) error {
+	for _, h := range a.hooks[preCreateHook] {
+		h(ctx, a, o)
+	}
+
 	options := types.CreateOptions{}
 	for _, opt := range opts {
 		opt.ApplyToCreate(&options)
