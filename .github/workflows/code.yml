@@ -8,12 +8,14 @@ on:
     types: [opened, synchronize, reopened, labeled]
     branches:
     - main
-    paths-ignore:
-    - "*.md"
-    - "*.yaml"
-    - "*.yml"
-    - LICENSE
-    - "docs/**"
+    paths:
+    - "!*.md"
+    - "!*.yaml"
+    - "!*.yml"
+    - "!LICENSE"
+    - "!docs/**"
+    - "CHANGELOG.md"
+    - ".github/workflows/**"
 
 jobs:
   static-checks:
