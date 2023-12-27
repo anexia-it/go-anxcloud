@@ -2,3 +2,6 @@ exclude_patterns:
   - "**/*_test.go"
   - "**/test/"
   - "**/xxgenerated_*.go"
+plugins:
+  govet:
+    enabled: true

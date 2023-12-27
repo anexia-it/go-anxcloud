@@ -3,23 +3,20 @@ name: Code
 on:
   push:
     branches:
-      - 'main'
+    - main
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - main
+    - main
     paths-ignore:
-      - "*.md"
-      - '*.yaml'
-      - '*.yml'
-      - LICENSE
-      - 'docs/**'
-
-env:
-  GO111MODULE: on
+    - "*.md"
+    - "*.yaml"
+    - "*.yml"
+    - LICENSE
+    - "docs/**"
 
 jobs:
-  go-lint:
+  static-checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,38 +25,30 @@ jobs:
           name: target
         - version: "1.21"
           name: latest
-    name: "Linting with ${{ matrix.go.name }} Go"
+    name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go.version }}
-      - name: run linters
-        run: |
-          make go-lint
-          make fmtcheck
-  codegen-uptodate:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go:
-        - version: "1.20"
-          name: target
-        - version: "1.21"
-          name: latest
-    name: "Code generator with ${{ matrix.go.name }} Go"
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go.version }}
-      - name: generate code
+
+      - name: check if generate code is up-to-date
         run:  |
           make generate
           if [ -n "$(git status --porcelain=v1)" ]; then git add -N .; git diff; exit 1; fi
-  unit:
+
+      - name: check if go.mod and go.sum are tidy
+        run: make depscheck
+
+      - name: check code format
+        run: make fmtcheck
+
+      - name: check code quality
+        run: make go-lint
+
+  unit-tests:
     runs-on: ubuntu-latest
-    if: success() || failure()
     strategy:
       matrix:
         go:
@@ -69,46 +58,68 @@ jobs:
           name: latest
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go.version }}
-      - name: run unit tests
-        run: make test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          files: ./coverage.out
-          flags: unittests
-          verbose: true
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go.version }}
+
+    - name: run unit tests
+      run: make test
+
+    - name: upload coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: unit-coverage-${{ matrix.go.name }}
+        path: coverage.out
+
   integration-tests:
     if: ${{ github.event.label.name == 'integration_tests' }}
+    needs:
+    - unit-tests
+    - static-checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
         - version: "1.20"
           name: target
-    name: "Integration tests with ${{ matrix.go.name }} Go (ok-to-test or trusted)"
+        - version: "1.21"
+          name: latest
+    name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v3
-        with:
-          ref: 'refs/pull/${{ github.event.pull_request.number }}/merge'
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go.version }}
-      - name: run integration tests
-        env:
-          ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
-        run: make func-test
+    - uses: actions/checkout@v4
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          files: ./coverage.out
-          flags: integration
-          verbose: true
-          override_pr: ${{ github.event.pull_request.number }}
+    - uses: actions/setup-go@v4
+      with:
+        go-version: ${{ matrix.go.version }}
+
+    - name: run integration tests
+      env:
+        ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
+      run: make func-test
+
+    - name: upload coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: integration-coverage-${{ matrix.go.name }}
+        path: coverage.out
+
+  upload-results:
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/download-artifact@v3
+
+    - uses: paambaati/codeclimate-action@v5.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      with:
+        prefix: go.anx.io/go-anxcloud
+        coverageLocations: |
+          ${{ github.workspace }}/unit-coverage-target/coverage.out:gocov
+          ${{ github.workspace }}/unit-coverage-latest/coverage.out:gocov
+          ${{ github.workspace }}/integration-coverage-target/coverage.out:gocov
+          ${{ github.workspace }}/integration-coverage-latest/coverage.out:gocov
