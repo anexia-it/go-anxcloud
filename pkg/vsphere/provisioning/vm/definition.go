@@ -96,6 +96,8 @@ type Definition struct {
 
 // Network defines the network configuration of a VM.
 type Network struct {
+	ID int `json:"id,omitempty"`
+
 	// Example: "vmxnet3"
 	NICType string `json:"nic_type,omitempty"`
 
@@ -145,6 +147,7 @@ type Change struct {
 	AddDisks           []Disk    `json:"disk_to_add,omitempty"`
 	ChangeDisks        []Disk    `json:"disk_to_change,omitempty"`
 	AddNICs            []Network `json:"network_to_add,omitempty"`
+	ChangeNICs         []Network `json:"network_to_change,omitempty"`
 	BootDelaySecs      int       `json:"boot_delay,omitempty"`
 	EnterBIOSSetup     bool      `json:"enter_bios_setup,omitempty"`
 	Reboot             bool      `json:"force_restart_if_needed,omitempty"`
