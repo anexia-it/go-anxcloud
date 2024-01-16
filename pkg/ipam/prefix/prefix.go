@@ -93,6 +93,7 @@ type Summary struct {
 	ID                  string `json:"identifier"`
 	Name                string `json:"name"`
 	CustomerDescription string `json:"description_customer"`
+	Vlans               []Vlan `json:"vlans"`
 }
 
 type listResponse struct {
