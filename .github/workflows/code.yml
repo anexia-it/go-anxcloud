@@ -9,6 +9,7 @@ on:
     branches:
     - main
     paths:
+    - "**"
     - "!*.md"
     - "!*.yaml"
     - "!*.yml"
