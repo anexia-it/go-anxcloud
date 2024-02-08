@@ -15,7 +15,7 @@ import (
 
 const (
 	locationID = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
-	vlanID     = "16854ecb42af4fad89f9fcef26789d50"
+	vlanID     = "166fa87362c8498f8c4aa6d1c5b9042c"
 )
 
 var _ = Describe("ipam/prefix client", func() {
