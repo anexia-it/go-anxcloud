@@ -109,7 +109,7 @@ var _ = Describe("mock", func() {
 						"s3_object_path": "fake-object-path",
 						"s3_access_key": "fake-access-key",
 						"s3_secret_key": "fake-secret-key",
-						"zip_file": {
+						"archive_file": {
 							"content": "fake-content",
 							"name": "fake-name"
 						}
@@ -146,7 +146,7 @@ var _ = Describe("mock", func() {
 						Username:   "fake-username",
 						Password:   "fake-password",
 					},
-					StorageBackendMetaZipFile: &StorageBackendMetaZipFile{
+					StorageBackendMetaArchive: &StorageBackendMetaArchive{
 						Content: "fake-content",
 						Name:    "fake-name",
 					},

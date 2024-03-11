@@ -5,7 +5,7 @@ type StorageBackend string
 const (
 	StorageBackendS3      = "s3"
 	StorageBackendGit     = "git"
-	StorageBackendZipFile = "zip"
+	StorageBackendArchive = "archive"
 )
 
 type WorkerType string
@@ -22,6 +22,7 @@ type Function struct {
 	omitResponseDecodeOnDestroy
 	Identifier            string                 `json:"identifier,omitempty" anxcloud:"identifier"`
 	State                 string                 `json:"state,omitempty"`
+	DeploymentState       string                 `json:"deployment_state,omitempty"`
 	Name                  string                 `json:"name,omitempty"`
 	ApplicationIdentifier string                 `json:"application_identifier,omitempty"`
 	Runtime               string                 `json:"runtime,omitempty"`
@@ -43,7 +44,7 @@ type Function struct {
 type StorageBackendMeta struct {
 	*StorageBackendMetaGit
 	*StorageBackendMetaS3
-	*StorageBackendMetaZipFile `json:"zip_file,omitempty"`
+	*StorageBackendMetaArchive `json:"archive_file,omitempty"`
 }
 
 // StorageBackendMetaGit is used to configure a git storage backend
@@ -64,8 +65,8 @@ type StorageBackendMetaS3 struct {
 	SecretKey  string `json:"s3_secret_key,omitempty"`
 }
 
-// StorageBackendMetaZipFile is used to configure a zip file storage backend
-type StorageBackendMetaZipFile struct {
+// StorageBackendMetaArchive is used to configure an archive storage backend
+type StorageBackendMetaArchive struct {
 	// Data string containing the mime-type, encoding and encoded data
 	// data:<mime type>;base64,<data>
 	Content string `json:"content"`
