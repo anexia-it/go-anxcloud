@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.6.3] - 2024-03-15
+
 ### Changed
 * e5e/v1: rename storage backend 'zip' to 'archive' and add new `deployment_state` attribute (#347, @anx-mschaefer)
 
