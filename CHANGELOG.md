@@ -23,6 +23,11 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.6.4] - 2024-03-15
+
+### Fixed
+* fix renamed inputs for crazy-max/ghaction-import-gpg action in release workflow
+
 ## [0.6.3] - 2024-03-15
 
 ### Changed
