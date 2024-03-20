@@ -13,13 +13,9 @@ import (
 var _ = Describe("Object ACL", func() {
 	o := apipkg.ACL{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -29,13 +25,9 @@ var _ = Describe("Object ACL", func() {
 var _ = Describe("Object Backend", func() {
 	o := apipkg.Backend{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -45,13 +37,9 @@ var _ = Describe("Object Backend", func() {
 var _ = Describe("Object Bind", func() {
 	o := apipkg.Bind{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -61,13 +49,9 @@ var _ = Describe("Object Bind", func() {
 var _ = Describe("Object Frontend", func() {
 	o := apipkg.Frontend{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -77,17 +61,9 @@ var _ = Describe("Object Frontend", func() {
 var _ = Describe("Object LoadBalancer", func() {
 	o := apipkg.LoadBalancer{}
 
-	ifaces := make([]interface{}, 0, 3)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.ResponseFilterHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -97,13 +73,9 @@ var _ = Describe("Object LoadBalancer", func() {
 var _ = Describe("Object Rule", func() {
 	o := apipkg.Rule{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 
@@ -113,13 +85,9 @@ var _ = Describe("Object Rule", func() {
 var _ = Describe("Object Server", func() {
 	o := apipkg.Server{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 

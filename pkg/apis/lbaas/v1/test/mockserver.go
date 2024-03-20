@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -16,7 +17,6 @@ import (
 )
 
 type backend v1.Backend
-type state gs.State
 
 func NewMockServer() *ghttp.Server {
 	type errorResponseData struct {
@@ -252,12 +252,13 @@ func NewMockServer() *ghttp.Server {
 func (b *backend) UnmarshalJSON(bytes []byte) error {
 	var clientData struct {
 		v1.Backend
+		State        string `json:"state,omitempty"`
 		LoadBalancer string `json:"load_balancer,omitempty"`
-		State        string `json:"state"`
 	}
 
 	err := json.Unmarshal(bytes, &clientData)
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 	clientData.Backend.State = getStateByID(clientData.State)
@@ -268,13 +269,22 @@ func (b *backend) UnmarshalJSON(bytes []byte) error {
 }
 
 func (b backend) MarshalJSON() ([]byte, error) {
+	type state struct {
+		ID string `json:"id"`
+	}
+
+	returnState := state{}
+	if b.State != nil {
+		returnState.ID = b.State.ID
+	}
+
 	clientData := struct {
 		v1.Backend
-		State        state                  `json:"state"`
+		State        state                  `json:"state,omitempty"`
 		LoadBalancer map[string]interface{} `json:"load_balancer"`
 	}{
 		Backend: v1.Backend(b),
-		State:   state(getStateByID(b.State.ID)),
+		State:   returnState,
 		LoadBalancer: map[string]interface{}{
 			"name":       b.LoadBalancer.Name,
 			"identifier": b.LoadBalancer.Name,
@@ -284,27 +294,18 @@ func (b backend) MarshalJSON() ([]byte, error) {
 	return json.Marshal(clientData)
 }
 
-// MarshalJSON overwrites the original MarshalJSON from lbaasv1.State so that we can properly use it in the mocked server
-func (s state) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
-		"id":   s.ID,
-		"type": s.Type,
-		"text": s.Text,
-	})
-}
-
-func getStateByID(stateID string) gs.State {
+func getStateByID(stateID string) *gs.State {
 	switch stateID {
 	case v1.NewlyCreated.ID, "":
-		return v1.NewlyCreated
+		return &v1.NewlyCreated
 	case v1.Updating.ID:
-		return v1.Updating
+		return &v1.Updating
 	case v1.Updated.ID:
-		return v1.Updated
+		return &v1.Updated
 	case v1.Deployed.ID:
-		return v1.Deployed
+		return &v1.Deployed
 	case v1.DeploymentError.ID:
-		return v1.DeploymentError
+		return &v1.DeploymentError
 	default:
 		panic(fmt.Sprintf("unknown id '%s'", stateID))
 	}

@@ -18,7 +18,7 @@ func (gen *ObjectGenerator) generateGetIdentifier() {
 	const templates = `
 {{range .IdentifiedObjects }}
 // GetIdentifier returns the primary identifier of a {{.ObjectName}} object
-func (o *{{.ObjectName}}) GetIdentifier(ctx context.Context) (string, error) {
+func (o {{.ObjectName}}) GetIdentifier(ctx context.Context) (string, error) {
 	return o.{{.IdentifyingField}}, nil
 }
 {{end}}`
@@ -45,8 +45,8 @@ func (gen *ObjectGenerator) findAlreadyIdentifiedObjects(file *ast.File, fset *t
 	ast.Inspect(file, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok {
 			if fn.Name.String() == "GetIdentifier" && fn.Recv != nil && len(fn.Recv.List) == 1 {
-				if r, ok := fn.Recv.List[0].Type.(*ast.StarExpr); ok {
-					gen.alreadyIdentifiedObjects = append(gen.alreadyIdentifiedObjects, r.X.(*ast.Ident).Name)
+				if r, ok := fn.Recv.List[0].Type.(*ast.Ident); ok {
+					gen.alreadyIdentifiedObjects = append(gen.alreadyIdentifiedObjects, r.Name)
 				}
 			}
 		}

@@ -38,19 +38,3 @@ func (f *Frontend) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, nil
 }
-
-// FilterAPIRequestBody generates the request body for Frontends, replacing linked Objects with just their identifier.
-func (f *Frontend) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			Frontend
-			LoadBalancer   string `json:"load_balancer"`
-			DefaultBackend string `json:"default_backend"`
-		}{
-			Frontend:       *f,
-			LoadBalancer:   f.LoadBalancer.Identifier,
-			DefaultBackend: f.DefaultBackend.Identifier,
-		}
-	})
-}

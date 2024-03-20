@@ -2,7 +2,7 @@ package v1
 
 import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // The Backend resource configures settings common for all specific backend Server resources linked to it.
 type Backend struct {
@@ -19,5 +19,5 @@ type Backend struct {
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	LoadBalancer LoadBalancer `json:"load_balancer"`
+	LoadBalancer LoadBalancer `json:"load_balancer" anxencode:"flatten"`
 }

@@ -7,41 +7,41 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a ACL object
-func (o *ACL) GetIdentifier(ctx context.Context) (string, error) {
+func (o ACL) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Backend object
-func (o *Backend) GetIdentifier(ctx context.Context) (string, error) {
+func (o Backend) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Bind object
-func (o *Bind) GetIdentifier(ctx context.Context) (string, error) {
+func (o Bind) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Frontend object
-func (o *Frontend) GetIdentifier(ctx context.Context) (string, error) {
+func (o Frontend) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a LoadBalancer object
-func (o *LoadBalancer) GetIdentifier(ctx context.Context) (string, error) {
+func (o LoadBalancer) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Rule object
-func (o *Rule) GetIdentifier(ctx context.Context) (string, error) {
+func (o Rule) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Server object
-func (o *Server) GetIdentifier(ctx context.Context) (string, error) {
+func (o Server) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a RuleInfo object
-func (o *RuleInfo) GetIdentifier(ctx context.Context) (string, error) {
+func (o RuleInfo) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

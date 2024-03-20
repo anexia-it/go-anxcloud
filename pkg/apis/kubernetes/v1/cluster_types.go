@@ -21,7 +21,7 @@ type Cluster struct {
 	// Kubernetes version to be used for the cluster. We recommend to use the default value.
 	Version string `json:"version,omitempty"`
 	// Location where the cluster will be deployed
-	Location corev1.Location `json:"location,omitempty"`
+	Location corev1.Location `json:"location,omitempty" anxencode:"flatten"`
 	// If set to true, Service VMs providing load balancers and outbound masquerade are created for this cluster.
 	// Default: true. Optional value can be set via pkg/utils/pointer.Bool
 	NeedsServiceVMs *bool `json:"needs_service_vms,omitempty"`
