@@ -2,7 +2,7 @@ package v1
 
 import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // ACL represents an LBaaS ACL
 type ACL struct {
@@ -24,6 +24,6 @@ type ACL struct {
 	Index *int `json:"index,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	Frontend Frontend `json:"frontend,omitempty" anxcloud:"filterable"`
-	Backend  Backend  `json:"backend,omitempty" anxcloud:"filterable"`
+	Frontend Frontend `json:"frontend,omitempty" anxcloud:"filterable" anxencode:"flatten"`
+	Backend  Backend  `json:"backend,omitempty" anxcloud:"filterable" anxencode:"flatten"`
 }

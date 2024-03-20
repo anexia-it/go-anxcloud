@@ -7,11 +7,11 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Application object
-func (o *Application) GetIdentifier(ctx context.Context) (string, error) {
+func (o Application) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Function object
-func (o *Function) GetIdentifier(ctx context.Context) (string, error) {
+func (o Function) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

@@ -7,11 +7,11 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Record object
-func (o *Record) GetIdentifier(ctx context.Context) (string, error) {
+func (o Record) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Zone object
-func (o *Zone) GetIdentifier(ctx context.Context) (string, error) {
+func (o Zone) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Name, nil
 }

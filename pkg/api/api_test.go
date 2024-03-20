@@ -1311,3 +1311,163 @@ func TestAPIUnits(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "api unit test suite")
 }
+
+type nested struct {
+	id string
+}
+
+func (n nested) GetIdentifier(context.Context) (string, error) {
+	return n.id, nil
+}
+
+type nestedErrorIdentifier struct{}
+
+func (n nestedErrorIdentifier) GetIdentifier(context.Context) (string, error) {
+	return "", errors.New("sorry, no id available...")
+}
+
+type FooEmbed struct {
+	Foo nested `json:"foo" anxencode:"flatten"`
+}
+
+type BarEmbed struct {
+	Bar nested `json:"bar" anxencode:"flatten"`
+}
+
+type withEmbeds struct {
+	FooEmbed
+	*BarEmbed
+
+	Baz nested `json:"baz" anxencode:"flatten"`
+}
+
+var _ = DescribeTable("flattenObject", func(o any, expectedJson string, expectedError string) {
+	flattened, err := flattenObject(context.TODO(), o)
+	if expectedError == "" {
+		Expect(err).ToNot(HaveOccurred())
+		Expect(json.Marshal(flattened)).To(MatchJSON(expectedJson))
+	} else {
+		Expect(err).To(MatchError(expectedError))
+	}
+},
+	Entry(
+		"nested resource",
+		&struct {
+			Foo nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: nested{"fake-id"},
+		},
+		`{"foo":"fake-id"}`,
+		"",
+	),
+	Entry(
+		"nested resource with error",
+		&struct {
+			Foo nestedErrorIdentifier `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: nestedErrorIdentifier{},
+		},
+		``,
+		"sorry, no id available...",
+	),
+	Entry(
+		"nested resource without id and without omitempty",
+		&struct {
+			Foo nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: nested{},
+		},
+		`{"foo":""}`,
+		"",
+	),
+	Entry(
+		"nested resource without id and with omitempty",
+		&struct {
+			Foo nested `json:"foo,omitempty" anxencode:"flatten"`
+		}{
+			Foo: nested{},
+		},
+		`{}`,
+		"",
+	),
+	Entry(
+		"pointer to nested resource",
+		&struct {
+			Foo *nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: &nested{"fake-id"},
+		},
+		`{"foo":"fake-id"}`,
+		"",
+	),
+	Entry(
+		"nil pointer to nested resource without omitempty",
+		&struct {
+			Foo *nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: nil,
+		},
+		`{"foo":null}`,
+		"",
+	),
+	Entry(
+		"nil pointer to nested resource with omitempty",
+		&struct {
+			Foo *nested `json:"foo,omitempty" anxencode:"flatten"`
+		}{
+			Foo: nil,
+		},
+		`{}`,
+		"",
+	),
+	Entry(
+		"multiple nested resources",
+		&struct {
+			Foo []nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: []nested{{"fake-foo-id"}, {"fake-bar-id"}},
+		},
+		`{"foo":"fake-foo-id,fake-bar-id"}`,
+		"",
+	),
+	Entry(
+		"multiple nested resources with error",
+		&struct {
+			Foo []nestedErrorIdentifier `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: []nestedErrorIdentifier{{}},
+		},
+		``,
+		"sorry, no id available...",
+	),
+	Entry(
+		"pointer to multiple nested resources",
+		&struct {
+			Foo *[]nested `json:"foo" anxencode:"flatten"`
+		}{
+			Foo: &[]nested{{"fake-foo-id"}, {"fake-bar-id"}},
+		},
+		`{"foo":"fake-foo-id,fake-bar-id"}`,
+		"",
+	),
+	Entry(
+		"with embeds",
+		&withEmbeds{
+			FooEmbed: FooEmbed{nested{"foo-id"}},
+			BarEmbed: &BarEmbed{nested{"bar-id"}},
+			Baz:      nested{"baz-id"},
+		},
+		`{"foo":"foo-id","bar":"bar-id","baz":"baz-id"}`,
+		"",
+	),
+	Entry(
+		"with nil embeds",
+		&withEmbeds{
+			FooEmbed: FooEmbed{nested{"foo-id"}},
+			BarEmbed: nil,
+			Baz:      nested{"baz-id"},
+		},
+		`{"foo":"foo-id","baz":"baz-id"}`,
+		"",
+	),
+)

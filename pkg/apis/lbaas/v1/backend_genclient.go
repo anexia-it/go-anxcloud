@@ -38,17 +38,3 @@ func (b *Backend) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, err
 }
-
-// FilterAPIRequestBody generates the request body for Backends, replacing linked Objects with just their identifier.
-func (b *Backend) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			Backend
-			LoadBalancer string `json:"load_balancer"`
-		}{
-			Backend:      *b,
-			LoadBalancer: b.LoadBalancer.Identifier,
-		}
-	})
-}

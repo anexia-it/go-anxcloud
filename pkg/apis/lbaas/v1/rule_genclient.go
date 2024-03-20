@@ -38,19 +38,3 @@ func (r *Rule) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, nil
 }
-
-// FilterAPIRequestBody generates the request body for Rules, replacing linked Objects with just their identifier.
-func (r *Rule) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			Rule
-			Backend  string `json:"backend,omitempty"`
-			Frontend string `json:"frontend,omitempty"`
-		}{
-			Rule:     *r,
-			Backend:  r.Backend.Identifier,
-			Frontend: r.Frontend.Identifier,
-		}
-	})
-}

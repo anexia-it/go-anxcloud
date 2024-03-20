@@ -25,13 +25,9 @@ var _ = Describe("Object Cluster", func() {
 var _ = Describe("Object NodePool", func() {
 	o := apipkg.NodePool{}
 
-	ifaces := make([]interface{}, 0, 2)
+	ifaces := make([]interface{}, 0, 1)
 	{
 		var i types.Object
-		ifaces = append(ifaces, &i)
-	}
-	{
-		var i types.RequestBodyHook
 		ifaces = append(ifaces, &i)
 	}
 

@@ -28,6 +28,7 @@ func appendGetClusterHandler(srv *ghttp.Server, clusterID string, resCode int, r
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", clusterID)),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(resCode, res),
 		))
 	})
@@ -37,6 +38,7 @@ func appendDeleteClusterHandler(srv *ghttp.Server, clusterID string, resCode int
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("DELETE", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", clusterID)),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(resCode, true),
 		))
 	})
@@ -51,6 +53,7 @@ func appendListClustersHandler(srv *ghttp.Server, clusters ...partialCluster) {
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/api/kubernetes/v1/cluster.json"),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(200, map[string]interface{}{
 				"data": map[string]interface{}{
 					"page":        1,
@@ -79,6 +82,7 @@ func appendGetNodePoolHandler(srv *ghttp.Server, nodePoolID string, resCode int,
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", fmt.Sprintf("/api/kubernetes/v1/node_pool.json/%s", nodePoolID)),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(resCode, res),
 		))
 	})
@@ -88,6 +92,7 @@ func appendDeleteNodePoolHandler(srv *ghttp.Server, nodePoolID string, resCode i
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("DELETE", fmt.Sprintf("/api/kubernetes/v1/node_pool.json/%s", nodePoolID)),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(resCode, true),
 		))
 	})
@@ -102,6 +107,7 @@ func appendListNodePoolsHandler(srv *ghttp.Server, nodePools ...partialNodePool)
 	withExistingServer(srv, func(srv *ghttp.Server) {
 		srv.AppendHandlers(ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/api/kubernetes/v1/node_pool.json"),
+			ghttp.VerifyBody(nil),
 			ghttp.RespondWithJSONEncoded(200, map[string]interface{}{
 				"data": map[string]interface{}{
 					"page":        1,

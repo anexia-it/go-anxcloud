@@ -11,17 +11,3 @@ func (lb *LoadBalancer) EndpointURL(ctx context.Context) (*url.URL, error) {
 	url, err := url.ParseRequestURI("/api/LBaaS/v1/loadbalancer.json")
 	return url, err
 }
-
-// FilterAPIRequestBody generates the request body for creating a new LoadBalancer, which differs from the LoadBalancer object.
-func (lb *LoadBalancer) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-
-			// nolint:govet
-			LoadBalancer
-		}{
-			LoadBalancer: *lb,
-		}
-	})
-}

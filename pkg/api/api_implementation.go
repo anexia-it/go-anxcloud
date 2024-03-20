@@ -12,11 +12,14 @@ import (
 	"net/url"
 	"path"
 	"reflect"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-logr/logr"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	corev1helper "go.anx.io/go-anxcloud/pkg/apis/core/v1/helper"
 	"go.anx.io/go-anxcloud/pkg/client"
 )
@@ -425,6 +428,11 @@ func (a defaultAPI) makeRequest(ctx context.Context, obj types.Object, body inte
 			requestBody = rb
 		}
 
+		requestBody, err = flattenObject(ctx, requestBody)
+		if err != nil {
+			return nil, err
+		}
+
 		if err := json.NewEncoder(&buffer).Encode(requestBody); err != nil {
 			return nil, err
 		}
@@ -463,6 +471,15 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 
 	if err != nil {
 		return fmt.Errorf("HTTP request failed: %w", err)
+	}
+
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("get operation from request context: %w", err)
+	}
+	if isGenericServiceResource(obj) && op == types.OperationDestroy {
+		response.Body.Close()
+		response.Body = io.NopCloser(bytes.NewReader([]byte("{}")))
 	}
 
 	if filterResponse, ok := obj.(types.ResponseFilterHook); ok {
@@ -577,4 +594,195 @@ func decodeResponse(ctx context.Context, mediaType string, data io.Reader, res i
 	}
 
 	return fmt.Errorf("%w: no idea how to handle media type %v", ErrUnsupportedResponseFormat, mediaType)
+}
+
+func isGenericServiceResource(o any) bool {
+	ot := reflect.TypeOf(o)
+	for ; ot.Kind() == reflect.Ptr; ot = ot.Elem() {
+		// resolve pointer
+	}
+
+	if ot.Kind() != reflect.Struct {
+		return false
+	}
+
+	gsBaseType := reflect.TypeOf(gs.GenericService{})
+	for i := 0; i < ot.NumField(); i++ {
+		if sf := ot.Field(i); sf.Type == gsBaseType && sf.Anonymous {
+			return true
+		}
+	}
+
+	return false
+}
+
+func flattenObject(ctx context.Context, o any) (any, error) {
+	type IdentifiedObject interface {
+		GetIdentifier(context.Context) (string, error)
+	}
+
+	type flatmeta struct {
+		multi    bool
+		ptr      bool
+		embedVal reflect.Value
+	}
+
+	origType := reflect.TypeOf(o)
+	origInstance := reflect.ValueOf(o)
+
+	if origType.Kind() == reflect.Pointer {
+		if origInstance.IsNil() {
+			return o, nil
+		}
+
+		origType = origType.Elem()
+		origInstance = origInstance.Elem()
+	}
+
+	if origType.Kind() != reflect.Struct {
+		// not a pointer to a struct? -> can't flatten -> return as is
+		return o, nil
+	}
+
+	identifiedObjectType := reflect.TypeOf((*IdentifiedObject)(nil)).Elem()
+
+	var newFields []reflect.StructField
+	var flatMetaMap = make(map[int]flatmeta)
+
+	// iterate all struct fields to construct new type
+	// if field is not exported
+	// -> omit from new type
+	// if field is anonymous
+	// -> flatten recursive
+	// if field contains `flatten` in anxencode tag
+	// -> change field type to (pointer - if original type is also a pointer) string
+	// -> store some meta in flatMetaMap (is pointer? is multi?)
+	for i := 0; i < origType.NumField(); i++ {
+		field := origType.Field(i)
+
+		if !field.IsExported() {
+			// not exported? -> omit in new type
+			continue
+		} else if field.Anonymous {
+			// handle embedded field recursively
+			flattened, err := flattenObject(ctx, origInstance.Field(i).Interface())
+			if err != nil {
+				return nil, err
+			}
+
+			field.Type = reflect.TypeOf(flattened)
+			val := reflect.ValueOf(flattened)
+			flatMetaMap[i] = flatmeta{embedVal: val}
+		} else {
+			isPtr := field.Type.Kind() == reflect.Pointer
+
+			fieldType := field.Type
+			if isPtr {
+				fieldType = fieldType.Elem()
+			}
+
+			if encodeOpts, ok := field.Tag.Lookup("anxencode"); ok && slices.Contains(strings.Split(encodeOpts, ","), "flatten") {
+				flatMetaMap[i] = flatmeta{ptr: isPtr, multi: fieldType.Kind() == reflect.Slice}
+				if !fieldType.Implements(identifiedObjectType) &&
+					!(fieldType.Kind() == reflect.Slice && fieldType.Elem().Implements(identifiedObjectType)) {
+					return nil, fmt.Errorf("%q does not implement IdentifiedObject interface", field.Name)
+				}
+
+				newType := reflect.TypeOf("")
+				if isPtr {
+					newType = reflect.PointerTo(newType)
+				}
+
+				field.Type = newType
+			}
+		}
+
+		newFields = append(newFields, field)
+	}
+
+	newType := reflect.StructOf(newFields)
+	newInstance := reflect.New(newType).Elem()
+
+	reflectGetIdentifier := func(v reflect.Value) (string, error) {
+		ret := v.MethodByName("GetIdentifier").Call([]reflect.Value{reflect.ValueOf(ctx)})
+		if err := ret[1].Interface(); err != nil {
+			return "", err.(error)
+		}
+
+		return ret[0].String(), nil
+	}
+
+	skipped := 0
+	// set values in instance of new type
+	for oi := 0; oi < origInstance.NumField(); oi++ {
+		ni := oi - skipped
+		if !origType.Field(oi).IsExported() {
+			skipped += 1
+			continue
+		}
+
+		if meta, ok := flatMetaMap[oi]; ok {
+			newField := newInstance.Field(ni)
+
+			if newType.Field(ni).Anonymous {
+				newField.Set(meta.embedVal)
+				continue
+			}
+
+			// original field value was null? -> nothing to do
+			if meta.ptr && origInstance.Field(oi).IsNil() {
+				continue
+			}
+
+			origFieldVal := origInstance.Field(oi)
+			if meta.ptr {
+				origFieldVal = origFieldVal.Elem()
+			}
+
+			var newFieldValString string
+
+			if !meta.multi {
+				id, err := reflectGetIdentifier(origFieldVal)
+				if err != nil {
+					return nil, err
+				}
+
+				if meta.ptr && id == "" {
+					return nil, types.ErrUnidentifiedObject
+				}
+
+				newFieldValString = id
+			} else {
+				// is multi? -> join ids with comma into a single string
+				ids := make([]string, 0, origFieldVal.Len())
+				for j := 0; j < origFieldVal.Len(); j++ {
+					id, err := reflectGetIdentifier(origFieldVal.Index(j))
+					if err != nil {
+						return nil, err
+					}
+
+					if id == "" {
+						return nil, types.ErrUnidentifiedObject
+					}
+
+					ids = append(ids, id)
+				}
+
+				newFieldValString = strings.Join(ids, ",")
+			}
+
+			var newVal reflect.Value
+			if !meta.ptr {
+				newVal = reflect.ValueOf(newFieldValString)
+			} else {
+				newVal = reflect.ValueOf(&newFieldValString)
+			}
+
+			newField.Set(newVal)
+		} else {
+			newInstance.Field(ni).Set(origInstance.Field(oi))
+		}
+	}
+
+	return newInstance.Interface(), nil
 }

@@ -38,19 +38,3 @@ func (a *ACL) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, nil
 }
-
-// FilterAPIRequestBody generates the request body for ACLs, replacing linked Objects with just their identifier.
-func (a *ACL) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			ACL
-			Backend  string `json:"backend,omitempty"`
-			Frontend string `json:"frontend,omitempty"`
-		}{
-			ACL:      *a,
-			Backend:  a.Backend.Identifier,
-			Frontend: a.Frontend.Identifier,
-		}
-	})
-}

@@ -7,16 +7,16 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Cluster object
-func (o *Cluster) GetIdentifier(ctx context.Context) (string, error) {
+func (o Cluster) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Node object
-func (o *Node) GetIdentifier(ctx context.Context) (string, error) {
+func (o Node) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a LoadBalancer object
-func (o *LoadBalancer) GetIdentifier(ctx context.Context) (string, error) {
+func (o LoadBalancer) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
