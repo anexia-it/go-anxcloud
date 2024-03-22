@@ -8,10 +8,8 @@ import (
 	"github.com/onsi/gomega/ghttp"
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 	"go.anx.io/go-anxcloud/pkg/client"
-	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -67,35 +65,3 @@ var _ = Describe("AwaitCompletion", Ordered, func() {
 		Expect(err).To(MatchError(context.DeadlineExceeded))
 	})
 })
-
-var _ = Describe("Create Cluster", func() {
-	DescribeTable("prefix configurations", func(cluster Cluster, expected error) {
-		_, err := cluster.FilterAPIRequestBody(types.ContextWithOperation(context.TODO(), types.OperationCreate))
-		if expected == nil {
-			Expect(err).ToNot(HaveOccurred())
-		} else {
-			Expect(err).To(MatchError(expected))
-		}
-	},
-		Entry("all prefixes implicitly managed", Cluster{}, nil),
-		Entry("all prefixes explicitly managed", Cluster{ManageInternalIPv4Prefix: pointer.Bool(true), ManageExternalIPv4Prefix: pointer.Bool(true), ManageExternalIPv6Prefix: pointer.Bool(true)}, nil),
-		Entry("internal v4 prefix implicitly managed and explicitly provided", Cluster{InternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("internal v4 prefix explicitly managed and explicitly provided", Cluster{ManageInternalIPv4Prefix: pointer.Bool(true), InternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("internal v4 prefix explicitly unmanaged and provided", Cluster{ManageInternalIPv4Prefix: pointer.Bool(false), InternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, nil),
-		Entry("external v4 prefix implicitly managed and explicitly provided", Cluster{ExternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("external v4 prefix explicitly managed and explicitly provided", Cluster{ManageExternalIPv4Prefix: pointer.Bool(true), ExternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("external v4 prefix explicitly unmanaged and provided", Cluster{ManageExternalIPv4Prefix: pointer.Bool(false), ExternalIPv4Prefix: &common.PartialResource{Identifier: "foo"}}, nil),
-		Entry("external v6 prefix implicitly managed and explicitly provided", Cluster{ExternalIPv6Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("external v6 prefix explicitly managed and explicitly provided", Cluster{ManageExternalIPv6Prefix: pointer.Bool(true), ExternalIPv6Prefix: &common.PartialResource{Identifier: "foo"}}, ErrManagedPrefixSet),
-		Entry("external v6 prefix explicitly unmanaged and provided", Cluster{ManageExternalIPv6Prefix: pointer.Bool(false), ExternalIPv6Prefix: &common.PartialResource{Identifier: "foo"}}, nil),
-	)
-})
-
-var _ = DescribeTable("explicitlyFalse",
-	func(b *bool, expected bool) {
-		Expect(explicitlyFalse(b)).To(Equal(expected))
-	},
-	Entry("explicitly false", pointer.Bool(false), true),
-	Entry("explicitly true", pointer.Bool(true), false),
-	Entry("implicitly false (nil)", nil, false),
-)

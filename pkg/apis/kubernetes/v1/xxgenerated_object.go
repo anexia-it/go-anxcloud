@@ -7,16 +7,16 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Cluster object
-func (o *Cluster) GetIdentifier(ctx context.Context) (string, error) {
+func (o Cluster) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a kubeconfig object
-func (o *kubeconfig) GetIdentifier(ctx context.Context) (string, error) {
+func (o kubeconfig) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Cluster, nil
 }
 
 // GetIdentifier returns the primary identifier of a NodePool object
-func (o *NodePool) GetIdentifier(ctx context.Context) (string, error) {
+func (o NodePool) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

@@ -33,17 +33,3 @@ func (s *Server) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, nil
 }
-
-// FilterAPIRequestBody generates the request body for Servers, replacing linked Objects with just their identifier.
-func (s *Server) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			Server
-			Backend string `json:"backend"`
-		}{
-			Server:  *s,
-			Backend: s.Backend.Identifier,
-		}
-	})
-}

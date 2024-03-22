@@ -7,6 +7,6 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Template object
-func (o *Template) GetIdentifier(ctx context.Context) (string, error) {
+func (o Template) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

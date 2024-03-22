@@ -31,7 +31,7 @@ func (l *Location) EndpointURL(ctx context.Context) (*url.URL, error) {
 }
 
 // GetIdentifier returns the objects identifier
-func (l *Location) GetIdentifier(ctx context.Context) (string, error) {
+func (l Location) GetIdentifier(ctx context.Context) (string, error) {
 	op, err := types.OperationFromContext(ctx)
 	if l.Identifier != "" || err != nil {
 		return l.Identifier, nil

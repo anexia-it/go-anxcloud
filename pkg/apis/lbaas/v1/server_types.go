@@ -2,7 +2,7 @@ package v1
 
 import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // Server holds the information of a load balancers backend server
 type Server struct {
@@ -19,5 +19,5 @@ type Server struct {
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	Backend Backend `json:"backend"`
+	Backend Backend `json:"backend" anxencode:"flatten"`
 }

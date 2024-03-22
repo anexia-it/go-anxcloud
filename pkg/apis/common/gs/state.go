@@ -40,29 +40,30 @@ const (
 )
 
 // StateOK checks if the state is one of the successful ones
-func (s State) StateOK() bool {
-	return s.Type == StateTypeOK
+func (s *State) StateOK() bool {
+	return s != nil && s.Type == StateTypeOK
 }
 
 // StatePending checks if the state is marking any change currently being applied
-func (s State) StatePending() bool {
-	return s.Type == StateTypePending
+func (s *State) StatePending() bool {
+	return s != nil && s.Type == StateTypePending
 }
 
 // StateError checks if the state is marking any failure
-func (s State) StateError() bool {
-	return s.Type == StateTypeError
+func (s *State) StateError() bool {
+	return s != nil && s.Type == StateTypeError
 }
 
-func (s State) MarshalJSON() ([]byte, error) {
-	// it would be great if one of the proposals in https://github.com/golang/go/issues/11939 would be
-	// accepted and we could do something like `if s.ID == "" { omitThisField }` ... but it isn't, so
-	// we have to override the field for every LBaaS Object for Create and Update operations.
+func (s *State) MarshalJSON() ([]byte, error) {
+	if s == nil {
+		return json.Marshal(nil)
+	}
+
 	return json.Marshal(s.ID)
 }
 
 type HasState struct {
-	State State `json:"state"`
+	State *State `json:"state,omitempty"`
 }
 
 // StateOK checks if the state is one of the successful ones

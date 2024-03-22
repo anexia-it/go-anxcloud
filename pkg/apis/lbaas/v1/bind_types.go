@@ -2,7 +2,7 @@ package v1
 
 import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // Bind represents an LBaaS FrontendBind
 type Bind struct {
@@ -20,5 +20,5 @@ type Bind struct {
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	Frontend Frontend `json:"frontend"`
+	Frontend Frontend `json:"frontend" anxencode:"flatten"`
 }

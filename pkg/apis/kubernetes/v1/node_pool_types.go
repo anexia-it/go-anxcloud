@@ -12,7 +12,7 @@ const (
 	FlatcarLinux OperatingSystem = "Flatcar Linux"
 )
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // NodePool represents a Kubernetes node pool
 // This resource does not support updates
@@ -25,7 +25,7 @@ type NodePool struct {
 	// Name of the node pool. Must be an RFC 1123 hostname in lowercase
 	Name string `json:"name,omitempty"`
 	// Cluster in which the node pool is deployed
-	Cluster Cluster `json:"cluster,omitempty" anxcloud:"filterable"`
+	Cluster Cluster `json:"cluster,omitempty" anxcloud:"filterable" anxencode:"flatten"`
 
 	// Number of replicas. Can be changed via machine controller.
 	// Default: 3 (see FAQ for more details) Optional value can be set via pkg/utils/pointer.Int

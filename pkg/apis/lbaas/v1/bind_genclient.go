@@ -34,17 +34,3 @@ func (b *Bind) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 	return u, nil
 }
-
-// FilterAPIRequestBody generates the request body for Binds, replacing linked Objects with just their identifier.
-func (b *Bind) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
-	return requestBody(ctx, func() interface{} {
-		return &struct {
-			commonRequestBody
-			Bind
-			Frontend string `json:"frontend"`
-		}{
-			Bind:     *b,
-			Frontend: b.Frontend.Identifier,
-		}
-	})
-}

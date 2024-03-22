@@ -2,7 +2,7 @@ package v1
 
 import "go.anx.io/go-anxcloud/pkg/apis/common/gs"
 
-// anxcloud:object:hooks=RequestBodyHook
+// anxcloud:object
 
 // Frontend represents a LBaaS Frontend.
 type Frontend struct {
@@ -18,8 +18,8 @@ type Frontend struct {
 	AutomationRules    []RuleInfo `json:"automation_rules,omitempty"`
 
 	// Only the name and identifier fields are used and returned.
-	LoadBalancer *LoadBalancer `json:"load_balancer,omitempty"`
+	LoadBalancer *LoadBalancer `json:"load_balancer,omitempty" anxencode:"flatten"`
 
 	// Only the name and identifier fields are used and returned.
-	DefaultBackend *Backend `json:"default_backend,omitempty"`
+	DefaultBackend *Backend `json:"default_backend,omitempty" anxencode:"flatten"`
 }

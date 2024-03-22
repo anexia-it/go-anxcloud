@@ -7,21 +7,21 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Action object
-func (o *Action) GetIdentifier(ctx context.Context) (string, error) {
+func (o Action) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a API object
-func (o *API) GetIdentifier(ctx context.Context) (string, error) {
+func (o API) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Deployment object
-func (o *Deployment) GetIdentifier(ctx context.Context) (string, error) {
+func (o Deployment) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a Endpoint object
-func (o *Endpoint) GetIdentifier(ctx context.Context) (string, error) {
+func (o Endpoint) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

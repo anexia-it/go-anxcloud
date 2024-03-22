@@ -7,11 +7,11 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a Resource object
-func (o *Resource) GetIdentifier(ctx context.Context) (string, error) {
+func (o Resource) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
 
 // GetIdentifier returns the primary identifier of a ResourceWithTag object
-func (o *ResourceWithTag) GetIdentifier(ctx context.Context) (string, error) {
+func (o ResourceWithTag) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }

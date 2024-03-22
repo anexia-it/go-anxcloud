@@ -7,6 +7,6 @@ import (
 )
 
 // GetIdentifier returns the primary identifier of a VLAN object
-func (o *VLAN) GetIdentifier(ctx context.Context) (string, error) {
+func (o VLAN) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
