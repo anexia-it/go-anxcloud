@@ -1,0 +1,13 @@
+package v1
+
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+func TestIPAM(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "test suite for IPAM API definition")
+}
