@@ -9,7 +9,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.16.0
 	github.com/onsi/gomega v1.31.1
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
-	golang.org/x/crypto v0.21.0
+	golang.org/x/crypto v0.22.0
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
