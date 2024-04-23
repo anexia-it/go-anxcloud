@@ -17,11 +17,12 @@ type PagedOption struct {
 }
 
 // ApplyToList applies the Paged option to all the ListOptions.
-func (p PagedOption) ApplyToList(o *types.ListOptions) {
+func (p PagedOption) ApplyToList(o *types.ListOptions) error {
 	o.Paged = true
 	o.Page = p.Page
 	o.EntriesPerPage = p.Limit
 	o.PageInfo = p.Info
+	return nil
 }
 
 // ObjectChannelOption configures the List operation to return the objects via the given channel.
@@ -30,8 +31,9 @@ type ObjectChannelOption struct {
 }
 
 // ApplyToList applies the AsObjectChannel option to all the ListOptions.
-func (aoc ObjectChannelOption) ApplyToList(o *types.ListOptions) {
+func (aoc ObjectChannelOption) ApplyToList(o *types.ListOptions) error {
 	o.ObjectChannel = aoc.Channel
+	return nil
 }
 
 // FullObjectsOption configures if the List operation shall make a Get operation for each object before
@@ -39,14 +41,16 @@ func (aoc ObjectChannelOption) ApplyToList(o *types.ListOptions) {
 type FullObjectsOption bool
 
 // ApplyToList applies the FullObjectsOption option to all the ListOptions.
-func (foo FullObjectsOption) ApplyToList(o *types.ListOptions) {
+func (foo FullObjectsOption) ApplyToList(o *types.ListOptions) error {
 	o.FullObjects = bool(foo)
+	return nil
 }
 
 // AutoTagOption configures the Create operation to automatically tag objects after creation
 type AutoTagOption []string
 
 // ApplyToCreate applies the AutoTagOption to the ListOptions
-func (ato AutoTagOption) ApplyToCreate(o *types.CreateOptions) {
+func (ato AutoTagOption) ApplyToCreate(o *types.CreateOptions) error {
 	o.AutoTags = ato
+	return nil
 }

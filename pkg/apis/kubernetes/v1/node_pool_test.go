@@ -12,7 +12,8 @@ import (
 var _ = Describe("NodePool resource", func() {
 	It("can filter by cluster", func() {
 		np := &NodePool{Cluster: Cluster{Identifier: "foo"}}
-		url, err := np.EndpointURL(types.ContextWithOperation(context.TODO(), types.OperationList))
+		url, err := np.EndpointURL(
+			types.ContextWithOperation(types.ContextWithOptions(context.TODO(), &types.ListOptions{}), types.OperationList))
 		Expect(err).ToNot(HaveOccurred())
 		Expect(url.Query().Encode()).To(Equal("filters=cluster%3Dfoo"))
 	})

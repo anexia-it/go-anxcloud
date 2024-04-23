@@ -24,32 +24,38 @@ type Options interface {
 // GetOption is the interface options have to implement to be usable with Get operation.
 type GetOption interface {
 	// Apply this option to the set of all options
-	ApplyToGet(*GetOptions)
+	ApplyToGet(*GetOptions) error
 }
 
 // ListOption is the interface options have to implement to be usable with List operation.
 type ListOption interface {
 	// Apply this option to the set of all options
-	ApplyToList(*ListOptions)
+	ApplyToList(*ListOptions) error
 }
 
 // CreateOption is the interface options have to implement to be usable with Create operation.
 type CreateOption interface {
 	// Apply this option to the set of all options
-	ApplyToCreate(*CreateOptions)
+	ApplyToCreate(*CreateOptions) error
 }
 
 // UpdateOption is the interface options have to implement to be usable with Update operation.
 type UpdateOption interface {
 	// Apply this option to the set of all options
-	ApplyToUpdate(*UpdateOptions)
+	ApplyToUpdate(*UpdateOptions) error
 }
 
 // DestroyOption is the interface options have to implement to be usable with Destroy operation.
 type DestroyOption interface {
 	// Apply this option to the set of all options
-	ApplyToDestroy(*DestroyOptions)
+	ApplyToDestroy(*DestroyOptions) error
 }
+
+type AnyOption interface {
+	ApplyToAny(Options) error
+}
+
+type Option interface{}
 
 func (o commonOptions) Get(key string) (interface{}, error) {
 	if o.additional != nil {

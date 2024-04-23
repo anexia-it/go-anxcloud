@@ -22,6 +22,9 @@ var (
 
 	// ErrContextRequired is returned when a nil context was passed as argument.
 	ErrContextRequired = errors.New("no context given")
+
+	// ErrEnvironmentSegmentNotTypeString is returned when the environment segment is not of type string
+	ErrEnvironmentSegmentNotTypeString = errors.New("environment segment is not of type string")
 )
 
 // EngineError is the base type for all errors returned by the engine.

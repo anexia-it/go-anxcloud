@@ -1,6 +1,10 @@
 package api
 
 import (
+	"context"
+	"errors"
+	"fmt"
+
 	"go.anx.io/go-anxcloud/pkg/api/internal"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
@@ -33,4 +37,33 @@ func FullObjects(fullObjects bool) ListOption {
 // AutoTag can be used to automatically tag objects after creation
 func AutoTag(tags ...string) CreateOption {
 	return internal.AutoTagOption(tags)
+}
+
+// EnvironmentOption can be used to configure an alternative environment path
+// segment for a given API group
+type EnvironmentOption struct {
+	APIGroup       string
+	EnvPathSegment string
+	Override       bool
+}
+
+// ApplyToAny applies the EnvironmentOption to any request type
+func (o EnvironmentOption) ApplyToAny(opts types.Options) error {
+	return opts.Set(fmt.Sprintf("environment/%s", o.APIGroup), o.EnvPathSegment, o.Override)
+}
+
+// GetEnvironmentPathSegment retrieves the environment path segment of a given API group
+// or the provided defaultValue if no environment override is set
+func GetEnvironmentPathSegment(ctx context.Context, apiGroup, defaultValue string) (string, error) {
+	if options, err := types.OptionsFromContext(ctx); err != nil {
+		return "", err
+	} else if env, err := options.Get(fmt.Sprintf("environment/%s", apiGroup)); errors.Is(err, types.ErrKeyNotSet) {
+		return defaultValue, nil
+	} else if err != nil {
+		return "", err
+	} else if envString, ok := env.(string); !ok {
+		return "", ErrEnvironmentSegmentNotTypeString
+	} else {
+		return envString, nil
+	}
 }
