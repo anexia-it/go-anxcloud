@@ -1,6 +1,9 @@
 package api
 
 import (
+	"context"
+	"fmt"
+
 	"go.anx.io/go-anxcloud/pkg/api/internal"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
@@ -33,4 +36,24 @@ func FullObjects(fullObjects bool) ListOption {
 // AutoTag can be used to automatically tag objects after creation
 func AutoTag(tags ...string) CreateOption {
 	return internal.AutoTagOption(tags)
+}
+
+// EnvironmentOption can be used to configure an alternative environment path
+// segment for a given API group
+func EnvironmentOption(apiGroup, envPathSegment string, override bool) types.AnyOption {
+	return func(o types.Options) error {
+		return o.SetEnvironment(fmt.Sprintf("environment/%s", apiGroup), envPathSegment, override)
+	}
+}
+
+// GetEnvironmentPathSegment retrieves the environment path segment of a given API group
+// or the provided defaultValue if no environment override is set
+func GetEnvironmentPathSegment(ctx context.Context, apiGroup, defaultValue string) string {
+	if options, err := types.OptionsFromContext(ctx); err != nil {
+		return defaultValue
+	} else if env, err := options.GetEnvironment(fmt.Sprintf("environment/%s", apiGroup)); err != nil {
+		return defaultValue
+	} else {
+		return env
+	}
 }
