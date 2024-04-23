@@ -229,3 +229,21 @@ func Example_implementObject() {
 	// Retrieved object with mode 'tcp' named 'hello TCP 1'
 	// Retrieved object with mode 'tcp' named 'hello TCP 2'
 }
+
+func ExampleWithRequestOptions() {
+	api, err := NewAPI(
+		WithRequestOptions(
+			// automatically assign tags to newly created resources
+			AutoTag("foo", "bar"),
+		),
+	)
+
+	if err != nil {
+		panic(fmt.Errorf("Error creating API instance: %v\n", err))
+	}
+
+	// create resource and automatically apply 'foo' & 'bar' tags
+	if err := api.Create(context.TODO(), &ExampleObject{Name: "foo"}); err != nil {
+		panic(err)
+	}
+}

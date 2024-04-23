@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -30,7 +31,8 @@ type defaultAPI struct {
 	client client.Client
 	logger *logr.Logger
 
-	clientOptions []client.Option
+	clientOptions  []client.Option
+	requestOptions []types.Option
 }
 
 // NewAPIOption is the type for giving options to the NewAPI function.
@@ -40,6 +42,13 @@ type NewAPIOption func(*defaultAPI)
 func WithClientOptions(o ...client.Option) NewAPIOption {
 	return func(a *defaultAPI) {
 		a.clientOptions = append(a.clientOptions, o...)
+	}
+}
+
+// WithRequestOptions configures default options applied to requests
+func WithRequestOptions(opts ...types.Option) NewAPIOption {
+	return func(a *defaultAPI) {
+		a.requestOptions = opts
 	}
 }
 
@@ -79,8 +88,12 @@ func NewAPI(opts ...NewAPIOption) (API, error) {
 // Get the identified object from the engine.
 func (a defaultAPI) Get(ctx context.Context, o types.IdentifiedObject, opts ...types.GetOption) error {
 	options := types.GetOptions{}
-	for _, opt := range opts {
-		opt.ApplyToGet(&options)
+	var err error
+	for _, opt := range resolveRequestOptions(a.requestOptions, opts) {
+		err = errors.Join(err, opt.ApplyToGet(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	return a.do(ctx, o, o, &options, types.OperationGet)
@@ -89,8 +102,12 @@ func (a defaultAPI) Get(ctx context.Context, o types.IdentifiedObject, opts ...t
 // Create the given object on the engine.
 func (a defaultAPI) Create(ctx context.Context, o types.Object, opts ...types.CreateOption) error {
 	options := types.CreateOptions{}
-	for _, opt := range opts {
-		opt.ApplyToCreate(&options)
+	var err error
+	for _, opt := range resolveRequestOptions(a.requestOptions, opts) {
+		err = errors.Join(err, opt.ApplyToCreate(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	if err := a.do(ctx, o, o, &options, types.OperationCreate); err != nil {
@@ -115,8 +132,12 @@ func (a defaultAPI) handlePostCreateOptions(ctx context.Context, o types.Identif
 // Update the object on the engine.
 func (a defaultAPI) Update(ctx context.Context, o types.IdentifiedObject, opts ...types.UpdateOption) error {
 	options := types.UpdateOptions{}
-	for _, opt := range opts {
-		opt.ApplyToUpdate(&options)
+	var err error
+	for _, opt := range resolveRequestOptions(a.requestOptions, opts) {
+		err = errors.Join(err, opt.ApplyToUpdate(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	return a.do(ctx, o, o, &options, types.OperationUpdate)
@@ -125,8 +146,12 @@ func (a defaultAPI) Update(ctx context.Context, o types.IdentifiedObject, opts .
 // Destroy the identified object.
 func (a defaultAPI) Destroy(ctx context.Context, o types.IdentifiedObject, opts ...types.DestroyOption) error {
 	options := types.DestroyOptions{}
-	for _, opt := range opts {
-		opt.ApplyToDestroy(&options)
+	var err error
+	for _, opt := range resolveRequestOptions(a.requestOptions, opts) {
+		err = errors.Join(err, opt.ApplyToDestroy(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	return a.do(ctx, o, o, &options, types.OperationDestroy)
@@ -135,11 +160,14 @@ func (a defaultAPI) Destroy(ctx context.Context, o types.IdentifiedObject, opts 
 // List objects matching the info given in the object.
 func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...types.ListOption) error {
 	options := types.ListOptions{}
-	for _, opt := range opts {
-		opt.ApplyToList(&options)
+	var err error
+	for _, opt := range resolveRequestOptions(a.requestOptions, opts) {
+		err = errors.Join(err, opt.ApplyToList(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
-	var err error
 	ctx, err = a.contextPrepare(ctx, o, types.OperationList, &options)
 
 	if err != nil {
@@ -514,4 +542,19 @@ func decodeResponse(ctx context.Context, mediaType string, data io.Reader, res i
 	}
 
 	return fmt.Errorf("%w: no idea how to handle media type %v", ErrUnsupportedResponseFormat, mediaType)
+}
+
+func resolveRequestOptions[T any](commonOptions []types.Option, requestOptions []T) []T {
+	return append(filterOptions[T](commonOptions), requestOptions...)
+}
+
+func filterOptions[T any](opts []types.Option) []T {
+	ret := make([]T, 0, len(opts))
+	for _, v := range opts {
+		if v, ok := v.(T); ok {
+			ret = append(ret, v)
+		}
+	}
+
+	return ret
 }

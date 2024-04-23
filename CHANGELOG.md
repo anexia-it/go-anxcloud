@@ -23,6 +23,12 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* `WithRequestOptions` API option to configure default request options (#361, @anx-mschaefer)
+
+### Changed
+* (internal) add "error-return" to request option interfaces (#361, @anx-mschaefer)
+
 ## [0.6.4] - 2024-03-15
 
 ### Fixed

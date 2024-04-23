@@ -102,8 +102,12 @@ func listDataAggregation(o types.Object, data mockDataView) ([]types.Object, err
 
 func listOutput(ctx context.Context, objects []types.Object, opts []types.ListOption) error {
 	options := types.ListOptions{}
+	var err error
 	for _, opt := range opts {
-		opt.ApplyToList(&options)
+		err = errors.Join(err, opt.ApplyToList(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	var channelPageIterator types.PageInfo
@@ -183,8 +187,12 @@ func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.Crea
 	}
 
 	options := types.CreateOptions{}
+	var err error
 	for _, opt := range opts {
-		opt.ApplyToCreate(&options)
+		err = errors.Join(err, opt.ApplyToCreate(&options))
+	}
+	if err != nil {
+		return fmt.Errorf("apply request options: %w", err)
 	}
 
 	a.mu.Lock()

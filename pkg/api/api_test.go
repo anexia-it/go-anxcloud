@@ -74,24 +74,30 @@ var _ = Describe("getResponseType function", func() {
 
 type apiTestAnyopOption string
 
-func (o apiTestAnyopOption) ApplyToGet(opts *types.GetOptions) {
-	_ = opts.Set("api_test_option", o, false)
+func (o apiTestAnyopOption) ApplyToGet(opts *types.GetOptions) error {
+	return opts.Set("api_test_option", o, false)
 }
 
-func (o apiTestAnyopOption) ApplyToList(opts *types.ListOptions) {
-	_ = opts.Set("api_test_option", o, false)
+func (o apiTestAnyopOption) ApplyToList(opts *types.ListOptions) error {
+	return opts.Set("api_test_option", o, false)
 }
 
-func (o apiTestAnyopOption) ApplyToCreate(opts *types.CreateOptions) {
-	_ = opts.Set("api_test_option", o, false)
+func (o apiTestAnyopOption) ApplyToCreate(opts *types.CreateOptions) error {
+	return opts.Set("api_test_option", o, false)
 }
 
-func (o apiTestAnyopOption) ApplyToUpdate(opts *types.UpdateOptions) {
-	_ = opts.Set("api_test_option", o, false)
+func (o apiTestAnyopOption) ApplyToUpdate(opts *types.UpdateOptions) error {
+	return opts.Set("api_test_option", o, false)
 }
 
-func (o apiTestAnyopOption) ApplyToDestroy(opts *types.DestroyOptions) {
-	_ = opts.Set("api_test_option", o, false)
+func (o apiTestAnyopOption) ApplyToDestroy(opts *types.DestroyOptions) error {
+	return opts.Set("api_test_option", o, false)
+}
+
+func errorOption(err error) types.AnyOption {
+	return func(o types.Options) error {
+		return err
+	}
 }
 
 type apiTestObject struct {
@@ -1024,6 +1030,87 @@ var _ = Describe("using an API object", func() {
 
 		err = api.Destroy(ctx, &o, opt)
 		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("consumes the default options for all operations", func() {
+		opt := apiTestAnyopOption("hello world")
+		ctx := context.WithValue(context.TODO(), errAPITest, opt)
+
+		server.AppendHandlers(
+			ghttp.RespondWithJSONEncoded(200, map[string]string{"value": "option-check"}),
+			ghttp.RespondWithJSONEncoded(200, map[string]string{"value": "option-check"}),
+			ghttp.RespondWithJSONEncoded(200, []map[string]string{{"value": "option-check"}}),
+			ghttp.RespondWithJSONEncoded(200, map[string]string{"value": "option-check"}),
+			ghttp.RespondWithJSONEncoded(200, map[string]string{}),
+		)
+
+		api, err := NewAPI(
+			WithLogger(logger),
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+			WithRequestOptions(opt),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := apiTestObject{"option-check"}
+
+		err = api.Create(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = api.Get(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = api.List(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = api.Update(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+
+		err = api.Destroy(ctx, &o)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("returns an error when applying configured options return errors", func() {
+		mockErr := errors.New("foo")
+		api, err := NewAPI(
+			WithLogger(logger),
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := apiTestObject{"foo"}
+
+		Expect(api.Create(context.TODO(), &o, errorOption(mockErr))).Error().To(MatchError(mockErr))
+		Expect(api.Get(context.TODO(), &o, errorOption(mockErr))).Error().To(MatchError(mockErr))
+		Expect(api.List(context.TODO(), &o, errorOption(mockErr))).Error().To(MatchError(mockErr))
+		Expect(api.Update(context.TODO(), &o, errorOption(mockErr))).Error().To(MatchError(mockErr))
+		Expect(api.Destroy(context.TODO(), &o, errorOption(mockErr))).Error().To(MatchError(mockErr))
+	})
+
+	It("returns an error when applying configured default options return errors", func() {
+		mockErr := errors.New("foo")
+		api, err := NewAPI(
+			WithLogger(logger),
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+			),
+			WithRequestOptions(errorOption(mockErr)),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := apiTestObject{"foo"}
+
+		Expect(api.Create(context.TODO(), &o)).Error().To(MatchError(mockErr))
+		Expect(api.Get(context.TODO(), &o)).Error().To(MatchError(mockErr))
+		Expect(api.List(context.TODO(), &o)).Error().To(MatchError(mockErr))
+		Expect(api.Update(context.TODO(), &o)).Error().To(MatchError(mockErr))
+		Expect(api.Destroy(context.TODO(), &o)).Error().To(MatchError(mockErr))
 	})
 })
 

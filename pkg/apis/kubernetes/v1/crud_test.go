@@ -24,10 +24,16 @@ const (
 
 var mockStateOK = map[string]interface{}{"type": gs.StateTypeOK}
 
+func EnvironmentTest() types.AnyOption {
+	return api.EnvironmentOption("kubernetes/v1", "kubernetes-test", true)
+}
+
 var _ = Describe("CRUD", Ordered, func() {
 	var (
 		a   api.API
 		srv *ghttp.Server
+
+		requestOptions []types.Option
 
 		clusterIdentifier  string
 		nodePoolIdentifier string
@@ -38,6 +44,10 @@ var _ = Describe("CRUD", Ordered, func() {
 	)
 
 	BeforeEach(func() {
+		requestOptions = []types.Option{}
+	})
+
+	JustBeforeEach(func() {
 		var err error
 
 		if isIntegrationTest {
@@ -49,12 +59,41 @@ var _ = Describe("CRUD", Ordered, func() {
 				srv.Close()
 			})
 
-			a, err = api.NewAPI(api.WithClientOptions(
-				client.BaseURL(srv.URL()),
-				client.IgnoreMissingToken(),
-			))
+			a, err = api.NewAPI(
+				api.WithClientOptions(
+					client.BaseURL(srv.URL()),
+					client.IgnoreMissingToken(),
+				),
+				api.WithRequestOptions(requestOptions...),
+			)
 			Expect(err).ToNot(HaveOccurred())
 		}
+	})
+
+	Context("with environment option", func() {
+		BeforeEach(func() {
+			if isIntegrationTest {
+				Skip("don't integration-test environment path overrides")
+			}
+
+			requestOptions = []types.Option{EnvironmentTest()}
+		})
+
+		It("correctly applies the environment to the cluster resource path", func() {
+			srv.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.VerifyRequest("POST", "/api/kubernetes-test/v1/cluster.json"),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]any{}),
+			))
+			Expect(a.Create(context.TODO(), &Cluster{})).To(Succeed())
+		})
+
+		It("correctly applies the environment to the node pool resource path", func() {
+			srv.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.VerifyRequest("POST", "/api/kubernetes-test/v1/node_pool.json"),
+				ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]any{}),
+			))
+			Expect(a.Create(context.TODO(), &NodePool{})).To(Succeed())
+		})
 	})
 
 	Context("Cluster object", Ordered, func() {
