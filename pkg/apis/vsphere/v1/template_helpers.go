@@ -24,7 +24,10 @@ const (
 // Empty and LatestTemplateBuild build identifier will yield the highest available build.
 // It returns ErrTemplateNotFound if no matching template was found.
 func FindNamedTemplate(ctx context.Context, a api.API, name, build string, location corev1.Location) (*Template, error) {
-	var match *Template
+	var (
+		match    *Template
+		fallback *Template
+	)
 	buildNo := -1
 	latest := build == "" || build == LatestTemplateBuild
 
@@ -52,6 +55,7 @@ func FindNamedTemplate(ctx context.Context, a api.API, name, build string, locat
 		if latest {
 			currentTemplateBuildNo, err := template.BuildNumber()
 			if err != nil {
+				fallback = &template
 				logr.FromContextOrDiscard(ctx).Info("couldn't parse build %q of template %q from location %q", template.Build, template.Identifier, location.Identifier)
 				continue
 			}
@@ -67,8 +71,10 @@ func FindNamedTemplate(ctx context.Context, a api.API, name, build string, locat
 
 	}
 
-	if match == nil {
+	if match == nil && fallback == nil {
 		return nil, fmt.Errorf("%w (name: %q, build: %q, location: %q)", ErrTemplateNotFound, name, build, location.Identifier)
+	} else if match == nil {
+		match = fallback
 	}
 
 	return match, nil

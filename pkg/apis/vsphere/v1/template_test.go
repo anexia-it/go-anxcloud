@@ -83,7 +83,7 @@ var _ = Describe("Template API bindings", func() {
 				Expect(err).NotTo(HaveOccurred())
 				templateCount++
 			}
-			Expect(templateCount).To(Equal(10))
+			Expect(templateCount).To(Equal(11))
 		})
 
 		It("can Get templates", func() {
@@ -142,6 +142,7 @@ var _ = Describe("Template API bindings", func() {
 			Entry("latest with specified build", "Flatcar Linux Stable", "b74", "26a47eee-dc9a-4eea-b67a-8fb1baa2fcc0"),
 			Entry("not latest build", "Windows 2022", "b06", "cb16dc94-ec55-4e9a-a1a3-b76a91bbe274"),
 			Entry("with non-standard build id", "Debian 11", "possibly-valid-build-id", "9d863fd9-d0d3-4959-b226-e73192f3e43d"),
+			Entry("fallback with non-standard build id", "Fake OS", "", "f39c2a43-97e3-476b-b52b-c3bec7a5c6a2"),
 		)
 
 		DescribeTable("find named template errors", func(name, build string) {
@@ -167,5 +168,6 @@ func mockedTemplateList() []vspherev1.Template {
 		{Identifier: "c3d4f0a6-978a-49fb-a952-7361bf531e4f", Name: "Debian 9", Build: "b92"},
 		{Identifier: "086c5f99-1be6-46ec-8374-cdc23cedd6a4", Name: "Windows 2022", Build: "b12"},
 		{Identifier: "9d863fd9-d0d3-4959-b226-e73192f3e43d", Name: "Debian 11", Build: "possibly-valid-build-id"},
+		{Identifier: "f39c2a43-97e3-476b-b52b-c3bec7a5c6a2", Name: "Fake OS", Build: "kvm-b42"},
 	}
 }

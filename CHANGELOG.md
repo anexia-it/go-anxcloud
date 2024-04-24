@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Changed
+* vsphere/v1.FindNamedTemplate: fall back to any template with matching name if no latest build can be determined (#362, @anx-mschaefer)
+
 ## [0.6.4] - 2024-03-15
 
 ### Fixed
