@@ -2,8 +2,6 @@ module go.anx.io/go-anxcloud/tools
 
 go 1.21
 
-toolchain go1.22.2
-
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/golangci/golangci-lint v1.58.0
