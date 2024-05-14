@@ -221,7 +221,7 @@ var _ = Describe("vsphere API client", Ordered, func() {
 	})
 
 	It("eventually retrieves the test VM provisioning being completed", func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 		defer cancel()
 
 		id, err := progress.NewAPI(cli).AwaitCompletion(ctx, provisionID)
