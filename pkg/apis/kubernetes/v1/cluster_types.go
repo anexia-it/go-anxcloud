@@ -57,4 +57,11 @@ type Cluster struct {
 
 	// Contains a kubeconfig if available
 	KubeConfig *string `json:"kubeconfig,omitempty"`
+
+	// Enable autoscaling for this cluster. You will need to explicitly configure
+	// your node pools for autoscaling, please refer to the provided [Autoscaling documentation]
+	// for details. Defaults to false if unset.
+	//
+	// [Autoscaling documentation]: https://engine.anexia-it.com/docs/en/module/kubernetes/user-guide/autoscaling
+	EnableAutoscaling *bool `json:"autoscaling,omitempty"`
 }
