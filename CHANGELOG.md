@@ -23,6 +23,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.7.0] - 2024-05-24
+
+* go-anxcloud is now tested with Go versions 1.21 and 1.22 and we might start using features only available since 1.21
+
 ### Added
 * `WithRequestOptions` API option to configure default request options (#361, @anx-mschaefer)
 * kubernetes/v1: Add `autoscaling` attribute via `EnableAutoscaling` field (#369, @nachtjasmin)
