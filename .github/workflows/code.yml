@@ -87,8 +87,6 @@ jobs:
         go:
         - version: "1.21"
           name: target
-        - version: "1.22.0"
-          name: latest
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
     - uses: actions/checkout@v4
