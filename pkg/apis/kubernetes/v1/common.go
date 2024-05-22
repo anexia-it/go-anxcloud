@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
 	"go.anx.io/go-anxcloud/pkg/api"
@@ -9,7 +10,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/utils/object/filter"
 )
 
-func endpointURL(ctx context.Context, o types.Object, apiPath string) (*url.URL, error) {
+func endpointURL(ctx context.Context, o types.Object, resourcePathName string) (*url.URL, error) {
 	op, err := types.OperationFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -19,8 +20,10 @@ func endpointURL(ctx context.Context, o types.Object, apiPath string) (*url.URL,
 		return nil, api.ErrOperationNotSupported
 	}
 
+	env := api.GetEnvironmentPathSegment(ctx, "kubernetes/v1", "kubernetes")
+
 	// we can ignore the error since the URL is hard-coded known as valid
-	u, _ := url.Parse(apiPath)
+	u, _ := url.Parse(fmt.Sprintf("/api/%s/v1/%s.json", env, resourcePathName))
 
 	if op == types.OperationList {
 		helper, err := filter.NewHelper(o)

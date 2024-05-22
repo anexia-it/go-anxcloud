@@ -15,7 +15,7 @@ var ErrManagedPrefixSet = errors.New("managed prefixes cannot be set on create")
 
 // EndpointURL returns the common URL for operations on Cluster resource
 func (c *Cluster) EndpointURL(ctx context.Context) (*url.URL, error) {
-	return endpointURL(ctx, c, "/api/kubernetes/v1/cluster.json")
+	return endpointURL(ctx, c, "cluster")
 }
 
 // explicitlyFalse returns true if the value of the provided
