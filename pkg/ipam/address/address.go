@@ -69,11 +69,35 @@ type Create struct {
 	Organization        string `json:"organization"`
 }
 
+// IPReserveVersionLimit limits the IP version for address reservations
+type IPReserveVersionLimit int
+
+const (
+	// IPReserveVersionLimitIPv4 specifies that only IPv4 addresses should be reserved
+	IPReserveVersionLimitIPv4 IPReserveVersionLimit = 4
+
+	// IPReserveVersionLimitIPv4 specifies that only IPv6 addresses should be reserved
+	IPReserveVersionLimitIPv6 IPReserveVersionLimit = 6
+)
+
 // ReserveRandom defines metadata of addresses to reserve randomly.
 type ReserveRandom struct {
 	LocationID string `json:"location_identifier"`
 	VlanID     string `json:"vlan_identifier"`
 	Count      int    `json:"count"`
+
+	// PrefixID limits the potential addresses to a specific prefix
+	// within the specified VLAN. Defaults to all prefixes within the VLAN.
+	PrefixID string `json:"prefix_identifier,omitempty"`
+
+	// IPVersion limits the potential addresses to a specific IP version.
+	// Defaults to v4 or v6, depending on availability.
+	IPVersion IPReserveVersionLimit `json:"ip_version,omitempty"`
+
+	// ReservationPeriod specifies how many seconds the addresses should be reserved.
+	// If IP addresses haven't been assigned to resources within the period, they are released again.
+	// Defaults to 1800 seconds (= 30 minutes).
+	ReservationPeriod uint `json:"reservation_period,omitempty"`
 }
 
 // ReserveRandomSummary is the reserved IPs information returned by list request.
