@@ -231,28 +231,28 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 
 	requestData := bytes.Buffer{}
 	if err := json.NewEncoder(&requestData).Encode(create); err != nil {
-		panic(fmt.Sprintf("could not create request data for vlan creation: %v", err))
+		panic(fmt.Sprintf("could not create request data for address creation: %v", err))
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not create vlan post request: %w", err)
+		return Summary{}, fmt.Errorf("could not create address post request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
+		return Summary{}, fmt.Errorf("could not execute address post request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
+		return Summary{}, fmt.Errorf("could not execute address post request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not decode vlan post response: %w", err)
+		return Summary{}, fmt.Errorf("could not decode address post response: %w", err)
 	}
 
 	return summary, nil
@@ -267,28 +267,28 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 
 	requestData := bytes.Buffer{}
 	if err := json.NewEncoder(&requestData).Encode(update); err != nil {
-		panic(fmt.Sprintf("could not create request data for vlan update: %v", err))
+		panic(fmt.Sprintf("could not create request data for address update: %v", err))
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &requestData)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not create vlan update request: %w", err)
+		return Summary{}, fmt.Errorf("could not create address update request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not execute vlan update request: %w", err)
+		return Summary{}, fmt.Errorf("could not execute address update request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Summary{}, fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
+		return Summary{}, fmt.Errorf("could not execute address update request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	if err != nil {
-		return summary, fmt.Errorf("could not decode vlan update response: %w", err)
+		return summary, fmt.Errorf("could not decode address update response: %w", err)
 	}
 
 	return summary, err

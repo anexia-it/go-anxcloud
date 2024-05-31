@@ -110,23 +110,23 @@ func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("could not create vlan list request: %w", err)
+		return nil, fmt.Errorf("could not create prefix list request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("could not execute vlan list request: %w", err)
+		return nil, fmt.Errorf("could not execute prefix list request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return nil, fmt.Errorf("could not execute vlan list request, got response %s", httpResponse.Status)
+		return nil, fmt.Errorf("could not execute prefix list request, got response %s", httpResponse.Status)
 	}
 
 	var responsePayload listResponse
 	err = json.NewDecoder(httpResponse.Body).Decode(&responsePayload)
 	if err != nil {
-		return nil, fmt.Errorf("could not decode vlan list response: %w", err)
+		return nil, fmt.Errorf("could not decode prefix list response: %w", err)
 	}
 
 	return responsePayload.Data.Data, nil
@@ -142,23 +142,23 @@ func (a api) Get(ctx context.Context, id string) (Info, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return Info{}, fmt.Errorf("could not create vlan get request: %w", err)
+		return Info{}, fmt.Errorf("could not create prefix get request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Info{}, fmt.Errorf("could not execute vlan get request: %w", err)
+		return Info{}, fmt.Errorf("could not execute prefix get request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Info{}, fmt.Errorf("could not execute vlan get request, got response %s", httpResponse.Status)
+		return Info{}, fmt.Errorf("could not execute prefix get request, got response %s", httpResponse.Status)
 	}
 
 	var info Info
 	err = json.NewDecoder(httpResponse.Body).Decode(&info)
 	if err != nil {
-		return Info{}, fmt.Errorf("could not decode vlan get response: %w", err)
+		return Info{}, fmt.Errorf("could not decode prefix get response: %w", err)
 	}
 
 	return info, nil
@@ -173,15 +173,15 @@ func (a api) Delete(ctx context.Context, id string) error {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
 	if err != nil {
-		return fmt.Errorf("could not create vlan delete request: %w", err)
+		return fmt.Errorf("could not create prefix delete request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("could not execute vlan delete request: %w", err)
+		return fmt.Errorf("could not execute prefix delete request: %w", err)
 	}
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return fmt.Errorf("could not execute vlan delete request, got response %s", httpResponse.Status)
+		return fmt.Errorf("could not execute prefix delete request, got response %s", httpResponse.Status)
 	}
 
 	return httpResponse.Body.Close()
@@ -196,27 +196,27 @@ func (a api) Create(ctx context.Context, create Create) (Summary, error) {
 
 	requestData := bytes.Buffer{}
 	if err := json.NewEncoder(&requestData).Encode(create); err != nil {
-		panic(fmt.Sprintf("could not create request data for vlan creation: %v", err))
+		panic(fmt.Sprintf("could not create request data for prefix creation: %v", err))
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &requestData)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not create vlan post request: %w", err)
+		return Summary{}, fmt.Errorf("could not create prefix post request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not execute vlan post request: %w", err)
+		return Summary{}, fmt.Errorf("could not execute prefix post request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Summary{}, fmt.Errorf("could not execute vlan post request, got response %s", httpResponse.Status)
+		return Summary{}, fmt.Errorf("could not execute prefix post request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not decode vlan post response: %w", err)
+		return Summary{}, fmt.Errorf("could not decode prefix post response: %w", err)
 	}
 
 	return summary, nil
@@ -231,28 +231,28 @@ func (a api) Update(ctx context.Context, id string, update Update) (Summary, err
 
 	requestData := bytes.Buffer{}
 	if err := json.NewEncoder(&requestData).Encode(update); err != nil {
-		panic(fmt.Sprintf("could not create request data for vlan update: %v", err))
+		panic(fmt.Sprintf("could not create request data for prefix update: %v", err))
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, &requestData)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not create vlan update request: %w", err)
+		return Summary{}, fmt.Errorf("could not create prefix update request: %w", err)
 	}
 
 	httpResponse, err := a.client.Do(req)
 	if err != nil {
-		return Summary{}, fmt.Errorf("could not execute vlan update request: %w", err)
+		return Summary{}, fmt.Errorf("could not execute prefix update request: %w", err)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode >= 500 && httpResponse.StatusCode < 600 {
-		return Summary{}, fmt.Errorf("could not execute vlan update request, got response %s", httpResponse.Status)
+		return Summary{}, fmt.Errorf("could not execute prefix update request, got response %s", httpResponse.Status)
 	}
 
 	var summary Summary
 	err = json.NewDecoder(httpResponse.Body).Decode(&summary)
 	if err != nil {
-		return summary, fmt.Errorf("could not decode vlan update response: %w", err)
+		return summary, fmt.Errorf("could not decode prefix update response: %w", err)
 	}
 
 	return summary, err
