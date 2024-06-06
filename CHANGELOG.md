@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.7.1] - 2024-06-06
+
 ### Added
 * ipam/address: Add ip-version and prefix filter attributes to `ReserveRandom` request (#378, @anx-mschaefer)
 
