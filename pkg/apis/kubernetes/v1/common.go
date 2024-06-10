@@ -16,10 +16,6 @@ func endpointURL(ctx context.Context, o types.Object, resourcePathName string) (
 		return nil, err
 	}
 
-	if op == types.OperationUpdate {
-		return nil, api.ErrOperationNotSupported
-	}
-
 	env, err := api.GetEnvironmentPathSegment(ctx, "kubernetes/v1", "kubernetes")
 	if err != nil {
 		return nil, fmt.Errorf("get environment: %w", err)
