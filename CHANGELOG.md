@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Fixed
+* pkg/api: use logger of client if `WithLogger` was not called explicitly (#381, @nachtjasmin)
+
 ## [0.7.1] - 2024-06-06
 
 ### Added

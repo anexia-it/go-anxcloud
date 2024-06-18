@@ -316,6 +316,35 @@ var _ = Describe("using an API object", func() {
 		Expect(log.String()).To(ContainSubstring("Hello from apiTestObject!"))
 	})
 
+	It("uses the underlying logger on the client", func(ctx context.Context) {
+		server.SetAllowUnhandledRequests(true)
+
+		log := strings.Builder{}
+
+		logger := funcr.New(
+			func(prefix, args string) {
+				_, _ = log.WriteString(prefix + "\t" + args + "\n")
+			},
+			funcr.Options{
+				Verbosity: 3,
+			})
+
+		api, err := NewAPI(
+			WithClientOptions(
+				client.BaseURL(server.URL()),
+				client.IgnoreMissingToken(),
+				client.Logger(logger),
+			),
+		)
+		Expect(err).NotTo(HaveOccurred())
+
+		o := apiTestObject{"identifier"}
+		err = api.Create(ctx, &o)
+		Expect(err).To(HaveOccurred())
+
+		Expect(log.String()).To(ContainSubstring("Hello from apiTestObject!"))
+	})
+
 	It("handles the Object returning an error on EndpointURL", func() {
 		api, err := NewAPI(
 			WithLogger(logger),
