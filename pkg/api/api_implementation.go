@@ -29,10 +29,41 @@ const (
 // defaultAPI is the type for our generic implementation of the API interface.
 type defaultAPI struct {
 	client client.Client
-	logger *logr.Logger
+
+	// If the user wants to override the logging for this API, it can be done by providing the [WithLogger] method.
+	// Said method is responsible for persisting the correct logger on this field.
+	//
+	// However, for calling, this field should *never* be called. Instead, use the Logger(context.Context) method
+	// on this struct to get a valid logger for further usage.
+	logger logr.Logger
 
 	clientOptions  []client.Option
 	requestOptions []types.Option
+}
+
+// Logger returns the logger for the given API in the following order:
+//  1. If set, the logger on the struct is returned.
+//  2. If the struct does not have a logger, the logger from the context is returned.
+//  3. In all other cases, the logger of the underlying client is returned, which falls back to the discard logger.
+func (a defaultAPI) Logger(ctx context.Context) logr.Logger {
+	if !a.logger.IsZero() {
+		return a.logger
+	}
+
+	if ctxLogger, err := logr.FromContext(ctx); err == nil {
+		return ctxLogger
+	}
+
+	// If the WithLogger method wasn't called, we use the logger of the underlying client.
+	// Because all of this is a rather hacky workaround for SYSENG-1746, the interface is not strongly typed.
+	//
+	// FIXME: Remove the duplicate logger handling.
+	c, ok := a.client.(interface{ Logger() logr.Logger })
+	if !ok {
+		panic("The underlying API client does not have a public Logger() method.")
+	}
+
+	return c.Logger()
 }
 
 // NewAPIOption is the type for giving options to the NewAPI function.
@@ -53,11 +84,11 @@ func WithRequestOptions(opts ...types.Option) NewAPIOption {
 }
 
 // WithLogger configures the API to use the given logger. It is recommended to pass a named logger.
-// If you don't pass an existing client, the logger you give here will given to the client (with
+// If you don't pass an existing client, the logger you give here will be given to the client (with
 // added name "client").
 func WithLogger(l logr.Logger) NewAPIOption {
 	return func(a *defaultAPI) {
-		a.logger = &l
+		a.logger = l
 		a.clientOptions = append(a.clientOptions, client.Logger(l.WithName("client")))
 	}
 }
@@ -202,9 +233,7 @@ func (a defaultAPI) List(ctx context.Context, o types.FilterObject, opts ...type
 
 	if options.Paged {
 		if options.Page == 0 {
-			log := logr.FromContextOrDiscard(ctx)
-			log.V(1).Info("List called requesting page 0, fixing to page 1")
-
+			a.Logger(ctx).V(1).Info("List called requesting page 0, fixing to page 1")
 			options.Page = 1
 		}
 
@@ -456,6 +485,8 @@ func (a defaultAPI) doRequest(req *http.Request, obj types.Object, body interfac
 	return nil
 }
 
+// contextPrepare attaches the given operation op, the options opts and the logger of the API to a newly constructed context and returns that.
+// If ctx is nil, [ErrContextRequired] is returned.
 func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types.Operation, opts types.Options) (context.Context, error) {
 	if ctx == nil {
 		return nil, ErrContextRequired
@@ -469,16 +500,7 @@ func (a defaultAPI) contextPrepare(ctx context.Context, o types.Object, op types
 		objectType = objectType.Elem()
 	}
 
-	logger := logr.Discard()
-
-	// Checking if we have a logger on the context and attach one if we don't.
-	if l, err := logr.FromContext(ctx); err != nil && a.logger != nil {
-		logger = *a.logger
-	} else if err == nil {
-		// TODO(LittleFox94): derive a named one from this?
-		logger = l
-	}
-
+	logger := a.Logger(ctx)
 	return logr.NewContext(ctx, logger.WithValues("operation", op, "resource", objectType)), nil
 }
 

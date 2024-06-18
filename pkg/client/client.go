@@ -59,6 +59,10 @@ type client struct {
 	metricReceiver    MetricReceiver
 }
 
+// Logger returns the logger of the given client, if provided.
+// It usually should not be used by external callers and is just there to provide a workaround for our generic API.
+func (c client) Logger() logr.Logger { return c.logger }
+
 type clientOptions struct {
 	client
 	ignoreMissingToken bool
