@@ -22,31 +22,29 @@ var _ = Describe("vlan client", func() {
 	var api API
 
 	BeforeEach(func() {
-		var err error
-		cli, err = client.New(client.AuthFromEnv(false))
+		envCli, err := client.New(client.AuthFromEnv(false))
 		Expect(err).ToNot(HaveOccurred())
 
+		cli = envCli
 		api = NewAPI(cli)
 	})
 
 	Context("with a VLAN created for testing", Ordered, func() {
 		var vlanID string
 
-		BeforeAll(func() {
+		BeforeAll(func(ctx context.Context) {
 			def := CreateDefinition{
 				Location:            locationID,
 				VMProvisioning:      false,
 				CustomerDescription: "go SDK integration test",
 			}
-			summary, err := api.Create(context.TODO(), def)
+			summary, err := api.Create(ctx, def)
 			Expect(err).NotTo(HaveOccurred())
-
-			DeferCleanup(func() {
-				err := api.Delete(context.TODO(), summary.Identifier)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
 			vlanID = summary.Identifier
+		})
+		DeferCleanup(func(ctx context.Context) {
+			err := api.Delete(ctx, vlanID)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("lists VLANs including test VLAN", func() {
