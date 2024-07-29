@@ -6,7 +6,7 @@ import (
 
 // PartialResource represents a linked resource
 type PartialResource struct {
-	Identifier string `json:"identifier,omitempty"`
+	Identifier string `json:"identifier,omitempty" anxcloud:"identifier"`
 	Name       string `json:"name,omitempty"`
 }
 

@@ -23,6 +23,11 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Fixed
+
+* apis/common: add missing `anxcloud:"identifier"` tag (#391, @nachtjasmin)
+* apis/clouddns/v1: add missing `anxcloud:"identifier"` tag (#391, @nachtjasmin)
+
 ## [0.7.2] - 2024-06-19
 
 ### Fixed

@@ -4,7 +4,7 @@ import "time"
 
 type Revision struct {
 	CreatedAt  time.Time `json:"created_at"`
-	Identifier string    `json:"identifier"`
+	Identifier string    `json:"identifier" anxcloud:"identifier"`
 	ModifiedAt time.Time `json:"modified_at"`
 	Records    []Record  `json:"records"`
 	Serial     int       `json:"serial"`
