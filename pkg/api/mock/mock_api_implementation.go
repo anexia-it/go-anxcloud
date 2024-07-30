@@ -18,7 +18,7 @@ import (
 type mockAPI struct {
 	data  mockDataView
 	mu    sync.Mutex
-	hooks map[hookName][]hook
+	hooks map[hookName][]Hook
 }
 
 type APIOption func(*mockAPI)
@@ -27,7 +27,7 @@ type APIOption func(*mockAPI)
 func NewMockAPI(opts ...APIOption) API {
 	a := &mockAPI{
 		data:  make(map[string]*APIObject),
-		hooks: make(map[hookName][]hook),
+		hooks: make(map[hookName][]Hook),
 	}
 
 	for _, opt := range opts {
@@ -231,6 +231,10 @@ func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.Crea
 
 // Update overwrites a types.Object in MockAPIs local storage
 func (a *mockAPI) Update(ctx context.Context, o types.IdentifiedObject, opts ...types.UpdateOption) error {
+	for _, h := range a.hooks[preUpdateHook] {
+		h(ctx, a, o)
+	}
+
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
