@@ -23,6 +23,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+
+* pkg/api/mock: add pre-update hook (#392, @nachtjasmin)
+
 ## [0.7.2] - 2024-06-19
 
 ### Fixed

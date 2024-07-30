@@ -209,6 +209,23 @@ var _ = Describe("Mock API implementation", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(a.Existing().Unwrap()[id]).To(Equal(&testObject{Identifier: id, TestFieldA: "some text A", TestFieldB: "some text B"}))
 		})
+
+		It("executes hook", func(ctx context.Context) {
+			a := NewMockAPI(
+				WithPreUpdateHook(func(ctx context.Context, a API, o types.IdentifiedObject) {
+					o.(*testObject).TestFieldB = "updated-in-hook"
+				}),
+			)
+
+			id := a.FakeExisting(&testObject{TestFieldA: "some text A"})
+			err := a.Update(ctx, &testObject{Identifier: id})
+			Expect(err).ToNot(HaveOccurred())
+			Expect(a.Existing().Unwrap()[id]).To(Equal(&testObject{
+				Identifier: id,
+				TestFieldA: "some text A",
+				TestFieldB: "updated-in-hook"},
+			))
+		})
 	})
 
 	Context("Destroy operations", func() {
