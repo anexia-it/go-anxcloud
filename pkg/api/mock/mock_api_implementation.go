@@ -16,8 +16,9 @@ import (
 )
 
 type mockAPI struct {
-	data  mockDataView
-	mu    sync.Mutex
+	data   mockDataView
+	dataMu sync.Mutex // required to ensure no concurrent access to the map/mockDataView
+
 	hooks map[hookName][]Hook
 }
 
@@ -39,8 +40,8 @@ func NewMockAPI(opts ...APIOption) API {
 
 // Get retrieves an Object from MockAPIs local storage by its identifier
 func (a *mockAPI) Get(ctx context.Context, o types.IdentifiedObject, opts ...types.GetOption) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	apiObject, err := a.findObject(o)
 	if err != nil {
@@ -61,8 +62,8 @@ func (a *mockAPI) Get(ctx context.Context, o types.IdentifiedObject, opts ...typ
 
 // Lists Objects filtered by types.FilterObject
 func (a *mockAPI) List(ctx context.Context, o types.FilterObject, opts ...types.ListOption) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	filteredData, err := listDataAggregation(o, a.data)
 	if err != nil {
@@ -195,8 +196,8 @@ func (a *mockAPI) Create(ctx context.Context, o types.Object, opts ...types.Crea
 		return fmt.Errorf("apply request options: %w", err)
 	}
 
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	if isTag, err := a.tagOperation(o, tagOperationCreate); isTag {
 		return err
@@ -235,8 +236,8 @@ func (a *mockAPI) Update(ctx context.Context, o types.IdentifiedObject, opts ...
 		h(ctx, a, o)
 	}
 
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	apiObject, err := a.findObject(o)
 	if err != nil {
@@ -270,8 +271,8 @@ func updateSetMergedToInputObject(merged, o types.Object) error {
 
 // Destroy removes a types.Object from MockAPIs local storage
 func (a *mockAPI) Destroy(ctx context.Context, o types.IdentifiedObject, opts ...types.DestroyOption) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	if isTag, err := a.tagOperation(o, tagOperationDestroy); isTag {
 		return err
@@ -292,8 +293,8 @@ func (a *mockAPI) Destroy(ctx context.Context, o types.IdentifiedObject, opts ..
 // FakeExisting stores an object to the mock API without incrementing the created count
 // and returns the created identifier
 func (a *mockAPI) FakeExisting(o types.Object, tags ...string) string {
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.dataMu.Lock()
+	defer a.dataMu.Unlock()
 
 	identifier := makeObjectIdentifiable(o)
 
