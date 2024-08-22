@@ -87,7 +87,7 @@ func (p *pageIter) Next(objects interface{}) bool {
 		objectType := reflect.TypeOf((*types.Object)(nil)).Elem()
 
 		elementType := val.Elem().Type().Elem()
-		ptrToElementType := reflect.PtrTo(elementType)
+		ptrToElementType := reflect.PointerTo(elementType)
 
 		isObjects = ptrToElementType.Implements(objectType)
 		isRawMessages = elementType == reflect.TypeOf((*json.RawMessage)(nil)).Elem()
