@@ -78,7 +78,7 @@ func reconcileValidateInputArray(v reflect.Value) (reconcileObjectRetriever, err
 	elemType := v.Type().Elem()
 
 	if !elemType.Implements(objectType) {
-		if !reflect.PtrTo(elemType).Implements(objectType) {
+		if !reflect.PointerTo(elemType).Implements(objectType) {
 			return nil, fmt.Errorf("%w: input array elements do not implement types.Object", ErrInvalidType)
 		}
 
