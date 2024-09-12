@@ -33,3 +33,23 @@ var _ = Describe("Object Template", func() {
 
 	testutils.ObjectTests(&o, ifaces...)
 })
+
+var _ = Describe("Object VirtualMachine", func() {
+	o := apipkg.VirtualMachine{}
+
+	ifaces := make([]interface{}, 0, 3)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.RequestBodyHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.FilterRequestURLHook
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})

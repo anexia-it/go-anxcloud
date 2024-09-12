@@ -10,3 +10,8 @@ import (
 func (o *Template) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil
 }
+
+// GetIdentifier returns the primary identifier of a VirtualMachine object
+func (o *VirtualMachine) GetIdentifier(ctx context.Context) (string, error) {
+	return o.Identifier, nil
+}
