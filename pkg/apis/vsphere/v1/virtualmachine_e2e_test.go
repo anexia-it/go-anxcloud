@@ -2,21 +2,54 @@ package v1_test
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"time"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	corev1 "go.anx.io/go-anxcloud/pkg/apis/core/v1"
 	"go.anx.io/go-anxcloud/pkg/apis/vsphere/v1"
+	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
 const (
-	locationIdentifier             = "52b5f6b2fd3a4a7eaaedf1a7c019e9ea"
-	provisioningLocationIdentifier = "b164595577114876af7662092da89f76"
+	waitTimeout  = 30 * time.Millisecond
+	retryTimeout = 10 * time.Millisecond
 )
 
 var _ = Describe("Dynamic Compute E2E tests", func() {
 	var apiClient api.API
+	var name string
+	var desc string
+	var identifier string
+	var template v1.Template
+
+	locationIdentifier := mockLocationIdentifier
+	vlanIdentifier := mockVLANIdentifier
+	templateIdentifier := mockTemplateIdentifier
+	sshKey := mockSSHKey
+	vlanIPAddress := mockIPAddress
+
+	if isIntegrationTest {
+		if os.Getenv("ANEXIA_LOCATION_ID") != "" {
+			locationIdentifier = os.Getenv("ANEXIA_LOCATION_ID")
+		}
+		if os.Getenv("ANEXIA_VLAN_ID") != "" {
+			vlanIdentifier = os.Getenv("ANEXIA_VLAN_ID")
+		}
+		if os.Getenv("ANEXIA_VLAN_IP_ADDRESS") != "" {
+			vlanIPAddress = os.Getenv("ANEXIA_VLAN_IP_ADDRESS")
+		}
+		if os.Getenv("ANEXIA_TEMPLATE_ID") != "" {
+			templateIdentifier = os.Getenv("ANEXIA_TEMPLATE_ID")
+		}
+		if os.Getenv("ANEXIA_SSH_KEY") != "" {
+			sshKey = os.Getenv("ANEXIA_SSH_KEY")
+		}
+	}
 
 	BeforeEach(func() {
 		a, err := getApi()
@@ -24,38 +57,99 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 		apiClient = a
 	})
 
-	When("creating a Virtual Machine", func() {
-		It("completes successfully", func() {
-			prepareCreate("foo", "desc")
+	Context("creating a Virtual Machine from template", Ordered, func() {
+		BeforeAll(func() {
+			name = "go-anxcloud-test-" + testutil.RandomHostname()
+			desc = "go-anxcloud test"
+			prepareCreate(name, desc)
 
-			adc := v1.VirtualMachine{
-				Name: "foo", CustomName: "desc", RAM: 1024, CPU: 1, DiskInfo: []v1.DiskInfo{
-					{DiskGB: 4},
-					// TODO: disk_type can be specified as well
-				},
-				Location:   corev1.Location{Identifier: locationIdentifier},
-				TemplateID: templateIdentifier,
+			template = v1.Template{Identifier: templateIdentifier, Type: v1.TypeTemplate, Location: corev1.Location{Identifier: locationIdentifier}}
+			if isIntegrationTest {
+				err := apiClient.Get(context.TODO(), &template)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(template.Identifier).To(Equal(templateIdentifier))
 			}
 
-			err := apiClient.Create(context.TODO(), &adc)
+			vm := v1.VirtualMachine{
+				Cores:              1,
+				CPUPerformanceType: "performance-amd",
+				CustomName:         desc,
+				DiskInfo: []v1.DiskInfo{
+					{DiskGB: 10, DiskType: "ENT2"},
+					{DiskGB: 10, DiskType: "ENT2"},
+				},
+				Location: corev1.Location{Identifier: locationIdentifier},
+				Name:     name,
+				Networks: []v1.Network{
+					{
+						NICType: "vmxnet3", VLAN: vlanIdentifier,
+						BandwidthLimit: v1.Bandwidth1GBit, IPs: []string{vlanIPAddress},
+					},
+				},
+				RAM:         1024,
+				SSHKey:      sshKey,
+				StartScript: "#/bin/sh\n",
+				TemplateID:  template.Identifier,
+			}
+
+			err := apiClient.Create(context.TODO(), &vm)
+			if err != nil {
+				fmt.Printf("Failed to create virtual machine: %s\n", err)
+			}
+
 			Expect(err).NotTo(HaveOccurred())
-			Expect(adc.Name).To(Equal("foo"))
-			Expect(adc.CustomName).To(Equal("desc"))
-			Expect(adc.Identifier).To(Equal(mockADCIdentifier))
+			Expect(vm.Name).To(Equal(name))
+			Expect(vm.CustomName).To(Equal(desc))
+
+			identifier = vm.Identifier
+			if !isIntegrationTest {
+				Expect(identifier).To(Equal(mockVMIdentifier))
+			}
+
+			DeferCleanup(func() {
+				prepareDelete()
+				err := apiClient.Destroy(context.TODO(), &v1.VirtualMachine{Identifier: identifier})
+				if err != nil {
+					Fail(fmt.Sprintf("Error destroying Virtual Machine %q created for testing: %v", identifier, err))
+				}
+			})
 		})
-	})
 
-	When("retrieving Virtual Machine information", func() {
-		It("completes successfully", func() {
-			prepareGet("foo", "bar")
+		It("retrieves Virtual Machine information", func() {
+			prepareGetInfo(name, desc)
 
-			adc := v1.VirtualMachine{Identifier: mockADCIdentifier}
+			vm := v1.VirtualMachine{Identifier: identifier}
+			err := apiClient.Get(context.TODO(), &vm)
 
-			err := apiClient.Get(context.TODO(), &adc)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(adc.Name).To(Equal("foo"))
-			Expect(adc.CustomName).To(Equal("bar"))
-			Expect(adc.Identifier).To(Equal(mockADCIdentifier))
+			Expect(vm.Name).To(Equal(name))
+			Expect(vm.CustomName).To(Equal(desc))
+			Expect(vm.Identifier).To(Equal(identifier))
+		})
+
+		//It("retrieves Virtual Machine status", func() {})
+
+		It("eventually is poweredOn", func() {
+			waitTimeout := waitTimeout
+			retryTimeout := retryTimeout
+			if isIntegrationTest {
+				// ms to seconds for integration test
+				waitTimeout *= 1000
+				retryTimeout *= 1000
+			}
+			Eventually(func(g Gomega) {
+				prepareEventuallyActive(name, desc)
+
+				vm := v1.VirtualMachine{Identifier: identifier}
+				err := apiClient.Get(context.TODO(), &vm)
+
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(vm.Status).To(Equal(v1.StatusPoweredOn))
+				g.Expect(vm.DiskInfo).To(HaveLen(vm.Disks))
+				g.Expect(vm.DiskInfo[0].DiskType).To(Equal("ENT2"))
+				g.Expect(vm.Networks).To(HaveLen(1))
+				g.Expect(vm.Networks[0].IPsv4).To(HaveLen(1))
+			}, waitTimeout, retryTimeout).Should(Succeed())
 		})
 	})
 
@@ -69,12 +163,12 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 
 			found := false
 			for r := range oc {
-				adc := v1.VirtualMachine{}
-				err := r(&adc)
+				vm := v1.VirtualMachine{}
+				err := r(&vm)
 				Expect(err).NotTo(HaveOccurred())
 
-				if adc.Identifier == mockADCIdentifier {
-					Expect(adc.Name).To(Equal("foo"))
+				if vm.Identifier == mockVMIdentifier {
+					Expect(vm.Name).To(Equal("foo"))
 					found = true
 				}
 			}

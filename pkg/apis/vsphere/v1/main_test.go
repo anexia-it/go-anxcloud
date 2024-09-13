@@ -3,11 +3,11 @@ package v1_test
 import (
 	"testing"
 
-	"go.anx.io/go-anxcloud/pkg/api"
-	"go.anx.io/go-anxcloud/pkg/client"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.anx.io/go-anxcloud/pkg/api"
+	"go.anx.io/go-anxcloud/pkg/client"
+	testutil "go.anx.io/go-anxcloud/pkg/utils/test"
 )
 
 func getApi() (api.API, error) {
@@ -28,6 +28,8 @@ func getApi() (api.API, error) {
 }
 
 func TestVSphere(t *testing.T) {
+	testutil.Seed(GinkgoRandomSeed())
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Generic vSphere API tests")
 }

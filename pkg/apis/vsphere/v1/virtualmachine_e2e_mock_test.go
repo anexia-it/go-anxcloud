@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"go.anx.io/go-anxcloud/pkg/apis/vsphere/v1"
 	"net/http"
+	"time"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
 )
 
 const (
-	mockADCIdentifier  = "something1234567aaaaaaaabbbbbbbb"
-	mockVLANIdentifier = "something1234567aaaaaaaabbbbbbbb"
+	mockVMIdentifier                   = "VMmething1234567aaaaaaaabbbbbbbb"
+	mockLocationIdentifier             = "LOCething1234567aaaaaaaabbbbbbbb"
+	mockProvisioningLocationIdentifier = "PROVLOCng1234567aaaaaaaabbbbbbbb"
+	mockVLANIdentifier                 = "VLANthing1234567aaaaaaaabbbbbbbb"
+	mockTemplateIdentifier             = "TMPL1234-ffff-5678-aaaa-aaaaaaaabbbb"
+	mockSSHKey                         = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILHfMcIohDRvMkwBJ4teXJxOTOxEWXbv1gmQlPrWcuiC comment"
+	mockIPAddress                      = "255.255.255.255"
 )
 
 var (
@@ -21,9 +27,7 @@ var (
 
 	mockGetDeleted = false
 
-	templateType = "templates"
-
-	templateIdentifier = "6a681fb4-0bc9-4b68-bada-b76a8ec31e0f"
+	mockGetPowerdOn = false
 )
 
 func initMockServer() {
@@ -112,22 +116,14 @@ func initMockServer() {
 }
 */
 
-func mockADCInfoResponseBody(name, desc string) map[string]interface{} {
-
+func mockVMInfoResponseBody(name, desc string) map[string]interface{} {
 	// example data taken from https://engine.anexia-it.com/api/vsphere/doc/#!/status/retrieveStatus_get
 	return map[string]interface{}{
-		"identifier":           mockADCIdentifier,
-		"name":                 name,
-		"custom_name":          desc,
-		"guest_os":             "Debian GNU/Linux 10 (64-bit)",
-		"firmware":             "UEFI",
-		"status":               mockStatus,
-		"ram":                  1024,
+		"cores":                1,
 		"cpu":                  1,
 		"cpu_clock_rate":       2095,
 		"cpu_performance_type": "performance",
-		"vtpm_enabled":         false,
-		"cores":                1,
+		"custom_name":          desc,
 		"disks":                1,
 		"disk_info": []map[string]interface{}{
 			{
@@ -135,20 +131,29 @@ func mockADCInfoResponseBody(name, desc string) map[string]interface{} {
 				"bus_type_label": "SCSI(0:0) Hard disk 1",
 				"disk_gb":        4,
 				"disk_id":        12343567,
-				"disk_type":      "STD4",
+				"disk_type":      "ENT2",
 				"iops":           900,
 				"latency":        30,
 				"storage_type":   "HDD",
 			},
 		},
-		"network": []map[string]interface{}{
+		"firmware":            "UEFI",
+		"guest_os":            "Debian GNU/Linux 10 (64-bit)",
+		"guest_tools_status":  "Active",
+		"identifier":          mockVMIdentifier,
+		"location_code":       "ANX04",
+		"location_country":    "AT",
+		"location_identifier": mockLocationIdentifier,
+		"location_name":       "ANX04 - AT, Vienna, Datasix",
+		"name":                name,
+		"networks": []map[string]interface{}{
 			{
 				"nic":             5,
 				"bandwidth_limit": 1000,
 				"vlan":            mockVLANIdentifier,
 				"id":              1235,
 				"ips_v4": []string{
-					"1.2.3.4",
+					mockIPAddress,
 				},
 				"ips_v6": []string{
 					"0000:111:2222:aaaa:bbbb",
@@ -156,46 +161,65 @@ func mockADCInfoResponseBody(name, desc string) map[string]interface{} {
 				"mac_address": "00:11:22:33:44:55",
 			},
 		},
+		"provisioning_location_identifier": mockProvisioningLocationIdentifier,
+		"ram":                              1024,
+		"status":                           mockStatus,
+		"template_id":                      mockTemplateIdentifier,
 		"version_tools":                    "guestToolsUnmanaged",
-		"guest_tools_status":               "Active",
-		"location_code":                    "ANX04",
-		"location_country":                 "AT",
-		"location_identifier":              locationIdentifier,
-		"location_name":                    "ANX04 - AT, Vienna, Datasix",
-		"provisioning_location_identifier": provisioningLocationIdentifier,
-		"template_id":                      templateIdentifier,
-		"resource_salesperson":             "AW",
+		"vtpm_enabled":                     false,
 	}
 }
 
-func prepareGet(name, desc string) {
+func prepareGetInfo(name, desc string) {
+	if isIntegrationTest {
+		return
+	}
 	var response http.HandlerFunc
 
-	if mockGetDeleted {
+	switch {
+	case mockGetDeleted:
 		response = RespondWith(404, ``)
-	} else {
-		body := mockADCInfoResponseBody(name, desc)
+	default:
+		body := mockVMInfoResponseBody(name, desc)
 		response = RespondWithJSONEncoded(200, body)
+
+		if mockGetPowerdOn {
+			body["status"] = v1.StatusPoweredOn
+		}
 	}
 
 	mock.AppendHandlers(CombineHandlers(
-		VerifyRequest("GET", "/api/vsphere/v1/info.json/"+mockADCIdentifier+"/info"),
+		VerifyRequest("GET", "/api/vsphere/v1/info.json/"+mockVMIdentifier+"/info"),
 		response,
 	))
 }
 
 func prepareCreate(name, desc string) {
+	if isIntegrationTest {
+		return
+	}
+
 	mock.AppendHandlers(CombineHandlers(
-		VerifyRequest("POST", "/api/provisioning/v1/vm.json/"+locationIdentifier+"/"+templateType+"/"+templateIdentifier),
+		VerifyRequest("POST", "/api/vsphere/v1/provisioning/vm.json/"+mockLocationIdentifier+"/"+string(v1.TypeTemplate)+"/"+mockTemplateIdentifier),
 		VerifyJSONRepresenting(map[string]interface{}{
-			"hostname":    name,
-			"custom_name": desc,
-			"memory_mb":   1024,
-			"cpus":        1,
-			"disk_gb":     4,
+			"additional_disks": []map[string]interface{}{
+				{"gb": 10, "type": "ENT2"},
+			},
+			"cpus":                 1,
+			"cpu_performance_type": "performance-amd",
+			"custom_name":          desc,
+			"disk_gb":              10,
+			"disk_type":            "ENT2",
+			"hostname":             name,
+			"memory_mb":            1024,
+			"networks": []map[string]interface{}{
+				{"nic_type": "vmxnet3", "vlan": mockVLANIdentifier, "bandwidth_limit": 1000, "ips": []string{mockIPAddress}},
+			},
+			"script": "Iy9iaW4vc2gK",
+			"ssh":    mockSSHKey,
 		}),
 		RespondWithJSONEncoded(200, map[string]interface{}{
-			"identifier": mockADCIdentifier,
+			"identifier": mockVMIdentifier,
 			"progress":   10,
 			"queued":     false,
 			"errors":     []string{},
@@ -204,23 +228,27 @@ func prepareCreate(name, desc string) {
 }
 
 func prepareList(name, desc string) {
-	mockADCs := []map[string]interface{}{
-		{"identifier": "foo0", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo1", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo2", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo3", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo4", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo5", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo6", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo7", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo8", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		{"identifier": "foo9", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": locationIdentifier},
-		mockADCInfoResponseBody(name, desc),
+	if isIntegrationTest {
+		return
+	}
+
+	mockVMs := []map[string]interface{}{
+		{"identifier": "foo0", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo1", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo2", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo3", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo4", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo5", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo6", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo7", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo8", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		{"identifier": "foo9", "name": "foo", "status": "poweredOff", "cores": 1, "cpu": 1, "ram": 1024, "location_code": "ANX04", "location_identifier": mockLocationIdentifier},
+		mockVMInfoResponseBody(name, desc),
 	}
 
 	pages := [][]map[string]interface{}{
-		mockADCs[0:10],
-		mockADCs[10:],
+		mockVMs[0:10],
+		mockVMs[10:],
 		{},
 	}
 
@@ -234,10 +262,28 @@ func prepareList(name, desc string) {
 			RespondWithJSONEncoded(200, map[string]interface{}{
 				"page":        i + 1,
 				"total_pages": len(pages),
-				"total_items": len(mockADCs),
+				"total_items": len(mockVMs),
 				"limit":       len(data),
 				"data":        data,
 			}),
 		))
 	}
+}
+
+func prepareDelete() {
+	if isIntegrationTest {
+		return
+	}
+	mock.AppendHandlers(CombineHandlers(
+		VerifyRequest("DELETE", "/api/vsphere/v1/provisioning/vm.json/"+mockVMIdentifier),
+		RespondWithJSONEncoded(200, map[string]interface{}{
+			"identifier":                 mockVMIdentifier,
+			"delete_will_be_executed_at": time.Now().Format(time.DateTime),
+		}),
+	))
+}
+
+func prepareEventuallyActive(name, desc string) {
+	prepareGetInfo(name, desc)
+	mockGetPowerdOn = true // Powered-on on second request.
 }
