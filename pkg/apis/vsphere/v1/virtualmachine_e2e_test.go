@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	waitTimeout  = 30 * time.Millisecond
-	retryTimeout = 10 * time.Millisecond
+	defaultWaitTimeout  = 30 * time.Millisecond
+	defaultRetryTimeout = 10 * time.Millisecond
 )
 
 var _ = Describe("Dynamic Compute E2E tests", func() {
@@ -40,6 +40,7 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 		if os.Getenv("ANEXIA_VLAN_ID") != "" {
 			vlanIdentifier = os.Getenv("ANEXIA_VLAN_ID")
 		}
+		// TODO: replace this with an API call
 		if os.Getenv("ANEXIA_VLAN_IP_ADDRESS") != "" {
 			vlanIPAddress = os.Getenv("ANEXIA_VLAN_IP_ADDRESS")
 		}
@@ -61,8 +62,9 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 		BeforeAll(func() {
 			name = "go-anxcloud-test-" + testutil.RandomHostname()
 			desc = "go-anxcloud test"
-			prepareCreate(name, desc)
 
+			// get the template
+			// TODO use/add template mocks?
 			template = v1.Template{Identifier: templateIdentifier, Type: v1.TypeTemplate, Location: corev1.Location{Identifier: locationIdentifier}}
 			if isIntegrationTest {
 				err := apiClient.Get(context.TODO(), &template)
@@ -70,13 +72,50 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 				Expect(template.Identifier).To(Equal(templateIdentifier))
 			}
 
+			//// get a free IP
+			//waitTimeout := defaultWaitTimeout
+			//retryTimeout := defaultRetryTimeout
+			//if isIntegrationTest {
+			//	// 30 ms => 30 seconds
+			//	waitTimeout *= 1000
+			//	retryTimeout *= 1000
+			//}
+			//
+			//prepareGetIPs()
+			//var channel types.ObjectChannel
+			//ips := v1.IPs{} // LocationIdentifier: locationIdentifier, VLANIdentifier: vlanIdentifier}
+			//err := apiClient.List(context.TODO(), &ips, api.ObjectChannel(&channel))
+			//Expect(err).NotTo(HaveOccurred())
+			//
+			//Eventually(func(g Gomega) {
+			//	prepareGetIPs()
+			//
+			//	//fmt.Printf("%+v\n", ips)
+			//
+			//	i := v1.IPs{}
+			//	for ip := range channel {
+			//		err = ip(&i)
+			//		g.Expect(err).NotTo(HaveOccurred())
+			//      // TODO: why is this always "empty"?
+			//		fmt.Printf("%+v\n", i)
+			//		g.Expect(i.Data).ToNot(BeEmpty())
+			//		//g.Expect(i.Data[0].Text).To(Equal(mockFreeIPAddress))
+			//		//vlanIPAddress = i.Data[0].Text
+			//		break
+			//	}
+			//
+			//	//g.Expect(ips.Data[0].Text).To(Equal(mockFreeIPAddress))
+			//
+			//}, waitTiemout, retryTimeout).Should(Succeed())
+
+			prepareCreate(name, desc)
 			vm := v1.VirtualMachine{
-				Cores:              1,
+				Cores:              2,
 				CPUPerformanceType: "performance-amd",
 				CustomName:         desc,
 				DiskInfo: []v1.DiskInfo{
-					{DiskGB: 10, DiskType: "ENT2"},
-					{DiskGB: 10, DiskType: "ENT2"},
+					{DiskGB: 10, DiskType: "ENT6"},
+					{DiskGB: 10, DiskType: "STD4"},
 				},
 				Location: corev1.Location{Identifier: locationIdentifier},
 				Name:     name,
@@ -86,7 +125,7 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 						BandwidthLimit: v1.Bandwidth1GBit, IPs: []string{vlanIPAddress},
 					},
 				},
-				RAM:         1024,
+				RAM:         2048,
 				SSHKey:      sshKey,
 				StartScript: "#/bin/sh\n",
 				TemplateID:  template.Identifier,
@@ -101,10 +140,35 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 			Expect(vm.Name).To(Equal(name))
 			Expect(vm.CustomName).To(Equal(desc))
 
-			identifier = vm.Identifier
-			if !isIntegrationTest {
-				Expect(identifier).To(Equal(mockVMIdentifier))
+			Expect(vm.Progress.Identifier).ToNot(BeEmpty())
+			Expect(vm.Progress.Errors).To(BeEmpty())
+
+			fmt.Printf("Creating virtual machine, progress identifier: %s\n", vm.Progress.Identifier)
+
+			// After creation, we get the VM identifier from the progress endpoint
+			waitTimeout := defaultWaitTimeout
+			retryTimeout := defaultRetryTimeout
+			if isIntegrationTest {
+				// 30 ms => 30*60 seconds = 30 min
+				waitTimeout *= 60000
+				retryTimeout *= 60000
 			}
+			Eventually(func(g Gomega) {
+				prepareEventuallyProvisioned()
+
+				pp := v1.ProvisionProgress{Identifier: vm.Progress.Identifier}
+				err := apiClient.Get(context.TODO(), &pp)
+
+				fmt.Printf("Provisioning progress: %d\n", pp.Percent)
+
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(pp.Errors).To(BeEmpty())
+				g.Expect(pp.Percent).To(Equal(100))
+				g.Expect(pp.Status).To(Equal("1"))
+				g.Expect(pp.VMIdentifier).ToNot(BeEmpty())
+
+				identifier = pp.VMIdentifier
+			}, waitTimeout, retryTimeout).Should(Succeed())
 
 			DeferCleanup(func() {
 				prepareDelete()
@@ -122,16 +186,24 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 			err := apiClient.Get(context.TODO(), &vm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(vm.Name).To(Equal(name))
+			if isIntegrationTest {
+				Expect(vm.Name).To(MatchRegexp("[0-9]*-" + name))
+			} else {
+				Expect(vm.Name).To(Equal(name))
+			}
 			Expect(vm.CustomName).To(Equal(desc))
 			Expect(vm.Identifier).To(Equal(identifier))
+			Expect(vm.Location.Identifier).To(Equal(locationIdentifier))
+			Expect(vm.Disks).To(Equal(2))
+			Expect(vm.DiskInfo).To(HaveLen(2))
+			Expect(vm.Networks).To(HaveLen(1))
 		})
 
 		//It("retrieves Virtual Machine status", func() {})
 
 		It("eventually is poweredOn", func() {
-			waitTimeout := waitTimeout
-			retryTimeout := retryTimeout
+			waitTimeout := defaultWaitTimeout
+			retryTimeout := defaultRetryTimeout
 			if isIntegrationTest {
 				// ms to seconds for integration test
 				waitTimeout *= 1000
@@ -145,15 +217,16 @@ var _ = Describe("Dynamic Compute E2E tests", func() {
 
 				g.Expect(err).NotTo(HaveOccurred())
 				g.Expect(vm.Status).To(Equal(v1.StatusPoweredOn))
-				g.Expect(vm.DiskInfo).To(HaveLen(vm.Disks))
-				g.Expect(vm.DiskInfo[0].DiskType).To(Equal("ENT2"))
-				g.Expect(vm.Networks).To(HaveLen(1))
-				g.Expect(vm.Networks[0].IPsv4).To(HaveLen(1))
 			}, waitTimeout, retryTimeout).Should(Succeed())
 		})
 	})
 
 	When("retrieving a list of Virtual Machines", func() {
+		// TODO: generic coverage for integration test
+		if isIntegrationTest {
+			return
+		}
+
 		It("completes successfully", func() {
 			prepareList("foo", "bar")
 

@@ -124,17 +124,21 @@ func mockVMInfoResponseBody(name, desc string) map[string]interface{} {
 		"cpu_clock_rate":       2095,
 		"cpu_performance_type": "performance",
 		"custom_name":          desc,
-		"disks":                1,
+		"disks":                2,
 		"disk_info": []map[string]interface{}{
 			{
 				"bus_type":       "SCSI",
 				"bus_type_label": "SCSI(0:0) Hard disk 1",
-				"disk_gb":        4,
+				"disk_gb":        10,
 				"disk_id":        12343567,
-				"disk_type":      "ENT2",
+				"disk_type":      "ENT6",
 				"iops":           900,
-				"latency":        30,
+				"latence":        30,
 				"storage_type":   "HDD",
+			},
+			{
+				"disk_gb": 10,
+				"disk_id": 23424323,
 			},
 		},
 		"firmware":            "UEFI",
@@ -146,7 +150,7 @@ func mockVMInfoResponseBody(name, desc string) map[string]interface{} {
 		"location_identifier": mockLocationIdentifier,
 		"location_name":       "ANX04 - AT, Vienna, Datasix",
 		"name":                name,
-		"networks": []map[string]interface{}{
+		"network": []map[string]interface{}{
 			{
 				"nic":             5,
 				"bandwidth_limit": 1000,
@@ -162,7 +166,7 @@ func mockVMInfoResponseBody(name, desc string) map[string]interface{} {
 			},
 		},
 		"provisioning_location_identifier": mockProvisioningLocationIdentifier,
-		"ram":                              1024,
+		"ram":                              2048,
 		"status":                           mockStatus,
 		"template_id":                      mockTemplateIdentifier,
 		"version_tools":                    "guestToolsUnmanaged",
@@ -203,23 +207,23 @@ func prepareCreate(name, desc string) {
 		VerifyRequest("POST", "/api/vsphere/v1/provisioning/vm.json/"+mockLocationIdentifier+"/"+string(v1.TypeTemplate)+"/"+mockTemplateIdentifier),
 		VerifyJSONRepresenting(map[string]interface{}{
 			"additional_disks": []map[string]interface{}{
-				{"gb": 10, "type": "ENT2"},
+				{"gb": 10, "type": "STD4"},
 			},
-			"cpus":                 1,
+			"cpus":                 2,
 			"cpu_performance_type": "performance-amd",
 			"custom_name":          desc,
 			"disk_gb":              10,
-			"disk_type":            "ENT2",
+			"disk_type":            "ENT6",
 			"hostname":             name,
-			"memory_mb":            1024,
-			"networks": []map[string]interface{}{
+			"memory_mb":            2048,
+			"network": []map[string]interface{}{
 				{"nic_type": "vmxnet3", "vlan": mockVLANIdentifier, "bandwidth_limit": 1000, "ips": []string{mockIPAddress}},
 			},
 			"script": "Iy9iaW4vc2gK",
 			"ssh":    mockSSHKey,
 		}),
 		RespondWithJSONEncoded(200, map[string]interface{}{
-			"identifier": mockVMIdentifier,
+			"identifier": mockProgressIdentifier,
 			"progress":   10,
 			"queued":     false,
 			"errors":     []string{},

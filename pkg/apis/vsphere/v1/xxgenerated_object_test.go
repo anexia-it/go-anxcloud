@@ -10,6 +10,30 @@ import (
 	apipkg "go.anx.io/go-anxcloud/pkg/apis/vsphere/v1"
 )
 
+var _ = Describe("Object IPs", func() {
+	o := apipkg.IPs{}
+
+	ifaces := make([]interface{}, 0, 1)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})
+
+var _ = Describe("Object ProvisionProgress", func() {
+	o := apipkg.ProvisionProgress{}
+
+	ifaces := make([]interface{}, 0, 1)
+	{
+		var i types.Object
+		ifaces = append(ifaces, &i)
+	}
+
+	testutils.ObjectTests(&o, ifaces...)
+})
+
 var _ = Describe("Object Template", func() {
 	o := apipkg.Template{}
 
@@ -37,7 +61,7 @@ var _ = Describe("Object Template", func() {
 var _ = Describe("Object VirtualMachine", func() {
 	o := apipkg.VirtualMachine{}
 
-	ifaces := make([]interface{}, 0, 3)
+	ifaces := make([]interface{}, 0, 4)
 	{
 		var i types.Object
 		ifaces = append(ifaces, &i)
@@ -48,6 +72,10 @@ var _ = Describe("Object VirtualMachine", func() {
 	}
 	{
 		var i types.FilterRequestURLHook
+		ifaces = append(ifaces, &i)
+	}
+	{
+		var i types.ResponseDecodeHook
 		ifaces = append(ifaces, &i)
 	}
 

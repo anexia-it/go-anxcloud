@@ -6,6 +6,11 @@ import (
 	"context"
 )
 
+// GetIdentifier returns the primary identifier of a ProvisionProgress object
+func (o *ProvisionProgress) GetIdentifier(ctx context.Context) (string, error) {
+	return o.Identifier, nil
+}
+
 // GetIdentifier returns the primary identifier of a Template object
 func (o *Template) GetIdentifier(ctx context.Context) (string, error) {
 	return o.Identifier, nil

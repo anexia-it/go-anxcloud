@@ -14,7 +14,7 @@ const (
 	StatusPoweredOff Status = "poweredOff"
 )
 
-// anxcloud:object:hooks=RequestBodyHook,FilterRequestURLHook
+// anxcloud:object:hooks=RequestBodyHook,FilterRequestURLHook,ResponseDecodeHook
 
 // VirtualMachine represents an Anexia Dynamic Compute resource used for vm provisioning
 // should contain everything we need to interact with the API. Does not need to represent the Engine API object as a whole.
@@ -35,7 +35,7 @@ type VirtualMachine struct {
 	RAM int `json:"ram"`
 	// CPU contains the amount of CPUs (sockets) available for the VM.
 	// By default, when only specifying 'Cores', CPU = Cores. Cores must be a multiple of CPU (e.g. 1 CPU, 2 Cores).
-	CPU int `json:"cpu"`
+	CPU int `json:"cpu,omitempty"`
 	// CPUClockRate specifies the maximum clock rate of a CPU core.
 	CPUClockRate int `json:"cpu_clock_rate"`
 	// CPUPerformanceType specifies a performance category that relates to the CPUClockRate.
@@ -51,19 +51,24 @@ type VirtualMachine struct {
 	// DiskInfo specifies disk devices available for the VM.
 	DiskInfo []DiskInfo `json:"disk_info"`
 	// Networks specifies network interfaces attached to the VM.
-	Networks []Network `json:"networks"`
+	Networks []Network `json:"network"`
 	// VersionTools specifies the guest OS tools version.
 	VersionTools string `json:"version_tools"`
 	// GuestToolsStatus contains the status of the guest OS tools (Active, Inactive)
 	GuestToolsStatus string `json:"guest_tools_status"`
 	// Location specifies the datacenter location of the VM.
 	Location v1.Location `json:"location"`
-	// ProvisioningLocationIdentifier contains the location identifier of the provisioning API.
-	ProvisioningLocationIdentifier string `json:"provisioning_location_identifier"`
+	// Location information as returned from the API will be provided as Location struct.
+	LocationIdentifier string `json:"location_identifier,omitempty"`
+	LocationCode       string `json:"location_code,omitempty"`
+	LocationName       string `json:"location_name,omitempty"`
+	LocationCountry    string `json:"location_country,omitempty"`
 	// TemplateID contains the template identifier for creating the VM.
 	TemplateID string `json:"template_id"`
 	// Password is the initial root password when creating a VM. Use 'ssh_key' instead.
 	Password string `json:"password,omitempty"`
+	// Progress contains information about the provisioning progress.
+	Progress ProvisionProgress `json:"progress,omitempty"`
 	// SSHKey is a public key that is granted root access when creating a VM. Preferred over 'password'.
 	SSHKey string `json:"ssh_key,omitempty"`
 	// StartScript is a base64 encoded shell script that is executed after provisioning, when creating a VM.
