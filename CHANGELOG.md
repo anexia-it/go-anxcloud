@@ -23,6 +23,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+
+* Add IPAM bindings for generic client (#114, @LittleFox94, @nachtjasmin)
+
 ## [0.7.3] -- 2024-08-06
 
 ### Added
