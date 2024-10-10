@@ -104,6 +104,9 @@ type Network struct {
 
 	// Example: [ "identifier1", "identifier2", "10.11.12.13", "1.0.0.1" ]
 	IPs []string `json:"ips,omitempty"`
+
+	// Example: 1000
+	BandwidthLimit int `json:"bandwidth_limit,omitempty"`
 }
 
 // NewDefinition create a VM definition with the mandatory values set.
