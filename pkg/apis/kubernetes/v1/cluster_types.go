@@ -64,4 +64,17 @@ type Cluster struct {
 	//
 	// [Autoscaling documentation]: https://engine.anexia-it.com/docs/en/module/kubernetes/user-guide/autoscaling
 	EnableAutoscaling *bool `json:"autoscaling,omitempty"`
+
+	// Container Network Interface plugin to be installed on the cluster.
+	// Only the default value is supported. Default: canal = Canal
+	CniPlugin string `json:"cni_plugin,omitempty"`
+
+	// Space-separated list of IP networks in CIDR notation, which are allowed to access the cluster's API server.
+	// If left empty, there will be no IP address-based restrictions.
+	ApiServerAllowlist string `json:"apiserver_allowlist,omitempty"`
+
+	// IP families to use for external networking.
+	// Addresses from the selected protocols will be allocated for the cluster's Service VMs and load balancing,
+	// if those are enabled. One of: IPv4 = IPv4, DualStack = IPv4 & IPv6. Default: DualStack
+	ExternalIPFamilies string `json:"external_ip_families,omitempty"`
 }

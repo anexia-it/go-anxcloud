@@ -27,6 +27,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 * vsphere/provisioning/vm: add `BandwidthLimit` option (#408 @ProbstenHias)
 * vsphere/provisioning/progress: add `Status` (#410, @drpsychick)
+* kubernetes/v1: Add `CniPlugin`, `ApiServerAllowlist` and `ApiServerAllowlist` options (#409, @ProbstenHias)
 
 ## [0.7.3] -- 2024-08-06
 
