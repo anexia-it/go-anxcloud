@@ -17,6 +17,10 @@ const (
 	pathPrefix            = "/api/vsphere/v1/provisioning/progress.json"
 	pollInterval          = 5 * time.Second
 	progressCompleteValue = 100
+	statusFailed          = -1
+	statusSuccess         = 1
+	statusInProgress      = 2
+	statusCancelled       = 3
 )
 
 // Progress contains information regarding the provisioning of a VM returned by the API .
