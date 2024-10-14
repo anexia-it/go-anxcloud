@@ -46,7 +46,6 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 
 			It("it returns status failed", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
-				Expect(result).NotTo(BeNil())
 				Expect(result.Status).To(Equal(StatusFailed))
 			})
 		})
@@ -59,7 +58,6 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 
 			It("it returns status success", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
-				Expect(result).NotTo(BeNil())
 				Expect(result.Status).To(Equal(StatusSuccess))
 			})
 		})
@@ -72,7 +70,6 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 
 			It("it returns an error", func() {
 				Expect(requestErr).To(HaveOccurred())
-				Expect(result).NotTo(BeNil())
 				Expect(result.Status).To(Equal(StatusInProgress))
 				Expect(result.Errors).To(HaveLen(1))
 			})
@@ -86,14 +83,13 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 
 			It("it returns status cancelled", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
-				Expect(result).NotTo(BeNil())
 				Expect(result.Status).To(Equal(StatusCancelled))
 			})
 		})
 	})
 })
 
-func prepareGet(identifier string, errors []string, status int) {
+func prepareGet(identifier string, errors []string, status Status) {
 	mock.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", "/api/vsphere/v1/provisioning/progress.json/"+identifier),
 		ghttp.RespondWithJSONEncoded(http.StatusOK, Progress{
