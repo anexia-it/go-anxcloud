@@ -41,39 +41,39 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 		When("progress has failed", func() {
 			BeforeEach(func() {
 				identifier = "statusFailedTest"
-				prepareGet(identifier, []string{}, statusFailed)
+				prepareGet(identifier, []string{}, StatusFailed)
 			})
 
 			It("it returns status failed", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
 				Expect(result).NotTo(BeNil())
-				Expect(result.Status).To(Equal(statusFailed))
+				Expect(result.Status).To(Equal(StatusFailed))
 			})
 		})
 
 		When("progress has succeeded", func() {
 			BeforeEach(func() {
 				identifier = "statusSuccessTest"
-				prepareGet(identifier, []string{}, statusSuccess)
+				prepareGet(identifier, []string{}, StatusSuccess)
 			})
 
 			It("it returns status success", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
 				Expect(result).NotTo(BeNil())
-				Expect(result.Status).To(Equal(statusSuccess))
+				Expect(result.Status).To(Equal(StatusSuccess))
 			})
 		})
 
 		When("progress has errors", func() {
 			BeforeEach(func() {
 				identifier = "statusInProgressTest"
-				prepareGet(identifier, []string{"some error"}, statusInProgress)
+				prepareGet(identifier, []string{"some error"}, StatusInProgress)
 			})
 
 			It("it returns an error", func() {
 				Expect(requestErr).To(HaveOccurred())
 				Expect(result).NotTo(BeNil())
-				Expect(result.Status).To(Equal(statusInProgress))
+				Expect(result.Status).To(Equal(StatusInProgress))
 				Expect(result.Errors).To(HaveLen(1))
 			})
 		})
@@ -81,13 +81,13 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 		When("progress is cancelled", func() {
 			BeforeEach(func() {
 				identifier = "statusCancelledTest"
-				prepareGet(identifier, []string{}, statusCancelled)
+				prepareGet(identifier, []string{}, StatusCancelled)
 			})
 
 			It("it returns status cancelled", func() {
 				Expect(requestErr).NotTo(HaveOccurred())
 				Expect(result).NotTo(BeNil())
-				Expect(result.Status).To(Equal(statusCancelled))
+				Expect(result.Status).To(Equal(StatusCancelled))
 			})
 		})
 	})

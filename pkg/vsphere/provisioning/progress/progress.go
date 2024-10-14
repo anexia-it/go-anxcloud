@@ -17,10 +17,15 @@ const (
 	pathPrefix            = "/api/vsphere/v1/provisioning/progress.json"
 	pollInterval          = 5 * time.Second
 	progressCompleteValue = 100
-	statusFailed          = -1
-	statusSuccess         = 1
-	statusInProgress      = 2
-	statusCancelled       = 3
+
+	// StatusFailed indicates that the progress failed.
+	StatusFailed = -1
+	// StatusSuccess indicates that the progress succeeded.
+	StatusSuccess = 1
+	// StatusInProgress indicates that the progress is still ongoing.
+	StatusInProgress = 2
+	// StatusCancelled indicates that the progress has been cancelled.
+	StatusCancelled = 3
 )
 
 // Progress contains information regarding the provisioning of a VM returned by the API .
