@@ -17,13 +17,24 @@ const (
 	pathPrefix            = "/api/vsphere/v1/provisioning/progress.json"
 	pollInterval          = 5 * time.Second
 	progressCompleteValue = 100
+
+	// StatusFailed indicates that the progress failed.
+	StatusFailed Status = -1
+	// StatusSuccess indicates that the progress succeeded.
+	StatusSuccess Status = 1
+	// StatusInProgress indicates that the progress is still ongoing.
+	StatusInProgress Status = 2
+	// StatusCancelled indicates that the progress has been cancelled.
+	StatusCancelled Status = 3
 )
+
+type Status int
 
 // Progress contains information regarding the provisioning of a VM returned by the API .
 type Progress struct {
 	// TaskIdentifier is the identifier of the provisioning task.
 	TaskIdentifier string `json:"identifier"`
-	// Queued indicated that the task is waiting to be started-
+	// Queued indicates that the task is waiting to be started.
 	Queued bool `json:"queued"`
 	// Progress is the provisioning progress in percent (queuing not included).
 	Progress int `json:"progress"`
@@ -31,6 +42,8 @@ type Progress struct {
 	VMIdentifier string `json:"vm_identifier"`
 	// Errors encountered while provisioning.
 	Errors []string `json:"errors"`
+	// Status of the task.
+	Status Status `json:"status"`
 }
 
 // ErrProgress is raised if a poll request completes but the result contains errors.
