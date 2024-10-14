@@ -23,7 +23,7 @@ const (
 type Progress struct {
 	// TaskIdentifier is the identifier of the provisioning task.
 	TaskIdentifier string `json:"identifier"`
-	// Queued indicated that the task is waiting to be started-
+	// Queued indicates that the task is waiting to be started.
 	Queued bool `json:"queued"`
 	// Progress is the provisioning progress in percent (queuing not included).
 	Progress int `json:"progress"`
@@ -31,6 +31,8 @@ type Progress struct {
 	VMIdentifier string `json:"vm_identifier"`
 	// Errors encountered while provisioning.
 	Errors []string `json:"errors"`
+	// Status of the task.
+	Status int `json:"status"`
 }
 
 // ErrProgress is raised if a poll request completes but the result contains errors.
