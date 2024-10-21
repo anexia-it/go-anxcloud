@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.7.4] -- 2024-10-21
+
 ### Added
 
 * vsphere/provisioning/vm: add `BandwidthLimit` option (#408 @ProbstenHias)
