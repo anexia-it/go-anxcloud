@@ -23,6 +23,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+### Added
+* vsphere/provisioning/progress: fix `Status`, it's a string (#412, @drpsychick)
+
 ## [0.7.4] -- 2024-10-21
 
 ### Added

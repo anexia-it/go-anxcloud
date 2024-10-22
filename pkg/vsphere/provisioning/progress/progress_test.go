@@ -86,20 +86,29 @@ var _ = Describe("vsphere/provisioning/progress API client", func() {
 				Expect(result.Status).To(Equal(StatusCancelled))
 			})
 		})
+
+		When("API returns an invalid status", func() {
+			BeforeEach(func() {
+				prepareGet(identifier, []string{}, "anything")
+			})
+			It("the status is passed through without error", func() {
+				Expect(requestErr).NotTo(HaveOccurred())
+				Expect(result.Status).To(Equal(Status("anything")))
+			})
+		})
 	})
 })
 
 func prepareGet(identifier string, errors []string, status Status) {
 	mock.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("GET", "/api/vsphere/v1/provisioning/progress.json/"+identifier),
-		ghttp.RespondWithJSONEncoded(http.StatusOK, Progress{
-			TaskIdentifier: identifier,
-			Queued:         false,
-			Progress:       0,
-			VMIdentifier:   "",
-			Errors:         errors,
-			Status:         status,
+		ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]interface{}{
+			"identifier":    identifier,
+			"queued":        false,
+			"progress":      0,
+			"vm_identifier": "",
+			"errors":        errors,
+			"status":        status,
 		}),
 	))
-
 }

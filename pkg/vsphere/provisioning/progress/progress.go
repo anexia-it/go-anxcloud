@@ -19,16 +19,16 @@ const (
 	progressCompleteValue = 100
 
 	// StatusFailed indicates that the progress failed.
-	StatusFailed Status = -1
+	StatusFailed Status = "-1"
 	// StatusSuccess indicates that the progress succeeded.
-	StatusSuccess Status = 1
+	StatusSuccess Status = "1"
 	// StatusInProgress indicates that the progress is still ongoing.
-	StatusInProgress Status = 2
+	StatusInProgress Status = "2"
 	// StatusCancelled indicates that the progress has been cancelled.
-	StatusCancelled Status = 3
+	StatusCancelled Status = "3"
 )
 
-type Status int
+type Status string
 
 // Progress contains information regarding the provisioning of a VM returned by the API .
 type Progress struct {
