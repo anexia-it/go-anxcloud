@@ -52,12 +52,13 @@ type DiskInfo struct {
 
 // Network contains meta information of attached NICs to a VM.
 type Network struct {
-	NIC        int      `json:"nic"`
-	ID         int      `json:"id"`
-	VLAN       string   `json:"vlan"`
-	MACAddress string   `json:"mac_address"`
-	IPv4       []string `json:"ips_v4"`
-	IPv6       []string `json:"ips_v6"`
+	NIC            int      `json:"nic"`
+	BandwidthLimit int      `json:"bandwidth_limit"`
+	VLAN           string   `json:"vlan"`
+	ID             int      `json:"id"`
+	IPv4           []string `json:"ips_v4"`
+	IPv6           []string `json:"ips_v6"`
+	MACAddress     string   `json:"mac_address"`
 }
 
 // Get returns additional information to a given VM identifier.
