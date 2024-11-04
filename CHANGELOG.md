@@ -23,6 +23,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+* vsphere/info/network: add missing `bandwidth_limit` field in `info.Network` (#417, @89q12) 
+
 ## [0.7.5] -- 2024-10-22
 
 ### Added
