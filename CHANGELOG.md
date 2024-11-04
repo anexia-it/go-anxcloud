@@ -22,12 +22,16 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+## [0.7.6] -- 2024-11-04
+
+### Added
 
 * vsphere/info/network: add missing `bandwidth_limit` field in `info.Network` (#417, @89q12) 
 
 ## [0.7.5] -- 2024-10-22
 
 ### Added
+
 * vsphere/provisioning/progress: fix `Status`, it's a string (#412, @drpsychick)
 
 ## [0.7.4] -- 2024-10-21
