@@ -69,7 +69,7 @@ func resourceWithTagObjects(obj types.IdentifiedObject, tags ...string) ([]*Reso
 	objects := make([]*ResourceWithTag, 0, len(tags))
 
 	for _, tag := range tags {
-		objects = append(objects, &ResourceWithTag{Identifier: identifier, Tag: tag})
+		objects = append(objects, &ResourceWithTag{ResourceIdentifier: identifier, Tag: tag})
 	}
 
 	return objects, nil

@@ -18,7 +18,7 @@ import (
 
 var _ = Describe("resource.Resource", func() {
 	Context("ResourceWithTags", func() {
-		rwt := &corev1.ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
+		rwt := &corev1.ResourceWithTag{ResourceIdentifier: "test-identifier", Tag: "test-tag"}
 
 		DescribeTable("Test EndpointURL and FilterRequestURL for all operations", func(op types.Operation, errorMatcher gomegaTypes.GomegaMatcher, expectedPath string) {
 			singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy

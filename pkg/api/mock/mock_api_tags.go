@@ -25,7 +25,7 @@ func (a *mockAPI) tagOperation(o types.Object, op tagOperation) (bool, error) {
 		return false, nil
 	}
 
-	obj, ok := a.data[rwt.Identifier]
+	obj, ok := a.data[rwt.ResourceIdentifier]
 	if !ok {
 		return true, api.ErrNotFound
 	}
