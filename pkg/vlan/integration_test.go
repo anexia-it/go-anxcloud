@@ -41,10 +41,11 @@ var _ = Describe("vlan client", func() {
 			summary, err := api.Create(ctx, def)
 			Expect(err).NotTo(HaveOccurred())
 			vlanID = summary.Identifier
-		})
-		DeferCleanup(func(ctx context.Context) {
-			err := api.Delete(ctx, vlanID)
-			Expect(err).NotTo(HaveOccurred())
+
+			DeferCleanup(func(ctx context.Context) {
+				err := api.Delete(ctx, vlanID)
+				Expect(err).NotTo(HaveOccurred())
+			})
 		})
 
 		It("lists VLANs including test VLAN", func() {
