@@ -47,6 +47,37 @@ var _ = Describe("resource.Resource", func() {
 			Entry("When operation is List", types.OperationList, MatchError(api.ErrOperationNotSupported), ""),
 			Entry("When operation is Update", types.OperationUpdate, MatchError(api.ErrOperationNotSupported), ""),
 		)
+
+		// cover former usage with 'Identifier'
+		rwt2 := &corev1.ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
+
+		DescribeTable("Test EndpointURL and FilterRequestURL for all operations", func(op types.Operation, errorMatcher gomegaTypes.GomegaMatcher, expectedPath string) {
+			singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
+			ctxWithOperation := types.ContextWithOperation(
+				context.TODO(),
+				op,
+			)
+
+			url, err := rwt2.EndpointURL(ctxWithOperation)
+			Expect(err).To(errorMatcher)
+
+			if err == nil {
+				Expect(url.Path).To(BeEquivalentTo(expectedPath))
+				// API client appends objects identifier to path on singleObjectOperation which should be removed by FilterRequestURLHook
+				if singleObjectOperation {
+					url.Path = path.Join(url.Path, rwt2.Identifier)
+				}
+				filteredURL, err := rwt2.FilterRequestURL(ctxWithOperation, url)
+				Expect(err).To(errorMatcher)
+				Expect(filteredURL.Path).To(BeEquivalentTo(expectedPath))
+			}
+		},
+			Entry("When operation is Create", types.OperationCreate, BeNil(), "/api/core/v1/resource.json/test-identifier/tags/test-tag"),
+			Entry("When operation is Destroy", types.OperationDestroy, BeNil(), "/api/core/v1/resource.json/test-identifier/tags/test-tag"),
+			Entry("When operation is Get", types.OperationGet, MatchError(api.ErrOperationNotSupported), ""),
+			Entry("When operation is List", types.OperationList, MatchError(api.ErrOperationNotSupported), ""),
+			Entry("When operation is Update", types.OperationUpdate, MatchError(api.ErrOperationNotSupported), ""),
+		)
 	})
 
 	Context("RetryResourceTagging", func() {
@@ -159,6 +190,53 @@ var _ = Describe("resource.Resource", func() {
 			err := apiClient.Destroy(context.TODO(), &corev1.Resource{Identifier: "foo"})
 			Expect(err).To(MatchError(api.ErrOperationNotSupported))
 		})
+	})
+
+	Context("ListTags", func() {
+		var a api.API
+		var srv *ghttp.Server
+		BeforeEach(func() {
+			srv = ghttp.NewServer()
+			var err error
+			a, err = api.NewAPI(api.WithClientOptions(
+				client.BaseURL(srv.URL()),
+				client.IgnoreMissingToken(),
+			))
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		When("tagging resources", func() {
+			var tags []string
+			BeforeEach(func(ctx context.Context) {
+				srv.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", "/api/core/v1/resource.json/test-id/tags/test-tag"),
+						ghttp.RespondWithJSONEncoded(200, map[string]any{
+							"identifier": "tag-id",
+							"name":       "test-tag",
+						}),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/core/v1/resource.json/test-id"),
+						ghttp.RespondWithJSONEncoded(200, map[string]any{
+							"identifier": "test-id",
+							"tags": []map[string]string{
+								{"identifier": "tag-id", "name": "test-tag"},
+							},
+						}),
+					),
+				)
+				err := corev1.Tag(ctx, a, &corev1.Resource{Identifier: "test-id"}, "test-tag")
+				Expect(err).ToNot(HaveOccurred())
+				tags, err = corev1.ListTags(ctx, a, &corev1.Resource{Identifier: "test-id"})
+				Expect(err).NotTo(HaveOccurred())
+			})
+			It("returns tags of the resources", func() {
+				Expect(tags).To(ConsistOf("test-tag"))
+			})
+
+		})
+
 	})
 
 	It("decodes correctly", func() {

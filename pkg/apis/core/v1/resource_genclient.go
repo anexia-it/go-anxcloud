@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"path"
 
 	"github.com/go-logr/logr"
 	"go.anx.io/go-anxcloud/pkg/api"
@@ -90,7 +91,11 @@ func (rwt ResourceWithTag) EndpointURL(ctx context.Context) (*url.URL, error) {
 		return nil, fmt.Errorf("%w: ResourceWithTag only support Create and Destroy operations", api.ErrOperationNotSupported)
 	}
 
-	return url.Parse(fmt.Sprintf("/api/core/v1/resource.json/%v/tags/%v", rwt.ResourceIdentifier, rwt.Tag))
+	if rwt.ResourceIdentifier != "" {
+		return url.Parse(fmt.Sprintf("/api/core/v1/resource.json/%v/tags/%v", rwt.ResourceIdentifier, rwt.Tag))
+	}
+	// SYSENG-1822: keep backwards compatibility when only providing 'Identifier'.
+	return url.Parse(fmt.Sprintf("/api/core/v1/resource.json/%v/tags/%v", rwt.Identifier, rwt.Tag))
 }
 
 func (rwt ResourceWithTag) FilterRequestURL(ctx context.Context, url *url.URL) (*url.URL, error) {
@@ -101,6 +106,11 @@ func (rwt ResourceWithTag) FilterRequestURL(ctx context.Context, url *url.URL) (
 
 	if op != types.OperationCreate && op != types.OperationDestroy {
 		return nil, fmt.Errorf("%w: ResourceWithTag only support Create and Destroy operations", api.ErrOperationNotSupported)
+	}
+
+	// remove 'Identifier' from path added by API client
+	if op == types.OperationDestroy && rwt.Identifier != "" {
+		url.Path = path.Dir(url.Path)
 	}
 
 	return url, nil
