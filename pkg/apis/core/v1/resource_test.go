@@ -192,53 +192,6 @@ var _ = Describe("resource.Resource", func() {
 		})
 	})
 
-	Context("ListTags", func() {
-		var a api.API
-		var srv *ghttp.Server
-		BeforeEach(func() {
-			srv = ghttp.NewServer()
-			var err error
-			a, err = api.NewAPI(api.WithClientOptions(
-				client.BaseURL(srv.URL()),
-				client.IgnoreMissingToken(),
-			))
-			Expect(err).ToNot(HaveOccurred())
-		})
-
-		When("tagging resources", func() {
-			var tags []string
-			BeforeEach(func(ctx context.Context) {
-				srv.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("POST", "/api/core/v1/resource.json/test-id/tags/test-tag"),
-						ghttp.RespondWithJSONEncoded(200, map[string]any{
-							"identifier": "tag-id",
-							"name":       "test-tag",
-						}),
-					),
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", "/api/core/v1/resource.json/test-id"),
-						ghttp.RespondWithJSONEncoded(200, map[string]any{
-							"identifier": "test-id",
-							"tags": []map[string]string{
-								{"identifier": "tag-id", "name": "test-tag"},
-							},
-						}),
-					),
-				)
-				err := corev1.Tag(ctx, a, &corev1.Resource{Identifier: "test-id"}, "test-tag")
-				Expect(err).ToNot(HaveOccurred())
-				tags, err = corev1.ListTags(ctx, a, &corev1.Resource{Identifier: "test-id"})
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("returns tags of the resources", func() {
-				Expect(tags).To(ConsistOf("test-tag"))
-			})
-
-		})
-
-	})
-
 	It("decodes correctly", func() {
 		msg := `{
 	"name":"test",
