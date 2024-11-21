@@ -29,7 +29,7 @@ var _ = Describe("Mock API Tags", func() {
 	})
 
 	It("returns api.ErrNotFound when object to tag does not exist in mock API", func() {
-		isTagOperation, err := a.tagOperation(&corev1.ResourceWithTag{ResourceIdentifier: "not-in-api"}, tagOperationCreate)
+		isTagOperation, err := a.tagOperation(&corev1.ResourceWithTag{Identifier: "not-in-api"}, tagOperationCreate)
 		Expect(isTagOperation).To(BeTrue())
 		Expect(err).To(MatchError(api.ErrNotFound))
 	})
@@ -41,7 +41,7 @@ var _ = Describe("Mock API Tags", func() {
 	})
 
 	It("returns api.HTTPError (422) when an object is tagged more than once with the same tag", func() {
-		rwt := &corev1.ResourceWithTag{ResourceIdentifier: objects[0].Identifier, Tag: "tagname"}
+		rwt := &corev1.ResourceWithTag{Identifier: objects[0].Identifier, Tag: "tagname"}
 
 		isTagOperation, err := a.tagOperation(rwt, tagOperationCreate)
 		Expect(isTagOperation).To(BeTrue())
@@ -55,7 +55,7 @@ var _ = Describe("Mock API Tags", func() {
 	})
 
 	It("returns api.HTTPError (404) when an object is untagged from a tag it doesn't have", func() {
-		rwt := &corev1.ResourceWithTag{ResourceIdentifier: objects[0].Identifier, Tag: "tagname"}
+		rwt := &corev1.ResourceWithTag{Identifier: objects[0].Identifier, Tag: "tagname"}
 
 		isTagOperation, err := a.tagOperation(rwt, tagOperationDestroy)
 		Expect(isTagOperation).To(BeTrue())
@@ -63,7 +63,7 @@ var _ = Describe("Mock API Tags", func() {
 	})
 
 	It("returns errTagOperationNotSupported if an unsupported tag operation was provided", func() {
-		rwt := &corev1.ResourceWithTag{ResourceIdentifier: objects[0].Identifier, Tag: "tagname"}
+		rwt := &corev1.ResourceWithTag{Identifier: objects[0].Identifier, Tag: "tagname"}
 
 		isTagOperation, err := a.tagOperation(rwt, 3)
 		Expect(isTagOperation).To(BeTrue())

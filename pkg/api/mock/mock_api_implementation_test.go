@@ -175,13 +175,13 @@ var _ = Describe("Mock API implementation", func() {
 
 		It("supports corev1.ResourceWithTag", func() {
 			id := a.FakeExisting(&testObject{})
-			err := a.Create(context.TODO(), &corev1.ResourceWithTag{ResourceIdentifier: id, Tag: "tagname"})
+			err := a.Create(context.TODO(), &corev1.ResourceWithTag{Identifier: id, Tag: "tagname"})
 			Expect(err).ToNot(HaveOccurred())
 			Expect(a.Inspect(id).HasTags("tagname")).To(BeTrue())
 		})
 
 		It("handles errors on tag operation", func() {
-			err := a.Create(context.TODO(), &corev1.ResourceWithTag{ResourceIdentifier: "not-in-api", Tag: "tagname"})
+			err := a.Create(context.TODO(), &corev1.ResourceWithTag{Identifier: "not-in-api", Tag: "tagname"})
 			Expect(err).To(MatchError(api.ErrNotFound))
 		})
 	})
@@ -237,14 +237,14 @@ var _ = Describe("Mock API implementation", func() {
 
 		It("supports corev1.ResourceWithTag", func() {
 			id := a.FakeExisting(&testObject{}, "tagname")
-			err := a.Destroy(context.TODO(), &corev1.ResourceWithTag{ResourceIdentifier: id, Tag: "tagname"})
+			err := a.Destroy(context.TODO(), &corev1.ResourceWithTag{Identifier: id, Tag: "tagname"})
 			Expect(err).ToNot(HaveOccurred())
 			Expect(a.Inspect(id).HasTags("tagname")).To(BeFalse())
 		})
 
 		It("returns 404 if object to be untagged does not have tag provided in corev1.ResourceWithTag", func() {
 			id := a.FakeExisting(&testObject{})
-			err := a.Destroy(context.TODO(), &corev1.ResourceWithTag{ResourceIdentifier: id, Tag: "tagname"})
+			err := a.Destroy(context.TODO(), &corev1.ResourceWithTag{Identifier: id, Tag: "tagname"})
 			Expect(err).To(MatchError(api.ErrNotFound))
 		})
 

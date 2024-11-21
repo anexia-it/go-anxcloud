@@ -18,7 +18,7 @@ import (
 
 var _ = Describe("resource.Resource", func() {
 	Context("ResourceWithTags", func() {
-		rwt := &corev1.ResourceWithTag{ResourceIdentifier: "test-identifier", Tag: "test-tag"}
+		rwt := &corev1.ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
 
 		DescribeTable("Test EndpointURL and FilterRequestURL for all operations", func(op types.Operation, errorMatcher gomegaTypes.GomegaMatcher, expectedPath string) {
 			singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
@@ -37,37 +37,6 @@ var _ = Describe("resource.Resource", func() {
 					url.Path = path.Join(url.Path, rwt.Identifier)
 				}
 				filteredURL, err := rwt.FilterRequestURL(ctxWithOperation, url)
-				Expect(err).To(errorMatcher)
-				Expect(filteredURL.Path).To(BeEquivalentTo(expectedPath))
-			}
-		},
-			Entry("When operation is Create", types.OperationCreate, BeNil(), "/api/core/v1/resource.json/test-identifier/tags/test-tag"),
-			Entry("When operation is Destroy", types.OperationDestroy, BeNil(), "/api/core/v1/resource.json/test-identifier/tags/test-tag"),
-			Entry("When operation is Get", types.OperationGet, MatchError(api.ErrOperationNotSupported), ""),
-			Entry("When operation is List", types.OperationList, MatchError(api.ErrOperationNotSupported), ""),
-			Entry("When operation is Update", types.OperationUpdate, MatchError(api.ErrOperationNotSupported), ""),
-		)
-
-		// cover former usage with 'Identifier'
-		rwt2 := &corev1.ResourceWithTag{Identifier: "test-identifier", Tag: "test-tag"}
-
-		DescribeTable("Test EndpointURL and FilterRequestURL for all operations", func(op types.Operation, errorMatcher gomegaTypes.GomegaMatcher, expectedPath string) {
-			singleObjectOperation := op == types.OperationGet || op == types.OperationUpdate || op == types.OperationDestroy
-			ctxWithOperation := types.ContextWithOperation(
-				context.TODO(),
-				op,
-			)
-
-			url, err := rwt2.EndpointURL(ctxWithOperation)
-			Expect(err).To(errorMatcher)
-
-			if err == nil {
-				Expect(url.Path).To(BeEquivalentTo(expectedPath))
-				// API client appends objects identifier to path on singleObjectOperation which should be removed by FilterRequestURLHook
-				if singleObjectOperation {
-					url.Path = path.Join(url.Path, rwt2.Identifier)
-				}
-				filteredURL, err := rwt2.FilterRequestURL(ctxWithOperation, url)
 				Expect(err).To(errorMatcher)
 				Expect(filteredURL.Path).To(BeEquivalentTo(expectedPath))
 			}
