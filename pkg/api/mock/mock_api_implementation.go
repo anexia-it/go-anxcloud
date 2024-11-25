@@ -296,6 +296,11 @@ func (a *mockAPI) FakeExisting(o types.Object, tags ...string) string {
 	a.dataMu.Lock()
 	defer a.dataMu.Unlock()
 
+	// SYSENG-1822: faking ResourceWithTag blindly overwrites object with same identifier.
+	if _, ok := o.(*corev1.ResourceWithTag); ok {
+		panic("mock: cannot fake ResourceWithTag, pass tags to the object or use the FakeExisting method")
+	}
+
 	identifier := makeObjectIdentifiable(o)
 
 	mao := APIObject{

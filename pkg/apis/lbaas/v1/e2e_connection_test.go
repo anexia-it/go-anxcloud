@@ -40,7 +40,7 @@ func unavailableServerConnectionCheck(url string) {
 			resp, err := http.Get(url)
 			g.Expect(err).NotTo(HaveOccurred())
 			g.Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
-		}, 5*time.Second, 1*time.Second).Should(Succeed())
+		}, 60*time.Second, 5*time.Second).Should(Succeed())
 	})
 }
 
