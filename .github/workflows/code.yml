@@ -28,9 +28,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "$GO_CURRENT"
+        - version: "${{ env.GO_CURRENT }}"
           name: target
-        - version: "$GO_LATEST"
+        - version: "${{ env.GO_LATEST }}"
           name: latest
     name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
@@ -59,9 +59,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "$GO_CURRENT"
+        - version: "${{ env.GO_CURRENT }}"
           name: target
-        - version: "$GO_LATEST"
+        - version: "${{ env.GO_LATEST }}"
           name: latest
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
@@ -89,7 +89,7 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "$GO_CURRENT"
+        - version: "${{ env.GO_CURRENT }}"
           name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:

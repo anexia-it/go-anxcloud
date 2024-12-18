@@ -27,9 +27,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "$GO_CURRENT"
+        - version: "${{ env.GO_CURRENT }}"
           name: target
-        - version: "$GO_LATEST"
+        - version: "${{ env.GO_LATEST }}"
           name: latest
     name: "Spell check with ${{ matrix.go.name }} Go"
     steps:
