@@ -9,6 +9,8 @@ on:
     - main
 
 env:
+  GO_CURRENT: "1.22"
+  GO_LATEST: "1.23"
   GO111MODULE: on
 
 jobs:
@@ -25,9 +27,9 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "1.22"
+        - version: "$GO_CURRENT"
           name: target
-        - version: "1.23"
+        - version: "$GO_LATEST"
           name: latest
     name: "Spell check with ${{ matrix.go.name }} Go"
     steps:
