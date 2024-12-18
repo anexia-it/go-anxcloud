@@ -1,6 +1,8 @@
 module go.anx.io/go-anxcloud
 
-go 1.20
+go 1.22
+
+toolchain go1.23.3
 
 require (
 	github.com/go-logr/logr v1.4.2
