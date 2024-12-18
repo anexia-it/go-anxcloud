@@ -2,7 +2,7 @@ module go.anx.io/go-anxcloud/tools
 
 go 1.22.1
 
-toolchain go1.22.5
+toolchain go1.23.3
 
 require (
 	github.com/client9/misspell v0.3.4
