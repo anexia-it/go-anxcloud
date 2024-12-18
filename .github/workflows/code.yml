@@ -18,20 +18,16 @@ on:
     - "CHANGELOG.md"
     - ".github/workflows/**"
 
-env:
-  GO_CURRENT: 1.22
-  GO_LATEST: 1.23
-
 jobs:
   static-checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
-        - version: "${{ env.GO_CURRENT }}"
-          name: target
-        - version: "${{ env.GO_LATEST }}"
-          name: latest
+          - version: "1.22"
+            name: "target"
+          - version: "1.23"
+            name: "latest"
     name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v4
@@ -59,10 +55,10 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "${{ env.GO_CURRENT }}"
-          name: target
-        - version: "${{ env.GO_LATEST }}"
-          name: latest
+          - version: "1.22"
+            name: "target"
+          - version: "1.23"
+            name: "latest"
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
     - uses: actions/checkout@v4
@@ -89,7 +85,7 @@ jobs:
     strategy:
       matrix:
         go:
-        - version: "${{ env.GO_CURRENT }}"
+        - version: "1.22"
           name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
