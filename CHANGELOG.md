@@ -27,6 +27,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 * api/mock/mock_api_implementation: panic when trying to fake `ResourceWithTag` (#419, @drpsychick)
 
+### Fixed
+
+* golang/x/net: update to 0.33.0 due to CVE-2024-45338 (#431, @drpsychick)
+
 ## [0.7.6] -- 2024-11-04
 
 ### Added
