@@ -29,6 +29,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 ### Fixed
 
+* CloudDNS now consistently uses `zone_name` during requests, fixing integration tests (#432,  @drpsychick)
 * golang/x/net: update to 0.33.0 due to CVE-2024-45338 (#431, @drpsychick)
 
 ## [0.7.6] -- 2024-11-04
