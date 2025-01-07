@@ -36,11 +36,11 @@ func (z *Zone) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// The Create and Update endpoints expect the Zone's name to be in the request body under the key "zoneName"
+	// The Create and Update endpoints expect the Zone's name to be in the request body under the key "zone_name"
 	if op == types.OperationCreate || op == types.OperationUpdate {
 		zWithZoneName := struct {
 			Zone
-			ZoneName string `json:"zoneName"`
+			ZoneName string `json:"zone_name"`
 		}{*z, z.Name}
 
 		// `name` does not exist as a field on the Engine API for these requests,
