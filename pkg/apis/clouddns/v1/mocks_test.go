@@ -141,7 +141,7 @@ func mock_update_zone(z clouddnsv1.Zone) {
 
 	expectedData := struct {
 		clouddnsv1.Zone
-		Name string `json:"zoneName"`
+		Name string `json:"zone_name"`
 	}{
 		Zone: z,
 		Name: z.Name,

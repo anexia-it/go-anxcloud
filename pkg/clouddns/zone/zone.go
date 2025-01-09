@@ -55,7 +55,7 @@ type Definition struct {
 
 	// Required - Zone name parameter
 	// Parameter used for create/update/delete etc.
-	ZoneName string `json:"zoneName"`
+	ZoneName string `json:"zone_name"`
 
 	// Required - Is master flag
 	// Flag designating if CloudDNS operates as master or slave.
@@ -116,7 +116,7 @@ type ResourceRecord struct {
 }
 
 type Create struct {
-	Name   string `json:"zoneName"`
+	Name   string `json:"zone_name"`
 	Master bool   `json:"master"`
 }
 
