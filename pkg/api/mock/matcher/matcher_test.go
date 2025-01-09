@@ -60,7 +60,7 @@ var _ = Describe("custom gomega matcher", func() {
 			matcher := ContainElementNTimes(ContainElement(1), 2)
 			_, err := matcher.Match([]string{"test1", "test2"})
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(HavePrefix("ContainElement matcher expects an array/slice/map."))
+			Expect(err.Error()).To(HavePrefix("ContainElement matcher expects an array/slice/map"))
 		})
 
 		It("has (Negated)FailureMessage", func() {
