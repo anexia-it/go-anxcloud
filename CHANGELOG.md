@@ -27,6 +27,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 * api/mock/mock_api_implementation: panic when trying to fake `ResourceWithTag` (#419, @drpsychick)
 
+### Changed
+
+* go-anxcloud is now tested with Go versions 1.22 and 1.23 (#428, @drpsychick)
+
 ### Fixed
 
 * CloudDNS now consistently uses `zone_name` during requests, fixing integration tests (#432,  @drpsychick)
