@@ -141,6 +141,17 @@ var _ = Describe("ErrorFromResponse function", func() {
 		})
 	})
 
+	Context("for status code 429", func() {
+		BeforeEach(func() {
+			statusCode = 429
+		})
+
+		It("returns RateLimitError", func() {
+			err := ErrorFromResponse(req, res)
+			Expect(IsRateLimitError(err)).To(BeTrue())
+		})
+	})
+
 	Context("for status code 500", func() {
 		BeforeEach(func() {
 			statusCode = 500

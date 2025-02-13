@@ -22,7 +22,8 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
-
+### Added
+* api: Add RateLimitError (#438, @nachtjasmin)
 
 ## [0.7.7] -- 2025-01-09
 
