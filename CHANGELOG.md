@@ -60,6 +60,10 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * vsphere/provisioning/progress: add `Status` (#410, @drpsychick)
 * kubernetes/v1: Add `CniPlugin`, `ApiServerAllowlist` and `ApiServerAllowlist` options (#409, @ProbstenHias)
 
+### Added
+
+* Add IPAM bindings for generic client (#114, @LittleFox94, @nachtjasmin)
+
 ## [0.7.3] -- 2024-08-06
 
 ### Added
