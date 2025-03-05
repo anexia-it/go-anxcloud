@@ -96,7 +96,7 @@ type Definition struct {
 
 // Network defines the network configuration of a VM.
 type Network struct {
-	// Example: "vmxnet3"
+	// Example: "virtio"
 	NICType string `json:"nic_type,omitempty"`
 
 	// Example: "791e8c171e654b459a7fcbbc07675cf3"
