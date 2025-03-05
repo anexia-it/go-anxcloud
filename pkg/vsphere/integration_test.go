@@ -205,7 +205,7 @@ var _ = Describe("vsphere API client", Ordered, func() {
 			cpus, memory, disk,
 			[]vm.Network{
 				{
-					NICType: "vmxnet3",
+					NICType: "virtio",
 					IPs:     []string{ipAddress},
 					VLAN:    vlanID,
 				},

@@ -24,6 +24,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 -->
 ### Added
 * api: Add RateLimitError (#438, @nachtjasmin)
+* Replace all occurrences of `vmxnet3` with `virtio` (#444, @nachtjasmin)
 
 ## [0.7.7] -- 2025-01-09
 

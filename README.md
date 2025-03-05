@@ -124,7 +124,7 @@ func main() {
 	}
 
 	// Create a NIC for the VM and connect it to the VLAN.
-	networkInterfaces := []vm.Network{{NICType: "vmxnet3", IPs: []string{ips[0].Identifier}, VLAN: vlan}}
+	networkInterfaces := []vm.Network{{NICType: "virtio", IPs: []string{ips[0].Identifier}, VLAN: vlan}}
 	// Create the definition of the new VM. The ID you see here is Flatcar.
 	definition := vm.NewAPI(c).NewDefinition(location, "template", "44b38284-6adb-430e-b4a4-1553e29f352f", "developersfirstvm", 2, 2048, 10, networkInterfaces)
 	definition.SSH = "<your SSH pub key>"
