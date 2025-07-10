@@ -101,11 +101,11 @@ type listResponse struct {
 	}
 }
 
-func (a api) List(ctx context.Context, page, limit int) ([]Summary, error) {
+func (a api) List(ctx context.Context, page, limit int, search string) ([]Summary, error) {
 	url := fmt.Sprintf(
-		"%s%s?page=%v&limit=%v",
+		"%s%s?page=%v&limit=%v&search=%s",
 		a.client.BaseURL(),
-		pathPrefix, page, limit,
+		pathPrefix, page, limit, search,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
