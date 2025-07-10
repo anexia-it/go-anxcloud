@@ -74,7 +74,7 @@ var _ = Describe("ipam/prefix client", func() {
 				page := 1
 
 				for !found {
-					ps, err := api.List(context.TODO(), page, 20)
+					ps, err := api.List(context.TODO(), page, 20, "")
 					Expect(err).NotTo(HaveOccurred())
 					Expect(ps).NotTo(BeEmpty())
 
