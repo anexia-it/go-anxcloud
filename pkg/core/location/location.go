@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -32,10 +33,11 @@ type listResponse struct {
 }
 
 func (a api) List(ctx context.Context, page, limit int, search string) ([]Location, error) {
+	escapedquerry := url.QueryEscape(search)
 	url := fmt.Sprintf(
 		"%s%s.json?page=%d&limit=%d&search=%s",
 		a.client.BaseURL(),
-		pathPrefix, page, limit, search,
+		pathPrefix, page, limit, escapedquerry,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

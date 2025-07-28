@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 // Type defines the type of a prefix.
@@ -102,10 +103,11 @@ type listResponse struct {
 }
 
 func (a api) List(ctx context.Context, page, limit int, search string) ([]Summary, error) {
+	escapedquerry := url.QueryEscape(search)
 	url := fmt.Sprintf(
 		"%s%s?page=%v&limit=%v&search=%s",
 		a.client.BaseURL(),
-		pathPrefix, page, limit, search,
+		pathPrefix, page, limit, escapedquerry,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
