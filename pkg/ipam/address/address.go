@@ -7,12 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go.anx.io/go-anxcloud/pkg/utils/param"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
 const (
@@ -132,10 +133,11 @@ func NewCreate(prefixID string, address string) Create {
 }
 
 func (a api) List(ctx context.Context, page, limit int, search string) ([]Summary, error) {
+	escapedquerry := url.QueryEscape(search)
 	url := fmt.Sprintf(
 		"%s%s?page=%d&limit=%d&search=%s",
 		a.client.BaseURL(),
-		pathAddressPrefix, page, limit, search,
+		pathAddressPrefix, page, limit, escapedquerry,
 	)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
