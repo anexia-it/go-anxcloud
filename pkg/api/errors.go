@@ -139,6 +139,20 @@ func (e HTTPError) Error() string {
 	return e.message
 }
 
+// Is overrides the handling for compatibility with the EngineError.
+func (e HTTPError) Is(other error) bool {
+	switch e.statusCode {
+	case 403:
+		return errors.Is(other, ErrAccessDenied)
+	case 404:
+		return errors.Is(other, ErrNotFound)
+	case 429:
+		return IsRateLimitError(other)
+	default:
+		return false
+	}
+}
+
 // ErrorFromResponse creates a new HTTPError from the given response.
 func ErrorFromResponse(req *http.Request, res *http.Response) error {
 	var specificError error

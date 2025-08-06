@@ -23,9 +23,16 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 ### Added
-* api: Add RateLimitError (#438, @nachtjasmin)
+
 * Replace all occurrences of `vmxnet3` with `virtio` (#444, @nachtjasmin)
 * api: Add search parameter to the prefix api (#456, @kkostial)
+* api: Add errors.Is compatibility for newer errors (#458, @nachtjasmin)
+
+## [0.7.8] -- 2025-02-28
+
+### Added
+
+* api: Add RateLimitError (#438, @nachtjasmin)
 
 ## [0.7.7] -- 2025-01-09
 
@@ -46,7 +53,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 ### Added
 
-* vsphere/info/network: add missing `bandwidth_limit` field in `info.Network` (#417, @89q12) 
+* vsphere/info/network: add missing `bandwidth_limit` field in `info.Network` (#417, @89q12)
 
 ## [0.7.5] -- 2024-10-22
 

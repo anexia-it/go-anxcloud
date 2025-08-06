@@ -103,6 +103,21 @@ var _ = Describe("HTTPError", func() {
 			Expect(err.Error()).To(Equal("Random message for testing"))
 		})
 	})
+
+	DescribeTable("compatibility with errors.Is", func(statusCode int, expected error) {
+		req := httptest.NewRequest("GET", "/", nil)
+		rec := httptest.NewRecorder()
+		rec.WriteHeader(statusCode)
+
+		msg := "Random message for testing"
+		he := newHTTPError(req, rec.Result(), nil, &msg)
+
+		Expect(he).To(MatchError(expected))
+	},
+		Entry("", 403, ErrAccessDenied),
+		Entry("", 404, ErrNotFound),
+		Entry("", 429, RateLimitError{}),
+	)
 })
 
 var _ = Describe("ErrorFromResponse function", func() {
