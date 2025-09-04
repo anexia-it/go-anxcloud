@@ -83,6 +83,21 @@ docs-lint-fix: tools
 .PHONY: lint
 lint: go-lint docs-lint
 
+.PHONY: compat-check
+compat-check: tools
+	@echo "==> Checking API compatibility..."
+	@if git describe --tags --exact-match HEAD >/dev/null 2>&1; then \
+		echo "Skipping compatibility check on tagged release"; \
+	else \
+		LATEST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
+		if [ -n "$$LATEST_TAG" ]; then \
+			echo "Checking compatibility against $$LATEST_TAG"; \
+			tools/gorelease -base=$$LATEST_TAG 2>&1 | grep -v "module .* requires go >=" || [ $$? -eq 1 ]; \
+		else \
+			echo "No previous release found, skipping compatibility check"; \
+		fi \
+	fi
+
 .PHONY: vendor
 vendor:
 	go mod vendor
@@ -99,4 +114,5 @@ fmtcheck:
 tools:
 	cd tools && go build -o . github.com/client9/misspell/cmd/misspell
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
+	cd tools && go build -o . golang.org/x/exp/cmd/gorelease
 	cd tools && go build
