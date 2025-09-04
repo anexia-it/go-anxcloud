@@ -92,7 +92,7 @@ compat-check: tools
 		LATEST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
 		if [ -n "$$LATEST_TAG" ]; then \
 			echo "Checking compatibility against $$LATEST_TAG"; \
-			tools/gorelease -base=$$LATEST_TAG 2>&1 | grep -v "module .* requires go >=" || [ $$? -eq 1 ]; \
+			tools/gorelease -base=$$LATEST_TAG; \
 		else \
 			echo "No previous release found, skipping compatibility check"; \
 		fi \
