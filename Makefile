@@ -80,8 +80,39 @@ docs-lint-fix: tools
 	@tools/misspell -w -source=text docs/
 	@docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli --fix docs/
 
+.PHONY: secrets-check
+secrets-check: tools
+	@echo "==> Scanning for secrets and security issues..."
+	@echo "Running gosec security analysis..."
+	@tools/golangci-lint run --disable-all --enable gosec ./... || true
+	@echo ""
+	@echo "Running gitleaks secrets detection..."
+	@gitleaks detect --source . --verbose --report-format json --report-path gitleaks-report.json || true
+	@if [ -f gitleaks-report.json ] && [ -s gitleaks-report.json ]; then \
+		echo "⚠️  Secrets detected! Check gitleaks-report.json for details"; \
+		cat gitleaks-report.json | jq -r '.[] | "File: \(.File) Line: \(.StartLine) Secret: \(.Description)"' 2>/dev/null || cat gitleaks-report.json; \
+	else \
+		echo "✅ No secrets detected by gitleaks"; \
+		rm -f gitleaks-report.json; \
+	fi
+
 .PHONY: lint
 lint: go-lint docs-lint
+
+.PHONY: compat-check
+compat-check: tools
+	@echo "==> Checking API compatibility..."
+	@if git describe --tags --exact-match HEAD >/dev/null 2>&1; then \
+		echo "Skipping compatibility check on tagged release"; \
+	else \
+		LATEST_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
+		if [ -n "$$LATEST_TAG" ]; then \
+			echo "Checking compatibility against $$LATEST_TAG"; \
+			tools/gorelease -base=$$LATEST_TAG; \
+		else \
+			echo "No previous release found, skipping compatibility check"; \
+		fi \
+	fi
 
 .PHONY: vendor
 vendor:
@@ -99,4 +130,6 @@ fmtcheck:
 tools:
 	cd tools && go build -o . github.com/client9/misspell/cmd/misspell
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
+	cd tools && go build -o . golang.org/x/exp/cmd/gorelease
 	cd tools && go build
+	@which gitleaks >/dev/null 2>&1 || (echo "Installing gitleaks..." && go install github.com/zricethezav/gitleaks/v8@latest)

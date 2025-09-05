@@ -35,3 +35,18 @@ repos:
     require_serial: true
     pass_filenames: false
     files:          '\.go$'
+  - id:             secrets-check
+    name:           secrets scanning
+    entry:          sh -c 'make secrets-check || true'
+    language:       system
+    require_serial: true
+    pass_filenames: false
+    files:          '\.(go|yaml|yml|json|md|sh)$'
+    stages:         [manual]
+  - id:             secrets-check-quick
+    name:           quick secrets check (gosec only)  
+    entry:          sh -c 'tools/golangci-lint run --disable-all --enable gosec ./... || true'
+    language:       system
+    require_serial: true
+    pass_filenames: false
+    files:          '\.go$'
