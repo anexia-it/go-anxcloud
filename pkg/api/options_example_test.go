@@ -18,8 +18,8 @@ func ExampleAutoTag() {
 
 	vlan := vlanv1.VLAN{DescriptionCustomer: "mocked VLAN"}
 	if err := a.Create(context.TODO(), &vlan, api.AutoTag("foo", "bar", "baz")); err != nil {
-		taggingErr := &api.ErrTaggingFailed{}
-		if errors.As(err, taggingErr) {
+		var taggingErr *api.ErrTaggingFailed
+		if errors.As(err, &taggingErr) {
 			log.Fatalf("object successfully created but tagging failed: %s", taggingErr.Error())
 		} else {
 			log.Fatalf("unknown error occurred: %s", err)
