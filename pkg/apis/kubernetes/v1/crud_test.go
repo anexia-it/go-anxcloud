@@ -191,9 +191,40 @@ var _ = Describe("CRUD", Ordered, func() {
 		})
 
 		Context("Update operation", Ordered, func() {
-			It("responds with api.ErrOperationNotSupported", func() {
-				err := a.Update(context.TODO(), &Cluster{Identifier: clusterIdentifier})
-				Expect(err).To(MatchError(api.ErrOperationNotSupported))
+			It("can update existing cluster", func() {
+				testLocation := corev1.Location{
+					Identifier:  "anx04id",
+					Code:        "004",
+					Name:        "anx04",
+					CountryCode: "AUSSIE",
+					CityCode:    "KLAGI",
+					Latitude:    pointer.String("1.1"),
+					Longitude:   pointer.String("2.2"),
+				}
+
+				clusterIdentifier = "test-identifier"
+				cluster := Cluster{
+					Identifier: clusterIdentifier,
+					Name:       "someClusterName",
+					Location:   testLocation,
+				}
+
+				srv.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", clusterIdentifier)),
+					ghttp.VerifyJSONRepresenting(struct {
+						Identifier string `json:"identifier"`
+						Name       string `json:"name"`
+						Location   string `json:"location"`
+					}{
+						Identifier: clusterIdentifier,
+						Name:       "someClusterName",
+						Location:   testLocation.Identifier,
+					}),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]any{}),
+				))
+
+				err := a.Update(context.TODO(), &cluster)
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 

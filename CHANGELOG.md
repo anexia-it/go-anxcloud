@@ -22,6 +22,9 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+
+* api: Add possibility to update kubernetes clusters (#461, @kkostial, @koflanx)
+
 ### Added
 
 * Replace all occurrences of `vmxnet3` with `virtio` (#444, @nachtjasmin)
