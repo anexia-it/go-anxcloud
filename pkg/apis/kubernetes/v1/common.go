@@ -16,10 +16,6 @@ func endpointURL(ctx context.Context, o types.Object, resourcePathName string) (
 		return nil, err
 	}
 
-	if op == types.OperationUpdate {
-		return nil, api.ErrOperationNotSupported
-	}
-
 	env := api.GetEnvironmentPathSegment(ctx, "kubernetes/v1", "kubernetes")
 
 	// we can ignore the error since the URL is hard-coded known as valid
