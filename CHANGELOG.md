@@ -23,7 +23,7 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
-* api: Add possibility to update kubernetes clusters (#461, @kkostial, @koflanx)
+* api: Add possibility to update kubernetes clusters and node pools (#461, @kkostial, @koflanx)
 
 ### Added
 

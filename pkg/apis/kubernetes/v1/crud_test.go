@@ -342,10 +342,22 @@ var _ = Describe("CRUD", Ordered, func() {
 		})
 
 		Context("Update operation", Ordered, func() {
-			// Updating a NodePool is currently not supported at all
-			It("responds with api.ErrOperationNotSupported", func() {
-				err := a.Update(context.TODO(), &NodePool{Identifier: nodePoolIdentifier})
-				Expect(err).To(MatchError(api.ErrOperationNotSupported))
+			It("can update existing node pool", func() {
+				nodePoolIdentifier = "test-identifier"
+				nodePool := NodePool{Identifier: nodePoolIdentifier}
+
+				srv.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/node_pool.json/%s", nodePoolIdentifier)),
+					ghttp.VerifyJSONRepresenting(struct {
+						Identifier string `json:"identifier"`
+					}{
+						Identifier: nodePoolIdentifier,
+					}),
+					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]any{}),
+				))
+
+				err := a.Update(context.TODO(), &nodePool)
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})
