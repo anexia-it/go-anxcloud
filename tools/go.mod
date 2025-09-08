@@ -2,11 +2,10 @@ module go.anx.io/go-anxcloud/tools
 
 go 1.22.1
 
-toolchain go1.23.3
-
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/golangci/golangci-lint v1.63.4
+	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/tools v0.28.0
 )
 
@@ -184,7 +183,6 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect

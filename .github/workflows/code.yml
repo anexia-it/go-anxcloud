@@ -50,6 +50,9 @@ jobs:
       - name: check code quality
         run: make go-lint
 
+      - name: check API compatibility
+        run: make compat-check
+
   unit-tests:
     runs-on: ubuntu-latest
     strategy:
