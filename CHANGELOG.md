@@ -23,7 +23,12 @@ Some examples, more below in the actual changelog (newer entries are more likely
 
 -->
 
+## [0.8.0] -- 2025-09-08
+
+### Added
 * api: Add possibility to update kubernetes clusters and node pools (#461, @kkostial, @koflanx)
+
+## [0.7.9]
 
 ### Added
 
