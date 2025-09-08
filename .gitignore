@@ -22,3 +22,4 @@ vendor/
 # others
 .envrc
 tools/gorelease
+gitleaks-report.json

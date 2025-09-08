@@ -80,6 +80,22 @@ docs-lint-fix: tools
 	@tools/misspell -w -source=text docs/
 	@docker run --rm -v $(PWD):/markdown 06kellyjac/markdownlint-cli --fix docs/
 
+.PHONY: secrets-check
+secrets-check: tools
+	@echo "==> Scanning for secrets and security issues..."
+	@echo "Running gosec security analysis..."
+	@tools/golangci-lint run --disable-all --enable gosec ./... || true
+	@echo ""
+	@echo "Running gitleaks secrets detection..."
+	@gitleaks detect --source . --verbose --report-format json --report-path gitleaks-report.json || true
+	@if [ -f gitleaks-report.json ] && [ -s gitleaks-report.json ]; then \
+		echo "⚠️  Secrets detected! Check gitleaks-report.json for details"; \
+		cat gitleaks-report.json | jq -r '.[] | "File: \(.File) Line: \(.StartLine) Secret: \(.Description)"' 2>/dev/null || cat gitleaks-report.json; \
+	else \
+		echo "✅ No secrets detected by gitleaks"; \
+		rm -f gitleaks-report.json; \
+	fi
+
 .PHONY: lint
 lint: go-lint docs-lint
 
@@ -116,3 +132,4 @@ tools:
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd tools && go build -o . golang.org/x/exp/cmd/gorelease
 	cd tools && go build
+	@which gitleaks >/dev/null 2>&1 || (echo "Installing gitleaks..." && go install github.com/zricethezav/gitleaks/v8@latest)
