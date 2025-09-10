@@ -5,6 +5,7 @@ package vlan
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"go.anx.io/go-anxcloud/pkg/client"
@@ -69,17 +70,30 @@ var _ = Describe("vlan client", func() {
 		})
 
 		It("eventually retrieves test VLAN with expected data and being active", func() {
-			pollCheck := func(g Gomega) {
+			pollCheck := func() error {
 				vlan, err := api.Get(context.TODO(), vlanID)
-				g.Expect(err).NotTo(HaveOccurred())
+				if err != nil {
+					return err
+				}
 
-				g.Expect(vlan.Locations).To(HaveLen(1))
-				g.Expect(vlan.Locations[0].Identifier).To(Equal(locationID))
+				if len(vlan.Locations) != 1 {
+					return errors.New("expected exactly one location")
+				}
+				if vlan.Locations[0].Identifier != locationID {
+					return errors.New("location ID mismatch")
+				}
 
-				g.Expect(vlan.VMProvisioning).To(BeFalse())
-				g.Expect(vlan.CustomerDescription).To(Equal("go SDK integration test"))
+				if vlan.VMProvisioning {
+					return errors.New("expected VM provisioning to be false")
+				}
+				if vlan.CustomerDescription != "go SDK integration test" {
+					return errors.New("customer description mismatch")
+				}
 
-				g.Expect(vlan.Status).To(Equal("Active"))
+				if vlan.Status != "Active" {
+					return errors.New("VLAN not active")
+				}
+				return nil
 			}
 
 			Eventually(pollCheck, 5*time.Minute, 10*time.Second).Should(Succeed())
@@ -96,16 +110,29 @@ var _ = Describe("vlan client", func() {
 		})
 
 		It("eventually retrieves test VLAN with expected updated data", func() {
-			pollCheck := func(g Gomega) {
+			pollCheck := func() error {
 				vlan, err := api.Get(context.TODO(), vlanID)
-				g.Expect(err).NotTo(HaveOccurred())
+				if err != nil {
+					return err
+				}
 
-				g.Expect(vlan.Locations).To(HaveLen(1))
-				g.Expect(vlan.Locations[0].Identifier).To(Equal(locationID))
+				if len(vlan.Locations) != 1 {
+					return errors.New("expected exactly one location")
+				}
+				if vlan.Locations[0].Identifier != locationID {
+					return errors.New("location ID mismatch")
+				}
 
-				g.Expect(vlan.VMProvisioning).To(BeTrue())
-				g.Expect(vlan.CustomerDescription).To(Equal("go SDK integration test updated"))
-				g.Expect(vlan.Status).To(Equal("Active"))
+				if !vlan.VMProvisioning {
+					return errors.New("expected VM provisioning to be true")
+				}
+				if vlan.CustomerDescription != "go SDK integration test updated" {
+					return errors.New("updated customer description mismatch")
+				}
+				if vlan.Status != "Active" {
+					return errors.New("VLAN not active")
+				}
+				return nil
 			}
 
 			Eventually(pollCheck, 5*time.Minute, 10*time.Second).Should(Succeed())

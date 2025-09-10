@@ -51,11 +51,18 @@ var _ = Describe("options", func() {
 					return
 				}
 
-				Eventually(func(g Gomega) {
+				pollCheck := func() error {
 					err := a.Get(context.TODO(), &vlan)
-					g.Expect(err).NotTo(HaveOccurred())
-					g.Expect(vlan.Status).To(Equal(vlanv1.StatusActive))
-				}, waitTimeout, retryTimeout).Should(Succeed())
+					if err != nil {
+						return err
+					}
+					if vlan.Status != vlanv1.StatusActive {
+						return errors.New("VLAN not yet active")
+					}
+					return nil
+				}
+
+				Eventually(pollCheck, waitTimeout, retryTimeout).Should(Succeed())
 
 				err := a.Destroy(context.TODO(), &vlan)
 				Expect(err).ToNot(HaveOccurred())

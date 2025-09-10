@@ -25,39 +25,51 @@ type LBaaSE2ETestRun struct {
 	Port int
 }
 
-func waitObject(ctx *context.Context, msg string, o *types.Object, handler func(Gomega, error)) {
-	It(msg, func() {
-		Eventually(func(g Gomega) {
-			err := apiClient.Get(*ctx, *o)
-			handler(g, err)
-		}, 5*time.Minute, 3*time.Second).Should(Succeed())
-	})
-}
-
 func waitObjectReady(ctx *context.Context, o *types.Object) {
-	waitObject(ctx, "eventually is ready", o, func(g Gomega, err error) {
-		// we do not expect an error at all, if one occures, fail immediately
-		Expect(err).NotTo(HaveOccurred())
+	It("eventually is ready", func() {
+		pollCheck := func() error {
+			err := apiClient.Get(*ctx, *o)
+			if err != nil {
+				return err
+			}
 
-		hasState, ok := (*o).(gs.StateRetriever)
-		// this function only expects to wait for LBaaS resources, fail immediately otherwise
-		Expect(ok).To(BeTrue())
+			hasState, ok := (*o).(gs.StateRetriever)
+			if !ok {
+				return errors.New("object does not implement StateRetriever")
+			}
 
-		// fail immediately for failure states, but only fail when not going to success state before timeout
-		Expect(hasState.StateError()).To(BeFalse())
-		g.Expect(hasState.StateOK()).To(BeTrue())
+			if hasState.StateError() {
+				return errors.New("object is in error state")
+			}
+			if !hasState.StateOK() {
+				return errors.New("object is not ready")
+			}
+			return nil
+		}
+
+		Eventually(pollCheck, 5*time.Minute, 3*time.Second).Should(Succeed())
 	})
 }
 
 func waitObjectGone(ctx *context.Context, o *types.Object) {
-	waitObject(ctx, "eventually is gone", o, func(g Gomega, err error) {
-		// it eventually returns an error ...
-		g.Expect(err).To(HaveOccurred())
+	It("eventually is gone", func() {
+		pollCheck := func() error {
+			err := apiClient.Get(*ctx, *o)
+			if err == nil {
+				return errors.New("object still exists")
+			}
 
-		// ... but if that error isn't an HTTP error or it's not a NotFoundError, fail immediately
-		var he api.HTTPError
-		Expect(errors.As(err, &he)).To(BeTrue())
-		Expect(he.StatusCode()).To(Equal(http.StatusNotFound))
+			var he api.HTTPError
+			if !errors.As(err, &he) {
+				return errors.New("expected HTTP error")
+			}
+			if he.StatusCode() != http.StatusNotFound {
+				return errors.New("expected 404 Not Found")
+			}
+			return nil
+		}
+
+		Eventually(pollCheck, 5*time.Minute, 3*time.Second).Should(Succeed())
 	})
 }
 

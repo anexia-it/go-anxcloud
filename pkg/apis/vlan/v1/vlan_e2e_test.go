@@ -91,14 +91,20 @@ var _ = Describe("VLAN E2E tests", func() {
 		})
 
 		It("eventually has StatusActive", func() {
-			Eventually(func(g Gomega) {
+			Eventually(func() error {
 				prepareEventuallyActive(desc, false)
 
 				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
+				if err != nil {
+					return err
+				}
 
-				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(vlan.Status).To(Equal(vlanv1.StatusActive))
+				if vlan.Status != vlanv1.StatusActive {
+					return fmt.Errorf("expected status %v, got %v", vlanv1.StatusActive, vlan.Status)
+				}
+
+				return nil
 			}, waitTimeout, retryTimeout).Should(Succeed())
 		})
 
@@ -115,14 +121,20 @@ var _ = Describe("VLAN E2E tests", func() {
 		})
 
 		It("eventually shows VM provisioning as enabled", func() {
-			Eventually(func(g Gomega) {
+			Eventually(func() error {
 				prepareGet(desc, true)
 
 				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
+				if err != nil {
+					return err
+				}
 
-				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(vlan.VMProvisioning).To(BeTrue())
+				if !vlan.VMProvisioning {
+					return fmt.Errorf("expected VM provisioning to be enabled, but it was disabled")
+				}
+
+				return nil
 			}, waitTimeout, retryTimeout).Should(Succeed())
 		})
 
@@ -144,18 +156,26 @@ var _ = Describe("VLAN E2E tests", func() {
 		})
 
 		It("eventually is gone", func() {
-			Eventually(func(g Gomega) {
+			Eventually(func() error {
 				prepareEventuallyDeleted(desc, true)
 
 				vlan := vlanv1.VLAN{Identifier: identifier}
 				err := apiClient.Get(context.TODO(), &vlan)
-				g.Expect(err).To(HaveOccurred())
+				if err == nil {
+					return fmt.Errorf("expected VLAN to be deleted, but it still exists")
+				}
 
 				he := api.HTTPError{}
 				ok := errors.As(err, &he)
-				g.Expect(ok).To(BeTrue())
+				if !ok {
+					return fmt.Errorf("expected HTTPError, got %T: %v", err, err)
+				}
 
-				g.Expect(he.StatusCode()).To(Equal(404))
+				if he.StatusCode() != 404 {
+					return fmt.Errorf("expected 404 status code, got %d", he.StatusCode())
+				}
+
+				return nil
 			}, waitTimeout, retryTimeout).Should(Succeed())
 
 			deleted = true

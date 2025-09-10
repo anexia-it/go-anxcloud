@@ -245,7 +245,7 @@ var _ = Describe("lbaas/v1 bindings", Ordered, func() {
 
 		// there might come a time where we have to check if a port is already in use
 		// and throw another set of dice.
-		Port: 32000 + rand.Intn(1000),
+		Port: 32000 + rand.Intn(1000), // #nosec G404 -- math/rand is acceptable for test data generation
 	}
 
 	loadbalancerChecks(testrun)

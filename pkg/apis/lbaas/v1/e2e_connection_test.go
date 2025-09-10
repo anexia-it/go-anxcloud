@@ -4,8 +4,10 @@
 package v1_test
 
 import (
+	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"syscall"
 	"time"
 
@@ -22,33 +24,59 @@ import (
 
 func successfulConnectionCheck(url string) {
 	It("delivers HAProxy status page", func() {
-		Eventually(func(g Gomega) {
-			resp, err := http.Get(url)
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		pollCheck := func() error {
+			resp, err := http.Get(url) // #nosec G107 -- URL is controlled test endpoint
+			if err != nil {
+				return err
+			}
+			if resp.StatusCode != http.StatusOK {
+				return errors.New("unexpected status code")
+			}
 
 			body, err := io.ReadAll(resp.Body)
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(string(body)).To(ContainSubstring("<title>Statistics Report for HAProxy</title>"))
-		}, 5*time.Second, 1*time.Second).Should(Succeed())
+			if err != nil {
+				return err
+			}
+			if !strings.Contains(string(body), "<title>Statistics Report for HAProxy</title>") {
+				return errors.New("HAProxy status page title not found")
+			}
+			return nil
+		}
+
+		Eventually(pollCheck, 5*time.Second, 1*time.Second).Should(Succeed())
 	})
 }
 
 func unavailableServerConnectionCheck(url string) {
 	It("delivers a 503 error", func() {
-		Eventually(func(g Gomega) {
-			resp, err := http.Get(url)
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
-		}, 60*time.Second, 5*time.Second).Should(Succeed())
+		pollCheck := func() error {
+			resp, err := http.Get(url) // #nosec G107 -- URL is controlled test endpoint
+			if err != nil {
+				return err
+			}
+			if resp.StatusCode != http.StatusServiceUnavailable {
+				return errors.New("expected 503 Service Unavailable")
+			}
+			return nil
+		}
+
+		Eventually(pollCheck, 60*time.Second, 5*time.Second).Should(Succeed())
 	})
 }
 
 func connectionResetByPeerCheck(url string) {
 	It("resets connection", func() {
-		Eventually(func(g Gomega) {
-			_, err := http.Get(url)
-			g.Expect(err).To(MatchError(syscall.ECONNRESET))
-		}, 30*time.Second, 1*time.Second).Should(Succeed())
+		pollCheck := func() error {
+			_, err := http.Get(url) // #nosec G107 -- URL is controlled test endpoint
+			if err == nil {
+				return errors.New("expected connection reset error")
+			}
+			if !errors.Is(err, syscall.ECONNRESET) {
+				return err
+			}
+			return nil
+		}
+
+		Eventually(pollCheck, 30*time.Second, 1*time.Second).Should(Succeed())
 	})
 }

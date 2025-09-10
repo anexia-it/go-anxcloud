@@ -314,7 +314,7 @@ func (a api) ReserveRandom(ctx context.Context, reserve ReserveRandom) (ReserveR
 	}
 
 	// Workaround to avoid race-conditions on IP reservations for the same VLAN
-	randomDelay := time.Duration(rand.Intn(1000))
+	randomDelay := time.Duration(rand.Intn(1000)) // #nosec G404 - timing jitter doesn't need cryptographic randomness
 	time.Sleep(randomDelay * time.Millisecond)
 
 	httpResponse, err := a.client.Do(req)

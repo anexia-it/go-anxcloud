@@ -5,6 +5,7 @@ package address
 
 import (
 	"context"
+	"errors"
 	"net"
 	"time"
 
@@ -54,37 +55,52 @@ var _ = Describe("ipam/address client", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		poll := func(g Gomega) {
+		poll := func() error {
 			p, err := papi.Get(context.TODO(), p.ID)
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(p.Status).To(Equal("Active"))
+			if err != nil {
+				return err
+			}
+			if p.Status != "Active" {
+				return errors.New("prefix not active")
+			}
 
 			ip, pnet, err := net.ParseCIDR(p.Name)
-			g.Expect(err).NotTo(HaveOccurred())
-			g.Expect(ip.To4()).NotTo(BeNil())
+			if err != nil {
+				return err
+			}
+			if ip.To4() == nil {
+				return errors.New("not IPv4 address")
+			}
 
 			// XXX: net.IP.IsPrivate() was added in go 1.17, but we target 1.16 and have to replicate
 			// that functionality here
 			privateIPv4Ranges := []string{"10.0.0.0/8", "172.20.0.0/14", "192.168.0.0/16"}
-			g.Expect(privateIPv4Ranges).To(WithTransform(
-				func(ranges []string) []bool {
-					results := make([]bool, 0, len(ranges))
-					for _, r := range ranges {
-						_, net, err := net.ParseCIDR(r)
-						g.Expect(err).NotTo(HaveOccurred())
-						results = append(results, net.Contains(ip))
-					}
-					return results
-				},
-				ContainElement(true),
-			))
+			isPrivate := false
+			for _, r := range privateIPv4Ranges {
+				_, net, err := net.ParseCIDR(r)
+				if err != nil {
+					return err
+				}
+				if net.Contains(ip) {
+					isPrivate = true
+					break
+				}
+			}
+			if !isPrivate {
+				return errors.New("IP is not in private range")
+			}
 
 			mask, size := pnet.Mask.Size()
-			g.Expect(mask).To(Equal(29))
-			g.Expect(size).To(Equal(32))
+			if mask != 29 {
+				return errors.New("unexpected mask size")
+			}
+			if size != 32 {
+				return errors.New("unexpected address size")
+			}
 
 			testPrefix = *pnet
 			testPrefixID = p.ID
+			return nil
 		}
 		Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())
 	}
@@ -124,10 +140,15 @@ var _ = Describe("ipam/address client", func() {
 		})
 
 		It("eventually retrieves the test address as inactive", func() {
-			poll := func(g Gomega) {
+			poll := func() error {
 				ip, err := api.Get(context.TODO(), ipID)
-				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(ip.Status).To(Equal("Inactive"))
+				if err != nil {
+					return err
+				}
+				if ip.Status != "Inactive" {
+					return errors.New("IP status not inactive")
+				}
+				return nil
 			}
 			Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())
 		})
@@ -144,11 +165,18 @@ var _ = Describe("ipam/address client", func() {
 		})
 
 		It("eventually retrieves the test address with changed data", func() {
-			poll := func(g Gomega) {
+			poll := func() error {
 				ip, err := api.Get(context.TODO(), ipID)
-				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(ip.Status).To(Equal("Inactive"))
-				g.Expect(ip.DescriptionCustomer).To(Equal("something something IPv4 is exhausted"))
+				if err != nil {
+					return err
+				}
+				if ip.Status != "Inactive" {
+					return errors.New("IP status not inactive")
+				}
+				if ip.DescriptionCustomer != "something something IPv4 is exhausted" {
+					return errors.New("description not updated")
+				}
+				return nil
 			}
 			Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())
 		})
@@ -185,10 +213,15 @@ var _ = Describe("ipam/address client", func() {
 		})
 
 		It("eventually retrieves the reserved IP being in progress", func() {
-			poll := func(g Gomega) {
+			poll := func() error {
 				ip, err := api.Get(context.TODO(), ip.ID)
-				g.Expect(err).NotTo(HaveOccurred())
-				g.Expect(ip.Status).To(Equal("In progress"))
+				if err != nil {
+					return err
+				}
+				if ip.Status != "In progress" {
+					return errors.New("IP status not in progress")
+				}
+				return nil
 			}
 			Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())
 		})
