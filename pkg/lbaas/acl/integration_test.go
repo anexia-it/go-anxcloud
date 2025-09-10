@@ -54,7 +54,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 			State:      common.NewlyCreated,
 			ParentType: "backend",
 			Criterion:  "src",
-			Index:      rand.Intn(100),
+			Index:      rand.Intn(100), // #nosec G404 -- math/rand is acceptable for test data generation
 			Value:      "10.0.0.0/8",
 			Backend:    &backend.Identifier,
 		}
@@ -137,7 +137,7 @@ var _ = Describe("lbaas/acl client", Label("old client", "slow"), func() {
 				State:      common.Updating,
 				ParentType: "backend",
 				Criterion:  "src",
-				Index:      rand.Intn(100),
+				Index:      rand.Intn(100), // #nosec G404 -- math/rand is acceptable for test data generation
 				Value:      "172.20.0.0/12",
 				Frontend:   nil,
 				Backend:    &backend.Identifier,

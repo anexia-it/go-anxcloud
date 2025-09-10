@@ -88,7 +88,7 @@ var _ = Describe("CloudDNS API client", Ordered, func() {
 		zoneName = test.RandomHostname() + ".go-anxcloud.test"
 		c = getClient()
 
-		rng := rand.New(rand.NewSource(GinkgoRandomSeed()))
+		rng := rand.New(rand.NewSource(GinkgoRandomSeed())) // #nosec G404 - test data generation doesn't need cryptographic randomness
 
 		times = randomTimes{
 			rng.Intn(10) * 100,

@@ -1,11 +1,11 @@
 package test
 
-import "math/rand"
+import "math/rand" // #nosec G404 - math/rand is acceptable for test utilities
 
 var random *rand.Rand = nil
 
 func Seed(seed int64) {
-	random = rand.New(rand.NewSource(seed))
+	random = rand.New(rand.NewSource(seed)) // #nosec G404 - test utility doesn't need cryptographic randomness
 }
 
 func getRandom() *rand.Rand {

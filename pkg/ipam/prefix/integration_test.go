@@ -5,6 +5,7 @@ package prefix
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -90,16 +91,27 @@ var _ = Describe("ipam/prefix client", func() {
 			})
 
 			It("eventually retrieves test prefix with expected data and being Active", func() {
-				poll := func(g Gomega) {
+				poll := func() error {
 					info, err := api.Get(context.TODO(), prefix)
-					g.Expect(err).NotTo(HaveOccurred())
+					if err != nil {
+						return err
+					}
 
-					g.Expect(info.Vlans).To(HaveLen(1))
-					g.Expect(info.Vlans[0].ID).To(Equal(vlanID))
+					if len(info.Vlans) != 1 {
+						return errors.New("expected exactly one VLAN")
+					}
+					if info.Vlans[0].ID != vlanID {
+						return errors.New("VLAN ID mismatch")
+					}
 
-					g.Expect(info.PrefixType).To(BeEquivalentTo(TypePrivate))
+					if info.PrefixType != TypePrivate {
+						return errors.New("expected private prefix type")
+					}
 
-					g.Expect(info.Status).To(Equal("Active"))
+					if info.Status != "Active" {
+						return errors.New("prefix not active")
+					}
+					return nil
 				}
 
 				Eventually(poll, 5*time.Minute, 10*time.Second).Should(Succeed())

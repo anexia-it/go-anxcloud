@@ -152,7 +152,8 @@ func (p *pageIter) Next(objects interface{}) bool {
 
 	log := logr.FromContextOrDiscard(p.ctx)
 
-	retrievedElements := uint(val.Elem().Len())
+	// Slice lengths are always non-negative, so this conversion is safe
+	retrievedElements := uint(val.Elem().Len()) // nolint:gosec // G115: slice length is always non-negative
 	if retrievedElements > p.itemsPerPage && p.itemsPerPage > 0 {
 		log.Info("Retrieved more elements in one Next() than wanted", "wanted", p.itemsPerPage, "retrieved", retrievedElements)
 	} else {
