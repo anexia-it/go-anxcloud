@@ -1,0 +1,15 @@
+# gorelease configuration
+# https://pkg.go.dev/golang.org/x/exp/cmd/gorelease
+
+# Skip certain modules that are internal or examples
+skip = [
+    "go.anx.io/go-anxcloud/cmd/client",          # Demo client, not part of public API
+    "go.anx.io/go-anxcloud/trees/*",             # Git worktrees, not part of API
+    "go.anx.io/go-anxcloud/tools",               # Build tools, not part of API
+]
+
+# Report compatibility issues for breaking changes
+version = "compatible"
+
+# Include test files in compatibility checks since they test public APIs
+include_tests = true

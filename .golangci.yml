@@ -12,6 +12,7 @@ linters:
     - ginkgolinter
     - gocheckcompilerdirectives
     - gofmt
+    - gosec
     - gosimple
     - ineffassign
     - misspell
