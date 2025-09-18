@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
@@ -21,11 +22,16 @@ func (b *Bucket) EndpointURL(ctx context.Context) (*url.URL, error) {
 		return nil, err
 	}
 
-	if op == types.OperationList {
+	if op == types.OperationList || op == types.OperationGet {
 		query := u.Query()
 
 		// Add attributes parameter to get all fields
 		query.Add("attributes", "name,state,region,object_count,object_size,backend,tenant,reseller,customer")
+
+		// Add embed parameter if specified
+		if len(b.Embed) > 0 {
+			query.Add("embed", strings.Join(b.Embed, ","))
+		}
 
 		filters := make(url.Values)
 
@@ -66,8 +72,28 @@ func (b *Bucket) EndpointURL(ctx context.Context) (*url.URL, error) {
 // FilterAPIRequestBody generates the request body for Buckets, replacing linked Objects with just their identifier.
 // Only includes required fields and conditionally includes optional fields to avoid 422 errors.
 func (b *Bucket) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	body := requestBody(ctx, func() interface{} {
-		// Create minimal request body with only required fields
+		// For UPDATE operations, only send the fields that are actually being updated
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+
+			// Only include fields that have been explicitly set for update
+			if b.Name != "" {
+				updateBody["name"] = b.Name
+			}
+			if b.ObjectLockLifetime != nil {
+				updateBody["object_lock_lifetime"] = *b.ObjectLockLifetime
+			}
+
+			return updateBody
+		}
+
+		// For CREATE operations, use the full request body
 		reqBody := &struct {
 			Name               string  `json:"name"`
 			Region             string  `json:"region"`

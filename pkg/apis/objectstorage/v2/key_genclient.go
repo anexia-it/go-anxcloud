@@ -25,7 +25,7 @@ func (k *Key) EndpointURL(ctx context.Context) (*url.URL, error) {
 		query := u.Query()
 
 		// Add attributes parameter to get all fields
-		query.Add("attributes", "name,remote_id,state,backend,tenant,user,expire_date,reseller,customer")
+		query.Add("attributes", "name,remote_id,state,backend,tenant,user,expire_date,secret_url,reseller,customer")
 
 		filters := make(url.Values)
 
@@ -66,8 +66,25 @@ func (k *Key) EndpointURL(ctx context.Context) (*url.URL, error) {
 // FilterAPIRequestBody generates the request body for Keys, replacing linked Objects with just their identifier.
 // Only includes required fields and conditionally includes optional fields to avoid API errors.
 func (k *Key) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	reqBody := requestBody(ctx, func() interface{} {
-		// Create minimal request body with only required fields
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+			if k.Name != "" {
+				updateBody["name"] = k.Name
+			}
+
+			if k.ExpireDate != nil {
+				updateBody["expiry_date"] = k.ExpireDate.Format("2006-01-02T15:04:05Z")
+			}
+
+			return updateBody
+		}
+
 		reqBody := &struct {
 			Name               string  `json:"name"`
 			Backend            string  `json:"backend"`

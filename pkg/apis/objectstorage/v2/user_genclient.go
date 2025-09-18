@@ -70,16 +70,55 @@ func (user *User) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 // FilterAPIRequestBody generates the request body for Users, replacing linked Objects with just their identifier.
 func (user *User) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	body := requestBody(ctx, func() interface{} {
-		return &struct {
-			User
-			Backend string `json:"backend"`
-			Tenant  string `json:"tenant"`
-		}{
-			User:    *user,
-			Backend: user.Backend.Identifier,
-			Tenant:  user.Tenant.Identifier,
+		// For UPDATE operations, only send the fields that are actually being updated
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+
+			// Only include fields that have been explicitly set for update
+			if user.Enabled != nil {
+				updateBody["enabled"] = *user.Enabled
+			}
+			if user.FullName != "" {
+				updateBody["full_name"] = user.FullName
+			}
+			if user.UserName != "" {
+				updateBody["user_name"] = user.UserName
+			}
+
+			return updateBody
 		}
+
+		// For CREATE operations, use the full request body
+		reqBody := &struct {
+			UserName           string  `json:"user_name"`
+			FullName           string  `json:"full_name"`
+			Enabled            *bool   `json:"enabled,omitempty"`
+			Backend            string  `json:"backend"`
+			Tenant             string  `json:"tenant"`
+			CustomerIdentifier string  `json:"customer_identifier"`
+			ResellerIdentifier *string `json:"reseller_identifier,omitempty"`
+			Share              *bool   `json:"share,omitempty"`
+		}{
+			UserName:           user.UserName,
+			FullName:           user.FullName,
+			Enabled:            user.Enabled,
+			Backend:            user.Backend.Identifier,
+			Tenant:             user.Tenant.Identifier,
+			CustomerIdentifier: user.CustomerIdentifier,
+			Share:              &user.Share,
+		}
+
+		if user.ResellerIdentifier != "" {
+			reqBody.ResellerIdentifier = &user.ResellerIdentifier
+		}
+
+		return reqBody
 	})
 	return body, nil
 }

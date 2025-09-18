@@ -27,5 +27,6 @@ type Key struct {
 	Tenant     *common.PartialResource `json:"tenant,omitempty"`
 	User       *common.PartialResource `json:"user,omitempty"`
 	ExpireDate *time.Time              `json:"expiry_date,omitempty"`
+	SecretURL  string                  `json:"secret_url,omitempty"`
 	Name       string                  `json:"name"`
 }

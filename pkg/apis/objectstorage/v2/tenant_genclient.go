@@ -26,7 +26,7 @@ func (t *Tenant) EndpointURL(ctx context.Context) (*url.URL, error) {
 		query := u.Query()
 
 		// Add attributes parameter to get all fields
-		query.Add("attributes", "name,state,remote_id,description,user_name,password,quota,usage,backend,reseller,customer")
+		query.Add("attributes", "name,state,remote_id,description,user,password,quota,usage,backend,reseller,customer")
 
 		filters := make(url.Values)
 
@@ -39,7 +39,7 @@ func (t *Tenant) EndpointURL(ctx context.Context) (*url.URL, error) {
 		}
 
 		if t.UserName != "" {
-			filters.Add("user_name", t.UserName)
+			filters.Add("user", t.UserName)
 		}
 
 		if t.CustomerIdentifier != "" {
@@ -78,7 +78,37 @@ func (t *Tenant) FilterAPIRequest(ctx context.Context, req *http.Request) (*http
 
 // FilterAPIRequestBody generates the request body for Tenants, replacing linked Objects with just their identifier.
 func (t *Tenant) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	body := requestBody(ctx, func() interface{} {
+		// For UPDATE operations, only send the fields that are actually being updated
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+
+			// Only include fields that have been explicitly set for update
+			if t.Name != "" {
+				updateBody["name"] = t.Name
+			}
+			if t.Description != "" {
+				updateBody["description"] = t.Description
+			}
+			if t.UserName != "" {
+				updateBody["user"] = t.UserName
+			}
+			if t.Password != "" {
+				updateBody["password"] = t.Password
+			}
+			if t.Quota != nil {
+				updateBody["quota"] = *t.Quota
+			}
+
+			return updateBody
+		}
+
+		// For CREATE operations, use the full request body
 		return &struct {
 			// Exclude the Backend field to avoid conflict
 			CustomerIdentifier string                 `json:"customer_identifier,omitempty"`
@@ -93,7 +123,7 @@ func (t *Tenant) FilterAPIRequestBody(ctx context.Context) (interface{}, error) 
 			State              *GenericAttributeState `json:"state,omitempty"`
 			RemoteID           *string                `json:"remote_id,omitempty"`
 			Description        string                 `json:"description"`
-			UserName           string                 `json:"user_name"`
+			UserName           string                 `json:"user"`
 			Password           string                 `json:"password,omitempty"`
 			Quota              *float64               `json:"quota,omitempty"`
 			Usage              *float64               `json:"usage,omitempty"`
