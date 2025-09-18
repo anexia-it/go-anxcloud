@@ -70,8 +70,31 @@ func (user *User) EndpointURL(ctx context.Context) (*url.URL, error) {
 
 // FilterAPIRequestBody generates the request body for Users, replacing linked Objects with just their identifier.
 func (user *User) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	body := requestBody(ctx, func() interface{} {
-		// Create minimal request body without the identifier field to avoid API rejection
+		// For UPDATE operations, only send the fields that are actually being updated
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+
+			// Only include fields that have been explicitly set for update
+			if user.Enabled != nil {
+				updateBody["enabled"] = *user.Enabled
+			}
+			if user.FullName != "" {
+				updateBody["full_name"] = user.FullName
+			}
+			if user.UserName != "" {
+				updateBody["user_name"] = user.UserName
+			}
+
+			return updateBody
+		}
+
+		// For CREATE operations, use the full request body
 		reqBody := &struct {
 			UserName           string  `json:"user_name"`
 			FullName           string  `json:"full_name"`
@@ -88,15 +111,11 @@ func (user *User) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 			Backend:            user.Backend.Identifier,
 			Tenant:             user.Tenant.Identifier,
 			CustomerIdentifier: user.CustomerIdentifier,
+			Share:              &user.Share,
 		}
 
-		// Conditionally include optional fields only if they have non-default values
 		if user.ResellerIdentifier != "" {
 			reqBody.ResellerIdentifier = &user.ResellerIdentifier
-		}
-
-		if user.Share {
-			reqBody.Share = &user.Share
 		}
 
 		return reqBody

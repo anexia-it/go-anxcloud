@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 )
@@ -21,11 +22,16 @@ func (b *Bucket) EndpointURL(ctx context.Context) (*url.URL, error) {
 		return nil, err
 	}
 
-	if op == types.OperationList {
+	if op == types.OperationList || op == types.OperationGet {
 		query := u.Query()
 
 		// Add attributes parameter to get all fields
 		query.Add("attributes", "name,state,region,object_count,object_size,backend,tenant,reseller,customer")
+
+		// Add embed parameter if specified
+		if len(b.Embed) > 0 {
+			query.Add("embed", strings.Join(b.Embed, ","))
+		}
 
 		filters := make(url.Values)
 
@@ -66,40 +72,51 @@ func (b *Bucket) EndpointURL(ctx context.Context) (*url.URL, error) {
 // FilterAPIRequestBody generates the request body for Buckets, replacing linked Objects with just their identifier.
 // Only includes required fields and conditionally includes optional fields to avoid 422 errors.
 func (b *Bucket) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
+	op, err := types.OperationFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	body := requestBody(ctx, func() interface{} {
-		// Create minimal request body with only required fields
+		// For UPDATE operations, only send the fields that are actually being updated
+		if op == types.OperationUpdate {
+			updateBody := make(map[string]interface{})
+
+			// Only include fields that have been explicitly set for update
+			if b.Name != "" {
+				updateBody["name"] = b.Name
+			}
+			if b.ObjectLockLifetime != nil {
+				updateBody["object_lock_lifetime"] = *b.ObjectLockLifetime
+			}
+
+			return updateBody
+		}
+
+		// For CREATE operations, use the full request body
 		reqBody := &struct {
 			Name               string  `json:"name"`
 			Region             string  `json:"region"`
 			Backend            string  `json:"backend"`
 			Tenant             string  `json:"tenant"`
-			CustomerIdentifier *string `json:"customer_identifier,omitempty"`  // Only include if not empty
-			ResellerIdentifier *string `json:"reseller_identifier,omitempty"`  // Only include if not empty
-			Share              *bool   `json:"share,omitempty"`                // Omit if false
-			ObjectLockLifetime *int    `json:"object_lock_lifetime,omitempty"` // Include if set
+			CustomerIdentifier string  `json:"customer_identifier"`           // Always include (can be empty)
+			ResellerIdentifier *string `json:"reseller_identifier,omitempty"` // Omit if empty
+			Share              *bool   `json:"share,omitempty"`               // Omit if false
 		}{
-			Name:    b.Name,
-			Region:  b.Region.Identifier,
-			Backend: b.Backend.Identifier,
-			Tenant:  b.Tenant.Identifier,
+			Name:               b.Name,
+			Region:             b.Region.Identifier,
+			Backend:            b.Backend.Identifier,
+			Tenant:             b.Tenant.Identifier,
+			CustomerIdentifier: b.CustomerIdentifier, // Always include (even if empty)
 		}
 
-		// Conditionally include customer/reseller fields only if they have values
-		// This prevents customer assignment issues when reseller context is missing
-		if b.CustomerIdentifier != "" {
-			reqBody.CustomerIdentifier = &b.CustomerIdentifier
-		}
-
+		// Conditionally include optional fields only if they have non-default values
 		if b.ResellerIdentifier != "" {
 			reqBody.ResellerIdentifier = &b.ResellerIdentifier
 		}
 
 		if b.Share {
 			reqBody.Share = &b.Share
-		}
-
-		if b.ObjectLockLifetime != nil {
-			reqBody.ObjectLockLifetime = b.ObjectLockLifetime
 		}
 
 		return reqBody

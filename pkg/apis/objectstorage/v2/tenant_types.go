@@ -25,7 +25,7 @@ type Tenant struct {
 	State       *GenericAttributeState `json:"state,omitempty"`
 	RemoteID    *string                `json:"remote_id,omitempty"`
 	Description string                 `json:"description"`
-	UserName    string                 `json:"user_name"`
+	UserName    string                 `json:"user"`
 	Password    string                 `json:"password,omitempty"`
 	Quota       *float64               `json:"quota,omitempty"`
 	Usage       *float64               `json:"usage,omitempty"`

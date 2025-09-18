@@ -7,6 +7,7 @@ import (
 	"io"
 	"strconv"
 
+	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
@@ -34,6 +35,8 @@ type Bucket struct {
 	Backend            common.PartialResource `json:"backend"`
 	Tenant             common.PartialResource `json:"tenant"`
 	ObjectLockLifetime *int                   `json:"object_lock_lifetime,omitempty"`
+	VersioningActive   bool                   `json:"versioning_active,omitempty"`
+	Embed              []string               `json:"-"`
 }
 
 // GetObjectCount returns the object count as a float64, handling both string and numeric values.
@@ -91,14 +94,13 @@ func (b *Bucket) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 		Customer           string                 `json:"customer,omitempty"`
 		Share              bool                   `json:"share,omitempty"`
 
-		Name               string                 `json:"name"`
-		State              *GenericAttributeState `json:"state,omitempty"`
-		Region             common.PartialResource `json:"region"`
-		ObjectCount        interface{}            `json:"object_count,omitempty"`
-		ObjectSize         interface{}            `json:"object_size,omitempty"`
-		Backend            common.PartialResource `json:"backend"`
-		Tenant             common.PartialResource `json:"tenant"`
-		ObjectLockLifetime *int                   `json:"object_lock_lifetime,omitempty"`
+		Name        string                 `json:"name"`
+		State       *GenericAttributeState `json:"state,omitempty"`
+		Region      common.PartialResource `json:"region"`
+		ObjectCount interface{}            `json:"object_count,omitempty"`
+		ObjectSize  interface{}            `json:"object_size,omitempty"`
+		Backend     common.PartialResource `json:"backend"`
+		Tenant      common.PartialResource `json:"tenant"`
 	}
 
 	// Unmarshal into the temp struct
@@ -121,11 +123,35 @@ func (b *Bucket) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 	b.Region = temp.Region
 	b.Backend = temp.Backend
 	b.Tenant = temp.Tenant
-	b.ObjectLockLifetime = temp.ObjectLockLifetime
 
 	// Handle the interface{} fields that can be strings or numbers
 	b.ObjectCount = temp.ObjectCount
 	b.ObjectSize = temp.ObjectSize
 
 	return nil
+}
+
+// bucketEmptyAndDelete represents the trigger object for empty and delete operations
+type bucketEmptyAndDelete struct {
+	BucketIdentifier string `json:"-" anxcloud:"identifier"`
+	EmptyAndDelete   bool   `json:"empty_and_delete"`
+}
+
+// EmptyAndDelete empties the bucket and then deletes it using the trigger/empty_and_delete endpoint.
+// This is the proper way to delete a bucket that contains objects.
+func EmptyAndDelete(ctx context.Context, a api.API, bucketID string) error {
+	trigger := &bucketEmptyAndDelete{
+		BucketIdentifier: bucketID,
+		EmptyAndDelete:   true,
+	}
+	return a.Create(ctx, trigger)
+}
+
+// EmptyAndDelete is a convenience method that calls the package-level EmptyAndDelete function
+// using the bucket's identifier.
+func (b *Bucket) EmptyAndDelete(ctx context.Context, a api.API) error {
+	if b.Identifier == "" {
+		return fmt.Errorf("bucket identifier is required for empty and delete operation")
+	}
+	return EmptyAndDelete(ctx, a, b.Identifier)
 }

@@ -58,3 +58,29 @@ var _ = Describe("Bucket URL generation", func() {
 		Expect(u.Path).To(Equal("/api/object_storage/v2/bucket"))
 	})
 })
+
+var _ = Describe("Bucket embed parameter", func() {
+	DescribeTable("embed parameter generation",
+		func(embeds []string, operation types.Operation, expectedEmbed string) {
+			b := objectstoragev2.Bucket{Embed: embeds}
+			ctx := types.ContextWithOperation(context.TODO(), operation)
+			u, err := b.EndpointURL(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			q := u.Query()
+			if expectedEmbed != "" {
+				Expect(q).To(HaveKey("embed"))
+				Expect(q.Get("embed")).To(Equal(expectedEmbed))
+			} else {
+				Expect(q).NotTo(HaveKey("embed"))
+			}
+		},
+		Entry("no embed for create operation", []string{"region", "backend"}, types.OperationCreate, ""),
+		Entry("no embed for update operation", []string{"region", "backend"}, types.OperationUpdate, ""),
+		Entry("single embed for list operation", []string{"region"}, types.OperationList, "region"),
+		Entry("multiple embeds for list operation", []string{"region", "backend"}, types.OperationList, "region,backend"),
+		Entry("single embed for get operation", []string{"backend"}, types.OperationGet, "backend"),
+		Entry("multiple embeds for get operation", []string{"region", "backend"}, types.OperationGet, "region,backend"),
+		Entry("empty embed array", []string{}, types.OperationList, ""),
+	)
+})
