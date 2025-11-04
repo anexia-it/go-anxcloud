@@ -6,13 +6,19 @@ import (
 )
 
 type (
-	Mode  = v1.Mode
-	State = gs.State
+	Mode        = v1.Mode
+	State       = gs.State
+	HealthCheck = string
 )
 
 const (
 	HTTP = v1.HTTP
 	TCP  = v1.TCP
+)
+
+const (
+	HealthCheckDefaultTCP  HealthCheck = "\"adv_check\": \"tcp-check\""
+	HealthCheckDefaultHTTP HealthCheck = "\"httpchk\": { \"method\": \"GET\", \"uri\": \"/\" }"
 )
 
 var (
