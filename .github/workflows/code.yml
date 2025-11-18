@@ -74,7 +74,7 @@ jobs:
       run: make test
 
     - name: upload coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: unit-coverage-${{ matrix.go.name }}
         path: coverage.out
@@ -104,7 +104,7 @@ jobs:
       run: make func-test
 
     - name: upload coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: integration-coverage-${{ matrix.go.name }}
         path: coverage.out
@@ -115,7 +115,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v6
 
     - uses: paambaati/codeclimate-action@v9.0.0
       env:
