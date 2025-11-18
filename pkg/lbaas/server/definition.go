@@ -9,4 +9,10 @@ type Definition struct {
 	IP      string       `json:"ip"`
 	Port    int          `json:"port"`
 	Backend string       `json:"backend"`
+	Check   string       `json:"check"`
 }
+
+const (
+	CheckEnabled  = "enabled"
+	CheckDisabled = "disabled"
+)
