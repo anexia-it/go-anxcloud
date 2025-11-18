@@ -7,4 +7,5 @@ type Definition struct {
 	State        common.State `json:"state"`
 	LoadBalancer string       `json:"load_balancer"`
 	Mode         common.Mode  `json:"mode"`
+	HealthCheck  string       `json:"health_check"`
 }
