@@ -9,6 +9,7 @@ type (
 	Mode        = v1.Mode
 	State       = gs.State
 	HealthCheck = string
+	EnableState = uint
 )
 
 const (
@@ -19,6 +20,11 @@ const (
 const (
 	HealthCheckDefaultTCP  HealthCheck = "\"adv_check\": \"tcp-check\""
 	HealthCheckDefaultHTTP HealthCheck = "\"httpchk\": { \"method\": \"GET\", \"uri\": \"/\" }"
+)
+
+const (
+	IsDisabled EnableState = 0
+	IsEnabled  EnableState = 1
 )
 
 var (
