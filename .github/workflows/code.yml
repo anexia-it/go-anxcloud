@@ -30,7 +30,7 @@ jobs:
             name: "latest"
     name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-go@v5
         with:
@@ -64,7 +64,7 @@ jobs:
             name: "latest"
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: actions/setup-go@v5
       with:
@@ -74,7 +74,7 @@ jobs:
       run: make test
 
     - name: upload coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: unit-coverage-${{ matrix.go.name }}
         path: coverage.out
@@ -92,7 +92,7 @@ jobs:
           name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: actions/setup-go@v5
       with:
@@ -104,7 +104,7 @@ jobs:
       run: make func-test
 
     - name: upload coverage
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: integration-coverage-${{ matrix.go.name }}
         path: coverage.out
@@ -113,9 +113,9 @@ jobs:
     needs: integration-tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v6
 
     - uses: paambaati/codeclimate-action@v9.0.0
       env:
