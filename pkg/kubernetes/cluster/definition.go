@@ -22,7 +22,7 @@ type Definition struct {
 	MaintenanceWindowStart   string   `json:"maintenance_window_start"`
 	MaintenanceWindowLength  string   `json:"maintenance_window_length"`
 	ManageInternalIPv4Prefix bool     `json:"manage_internal_ipv4_prefix"`
-	InternalIPv4Prefix       bool     `json:"internal_ipv4_prefix"`
+	InternalIPv4Prefix       string   `json:"internal_ipv4_prefix"`
 	NeedsServiceVMs          bool     `json:"needs_service_vms"`
 	EnableNATGateways        bool     `json:"enable_nat_gateways"`
 	EnableLBaaS              bool     `json:"enable_lbaas"`
