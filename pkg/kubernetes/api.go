@@ -1,6 +1,6 @@
-// Package ipam implements API functions residing under /ipam.
-// This path contains methods for managing IPs.
-package ipam
+// Package kubernetes implements API functions residing under /kubernetes.
+// This path contains methods for managing kubernetes.
+package kubernetes
 
 import (
 	"go.anx.io/go-anxcloud/pkg/client"
@@ -13,11 +13,11 @@ type API interface {
 }
 
 type api struct {
-	address cluster.API
+	cluster cluster.API
 }
 
 func (a api) Cluster() cluster.API {
-	return a.address
+	return a.cluster
 }
 
 // NewAPI creates a new IP API instance with the given client.
