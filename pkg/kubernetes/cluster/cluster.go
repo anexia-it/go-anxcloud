@@ -9,6 +9,8 @@ import (
 	"net/url"
 	utils "path"
 	"strconv"
+
+	"go.anx.io/go-anxcloud/pkg/automation"
 )
 
 // The Cluster resource configures settings common for all specific backend Server resources linked to it.
@@ -246,4 +248,23 @@ func (a *api) DeleteByID(ctx context.Context, identifier string) error {
 			identifier, response.Status)
 	}
 	return nil
+}
+
+func (a *api) RequestKubeConfig(ctx context.Context, cluster *Cluster) error {
+	const name = "Request kubeconfig"
+	var automationID string
+
+	for _, i := range cluster.AutomationRules {
+		if i.Name == name {
+			automationID = i.Identifier
+		}
+	}
+
+	result, err := automation.NewAPI(a.client).Rules().FireSingle(ctx, automationID, cluster.Identifier)
+
+	if err != nil {
+		return err
+	}
+
+	return result.Validate()
 }
