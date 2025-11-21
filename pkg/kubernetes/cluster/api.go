@@ -16,6 +16,8 @@ type API interface {
 	Create(ctx context.Context, definition Definition) (Cluster, error)
 	Update(ctx context.Context, identifier string, definition Definition) (Cluster, error)
 	DeleteByID(ctx context.Context, identifier string) error
+
+	RequestKubeConfig(ctx context.Context, cluster *Cluster) error
 }
 
 type api struct {
