@@ -16,6 +16,10 @@ const (
 	Enable  IntBoolean = 1
 )
 
+var (
+	StateNewlyCreated = gs.State{ID: "2", Text: "NewlyCreated", Type: gs.StateTypePending}
+)
+
 type Definition struct {
 	Name                     string     `json:"name"`
 	State                    gs.State   `json:"state"`
