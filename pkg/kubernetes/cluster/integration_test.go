@@ -5,6 +5,8 @@ package cluster
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -46,6 +48,86 @@ var _ = Describe("cluster client", func() {
 			err := api.RequestKubeConfig(context.TODO(), &cluster)
 
 			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Context("json serialization", func() {
+		It("serializes object", func() {
+			cli, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var def Definition
+
+				err := json.NewDecoder(r.Body).Decode(&def)
+				Expect(err).NotTo(HaveOccurred())
+
+				resp := struct {
+					State struct {
+						ID   string `json:"id"`
+						Text string `json:"text"`
+						Type int    `json:"type"`
+					} `json:"state"`
+					Name string `json:"name"`
+				}{
+					State: struct {
+						ID   string `json:"id"`
+						Text string `json:"text"`
+						Type int    `json:"type"`
+					}{
+						ID:   "2",
+						Text: "Pending",
+						Type: 2,
+					},
+					Name: "clustername",
+				}
+
+				err = json.NewEncoder(w).Encode(resp)
+				Expect(err).NotTo(HaveOccurred())
+			}))
+			defer server.Close()
+
+			api := NewAPI(cli, ClientOpts{Environment: EnvironmentDev})
+
+			cCreated, err := api.Create(context.TODO(), Definition{
+				State: StateNewlyCreated,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cCreated.Name).To(Equal("clustername"))
+			Expect(cCreated.State.Type).To(Equal(2))
+			Expect(cCreated.State.ID).To(Equal("2"))
+			Expect(cCreated.State.Text).To(Equal("Pending"))
+		})
+
+		It("serializes string", func() {
+			cli, server := client.NewTestClient(nil, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var def Definition
+
+				err := json.NewDecoder(r.Body).Decode(&def)
+				Expect(err).NotTo(HaveOccurred())
+
+				resp := struct {
+					State string `json:"state"`
+					Name  string `json:"name"`
+				}{
+					State: "2",
+					Name:  "clustername",
+				}
+
+				err = json.NewEncoder(w).Encode(resp)
+				Expect(err).NotTo(HaveOccurred())
+			}))
+			defer server.Close()
+
+			api := NewAPI(cli, ClientOpts{Environment: EnvironmentDev})
+
+			cCreated, err := api.Create(context.TODO(), Definition{
+				State: StateNewlyCreated,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cCreated.Name).To(Equal("clustername"))
+			Expect(cCreated.State.Type).To(Equal(2))
+			Expect(cCreated.State.ID).To(Equal("2"))
+			Expect(cCreated.State.Text).To(Equal("Unknown"))
 		})
 	})
 })
