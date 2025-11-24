@@ -9,8 +9,6 @@ import (
 	"net/url"
 	utils "path"
 	"strconv"
-
-	"go.anx.io/go-anxcloud/pkg/automation"
 )
 
 // The Cluster resource configures settings common for all specific backend Server resources linked to it.
@@ -252,19 +250,40 @@ func (a *api) DeleteByID(ctx context.Context, identifier string) error {
 
 func (a *api) RequestKubeConfig(ctx context.Context, cluster *Cluster) error {
 	const name = "Request kubeconfig"
-	var automationID string
+	var ruleID string
 
 	for _, i := range cluster.AutomationRules {
 		if i.Name == name {
-			automationID = i.Identifier
+			ruleID = i.Identifier
 		}
 	}
 
-	result, err := automation.NewAPI(a.client).Rules().FireSingle(ctx, automationID, cluster.Identifier)
+	return a.triggerAutomation(ctx, ruleID, cluster.Identifier)
+}
 
+func (a *api) triggerAutomation(ctx context.Context, ruleIdentifier, clusterIdentifier string) error {
+	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
-		return err
+		return fmt.Errorf("could not parse URL: %w", err)
 	}
 
-	return result.Validate()
+	endpoint.Path = utils.Join(endpoint.Path, a.path, clusterIdentifier, "rule", ruleIdentifier)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.String(), nil)
+	if err != nil {
+		return fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error when firing automation rule '%s': %w", ruleIdentifier, err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return fmt.Errorf("could not fire automation rule '%s': %s", ruleIdentifier,
+			response.Status)
+	}
+
+	return nil
 }
