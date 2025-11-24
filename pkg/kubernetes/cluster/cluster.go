@@ -9,56 +9,45 @@ import (
 	"net/url"
 	utils "path"
 	"strconv"
+
+	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
 // The Cluster resource configures settings common for all specific backend Server resources linked to it.
 type Cluster struct {
+	gs.HasState
+
 	CustomerIdentifier         string      `json:"customer_identifier"`
 	ResellerIdentifier         string      `json:"reseller_identifier"`
 	CriticalOperationPassword  interface{} `json:"critical_operation_password"` // TODO
 	CriticalOperationConfirmed bool        `json:"critical_operation_confirmed"`
 	Identifier                 string      `json:"identifier"`
 	Name                       string      `json:"name"`
-	State                      struct {
-		Text  string `json:"text"`
-		Title string `json:"title"`
-		ID    string `json:"id"`
-		Type  int    `json:"type"`
-	} `json:"state"`
-	Location struct {
-		Identifier string `json:"identifier"`
-		Name       string `json:"name"`
-	} `json:"location"`
-	Version                  string      `json:"version"`
-	PatchVersion             string      `json:"patch_version"`
-	Kubeconfig               string      `json:"kubeconfig"`
-	Autoscaling              bool        `json:"autoscaling"`
-	CniPlugin                string      `json:"cni_plugin"`
-	APIServerAllowlist       interface{} `json:"apiserver_allowlist"`       // TODO
-	MaintenanceWindowStart   interface{} `json:"maintenance_window_start"`  // TODO
-	MaintenanceWindowLength  interface{} `json:"maintenance_window_length"` // TODO
-	ManageInternalIpv4Prefix bool        `json:"manage_internal_ipv4_prefix"`
-	InternalIpv4Prefix       struct {
-		Identifier string `json:"identifier"`
-		Name       string `json:"name"`
-	} `json:"internal_ipv4_prefix"`
-	NeedsServiceVMs          bool   `json:"needs_service_vms"`
-	EnableNATGateways        bool   `json:"enable_nat_gateways"`
-	EnableLBaaS              bool   `json:"enable_lbaas"`
-	ExternalIPFamilies       string `json:"external_ip_families"`
-	ManageExternalIPv4Prefix bool   `json:"manage_external_ipv4_prefix"`
-	ExternalIPv4Prefix       struct {
-		Identifier string `json:"identifier"`
-		Name       string `json:"name"`
-	} `json:"external_ipv4_prefix"`
-	ManageExternalIPv6Prefix bool `json:"manage_external_ipv6_prefix"`
-	ExternalIPv6Prefix       struct {
-		Name string `json:"name"`
-	} `json:"external_ipv6_prefix"`
-	AutomationRules []struct {
-		Identifier string `json:"identifier"`
-		Name       string `json:"name"`
-	} `json:"automation_rules"`
+	Location                   Minimal     `json:"location"`
+	Version                    string      `json:"version"`
+	PatchVersion               string      `json:"patch_version"`
+	Kubeconfig                 string      `json:"kubeconfig"`
+	Autoscaling                bool        `json:"autoscaling"`
+	CniPlugin                  string      `json:"cni_plugin"`
+	APIServerAllowlist         interface{} `json:"apiserver_allowlist"`       // TODO
+	MaintenanceWindowStart     interface{} `json:"maintenance_window_start"`  // TODO
+	MaintenanceWindowLength    interface{} `json:"maintenance_window_length"` // TODO
+	ManageInternalIpv4Prefix   bool        `json:"manage_internal_ipv4_prefix"`
+	InternalIpv4Prefix         Minimal     `json:"internal_ipv4_prefix"`
+	NeedsServiceVMs            bool        `json:"needs_service_vms"`
+	EnableNATGateways          bool        `json:"enable_nat_gateways"`
+	EnableLBaaS                bool        `json:"enable_lbaas"`
+	ExternalIPFamilies         string      `json:"external_ip_families"`
+	ManageExternalIPv4Prefix   bool        `json:"manage_external_ipv4_prefix"`
+	ExternalIPv4Prefix         Minimal     `json:"external_ipv4_prefix"`
+	ManageExternalIPv6Prefix   bool        `json:"manage_external_ipv6_prefix"`
+	ExternalIPv6Prefix         Minimal     `json:"external_ipv6_prefix"`
+	AutomationRules            []Minimal   `json:"automation_rules"`
+}
+
+type Minimal struct {
+	Identifier string `json:"identifier"`
+	Name       string `json:"name"`
 }
 
 // ClusterInfo holds the identifier and the name of a kubernetes cluster.
