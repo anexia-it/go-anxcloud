@@ -18,7 +18,7 @@ const (
 
 type Definition struct {
 	Name                     string     `json:"name"`
-	State                    State      `json:"state"`
+	State                    gs.State   `json:"state"`
 	Location                 Location   `json:"location"`
 	Version                  string     `json:"version"`
 	Autoscaling              IntBoolean `json:"autoscaling"`
@@ -37,15 +37,3 @@ type Definition struct {
 	ManageExternalIPv6Prefix IntBoolean `json:"manage_external_ipv6_prefix"`
 	ExternalIPv6Prefix       string     `json:"external_ipv6_prefix"`
 }
-
-type State struct {
-	// programatically usable enum value
-	ID string `json:"id"`
-
-	// human readable status text
-	Text string `json:"text"`
-
-	Type int `json:"type"`
-}
-
-var StateNewlyCreated = State{ID: "4", Text: "NewlyCreated", Type: gs.StateTypePending}
