@@ -3,26 +3,34 @@
 package automation
 
 import (
-	"go.anx.io/go-anxcloud/pkg/automation/rules"
-	"go.anx.io/go-anxcloud/pkg/client"
+	"errors"
 )
 
-// API contains methods for IP manipulation.
-type API interface {
-	Rules() rules.API
+type AutomationResult struct {
+	State    AutomationState `json:"state"`
+	Messages []string        `json:"messages"`
+	Data     any             `json:"data"`
 }
 
-type api struct {
-	rules rules.API
-}
+var ErrNoAutomationSuccess = errors.New("firing of automation rule did not return success")
 
-func (a api) Rules() rules.API {
-	return a.rules
-}
+// Validate validates the automation result for success.
+func (ar *AutomationResult) Validate() error {
+	if ar.State != StateSuccess {
+		errs := []error{ErrNoAutomationSuccess}
 
-// NewAPI creates a new IP API instance with the given client.
-func NewAPI(c client.Client) API {
-	return &api{
-		rules.NewAPI(c),
+		for _, m := range ar.Messages {
+			errs = append(errs, errors.New(m))
+		}
+
+		return errors.Join(errs...)
 	}
+
+	return nil
 }
+
+type AutomationState string
+
+const (
+	StateSuccess AutomationState = "success"
+)

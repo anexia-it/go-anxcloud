@@ -35,10 +35,17 @@ var _ = Describe("cluster client", func() {
 		})
 
 		It("retrieves first cluster with expected values", func() {
-			c, err := api.GetByID(context.TODO(), cluster.Identifier)
+			var err error
+			cluster, err = api.GetByID(context.TODO(), cluster.Identifier)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(c).NotTo(BeNil())
+			Expect(cluster).NotTo(BeNil())
+		})
+
+		It("can trigger GA request kubeconfig", func() {
+			err := api.RequestKubeConfig(context.TODO(), &cluster)
+
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })
