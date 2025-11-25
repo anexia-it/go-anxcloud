@@ -17,32 +17,50 @@ import (
 type Cluster struct {
 	gs.HasState
 
-	CustomerIdentifier         string      `json:"customer_identifier"`
-	ResellerIdentifier         string      `json:"reseller_identifier"`
-	CriticalOperationPassword  interface{} `json:"critical_operation_password"` // TODO
-	CriticalOperationConfirmed bool        `json:"critical_operation_confirmed"`
-	Identifier                 string      `json:"identifier"`
-	Name                       string      `json:"name"`
-	Location                   Minimal     `json:"location"`
-	Version                    string      `json:"version"`
-	PatchVersion               string      `json:"patch_version"`
-	Kubeconfig                 string      `json:"kubeconfig"`
-	Autoscaling                bool        `json:"autoscaling"`
-	CniPlugin                  string      `json:"cni_plugin"`
-	APIServerAllowlist         interface{} `json:"apiserver_allowlist"`       // TODO
-	MaintenanceWindowStart     interface{} `json:"maintenance_window_start"`  // TODO
-	MaintenanceWindowLength    interface{} `json:"maintenance_window_length"` // TODO
-	ManageInternalIpv4Prefix   bool        `json:"manage_internal_ipv4_prefix"`
-	InternalIpv4Prefix         Minimal     `json:"internal_ipv4_prefix"`
-	NeedsServiceVMs            bool        `json:"needs_service_vms"`
-	EnableNATGateways          bool        `json:"enable_nat_gateways"`
-	EnableLBaaS                bool        `json:"enable_lbaas"`
-	ExternalIPFamilies         string      `json:"external_ip_families"`
-	ManageExternalIPv4Prefix   bool        `json:"manage_external_ipv4_prefix"`
-	ExternalIPv4Prefix         Minimal     `json:"external_ipv4_prefix"`
-	ManageExternalIPv6Prefix   bool        `json:"manage_external_ipv6_prefix"`
-	ExternalIPv6Prefix         Minimal     `json:"external_ipv6_prefix"`
-	AutomationRules            []Minimal   `json:"automation_rules"`
+	CustomerIdentifier         string    `json:"customer_identifier"`
+	ResellerIdentifier         string    `json:"reseller_identifier"`
+	CriticalOperationPassword  string    `json:"critical_operation_password"`
+	CriticalOperationConfirmed bool      `json:"critical_operation_confirmed"`
+	Identifier                 string    `json:"identifier"`
+	Name                       string    `json:"name"`
+	Location                   Minimal   `json:"location"`
+	Version                    string    `json:"version"`
+	PatchVersion               string    `json:"patch_version"`
+	Kubeconfig                 string    `json:"kubeconfig"`
+	Autoscaling                bool      `json:"autoscaling"`
+	CniPlugin                  string    `json:"cni_plugin"`
+	APIServerAllowlist         string    `json:"apiserver_allowlist"`
+	Backend                    string    `json:"backend"`
+	BackendName                string    `json:"backend_name"`
+	MaintenanceWindowStart     string    `json:"maintenance_window_start"`
+	MaintenanceWindowLength    string    `json:"maintenance_window_length"`
+	ManageInternalIPv4Prefix   bool      `json:"manage_internal_ipv4_prefix"`
+	InternalIpv4Prefix         Minimal   `json:"internal_ipv4_prefix"`
+	NeedsServiceVMs            bool      `json:"needs_service_vms"`
+	EnableNATGateways          bool      `json:"enable_nat_gateways"`
+	EnableLBaaS                bool      `json:"enable_lbaas"`
+	ExternalIPFamilies         string    `json:"external_ip_families"`
+	ManageExternalIPv4Prefix   bool      `json:"manage_external_ipv4_prefix"`
+	ExternalIPv4Prefix         Minimal   `json:"external_ipv4_prefix"`
+	ManageExternalIPv6Prefix   bool      `json:"manage_external_ipv6_prefix"`
+	ExternalIPv6Prefix         Minimal   `json:"external_ipv6_prefix"`
+	AutomationRules            []Minimal `json:"automation_rules"`
+
+	ServiceVM01InternalIPv4Address Minimal `json:"service_vm_01_internal_ipv4_address"`
+	ServiceVM02InternalIPv4Address Minimal `json:"service_vm_02_internal_ipv4_address"`
+	ServiceVM01ExternalIPv4Address Minimal `json:"service_vm_01_external_ipv4_address"`
+	ServiceVM02ExternalIPv4Address Minimal `json:"service_vm_02_external_ipv4_address"`
+	ServiceVM01ExternalIPv6Address Minimal `json:"service_vm_01_external_ipv6_address"`
+	ServiceVM02ExternalIPv6Address Minimal `json:"service_vm_02_external_ipv6_address"`
+	ServiceLB01                    Minimal `json:"service_lb_01"`
+	ServiceLB02                    Minimal `json:"service_lb_02"`
+	ExternalIPv4VIP                Minimal `json:"external_ipv4_vip"`
+	ExternalIPv6VIP                Minimal `json:"external_ipv6_vip"`
+	KKPAPILBaaSBackend01           Minimal `json:"kkp_api_lbaas_backend_01"`
+	KKPAPILBaaSBackend02           Minimal `json:"kkp_api_lbaas_backend_02"`
+	KKPVPNLBaaSBackend01           Minimal `json:"kkp_vpn_lbaas_backend_01"`
+	KKPVPNLBaaSBackend02           Minimal `json:"kkp_vpn_lbaas_backend_02"`
+	StorageServerInterfaceAddress  Minimal `json:"storage_server_interface_address"`
 }
 
 type Minimal struct {
