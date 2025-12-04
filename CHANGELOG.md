@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * object-storage: add support for object storage *TESTING*
 * api: add fields for LBaaS resources (#475, @davidkroell)
+* kubernetes: add support for updating the state of a cluster
 
 <!--
 Please add your changelog entry under this comment in the correct category (Security, Fixed, Added, Changed, Deprecated, Removed - in this order).

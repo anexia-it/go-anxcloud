@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
@@ -48,7 +49,7 @@ func (c *Cluster) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 	}
 
 	return requestBody(ctx, func() interface{} {
-		return &struct {
+		body := &struct {
 			commonRequestBody
 			Cluster
 			Location string `json:"location,omitempty"`
@@ -56,5 +57,13 @@ func (c *Cluster) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 			Cluster:  *c,
 			Location: c.Location.Identifier,
 		}
+
+		if op == types.OperationUpdate {
+			body.commonRequestBody = commonRequestBody{
+				State: strconv.Itoa(c.State.Type),
+			}
+		}
+
+		return body
 	})
 }
