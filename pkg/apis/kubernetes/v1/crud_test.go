@@ -212,10 +212,12 @@ var _ = Describe("CRUD", Ordered, func() {
 				srv.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", clusterIdentifier)),
 					ghttp.VerifyJSONRepresenting(struct {
+						State      string `json:"state"`
 						Identifier string `json:"identifier"`
 						Name       string `json:"name"`
 						Location   string `json:"location"`
 					}{
+						State:      "0",
 						Identifier: clusterIdentifier,
 						Name:       "someClusterName",
 						Location:   testLocation.Identifier,
