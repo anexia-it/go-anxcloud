@@ -1,0 +1,2627 @@
+openapi: 3.0.3
+info:
+  version: 2.0.0
+  title: 'Generic Service ''ObjectStorage'' API'
+  description: 'This is the Generic Services API V2.0.0 for the Service ''ObjectStorage'''
+  contact:
+    name: Anexia
+    url: 'https://anexia.com'
+    email: engine-support@anexia-it.com
+  x-audience: public
+servers:
+  - url: /api/object_storage/v2
+tags:
+  - name: Endpoints
+    description: 'Manage your Generic Resources'
+  - name: 'S3 Backends'
+    description: 'Manage your Generic Resources'
+  - name: Regions
+    description: 'Manage your Generic Resources'
+  - name: Tenants
+    description: 'Manage your Generic Resources'
+  - name: Buckets
+    description: 'Manage your Generic Resources'
+  - name: Users
+    description: 'Manage your Generic Resources'
+  - name: Keys
+    description: 'Manage your Generic Resources'
+paths:
+  /endpoint:
+    get:
+      tags:
+        - Endpoints
+      summary: 'List Endpoints'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointPaginator'
+      description: 'Get a list of all Endpoints.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''state'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending'').</font>'
+          schema:
+            type: string
+  '/endpoint/{identifier}':
+    get:
+      tags:
+        - Endpoints
+      summary: 'Get Endpoint details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointDetail'
+      description: 'Get details of one Endpoint by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer''.</font>'
+    patch:
+      tags:
+        - Endpoints
+      summary: 'Update Endpoint'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointDetail'
+      description: 'Update one Endpoint by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EndpointUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Endpoints
+      summary: 'Delete Endpoint'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one Endpoint by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  /s3_backend:
+    get:
+      tags:
+        - 'S3 Backends'
+      summary: 'List S3 Backends'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3BackendPaginator'
+      description: 'Get a list of all S3 Backends.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''state'', ''latest_sync'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending''), ''3'' (''Syncing'').</font>'
+          schema:
+            type: string
+        - name: latest_sync
+          in: query
+          description: 'Define a string for ''latest_sync'' by which the resources will be filtered.'
+          schema:
+            type: string
+  '/s3_backend/{identifier}':
+    get:
+      tags:
+        - 'S3 Backends'
+      summary: 'Get S3 Backend details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3BackendDetail'
+      description: 'Get details of one S3 Backend by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer''.</font>'
+    patch:
+      tags:
+        - 'S3 Backends'
+      summary: 'Update S3 Backend'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/S3BackendDetail'
+      description: 'Update one S3 Backend by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/S3BackendUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - 'S3 Backends'
+      summary: 'Delete S3 Backend'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one S3 Backend by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/s3_backend/{identifier}/trigger/sync_tenants_and_regions':
+    post:
+      tags:
+        - 'S3 Backends'
+      summary: 'Trigger Sync Tenants and Regions'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Sync Tenants and Regions for a resource by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/s3_backend/{identifier}/{rule_identifier}':
+    post:
+      tags:
+        - 'S3 Backends'
+      summary: 'Trigger automation rule for S3 Backend'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Trigger an automation rule for a S3 Backend by the given resource identifier and automation rule identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleTriggerRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rule_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'Identifier of the automation rule'
+  '/s3_backend/{identifier}/automation-process':
+    get:
+      tags:
+        - 'S3 Backends'
+      summary: 'Get pending and running automation rules for S3 Backend'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessesResponse'
+      description: 'Get pending and running automation rules for S3 Backend by the given resource identifier.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/s3_backend/{identifier}/automation-process/{automation_rule_process_identifier}':
+    get:
+      tags:
+        - 'S3 Backends'
+      summary: 'Get information about the progress of automation rules for S3 Backend'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessProgressResponse'
+      description: 'Get information of the automation rule process for S3 Backend by the given resource identifier and automation rule process identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: automation_rule_process_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  /region:
+    get:
+      tags:
+        - Regions
+      summary: 'List Regions'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionPaginator'
+      description: 'Get a list of all Regions.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''description'', ''backend'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: description
+          in: query
+          description: 'Define a text for ''description'' by which the resources will be filtered. The text will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: backend
+          in: query
+          description: 'Define a ''backend'' identifier (Resource type: ''S3 Backends'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+  '/region/{identifier}':
+    get:
+      tags:
+        - Regions
+      summary: 'Get Region details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDetail'
+      description: 'Get details of one Region by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer'', ''backend''.</font>'
+    patch:
+      tags:
+        - Regions
+      summary: 'Update Region'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDetail'
+      description: 'Update one Region by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegionUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Regions
+      summary: 'Delete Region'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one Region by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  /tenant:
+    get:
+      tags:
+        - Tenants
+      summary: 'List Tenants'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantPaginator'
+      description: 'Get a list of all Tenants.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''state'', ''backend'', ''remote_id'', ''suffix'', ''description'', ''quota'', ''usage'', ''latest_sync'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending''), ''3'' (''Syncing''), ''4'' (''Credential missing'').</font>'
+          schema:
+            type: string
+        - name: backend
+          in: query
+          description: 'Define a ''backend'' identifier (Resource type: ''S3 Backends'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: remote_id
+          in: query
+          description: 'Define a string for ''remote_id'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: suffix
+          in: query
+          description: 'Define a string for ''suffix'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: 'Define a text for ''description'' by which the resources will be filtered. The text will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: latest_sync
+          in: query
+          description: 'Define a string for ''latest_sync'' by which the resources will be filtered.'
+          schema:
+            type: string
+  '/tenant/{identifier}':
+    get:
+      tags:
+        - Tenants
+      summary: 'Get Tenant details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantDetail'
+      description: 'Get details of one Tenant by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer'', ''backend''.</font>'
+    patch:
+      tags:
+        - Tenants
+      summary: 'Update Tenant'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantDetail'
+      description: 'Update one Tenant by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Tenants
+      summary: 'Delete Tenant'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one Tenant by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/tenant/{identifier}/trigger/sync_buckets_users_keys':
+    post:
+      tags:
+        - Tenants
+      summary: 'Trigger Sync Buckets and Users and Keys'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Sync Buckets and Users and Keys for a resource by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/tenant/{identifier}/{rule_identifier}':
+    post:
+      tags:
+        - Tenants
+      summary: 'Trigger automation rule for Tenant'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Trigger an automation rule for a Tenant by the given resource identifier and automation rule identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleTriggerRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rule_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'Identifier of the automation rule'
+  '/tenant/{identifier}/automation-process':
+    get:
+      tags:
+        - Tenants
+      summary: 'Get pending and running automation rules for Tenant'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessesResponse'
+      description: 'Get pending and running automation rules for Tenant by the given resource identifier.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/tenant/{identifier}/automation-process/{automation_rule_process_identifier}':
+    get:
+      tags:
+        - Tenants
+      summary: 'Get information about the progress of automation rules for Tenant'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessProgressResponse'
+      description: 'Get information of the automation rule process for Tenant by the given resource identifier and automation rule process identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: automation_rule_process_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  /bucket:
+    get:
+      tags:
+        - Buckets
+      summary: 'List Buckets'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BucketPaginator'
+      description: 'Get a list of all Buckets.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''state'', ''backend'', ''tenant'', ''region'', ''created_at'', ''object_count'', ''object_size'', ''versioning_active'', ''object_lock_lifetime'', ''description'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending''), ''3'' (''Deleting'').</font>'
+          schema:
+            type: string
+        - name: backend
+          in: query
+          description: 'Define a ''backend'' identifier (Resource type: ''S3 Backends'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: 'Define a ''tenant'' identifier (Resource type: ''Tenants'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: region
+          in: query
+          description: 'Define a ''region'' identifier (Resource type: ''Regions'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: created_at
+          in: query
+          description: 'Define a string for ''created_at'' by which the resources will be filtered.'
+          schema:
+            type: string
+        - name: versioning_active
+          in: query
+          description: 'Define a boolean for ''versioning_active'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''false'', ''true''.</font>'
+          schema:
+            type: boolean
+        - name: description
+          in: query
+          description: 'Define a string for ''description'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+    post:
+      tags:
+        - Buckets
+      summary: 'Create Bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BucketDetail'
+      description: 'Create a new Bucket with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BucketCreateRequest'
+      parameters:
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/bucket/{identifier}':
+    get:
+      tags:
+        - Buckets
+      summary: 'Get Bucket details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BucketDetail'
+      description: 'Get details of one Bucket by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer'', ''backend'', ''tenant'', ''region''.</font>'
+    patch:
+      tags:
+        - Buckets
+      summary: 'Update Bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BucketDetail'
+      description: 'Update one Bucket by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BucketUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Buckets
+      summary: 'Delete Bucket'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one Bucket by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/bucket/{identifier}/trigger/refresh':
+    post:
+      tags:
+        - Buckets
+      summary: 'Trigger Refresh the bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Refresh the bucket for a resource by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/bucket/{identifier}/trigger/empty_and_delete':
+    post:
+      tags:
+        - Buckets
+      summary: 'Trigger Empty and delete the bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Empty and delete the bucket for a resource by a given identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerEmptyAndDelete'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/bucket/{identifier}/trigger/cancel_emptying_and_deleting_of_the_bucket':
+    post:
+      tags:
+        - Buckets
+      summary: 'Trigger Cancel emptying and deleting of the bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Cancel emptying and deleting of the bucket for a resource by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/bucket/{identifier}/{rule_identifier}':
+    post:
+      tags:
+        - Buckets
+      summary: 'Trigger automation rule for Bucket'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Trigger an automation rule for a Bucket by the given resource identifier and automation rule identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleTriggerRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rule_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'Identifier of the automation rule'
+  '/bucket/{identifier}/automation-process':
+    get:
+      tags:
+        - Buckets
+      summary: 'Get pending and running automation rules for Bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessesResponse'
+      description: 'Get pending and running automation rules for Bucket by the given resource identifier.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/bucket/{identifier}/automation-process/{automation_rule_process_identifier}':
+    get:
+      tags:
+        - Buckets
+      summary: 'Get information about the progress of automation rules for Bucket'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessProgressResponse'
+      description: 'Get information of the automation rule process for Bucket by the given resource identifier and automation rule process identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: automation_rule_process_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  /user:
+    get:
+      tags:
+        - Users
+      summary: 'List Users'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPaginator'
+      description: 'Get a list of all Users.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''user_name'', ''state'', ''full_name'', ''enabled'', ''backend'', ''tenant'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: user_name
+          in: query
+          description: 'Define a string for ''user_name'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending''), ''3'' (''Deleting'').</font>'
+          schema:
+            type: string
+        - name: full_name
+          in: query
+          description: 'Define a string for ''full_name'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: enabled
+          in: query
+          description: 'Define a boolean for ''enabled'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''false'', ''true''.</font>'
+          schema:
+            type: boolean
+        - name: backend
+          in: query
+          description: 'Define a ''backend'' identifier (Resource type: ''S3 Backends'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: 'Define a ''tenant'' identifier (Resource type: ''Tenants'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+    post:
+      tags:
+        - Users
+      summary: 'Create User'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+      description: 'Create a new User with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      parameters:
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/user/{identifier}':
+    get:
+      tags:
+        - Users
+      summary: 'Get User details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+      description: 'Get details of one User by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer'', ''backend'', ''tenant''.</font>'
+    patch:
+      tags:
+        - Users
+      summary: 'Update User'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+      description: 'Update one User by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Users
+      summary: 'Delete User'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one User by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/user/{identifier}/trigger/refresh':
+    post:
+      tags:
+        - Users
+      summary: 'Trigger Refresh the user'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Refresh the user for a resource by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/user/{identifier}/trigger/delete_user_and_keys':
+    post:
+      tags:
+        - Users
+      summary: 'Trigger Delete the user and its keys'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleTriggerResponse'
+      description: 'Trigger the automation rule Delete the user and its keys for a resource by a given identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerDeleteUserAndKeys'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/user/{identifier}/{rule_identifier}':
+    post:
+      tags:
+        - Users
+      summary: 'Trigger automation rule for User'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Trigger an automation rule for a User by the given resource identifier and automation rule identifier.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleTriggerRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: rule_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 'Identifier of the automation rule'
+  '/user/{identifier}/automation-process':
+    get:
+      tags:
+        - Users
+      summary: 'Get pending and running automation rules for User'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessesResponse'
+      description: 'Get pending and running automation rules for User by the given resource identifier.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  '/user/{identifier}/automation-process/{automation_rule_process_identifier}':
+    get:
+      tags:
+        - Users
+      summary: 'Get information about the progress of automation rules for User'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRuleProcessProgressResponse'
+      description: 'Get information of the automation rule process for User by the given resource identifier and automation rule process identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: automation_rule_process_identifier
+          in: path
+          required: true
+          schema:
+            type: string
+  /key:
+    get:
+      tags:
+        - Keys
+      summary: 'List Keys'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyPaginator'
+      description: 'Get a list of all Keys.'
+      parameters:
+        - name: page
+          in: query
+          description: 'Page to be displayed <br><font color="#10a54a">Example: (1, 2, 3, 4, ...)</font>'
+          schema:
+            default: 1
+            type: integer
+        - name: limit
+          description: "Amount of results displayed per page <br><font color=\"#10a54a\">Example: (0, 10, 20, 30, ...)</font><br><font\ncolor=\"#0f6ab4\">Hint: Maximum value is 1000.</font>"
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 0
+            default: 50
+          in: query
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 'Define a search term for which the search will be performed.<br><font color="#10a54a">Example: (anexia-it.at)</font>'
+        - name: attributes
+          in: query
+          schema:
+            type: string
+          description: 'Comma-separated list of attributes to include in the response. ''all'' can be used to include all available attributes.<br/><font color="#0f6ab4">Hint: Possible values are ''name'', ''state'', ''backend'', ''tenant'', ''user'', ''expiry_date'', ''secret_url'', ''description'', ''reseller'', ''customer'', ''managed_status'', ''resource_pools'', ''created_at'', ''updated_at''.</font>'
+        - name: reseller
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of reseller identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: customer
+          in: query
+          schema:
+            type: string
+          description: 'Define a comma-separated list of customer identifiers by which the resources will be filtered.<br><font color="#10a54a">Example: (2c0282c04b4842f09c7866ab03446ec0)</font>'
+        - name: name
+          in: query
+          description: 'Define a string for ''name'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: 'Define a state ID for ''state'' by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Possible values are ''0'' (''OK''), ''1'' (''Error''), ''2'' (''Pending'').</font>'
+          schema:
+            type: string
+        - name: backend
+          in: query
+          description: 'Define a ''backend'' identifier (Resource type: ''S3 Backends'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          description: 'Define a ''tenant'' identifier (Resource type: ''Tenants'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: user
+          in: query
+          description: 'Define a ''user'' identifier (Resource type: ''Users'') by which the resources will be filtered.<br/><font color="#0f6ab4">Hint: Passing ''NULL'' allows to filter for resources, where the value is empty.</font>'
+          schema:
+            type: string
+        - name: expiry_date
+          in: query
+          description: 'Define a string for ''expiry_date'' by which the resources will be filtered.'
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: 'Define a string for ''description'' by which the resources will be filtered. The string will be filtered via ''LIKE'' (''%'' is supported).'
+          schema:
+            type: string
+    post:
+      tags:
+        - Keys
+      summary: 'Create Key'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+      description: 'Create a new Key with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyCreateRequest'
+      parameters:
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+  '/key/{identifier}':
+    get:
+      tags:
+        - Keys
+      summary: 'Get Key details'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+      description: 'Get details of one Key by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: embed
+          in: query
+          schema:
+            type: string
+          description: 'Accepts a comma separated list of keys, for which the full object should be retrieved.<br/><font color="#0f6ab4">Hint: Possible values are ''reseller'', ''customer'', ''backend'', ''tenant'', ''user''.</font>'
+    patch:
+      tags:
+        - Keys
+      summary: 'Update Key'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+      description: 'Update one Key by a given identifier with specified parameters.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyUpdateRequest'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+    delete:
+      tags:
+        - Keys
+      summary: 'Delete Key'
+      responses:
+        '204':
+          description: 'Successful operation'
+      description: 'Delete one Key by a given identifier.'
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skip_queued_automation_rules
+          in: query
+          schema:
+            type: boolean
+          description: "If true, automation rules with queued processing that refer to this resource are skipped. </br>\nIf no value is specified, the value \"false\" is automatically used."
+components:
+  schemas:
+    OrganizationMinimalApi:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          format: int32
+        demo:
+          oneOf:
+            - type: boolean
+            - type: string
+          nullable: true
+        identifier:
+          type: string
+        name:
+          type: string
+        name_slug:
+          type: string
+        reseller:
+          type: string
+          description: 'Reseller Identifier'
+    DefaultListResponse:
+      type: object
+      properties:
+        identifier:
+          type: string
+        name:
+          type: string
+    EndpointDetailVariant1:
+      type: object
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    GenericAttributeStateResponse:
+      type: object
+      example:
+        title: Error
+        id: '1'
+        type: 1
+      properties:
+        type:
+          type: integer
+          format: int32
+        id:
+          type: string
+        title:
+          type: string
+    EndpointDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        name:
+          description: 'Name - Name of the endpoint'
+          type: string
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+      type: object
+    EndpointPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointDetail'
+    EndpointUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+      type: object
+    AutomationRuleResponse:
+      type: object
+      example:
+        name: 'Example Automation Rule'
+        identifier: 2c0282c04b4842f09c7866ab03446ec0
+      properties:
+        identifier:
+          type: string
+        name:
+          type: string
+    S3BackendDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        automation_rules:
+          description: 'Automation Rules which can be executed for this resource.'
+          items:
+            $ref: '#/components/schemas/AutomationRuleResponse'
+          type: array
+        name:
+          description: 'Name - Name of the S3 backend'
+          type: string
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+        latest_sync:
+          description: '<br/>latest_sync=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s&amp;latest_sync[until]=Y-m-d H:i:s'
+          type: string
+          nullable: true
+          format: date-time
+      type: object
+    S3BackendPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/S3BackendDetail'
+    S3BackendUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        latest_sync:
+          description: '<br/>latest_sync=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s&amp;latest_sync[until]=Y-m-d H:i:s'
+          type: string
+          format: date-time
+          nullable: true
+      type: object
+    AutomationRuleTriggerResponse:
+      type: object
+      example:
+        automationRuleProcessIdentifier: 2c0282c04b4842f09c7866ab03446ec0
+      properties:
+        automation_rule_process_identifier:
+          type: string
+          nullable: true
+    AutomationRuleTriggerRequest:
+      type: object
+      properties: {}
+    AutomationRuleExecutionResponse:
+      type: object
+      example:
+        name: 'Example Automation Rule'
+        identifier: 2c0282c04b4842f09c7866ab03446ec0
+        automation_rule_process_identifier: 363f0c28f2fd4b25a4a3825dde4caea0
+      properties:
+        automation_rule_process_identifier:
+          type: string
+          nullable: true
+        identifier:
+          type: string
+        name:
+          type: string
+    AutomationRuleProcessesResponse:
+      type: object
+      properties:
+        automation_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationRuleExecutionResponse'
+    AutomationRuleProcessStatusResponse:
+      type: object
+      example:
+        status_code: 1
+        status_type: Success
+      properties:
+        status_code:
+          default: 1
+          type: integer
+          format: int32
+        status_message:
+          default: Success
+          type: string
+    AutomationRuleProcessProgressTaskInfoResponse:
+      type: object
+      example:
+        id: '1'
+        progress: 90
+        status: 1
+        error: null
+        startedAt: '2000-01-01T00:00:00Z'
+        finishedAt: null
+        statusText: 'Waiting for external service response.'
+      properties:
+        id:
+          type: string
+        progress:
+          default: 0
+          type: integer
+          format: int32
+        status:
+          default: 0
+          type: integer
+          format: int32
+        error:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          nullable: true
+        finished_at:
+          type: string
+          nullable: true
+        status_text:
+          type: string
+          nullable: true
+    AutomationRuleProcessProgressResponse:
+      type: object
+      example:
+        status:
+          status_code: 1
+          status_type: Success
+        message: 'Process message'
+        progress: 50
+        task_info:
+          id: '1'
+          progress: 90
+          status: 2
+          error: null
+          startedAt: '2000-01-01T00:00:00Z'
+          finishedAt: null
+          statusText: 'Waiting for external service response.'
+      properties:
+        status:
+          $ref: '#/components/schemas/AutomationRuleProcessStatusResponse'
+        message:
+          type: string
+          nullable: true
+        progress:
+          default: 0
+          type: integer
+          format: int32
+        task_info:
+          oneOf:
+            - $ref: '#/components/schemas/AutomationRuleProcessProgressTaskInfoResponse'
+          nullable: true
+    GenericAttributeResourceResponse:
+      type: object
+      example:
+        name: 'Example resource'
+        identifier: 2c0282c04b4842f09c7866ab03446ec0
+      properties:
+        identifier:
+          type: string
+          description: 'Unique Identifier of the Resource.'
+        name:
+          type: string
+          description: 'Human Value of the Resource.'
+    RegionDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        name:
+          description: 'Name - Name of the region'
+          type: string
+        description:
+          description: 'Description - Description of the region'
+          type: string
+          nullable: true
+        backend:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeResourceResponse'
+      type: object
+    RegionPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegionDetail'
+    RegionUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+      type: object
+    TenantDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        automation_rules:
+          description: 'Automation Rules which can be executed for this resource.'
+          items:
+            $ref: '#/components/schemas/AutomationRuleResponse'
+          type: array
+        name:
+          description: 'Name - Name of the tenant'
+          type: string
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+        backend:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        remote_id:
+          description: 'Remote ID - Remote ID of the tenant'
+          type: string
+          nullable: true
+        suffix:
+          description: 'Suffix - Suffix of the tenant'
+          type: string
+          nullable: true
+        description:
+          description: 'Description - Description of the tenant'
+          type: string
+          nullable: true
+        quota:
+          description: 'Quota - Maximum number of bytes allowed for objects within all buckets for the tenant. "0" means that there is no quota.'
+          type: number
+          format: double
+        usage:
+          description: 'Usage - Current number of bytes used by the tenant within all buckets.'
+          type: number
+          example: '0'
+          nullable: true
+          format: double
+        latest_sync:
+          description: '<br/>latest_sync=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s&amp;latest_sync[until]=Y-m-d H:i:s'
+          type: string
+          nullable: true
+          format: date-time
+      type: object
+    TenantPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantDetail'
+    TenantUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        description:
+          description: 'Description - Description of the tenant'
+          type: string
+          nullable: true
+        quota:
+          description: 'Quota - Maximum number of bytes allowed for objects within all buckets for the tenant. "0" means that there is no quota.'
+          type: number
+          format: double
+        latest_sync:
+          description: '<br/>latest_sync=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s,<br/>latest_sync[from]=Y-m-d H:i:s&amp;latest_sync[until]=Y-m-d H:i:s'
+          type: string
+          format: date-time
+          nullable: true
+      type: object
+    BucketDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          description: '<br/>created_at=Y-m-d H:i:s,<br/>created_at[from]=Y-m-d H:i:s,<br/>created_at[from]=Y-m-d H:i:s&amp;created_at[until]=Y-m-d H:i:s'
+          type: string
+          example: '2025-12-16T09:21:00Z'
+          nullable: true
+          format: date-time
+        automation_rules:
+          description: 'Automation Rules which can be executed for this resource.'
+          items:
+            $ref: '#/components/schemas/AutomationRuleResponse'
+          type: array
+        name:
+          description: 'Name - Name of the bucket. The name can include lower case letters, numbers and "-".'
+          type: string
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+        backend:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        tenant:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        region:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        object_count:
+          description: 'Object count - Indicates the number of the objects in the bucket.'
+          type: number
+          example: '0'
+          nullable: true
+          format: double
+        object_size:
+          description: 'Object size - Indicates the total size of the objects in the bucket.'
+          type: number
+          example: '0'
+          nullable: true
+          format: double
+        versioning_active:
+          description: 'Versioning active - If enabled, the versioning is active.<br/>One of: false = No, true = Yes'
+          type: boolean
+          example: 'false'
+          nullable: true
+        object_lock_lifetime:
+          description: "Object lock lifetime - The lifetime of the object lock in days (maximum 7 days, 0 - disabled).\nIt is possible to enable the object lock only while creating the bucket.\nOnce the object lock was enabled, it is not possible to disable it."
+          type: number
+          example: '0'
+          nullable: true
+          format: double
+        description:
+          description: 'Description - Description of the bucket'
+          type: string
+          nullable: true
+      type: object
+    BucketPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BucketDetail'
+    BucketCreateRequest:
+      required:
+        - name
+        - backend
+        - tenant
+        - region
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        name:
+          description: 'Name - Name of the bucket. The name can include lower case letters, numbers and "-".'
+          type: string
+        backend:
+          description: 'Backend - Indicates the backend to which the bucket belongs.'
+          type: string
+        tenant:
+          description: 'Tenant - Indicates the tenant to which the bucket belongs.'
+          type: string
+        region:
+          description: 'Region - Indicates the region to which the bucket belongs.'
+          type: string
+        created_at:
+          description: '<br/>created_at=Y-m-d H:i:s,<br/>created_at[from]=Y-m-d H:i:s,<br/>created_at[from]=Y-m-d H:i:s&amp;created_at[until]=Y-m-d H:i:s<br/>Default: 2025-12-16T09:21:00Z'
+          type: string
+          format: date-time
+          example: '2025-12-16T09:21:00Z'
+        versioning_active:
+          description: 'Versioning active - If enabled, the versioning is active.<br/>One of: false = No, true = Yes<br/>Default: false'
+          type: boolean
+          example: 'false'
+        object_lock_lifetime:
+          description: "Object lock lifetime - The lifetime of the object lock in days (maximum 7 days, 0 - disabled).\nIt is possible to enable the object lock only while creating the bucket.\nOnce the object lock was enabled, it is not possible to disable it.<br/>Default: 0"
+          type: number
+          format: double
+          example: '0'
+        description:
+          description: 'Description - Description of the bucket'
+          type: string
+      type: object
+    BucketUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        versioning_active:
+          description: 'Versioning active - If enabled, the versioning is active.<br/>One of: false = No, true = Yes'
+          type: boolean
+          nullable: true
+        object_lock_lifetime:
+          description: "Object lock lifetime - The lifetime of the object lock in days (maximum 7 days, 0 - disabled).\nIt is possible to enable the object lock only while creating the bucket.\nOnce the object lock was enabled, it is not possible to disable it."
+          type: number
+          format: double
+          nullable: true
+        description:
+          description: 'Description - Description of the bucket'
+          type: string
+          nullable: true
+      type: object
+    TriggerEmptyAndDelete:
+      properties:
+        empty_and_delete:
+          description: 'Empty and delete - Do you really want to remove all the data from the bucket and delete it?<br/>One of: false = No, true = Yes<br/>Default: false'
+          type: boolean
+          example: 'false'
+      type: object
+    UserDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        automation_rules:
+          description: 'Automation Rules which can be executed for this resource.'
+          items:
+            $ref: '#/components/schemas/AutomationRuleResponse'
+          type: array
+        user_name:
+          description: 'User name - Unique name of the user'
+          type: string
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+        full_name:
+          description: 'Full name - Full name of the user'
+          type: string
+        enabled:
+          description: 'Enabled - If enabled, the user is available.<br/>One of: false = No, true = Yes'
+          type: boolean
+          example: 'true'
+          nullable: true
+        backend:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        tenant:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+      type: object
+    UserPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetail'
+    UserCreateRequest:
+      required:
+        - user_name
+        - full_name
+        - backend
+        - tenant
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        user_name:
+          description: 'User name - Unique name of the user'
+          type: string
+        full_name:
+          description: 'Full name - Full name of the user'
+          type: string
+        enabled:
+          description: 'Enabled - If enabled, the user is available.<br/>One of: false = No, true = Yes<br/>Default: true'
+          type: boolean
+          example: 'true'
+        backend:
+          description: 'Backend - Indicates the backend to which the user belongs.'
+          type: string
+        tenant:
+          description: 'Tenant - Indicates the tenant to which the user belongs.'
+          type: string
+        remote_id:
+          description: 'Remote ID - Remote ID of the user'
+          type: string
+          example: 'No input needed. It will be generated automatically.'
+      type: object
+    UserUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        full_name:
+          description: 'Full name - Full name of the user'
+          type: string
+        enabled:
+          description: 'Enabled - If enabled, the user is available.<br/>One of: false = No, true = Yes'
+          type: boolean
+          nullable: true
+      type: object
+    TriggerDeleteUserAndKeys:
+      properties:
+        delete_user_and_keys:
+          description: 'Delete user and keys - Do you really want to delete the user and related keys?<br/>One of: false = No, true = Yes<br/>Default: false'
+          type: boolean
+          example: 'false'
+      type: object
+    KeyDetail:
+      properties:
+        identifier:
+          type: string
+        reseller:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        customer:
+          oneOf:
+            - $ref: '#/components/schemas/OrganizationMinimalApi'
+            - type: string
+          nullable: true
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultListResponse'
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        name:
+          description: 'Name - Name of the key'
+          type: string
+          example: 'No input needed. It will be generated automatically.'
+        state:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/GenericAttributeStateResponse'
+        backend:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        tenant:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        user:
+          $ref: '#/components/schemas/GenericAttributeResourceResponse'
+        expiry_date:
+          description: '<br/>expiry_date=Y-m-d H:i:s,<br/>expiry_date[from]=Y-m-d H:i:s,<br/>expiry_date[from]=Y-m-d H:i:s&amp;expiry_date[until]=Y-m-d H:i:s'
+          type: string
+          nullable: true
+          format: date-time
+        secret_url:
+          description: 'Secret URL - Link to the secret'
+          type: string
+          nullable: true
+        description:
+          description: 'Description - Description of the key'
+          type: string
+          nullable: true
+      type: object
+    KeyPaginator:
+      type: object
+      properties:
+        page:
+          default: 1
+          type: integer
+          format: int32
+        total_items:
+          default: 0
+          type: integer
+          format: int32
+        total_pages:
+          default: 1
+          type: integer
+          format: int32
+        limit:
+          default: 50
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyDetail'
+    KeyCreateRequest:
+      required:
+        - name
+        - backend
+        - tenant
+        - user
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        name:
+          description: 'Name - Name of the key<br/>Default: No input needed. It will be generated automatically.'
+          type: string
+          example: 'No input needed. It will be generated automatically.'
+        backend:
+          description: 'Backend - Indicates the backend to which the key belongs.'
+          type: string
+        tenant:
+          description: 'Tenant - Indicates the tenant to which the key belongs.'
+          type: string
+        user:
+          description: 'User - Indicates the user to which the key belongs.'
+          type: string
+        expiry_date:
+          description: '<br/>expiry_date=Y-m-d H:i:s,<br/>expiry_date[from]=Y-m-d H:i:s,<br/>expiry_date[from]=Y-m-d H:i:s&amp;expiry_date[until]=Y-m-d H:i:s'
+          type: string
+          format: date-time
+        remote_id:
+          description: 'Remote ID - Remote ID of the key'
+          type: string
+          example: 'No input needed. It will be generated automatically.'
+        secret:
+          description: 'Secret - Link to the secret as text. No input needed. It will be generated automatically.<br/>Default: https://secret.anexia.com/secret/placeholder'
+          type: string
+          example: 'https://secret.anexia.com/secret/placeholder'
+        description:
+          description: 'Description - Description of the key'
+          type: string
+      type: object
+    KeyUpdateRequest:
+      properties:
+        customer_identifier:
+          type: string
+          description: 'Identifier of the customer the resource should be assigned to.'
+        reseller_identifier:
+          type: string
+          description: 'Identifier of the reseller the resource should be assigned to.'
+        managed_status:
+          type: string
+          description: "Managed status of the resource. One of:\n- unmanaged\n- managed\n- semi-managed\n- unspecified"
+        resource_pools:
+          type: array
+          items:
+            type: string
+          description: 'List of resource pool identifiers, to which the resource should be assigned.'
+        description:
+          description: 'Description - Description of the key'
+          type: string
+          nullable: true
+      type: object
