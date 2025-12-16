@@ -1,52 +1,58 @@
 repos:
-- repo: local
-  hooks:
-  - id:             golint
-    name:           go lint
-    entry:          make go-lint
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          '\.go$'
-  - id:             gofmt
-    name:           go fmt
-    entry:          make fmt
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          '\.go$'
-  - id:             doclint
-    name:           docs lint
-    entry:          make docs-lint-fix
-    language:       system
-    require_serial: true
-    pass_filenames: false
-  - id:             depscheck
-    name:           go mod tidy
-    entry:          go mod tidy
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          "^go.(mod|sum)$"
-  - id:             codegen
-    name:           generate code
-    entry:          make generate
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          '\.go$'
-  - id:             secrets-check
-    name:           secrets scanning
-    entry:          sh -c 'make secrets-check || true'
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          '\.(go|yaml|yml|json|md|sh)$'
-    stages:         [manual]
-  - id:             secrets-check-quick
-    name:           quick secrets check (gosec only)  
-    entry:          sh -c 'tools/golangci-lint run --disable-all --enable gosec ./... || true'
-    language:       system
-    require_serial: true
-    pass_filenames: false
-    files:          '\.go$'
+  - repo: local
+    hooks:
+      - id: golint
+        name: go lint
+        entry: make go-lint
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: '\.go$'
+      - id: gofmt
+        name: go fmt
+        entry: make fmt
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: '\.go$'
+      - id: doclint
+        name: docs lint
+        entry: make docs-lint-fix
+        language: system
+        require_serial: true
+        pass_filenames: false
+      - id: depscheck
+        name: go mod tidy
+        entry: go mod tidy
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: "^go.(mod|sum)$"
+      - id: codegen
+        name: generate code
+        entry: make generate
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: '\.go$'
+      - id: secrets-check
+        name: secrets scanning
+        entry: sh -c 'make secrets-check || true'
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: '\.(go|yaml|yml|json|md|sh)$'
+        stages: [manual]
+      - id: secrets-check-quick
+        name: quick secrets check (gosec only)
+        entry: sh -c 'tools/golangci-lint run --disable-all --enable gosec ./... || true'
+        language: system
+        require_serial: true
+        pass_filenames: false
+        files: '\.go$'
+      - id: yamlfmt
+        name: yaml fmt
+        entry: tools/yamlfmt
+        language: system
+        require_serial: true
+        files: \.(yaml|yml)$

@@ -131,5 +131,6 @@ tools:
 	cd tools && go build -o . github.com/client9/misspell/cmd/misspell
 	cd tools && go build -o . github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd tools && go build -o . golang.org/x/exp/cmd/gorelease
+	cd tools && go build -o . github.com/google/yamlfmt/cmd/yamlfmt
 	cd tools && go build
 	@which gitleaks >/dev/null 2>&1 || (echo "Installing gitleaks..." && go install github.com/zricethezav/gitleaks/v8@latest)

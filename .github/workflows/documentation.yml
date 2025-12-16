@@ -1,25 +1,22 @@
 name: Documentation
-
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
-
+      - main
 env:
   GO111MODULE: on
-
 jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-    - uses: avto-dev/markdown-lint@v1
-      with:
-        config: '.markdownlint.yml'
-        args: 'docs'
+      - uses: actions/checkout@v6
+      - uses: avto-dev/markdown-lint@v1
+        with:
+          config: '.markdownlint.yml'
+          args: 'docs'
   misspell:
     runs-on: ubuntu-latest
     strategy:
@@ -31,9 +28,9 @@ jobs:
             name: "latest"
     name: "Spell check with ${{ matrix.go.name }} Go"
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go.version }}
-    - run: |
-        make docs-lint
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go.version }}
+      - run: |-
+          make docs-lint

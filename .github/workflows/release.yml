@@ -13,8 +13,7 @@ name: release
 on:
   push:
     tags:
-    - 'v*'
-
+      - 'v*'
 jobs:
   import-gpg:
     runs-on: ubuntu-latest

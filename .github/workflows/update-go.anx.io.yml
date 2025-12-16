@@ -1,14 +1,12 @@
 name: Trigger go.anx.io update
-
 on:
   push:
-
 jobs:
   trigger:
-    name:    Trigger go.anx.io update
+    name: Trigger go.anx.io update
     runs-on: ubuntu-latest
-    if:      github.actor != 'dependabot[bot]'
+    if: github.actor != 'dependabot[bot]'
     steps:
-    - uses: anexia/go.anx.io@main
-      env:
-        GOANXIO_E5E_TOKEN: "${{ secrets.GOANXIO_E5E_TOKEN }}"
+      - uses: anexia/go.anx.io@main
+        env:
+          GOANXIO_E5E_TOKEN: "${{ secrets.GOANXIO_E5E_TOKEN }}"

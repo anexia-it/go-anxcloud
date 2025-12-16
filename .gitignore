@@ -23,3 +23,4 @@ vendor/
 .envrc
 tools/gorelease
 gitleaks-report.json
+tools/yamlfmt

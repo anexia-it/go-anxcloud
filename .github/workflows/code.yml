@@ -1,23 +1,21 @@
 name: Code
-
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-    - main
+      - main
     paths:
-    - "**"
-    - "!*.md"
-    - "!*.yaml"
-    - "!*.yml"
-    - "!LICENSE"
-    - "!docs/**"
-    - "CHANGELOG.md"
-    - ".github/workflows/**"
-
+      - "**"
+      - "!*.md"
+      - "!*.yaml"
+      - "!*.yml"
+      - "!LICENSE"
+      - "!docs/**"
+      - "CHANGELOG.md"
+      - ".github/workflows/**"
 jobs:
   static-checks:
     runs-on: ubuntu-latest
@@ -31,28 +29,21 @@ jobs:
     name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go.version }}
-
       - name: check if generate code is up-to-date
-        run:  |
+        run: |
           make generate
           if [ -n "$(git status --porcelain=v1)" ]; then git add -N .; git diff; exit 1; fi
-
       - name: check if go.mod and go.sum are tidy
         run: make depscheck
-
       - name: check code format
         run: make fmtcheck
-
       - name: check code quality
         run: make go-lint
-
       - name: check API compatibility
         run: make compat-check
-
   unit-tests:
     runs-on: ubuntu-latest
     strategy:
@@ -64,66 +55,56 @@ jobs:
             name: "latest"
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
-    - uses: actions/checkout@v6
-
-    - uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go.version }}
-
-    - name: run unit tests
-      run: make test
-
-    - name: upload coverage
-      uses: actions/upload-artifact@v5
-      with:
-        name: unit-coverage-${{ matrix.go.name }}
-        path: coverage.out
-
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go.version }}
+      - name: run unit tests
+        run: make test
+      - name: upload coverage
+        uses: actions/upload-artifact@v5
+        with:
+          name: unit-coverage-${{ matrix.go.name }}
+          path: coverage.out
   integration-tests:
     if: ${{ github.event.label.name == 'integration_tests' }}
     needs:
-    - unit-tests
-    - static-checks
+      - unit-tests
+      - static-checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
-        - version: "1.24"
-          name: target
+          - version: "1.24"
+            name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
-    - uses: actions/checkout@v6
-
-    - uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go.version }}
-
-    - name: run integration tests
-      env:
-        ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
-      run: make func-test
-
-    - name: upload coverage
-      uses: actions/upload-artifact@v5
-      with:
-        name: integration-coverage-${{ matrix.go.name }}
-        path: coverage.out
-
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go.version }}
+      - name: run integration tests
+        env:
+          ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
+        run: make func-test
+      - name: upload coverage
+        uses: actions/upload-artifact@v5
+        with:
+          name: integration-coverage-${{ matrix.go.name }}
+          path: coverage.out
   upload-results:
     needs: integration-tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-
-    - uses: actions/download-artifact@v6
-
-    - uses: paambaati/codeclimate-action@v9.0.0
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      with:
-        prefix: go.anx.io/go-anxcloud
-        coverageLocations: |
-          ${{ github.workspace }}/unit-coverage-target/coverage.out:gocov
-          ${{ github.workspace }}/unit-coverage-latest/coverage.out:gocov
-          ${{ github.workspace }}/integration-coverage-target/coverage.out:gocov
-          ${{ github.workspace }}/integration-coverage-latest/coverage.out:gocov
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v6
+      - uses: paambaati/codeclimate-action@v9.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          prefix: go.anx.io/go-anxcloud
+          coverageLocations: |-
+            ${{ github.workspace }}/unit-coverage-target/coverage.out:gocov
+            ${{ github.workspace }}/unit-coverage-latest/coverage.out:gocov
+            ${{ github.workspace }}/integration-coverage-target/coverage.out:gocov
+            ${{ github.workspace }}/integration-coverage-latest/coverage.out:gocov
