@@ -62,7 +62,7 @@ jobs:
       - name: run unit tests
         run: make test
       - name: upload coverage
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-coverage-${{ matrix.go.name }}
           path: coverage.out
@@ -88,7 +88,7 @@ jobs:
           ANEXIA_TOKEN: ${{ secrets.ANEXIA_TOKEN }}
         run: make func-test
       - name: upload coverage
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: integration-coverage-${{ matrix.go.name }}
           path: coverage.out
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
       - uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
