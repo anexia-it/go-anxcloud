@@ -61,6 +61,34 @@ func (s State) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.ID)
 }
 
+// UnmarshalJSON supports both simple string and the real State object
+func (s *State) UnmarshalJSON(data []byte) error {
+	// CASE 1: state is a simple string
+	var asString string
+	if err := json.Unmarshal(data, &asString); err == nil {
+		// interpret the string as the type/id value
+		s.ID = asString
+		s.Text = "Unknown"
+
+		// convert numeric string to int if possible
+		var n int
+		if err := json.Unmarshal([]byte(asString), &n); err == nil {
+			s.Type = n
+		}
+		return nil
+	}
+
+	// CASE 2: state is an object → unmarshal normally
+	type alias State
+	var obj alias
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+
+	*s = State(obj)
+	return nil
+}
+
 type HasState struct {
 	State State `json:"state"`
 }
