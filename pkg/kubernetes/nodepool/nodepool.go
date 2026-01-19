@@ -10,6 +10,7 @@ import (
 	utils "path"
 	"strconv"
 
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
@@ -24,19 +25,14 @@ type Nodepool struct {
 	Identifier                 string `json:"identifier"`
 	Name                       string `json:"name"`
 
-	Cluster         Minimal `json:"cluster"`
-	Replicas        uint    `json:"replicas"`
-	CPUs            uint    `json:"cpus"`
-	MemoryBytes     uint64  `json:"memory"`
-	DiskSizeBytes   uint64  `json:"disk_size"`
-	OperatingSystem string  `json:"operating_system"`
+	Cluster         common.PartialResource `json:"cluster"`
+	Replicas        uint                   `json:"replicas"`
+	CPUs            uint                   `json:"cpus"`
+	MemoryBytes     uint64                 `json:"memory"`
+	DiskSizeBytes   uint64                 `json:"disk_size"`
+	OperatingSystem string                 `json:"operating_system"`
 
-	AutomationRules []Minimal `json:"automation_rules"`
-}
-
-type Minimal struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
+	AutomationRules []common.PartialResource `json:"automation_rules"`
 }
 
 // NodePoolInfo holds the identifier and the name of a kubernetes nodepool.

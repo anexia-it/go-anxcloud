@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
@@ -22,7 +23,7 @@ var _ = Describe("nodepool client", func() {
 		cli, err = client.New(client.AuthFromEnv(false))
 		Expect(err).ToNot(HaveOccurred())
 
-		api = NewAPI(cli, ClientOpts{Environment: EnvironmentDev})
+		api = NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 	})
 
 	Context("with a nodepool", func() {
@@ -119,7 +120,7 @@ var _ = Describe("nodepool client", func() {
 			}))
 			defer server.Close()
 
-			api := NewAPI(cli, ClientOpts{Environment: EnvironmentDev})
+			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
 				State: StatePending,
@@ -152,7 +153,7 @@ var _ = Describe("nodepool client", func() {
 			}))
 			defer server.Close()
 
-			api := NewAPI(cli, ClientOpts{Environment: EnvironmentDev})
+			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
 				State: StatePending,

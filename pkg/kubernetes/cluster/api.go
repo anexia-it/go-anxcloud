@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 )
@@ -29,22 +30,11 @@ const (
 	pathFormat = "api/kubernetes%s/v1/cluster.json"
 )
 
-type ClientOpts struct {
-	Environment Environment
-}
-
-type Environment string
-
-const EnvironmentDev = Environment("dev")
-
 // NewAPI creates a new kubernetes cluster API instance with the given client.
-func NewAPI(c client.Client, opts ...ClientOpts) API {
+func NewAPI(c client.Client, opt common.ClientOpts) API {
 	envPath := ""
 
-	if len(opts) > 1 {
-		panic("too many options, only one supported")
-	} else if len(opts) == 1 {
-		opt := opts[0]
+	if opt.Environment != common.EnvironmentProd {
 		envPath = "-" + string(opt.Environment)
 	}
 
