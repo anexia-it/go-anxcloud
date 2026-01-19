@@ -15,8 +15,8 @@ type Definition struct {
 	Name            string   `json:"name"`
 	State           gs.State `json:"state"`
 	ClusterID       string   `json:"cluster"`
-	Replicas        uint64   `json:"replicas"`
-	CPUs            uint64   `json:"cpus"`
+	Replicas        uint     `json:"replicas"`
+	CPUs            uint     `json:"cpus"`
 	MemoryBytes     uint64   `json:"memory"`
 	DiskSizeBytes   uint64   `json:"disk_size"`
 	OperatingSystem string   `json:"operating_system"`

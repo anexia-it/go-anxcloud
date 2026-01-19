@@ -25,10 +25,10 @@ type Nodepool struct {
 	Name                       string `json:"name"`
 
 	Cluster         Minimal `json:"cluster"`
-	Replicas        int     `json:"replicas"`
-	CPUs            int     `json:"cpus"`
-	MemoryBytes     int     `json:"memory"`
-	DiskSizeBytes   int     `json:"disk_size"`
+	Replicas        uint    `json:"replicas"`
+	CPUs            uint    `json:"cpus"`
+	MemoryBytes     uint64  `json:"memory"`
+	DiskSizeBytes   uint64  `json:"disk_size"`
 	OperatingSystem string  `json:"operating_system"`
 
 	AutomationRules []Minimal `json:"automation_rules"`
