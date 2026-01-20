@@ -55,6 +55,12 @@ type Cluster struct {
 	// If set to true an external v6 prefix is automatically created for the cluster. Defaults to true if not set.
 	ManageExternalIPv6Prefix *bool `json:"manage_external_ipv6_prefix,omitempty"`
 
+	ExternalVlan *common.PartialResource `json:"external_vlan,omitempty"`
+	InternalVlan *common.PartialResource `json:"internal_vlan,omitempty"`
+
+	KkpProjectID *string `json:"kkp_project_id,omitempty"`
+	KkpClusterID *string `json:"kkp_cluster_id,omitempty"`
+
 	// Contains a kubeconfig if available
 	KubeConfig *string `json:"kubeconfig,omitempty"`
 
