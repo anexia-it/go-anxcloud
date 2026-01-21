@@ -1,4 +1,4 @@
-package cluster
+package nodepool
 
 import (
 	"context"
@@ -9,16 +9,14 @@ import (
 	"go.anx.io/go-anxcloud/pkg/pagination"
 )
 
-// API contains methods for kubernetes cluster
+// API contains methods for kubernetes nodepool
 type API interface {
 	pagination.Pageable
-	Get(ctx context.Context, page, limit int) ([]ClusterInfo, error)
-	GetByID(ctx context.Context, identifier string) (Cluster, error)
-	Create(ctx context.Context, definition Definition) (Cluster, error)
-	Update(ctx context.Context, identifier string, definition Definition) (Cluster, error)
+	Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error)
+	GetByID(ctx context.Context, identifier string) (Nodepool, error)
+	Create(ctx context.Context, definition Definition) (Nodepool, error)
+	Update(ctx context.Context, identifier string, definition Definition) (Nodepool, error)
 	DeleteByID(ctx context.Context, identifier string) error
-
-	RequestKubeConfig(ctx context.Context, cluster *Cluster) error
 }
 
 type api struct {
@@ -27,10 +25,10 @@ type api struct {
 }
 
 const (
-	pathFormat = "api/kubernetes%s/v1/cluster.json"
+	pathFormat = "api/kubernetes%s/v1/node_pool.json"
 )
 
-// NewAPI creates a new kubernetes cluster API instance with the given client.
+// NewAPI creates a new kubernetes nodepool API instance with the given client.
 func NewAPI(c client.Client, opt common.ClientOpts) API {
 	envPath := ""
 

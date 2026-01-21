@@ -13,7 +13,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
-// The Cluster resource configures settings common for all specific backend Server resources linked to it.
+// The Cluster resource configures settings common for all specific cluster resources linked to it.
 type Cluster struct {
 	gs.HasState
 

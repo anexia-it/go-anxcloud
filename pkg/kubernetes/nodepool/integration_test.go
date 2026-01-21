@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package cluster
+package nodepool
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
-var _ = Describe("cluster client", func() {
+var _ = Describe("nodepool client", func() {
 	var cli client.Client
 	var api API
 
@@ -26,28 +26,63 @@ var _ = Describe("cluster client", func() {
 		api = NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 	})
 
-	Context("with a cluster", func() {
-		var cluster Cluster
+	Context("with a nodepool", func() {
+		var nodepool Nodepool
 
-		It("lists clusters", func() {
-			clusterInfos, err := api.Get(context.TODO(), 1, 20)
+		It("lists nodepools", func() {
+			nodepoolInfos, err := api.Get(context.TODO(), 1, 20)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(clusterInfos).NotTo(BeEmpty())
+			Expect(nodepoolInfos).NotTo(BeEmpty())
 
-			cluster.Identifier = clusterInfos[0].Identifier
+			nodepool.Identifier = nodepoolInfos[0].Identifier
 		})
 
-		It("retrieves first cluster with expected values", func() {
+		It("retrieves first nodepool with expected values", func() {
 			var err error
-			cluster, err = api.GetByID(context.TODO(), cluster.Identifier)
+			nodepool, err = api.GetByID(context.TODO(), nodepool.Identifier)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(cluster).NotTo(BeNil())
+			Expect(nodepool).NotTo(BeNil())
+		})
+	})
+
+	Context("nodepool full cycle", func() {
+		var id string
+
+		It("creates a nodepool", func() {
+			nodepool, err := api.Create(context.TODO(), Definition{
+				Name:            "integration-test-nodepool",
+				State:           StatePending,
+				ClusterID:       "d0d9c6f26dd2489281e0bd86d79de572",
+				Replicas:        4,
+				CPUs:            3,
+				MemoryBytes:     5 * Gibibyte,
+				DiskSizeBytes:   22 * Gibibyte,
+				OperatingSystem: OSFlatcar,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nodepool).NotTo(BeNil())
+			id = nodepool.Identifier
 		})
 
-		It("can trigger GA request kubeconfig", func() {
-			err := api.RequestKubeConfig(context.TODO(), &cluster)
+		It("updates the nodepool", func() {
+			nodepool, err := api.Update(context.TODO(), id, Definition{
+				Name:            "integration-test-nodepool-updated",
+				ClusterID:       "d0d9c6f26dd2489281e0bd86d79de572",
+				Replicas:        5,
+				CPUs:            4,
+				MemoryBytes:     6 * Gibibyte,
+				DiskSizeBytes:   23 * Gibibyte,
+				OperatingSystem: OSFlatcar,
+			})
 
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nodepool).NotTo(BeNil())
+		})
+
+		It("deletes the nodepool", func() {
+			err := api.DeleteByID(context.TODO(), id)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
@@ -77,7 +112,7 @@ var _ = Describe("cluster client", func() {
 						Text: "Pending",
 						Type: 2,
 					},
-					Name: "clustername",
+					Name: "nodepoolname",
 				}
 
 				err = json.NewEncoder(w).Encode(resp)
@@ -88,11 +123,11 @@ var _ = Describe("cluster client", func() {
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StateNewlyCreated,
+				State: StatePending,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(cCreated.Name).To(Equal("clustername"))
+			Expect(cCreated.Name).To(Equal("nodepoolname"))
 			Expect(cCreated.State.Type).To(Equal(2))
 			Expect(cCreated.State.ID).To(Equal("2"))
 			Expect(cCreated.State.Text).To(Equal("Pending"))
@@ -110,7 +145,7 @@ var _ = Describe("cluster client", func() {
 					Name  string `json:"name"`
 				}{
 					State: "2",
-					Name:  "clustername",
+					Name:  "nodepoolname",
 				}
 
 				err = json.NewEncoder(w).Encode(resp)
@@ -121,11 +156,11 @@ var _ = Describe("cluster client", func() {
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StateNewlyCreated,
+				State: StatePending,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(cCreated.Name).To(Equal("clustername"))
+			Expect(cCreated.Name).To(Equal("nodepoolname"))
 			Expect(cCreated.State.Type).To(Equal(2))
 			Expect(cCreated.State.ID).To(Equal("2"))
 			Expect(cCreated.State.Text).To(Equal("Unknown"))
