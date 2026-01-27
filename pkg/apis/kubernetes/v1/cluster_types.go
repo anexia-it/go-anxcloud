@@ -61,6 +61,16 @@ type Cluster struct {
 	KkpProjectID *string `json:"kkp_project_id,omitempty"`
 	KkpClusterID *string `json:"kkp_cluster_id,omitempty"`
 
+	EnableOidcAuthentication bool   `json:"enable_oidc_authentication,omitempty"`
+	OidcClientId             string `json:"oidc_client_id,omitempty"`
+	OidcIssuerUrl            string `json:"oidc_issuer_url,omitempty"`
+	OidcGroupsClaim          string `json:"oidc_groups_claim,omitempty"`
+	OidcUsernameClaim        string `json:"oidc_username_claim,omitempty"`
+	OidcExtraScopes          string `json:"oidc_extra_scopes,omitempty"`
+	OidcGroupsPrefix         string `json:"oidc_groups_prefix,omitempty"`
+	OidcRequiredClaim        string `json:"oidc_required_claim,omitempty"`
+	OidcUsernamePrefix       string `json:"oidc_username_prefix,omitempty"`
+
 	// Contains a kubeconfig if available
 	KubeConfig *string `json:"kubeconfig,omitempty"`
 
