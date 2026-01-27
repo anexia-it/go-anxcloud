@@ -59,6 +59,7 @@ type Update struct {
 	Name                string `json:"name,omitempty"`
 	DescriptionCustomer string `json:"description_customer,omitempty"`
 	Role                string `json:"role,omitempty"`
+	RDNSName            string `json:"rdns_name"`
 }
 
 // Create defines meta data of an address to create.
@@ -68,6 +69,7 @@ type Create struct {
 	DescriptionCustomer string `json:"description_customer"`
 	Role                string `json:"role"`
 	Organization        string `json:"organization"`
+	RDNSName            string `json:"rdns_name"`
 }
 
 // IPReserveVersionLimit limits the IP version for address reservations
