@@ -95,18 +95,18 @@ type Cluster struct {
 	ExternalIPFamilies string `json:"external_ip_families,omitempty"`
 
 	// ServiceVM IP address ids for both SVM01 and SVM02 as well as IPv4 and IPv6 and internal and external.
-	ServiceVM01InternalIPv4Address string `json:"service_vm_01_internal_ipv4_address,omitempty"`
-	ServiceVM02InternalIPv4Address string `json:"service_vm_02_internal_ipv4_address,omitempty"`
-	ServiceVM01ExternalIPv4Address string `json:"service_vm_01_external_ipv4_address,omitempty"`
-	ServiceVM02ExternalIPv4Address string `json:"service_vm_02_external_ipv4_address,omitempty"`
-	ServiceVM01ExternalIPv6Address string `json:"service_vm_01_external_ipv6_address,omitempty"`
-	ServiceVM02ExternalIPv6Address string `json:"service_vm_02_external_ipv6_address,omitempty"`
+	ServiceVM01InternalIPv4Address *common.PartialResource `json:"service_vm_01_internal_ipv4_address,omitempty"`
+	ServiceVM02InternalIPv4Address *common.PartialResource `json:"service_vm_02_internal_ipv4_address,omitempty"`
+	ServiceVM01ExternalIPv4Address *common.PartialResource `json:"service_vm_01_external_ipv4_address,omitempty"`
+	ServiceVM02ExternalIPv4Address *common.PartialResource `json:"service_vm_02_external_ipv4_address,omitempty"`
+	ServiceVM01ExternalIPv6Address *common.PartialResource `json:"service_vm_01_external_ipv6_address,omitempty"`
+	ServiceVM02ExternalIPv6Address *common.PartialResource `json:"service_vm_02_external_ipv6_address,omitempty"`
 
 	// LBaaS load balancer that points to the corresponding Service VM. If not specified, it is created together with the Service VM. (Identifier).
-	ServiceLB01 string `json:"service_lb_01,omitempty"`
-	ServiceLB02 string `json:"service_lb_02,omitempty"`
+	ServiceLB01 *common.PartialResource `json:"service_lb_01,omitempty"`
+	ServiceLB02 *common.PartialResource `json:"service_lb_02,omitempty"`
 
 	// Virtual IP address in the external IPv4 prefix. If not set, an address from the prefix will be allocated when LBaaS hosts are enabled. (Identifier).
-	ExternalVIPv4 string `json:"external_ipv4_vip,omitempty"`
-	ExternalVIPv6 string `json:"external_ipv6_vip,omitempty"`
+	ExternalVIPv4 *common.PartialResource `json:"external_ipv4_vip,omitempty"`
+	ExternalVIPv6 *common.PartialResource `json:"external_ipv6_vip,omitempty"`
 }
