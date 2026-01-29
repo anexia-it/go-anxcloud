@@ -46,4 +46,7 @@ type Definition struct {
 	ServiceVM02ExternalIPv4Address string     `json:"service_vm_02_external_ipv4_address,omitempty"`
 	ServiceVM01ExternalIPv6Address string     `json:"service_vm_01_external_ipv6_address,omitempty"`
 	ServiceVM02ExternalIPv6Address string     `json:"service_vm_02_external_ipv6_address,omitempty"`
+	ServiceUser                    string     `json:"service_user,omitempty"`
+	KKPProjectID                   string     `json:"kp_project_id,omitempty"`
+	KKPClusterID                   string     `json:"kp_cluster_id,omitempty"`
 }
