@@ -45,22 +45,6 @@ type Cluster struct {
 	ManageExternalIPv6Prefix   bool      `json:"manage_external_ipv6_prefix"`
 	ExternalIPv6Prefix         Minimal   `json:"external_ipv6_prefix"`
 	AutomationRules            []Minimal `json:"automation_rules"`
-
-	ServiceVM01InternalIPv4Address *Minimal `json:"service_vm_01_internal_ipv4_address"`
-	ServiceVM02InternalIPv4Address *Minimal `json:"service_vm_02_internal_ipv4_address"`
-	ServiceVM01ExternalIPv4Address *Minimal `json:"service_vm_01_external_ipv4_address"`
-	ServiceVM02ExternalIPv4Address *Minimal `json:"service_vm_02_external_ipv4_address"`
-	ServiceVM01ExternalIPv6Address *Minimal `json:"service_vm_01_external_ipv6_address"`
-	ServiceVM02ExternalIPv6Address *Minimal `json:"service_vm_02_external_ipv6_address"`
-	ServiceLB01                    *Minimal `json:"service_lb_01"`
-	ServiceLB02                    *Minimal `json:"service_lb_02"`
-	ExternalIPv4VIP                *Minimal `json:"external_ipv4_vip"`
-	ExternalIPv6VIP                *Minimal `json:"external_ipv6_vip"`
-	KKPAPILBaaSBackend01           *Minimal `json:"kkp_api_lbaas_backend_01"`
-	KKPAPILBaaSBackend02           *Minimal `json:"kkp_api_lbaas_backend_02"`
-	KKPVPNLBaaSBackend01           *Minimal `json:"kkp_vpn_lbaas_backend_01"`
-	KKPVPNLBaaSBackend02           *Minimal `json:"kkp_vpn_lbaas_backend_02"`
-	StorageServerInterfaceAddress  *Minimal `json:"storage_server_interface_address"`
 }
 
 type Minimal struct {
