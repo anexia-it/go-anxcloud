@@ -93,4 +93,20 @@ type Cluster struct {
 	// Addresses from the selected protocols will be allocated for the cluster's Service VMs and load balancing,
 	// if those are enabled. One of: IPv4 = IPv4, DualStack = IPv4 & IPv6. Default: DualStack
 	ExternalIPFamilies string `json:"external_ip_families,omitempty"`
+
+	// ServiceVM IP address ids for both SVM01 and SVM02 as well as IPv4 and IPv6 and internal and external.
+	ServiceVM01InternalIPv4Address string `json:"service_vm_01_internal_ipv4_address,omitempty"`
+	ServiceVM02InternalIPv4Address string `json:"service_vm_02_internal_ipv4_address,omitempty"`
+	ServiceVM01ExternalIPv4Address string `json:"service_vm_01_external_ipv4_address,omitempty"`
+	ServiceVM02ExternalIPv4Address string `json:"service_vm_02_external_ipv4_address,omitempty"`
+	ServiceVM01ExternalIPv6Address string `json:"service_vm_01_external_ipv6_address,omitempty"`
+	ServiceVM02ExternalIPv6Address string `json:"service_vm_02_external_ipv6_address,omitempty"`
+
+	// LBaaS load balancer that points to the corresponding Service VM. If not specified, it is created together with the Service VM. (Identifier).
+	ServiceLB01 string `json:"service_lb_01,omitempty"`
+	ServiceLB02 string `json:"service_lb_02,omitempty"`
+
+	// Virtual IP address in the external IPv4 prefix. If not set, an address from the prefix will be allocated when LBaaS hosts are enabled. (Identifier).
+	ExternalVIPv4 string `json:"external_ipv4_vip,omitempty"`
+	ExternalVIPv6 string `json:"external_ipv6_vip,omitempty"`
 }
