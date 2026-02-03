@@ -39,6 +39,7 @@ type Address struct {
 	Name                string `json:"name"`
 	DescriptionCustomer string `json:"description_customer"`
 	DescriptionInternal string `json:"description_internal"`
+	RDNSName            string `json:"rdns_name"`
 	Role                string `json:"role_text"`
 	Version             int    `json:"version"`
 	Status              string `json:"status"`
@@ -52,6 +53,7 @@ type Summary struct {
 	Name                string `json:"name"`
 	DescriptionCustomer string `json:"description_customer"`
 	Role                string `json:"role_text"`
+	RDNSName            string `json:"rdns_name"`
 }
 
 // Update contains fields to change on a prefix.
