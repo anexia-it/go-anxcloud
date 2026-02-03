@@ -141,7 +141,7 @@ var _ = Describe("ipam/address client", func() {
 
 			Expect(a.Name).To(Equal(ip.String()))
 			Expect(a.DescriptionCustomer).To(Equal(descriptionCustomer))
-			//Expect(a.RDNSName).To(Equal(rndsName))
+			Expect(a.RDNSName).To(Equal(rndsName))
 			ipID = a.ID
 		})
 
