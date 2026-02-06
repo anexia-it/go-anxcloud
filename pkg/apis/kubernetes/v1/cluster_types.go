@@ -94,6 +94,8 @@ type Cluster struct {
 	// if those are enabled. One of: IPv4 = IPv4, DualStack = IPv4 & IPv6. Default: DualStack
 	ExternalIPFamilies string `json:"external_ip_families,omitempty"`
 
+	ServiceUser *common.PartialResource `json:"service_user,omitempty"`
+
 	// LBaaS load balancer that points to the corresponding Service VM. If not specified, it is created together with the Service VM. (Identifier).
 	ServiceVM01Identifier *common.PartialResource `json:"service_vm_01,omitempty"`
 	ServiceVM02Identifier *common.PartialResource `json:"service_vm_02,omitempty"`
