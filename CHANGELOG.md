@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* object-storage: add support for object storage *TESTING*
 * api: add fields for LBaaS resources (#475, @davidkroell)
 * kubernetes: add support for updating the state of a cluster
 * kubernetes: add support for managing clusters
@@ -34,6 +33,13 @@ Some examples, more below in the actual changelog (newer entries are more likely
 * (internal) generic client: add hook FilterRequestURLHook (#123, @marioreggiori)
 
 -->
+
+## [0.8.1] -- 2025-09-08
+
+### Added
+
+* object-storage: _BETA_ add support for object storage *TESTING*
+* ipam: add support for RDNS configuration of ip addresses
 
 ## [0.8.0] -- 2025-09-08
 
