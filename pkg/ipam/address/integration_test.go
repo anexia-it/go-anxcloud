@@ -128,14 +128,20 @@ var _ = Describe("ipam/address client", func() {
 
 			Expect(testPrefix.Contains(ip)).To(BeTrue())
 
+			const rndsName = "anexia-it.com"
+			const descriptionCustomer = "go-anxcloud test IP"
+
 			a, err := api.Create(context.TODO(), Create{
 				PrefixID:            testPrefixID,
 				Address:             ip.String(),
-				DescriptionCustomer: "go-anxcloud test IP",
+				DescriptionCustomer: descriptionCustomer,
+				RDNSName:            rndsName,
 			})
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(a.Name).To(Equal(ip.String()))
+			Expect(a.DescriptionCustomer).To(Equal(descriptionCustomer))
+			Expect(a.RDNSName).To(Equal(rndsName))
 			ipID = a.ID
 		})
 
@@ -154,14 +160,20 @@ var _ = Describe("ipam/address client", func() {
 		})
 
 		It("updates the test address", func() {
+
+			const rndsName = "anexia.com"
+			const descriptionCustomer = "something something IPv4 is exhausted"
+
 			s, err := api.Update(context.TODO(), ipID, Update{
-				DescriptionCustomer: "something something IPv4 is exhausted",
+				DescriptionCustomer: descriptionCustomer,
+				RDNSName:            rndsName,
 			})
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(s.ID).To(Equal(ipID))
 			Expect(s.Name).To(Equal(ip.String()))
-			Expect(s.DescriptionCustomer).To(Equal("something something IPv4 is exhausted"))
+			Expect(s.DescriptionCustomer).To(Equal(descriptionCustomer))
+			Expect(s.RDNSName).To(Equal(rndsName))
 		})
 
 		It("eventually retrieves the test address with changed data", func() {
@@ -175,6 +187,9 @@ var _ = Describe("ipam/address client", func() {
 				}
 				if ip.DescriptionCustomer != "something something IPv4 is exhausted" {
 					return errors.New("description not updated")
+				}
+				if ip.RDNSName != "anexia.com." {
+					return errors.New("rdns not updated")
 				}
 				return nil
 			}
