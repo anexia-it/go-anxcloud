@@ -126,13 +126,13 @@ func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, e
 	response, err := a.client.Do(req)
 	if err != nil {
 		return Loadbalancer{}, fmt.Errorf("error when creating a LBaaS Loadbalancer '%s': %w",
-			definition.LoadBalancer, err)
+			definition.Name, err)
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Loadbalancer{}, fmt.Errorf("could not create LBaaS Loadbalancer '%s': %s",
-			definition.LoadBalancer, response.Status)
+			definition.Name, response.Status)
 	}
 
 	var payload Loadbalancer
@@ -164,13 +164,13 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 	response, err := a.client.Do(req)
 	if err != nil {
 		return Loadbalancer{}, fmt.Errorf("error when updating a LBaaS Loadbalancer '%s': %w",
-			definition.LoadBalancer, err)
+			definition.Name, err)
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return Loadbalancer{}, fmt.Errorf("could not update LBaaS Loadbalancer '%s': %s",
-			definition.LoadBalancer, response.Status)
+			definition.Name, response.Status)
 	}
 
 	var payload Loadbalancer

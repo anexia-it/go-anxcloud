@@ -5,9 +5,7 @@ import (
 )
 
 type Definition struct {
-	Name      string             `json:"name"`
-	IpAddress string             `json:"ip_address"`
-	Mode      common.Mode        `json:"mode"`
-	State     common.State       `json:"state"`
-	Enable    common.EnableState `json:"enable"`
+	Name      string       `json:"name"`
+	IpAddress string       `json:"ip_address"`
+	State     common.State `json:"state"`
 }
