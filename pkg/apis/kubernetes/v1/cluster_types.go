@@ -117,12 +117,12 @@ type Cluster struct {
 	ExternalVIPv6 *common.PartialResource `json:"external_ipv6_vip,omitempty"`
 
 	// LBaaS resources to enable access to the control plane.
-	KKPAPILBaaSBackend01 *common.PartialResource `json:"kkp_api_lbaas_backend_01"`
-	KKPAPILBaaSBackend02 *common.PartialResource `json:"kkp_api_lbaas_backend_02"`
-	KKPVPNLBaaSBackend01 *common.PartialResource `json:"kkp_vpn_lbaas_backend_01"`
-	KKPVPNLBaaSBackend02 *common.PartialResource `json:"kkp_vpn_lbaas_backend_02"`
+	KKPAPILBaaSBackend01 *common.PartialResource `json:"kkp_api_lbaas_backend_01,omitempty"`
+	KKPAPILBaaSBackend02 *common.PartialResource `json:"kkp_api_lbaas_backend_02,omitempty"`
+	KKPVPNLBaaSBackend01 *common.PartialResource `json:"kkp_vpn_lbaas_backend_01,omitempty"`
+	KKPVPNLBaaSBackend02 *common.PartialResource `json:"kkp_vpn_lbaas_backend_02,omitempty"`
 
 	// The Kubermatic backend which creates the cluster control plane.
-	BackendName string `json:"backend_name"`
-	Backend     string `json:"backend"`
+	BackendName string `json:"backend_name,omitempty"`
+	Backend     string `json:"backend,omitempty"`
 }
