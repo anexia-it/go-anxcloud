@@ -14,6 +14,13 @@ import (
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
 )
 
+type SyncSource string
+
+const (
+	SyncSourceEngine  SyncSource = "engine"
+	SyncSourceCluster SyncSource = "cluster"
+)
+
 // The Nodepool resource configures settings common for all specific backend Server resources linked to it.
 type Nodepool struct {
 	gs.HasState
@@ -33,6 +40,7 @@ type Nodepool struct {
 	OperatingSystem string                 `json:"operating_system"`
 
 	AutomationRules []common.PartialResource `json:"automation_rules"`
+	SyncSource      SyncSource               `json:"syncsource"`
 }
 
 // NodePoolInfo holds the identifier and the name of a kubernetes nodepool.
