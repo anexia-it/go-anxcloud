@@ -51,14 +51,32 @@ var _ = Describe("nodepool client", func() {
 
 		It("creates a nodepool", func() {
 			nodepool, err := api.Create(context.TODO(), Definition{
-				Name:            "integration-test-nodepool",
-				State:           StatePending,
-				ClusterID:       "d0d9c6f26dd2489281e0bd86d79de572",
-				Replicas:        4,
-				CPUs:            3,
-				MemoryBytes:     5 * Gibibyte,
-				DiskSizeBytes:   22 * Gibibyte,
-				OperatingSystem: OSFlatcar,
+				Name:               "integration-test-nodepool",
+				State:              StateNoGA,
+				SyncSource:         SyncSourceEngine,
+				ClusterID:          "2831d70e35014768bb1f0100f3373c8f",
+				Replicas:           4,
+				CPUs:               3,
+				CPUType:            CPUPerformanceTypePerformance,
+				MemoryBytes:        5 * GibiByte,
+				OperatingSystem:    OSFlatcar,
+				AutoscalerEnabled:  true,
+				AutoscalerMinNodes: 2,
+				AutoscalerMaxNodes: 5,
+				Disks: []NodepoolDisks{
+					{
+						Name:            "disk0",
+						SizeBytes:       22 * GibiByte,
+						PerformanceType: "ENT6",
+					},
+				},
+				Networks: []NodepoolNetwork{
+					{
+						Name:           "eth0",
+						BandwidthLimit: "1000",
+						VLAN:           common.PartialResource{Identifier: "1b42fed9de904399889120871193cc0c"},
+					},
+				},
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -68,13 +86,17 @@ var _ = Describe("nodepool client", func() {
 
 		It("updates the nodepool", func() {
 			nodepool, err := api.Update(context.TODO(), id, Definition{
-				Name:            "integration-test-nodepool-updated",
-				ClusterID:       "d0d9c6f26dd2489281e0bd86d79de572",
-				Replicas:        5,
-				CPUs:            4,
-				MemoryBytes:     6 * Gibibyte,
-				DiskSizeBytes:   23 * Gibibyte,
-				OperatingSystem: OSFlatcar,
+				Name:               "integration-test-nodepool-updated",
+				Replicas:           5,
+				CPUs:               4,
+				MemoryBytes:        6 * GibiByte,
+				OperatingSystem:    OSFlatcar,
+				SyncSource:         SyncSourceEngine,
+				ClusterID:          "2831d70e35014768bb1f0100f3373c8f",
+				CPUType:            CPUPerformanceTypePerformance,
+				AutoscalerEnabled:  true,
+				AutoscalerMinNodes: 3,
+				AutoscalerMaxNodes: 6,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -123,7 +145,7 @@ var _ = Describe("nodepool client", func() {
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StatePending,
+				State: StateNoGA,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -156,7 +178,7 @@ var _ = Describe("nodepool client", func() {
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
 			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StatePending,
+				State: StateNoGA,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
