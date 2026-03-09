@@ -28,7 +28,7 @@ type GSBase struct {
 	Name               string `json:"name"`
 }
 
-// The Nodepool resource configures settings common for all specific backend Server resources linked to it.
+// The Nodepool resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Nodepool struct {
 	gs.HasState
 	GSBase
