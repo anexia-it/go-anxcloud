@@ -21,17 +21,34 @@ const (
 	SyncSourceCluster SyncSource = "cluster"
 )
 
-type GSBase struct {
-	CustomerIdentifier string `json:"customer_identifier"`
-	ResellerIdentifier string `json:"reseller_identifier"`
-	Identifier         string `json:"identifier"`
-	Name               string `json:"name"`
-}
+const (
+	OSFlatcar = "Flatcar Linux"
+	GibiByte  = 1024 * 1024 * 1024
+)
+
+var (
+	StateOK   = gs.State{ID: "0", Text: "OK", Type: gs.StateTypeOK}
+	StateNoGA = gs.State{ID: "1", Text: "OK", Type: gs.StateTypeOK}
+)
+
+type CPUPerformanceType string
+
+const (
+	CPUPerformanceTypeBestEffort      CPUPerformanceType = "best-effort"
+	CPUPerformanceTypeStandard        CPUPerformanceType = "standard"
+	CPUPerformanceTypeEnterprise      CPUPerformanceType = "enterprise"
+	CPUPerformanceTypePerformance     CPUPerformanceType = "performance"
+	CPUPerformanceTypePerformancePlus CPUPerformanceType = "performance-plus"
+)
 
 // The Nodepool resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Nodepool struct {
 	gs.HasState
-	GSBase
+
+	CustomerIdentifier string `json:"customer_identifier"`
+	ResellerIdentifier string `json:"reseller_identifier"`
+	Identifier         string `json:"identifier"`
+	Name               string `json:"name"`
 
 	CriticalOperationPassword  string `json:"critical_operation_password"`
 	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
@@ -42,41 +59,90 @@ type Nodepool struct {
 	CPUs               uint                   `json:"cpus"`
 	CPUType            string                 `json:"cputype"`
 	MemoryBytes        uint64                 `json:"memory"`
-	DiskSizeBytes      uint64                 `json:"disk_size"`
 	OperatingSystem    string                 `json:"operating_system"`
 	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
-	AutoscalerMinNodes bool                   `json:"autoscaler_min_nodes"`
-	AutoscalerMaxNodes bool                   `json:"autoscaler_max_nodes"`
+	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes,omitempty"`
+	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes,omitempty"`
 
-	Disks    []NodepoolDisks `json:"disks"`
-	Networks []NodepoolDisks `json:"networks"`
+	Disks    []NodepoolDisks   `json:"disks"`
+	Networks []NodepoolNetwork `json:"networks"`
 
 	CustomDNSEnabled bool   `json:"customdns_enabled"`
 	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
-	DNSv4Entry1      string `json:"dns_v4_1"`
-	DNSv4Entry2      string `json:"dns_v4_2"`
+	DNSv4Entry1      string `json:"dns_v4_1,omitempty"`
+	DNSv4Entry2      string `json:"dns_v4_2,omitempty"`
 
 	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
-	DNSv6Entry1     string `json:"dns_v6_1"`
-	DNSv6Entry2     string `json:"dns_v6_2"`
+	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
+	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
 
-	Taints      string `json:"taints"`
-	Labels      string `json:"labels"`
-	Annotations string `json:"annotations"`
-	SSHPubKeys  string `json:"sshpubkeys"`
+	Taints      string `json:"taints,omitempty"`
+	Labels      string `json:"labels,omitempty"`
+	Annotations string `json:"annotations,omitempty"`
+	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
 
-	AutomationRules []common.PartialResource `json:"automation_rules"`
+	AutomationRules []common.PartialResource `json:"automation_rules,omitempty"`
 }
 
+// The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
+type Definition struct {
+	State gs.State `json:"state"`
+
+	CustomerIdentifier string `json:"customer_identifier"`
+	ResellerIdentifier string `json:"reseller_identifier"`
+	Name               string `json:"name"`
+
+	CriticalOperationPassword  string `json:"critical_operation_password"`
+	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
+
+	ClusterID          string             `json:"cluster"`
+	SyncSource         SyncSource         `json:"syncsource"`
+	Replicas           uint               `json:"replicas"`
+	CPUs               uint               `json:"cpus"`
+	CPUType            CPUPerformanceType `json:"cputype"`
+	MemoryBytes        uint64             `json:"memory"`
+	OperatingSystem    string             `json:"operating_system"`
+	AutoscalerEnabled  bool               `json:"autoscaler_enabled"`
+	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
+	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
+
+	Disks    []NodepoolDisks   `json:"disks"`
+	Networks []NodepoolNetwork `json:"networks"`
+
+	CustomDNSEnabled bool   `json:"customdns_enabled"`
+	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
+	DNSv4Entry1      string `json:"dns_v4_1,omitempty"`
+	DNSv4Entry2      string `json:"dns_v4_2,omitempty"`
+
+	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
+	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
+	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
+
+	Taints      string `json:"taints,omitempty"`
+	Labels      string `json:"labels,omitempty"`
+	Annotations string `json:"annotations,omitempty"`
+	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
+}
+
+// NodepoolDisks represents the disks of a [Nodepool].
 type NodepoolDisks struct {
-	GSBase
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Identifier         string `json:"identifier,omitempty"`
+	Name               string `json:"name"`
+
 	SizeBytes       uint64 `json:"size_bytes"`
 	PerformanceType string `json:"performance_type"`
 }
 
+// NodepoolNetwork represents the networks of a [Nodepool].
 type NodepoolNetwork struct {
-	GSBase
-	BandwidthLimit uint                   `json:"bandwidth_limit"`
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Identifier         string `json:"identifier,omitempty"`
+	Name               string `json:"name"`
+
+	BandwidthLimit string                 `json:"bandwidth_limit"`
 	VLAN           common.PartialResource `json:"vlan"`
 }
 

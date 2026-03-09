@@ -9,16 +9,17 @@ import (
 	utils "path"
 	"strconv"
 
+	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
 type NodepoolPage struct {
-	Page        int            `json:"page"`
-	TotalItems  int            `json:"total_items"`
-	TotalPages  int            `json:"total_pages"`
-	Limit       int            `json:"limit"`
-	Data        []NodePoolInfo `json:"data"`
+	Page        int                      `json:"page"`
+	TotalItems  int                      `json:"total_items"`
+	TotalPages  int                      `json:"total_pages"`
+	Limit       int                      `json:"limit"`
+	Data        []common.PartialResource `json:"data"`
 	pageOptions []param.Parameter
 }
 

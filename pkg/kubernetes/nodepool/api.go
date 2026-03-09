@@ -12,7 +12,7 @@ import (
 // API contains methods for kubernetes nodepool
 type API interface {
 	pagination.Pageable
-	Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error)
+	Get(ctx context.Context, page, limit int) ([]common.PartialResource, error)
 	GetByID(ctx context.Context, identifier string) (Nodepool, error)
 	Create(ctx context.Context, definition Definition) (Nodepool, error)
 	Update(ctx context.Context, identifier string, definition Definition) (Nodepool, error)
