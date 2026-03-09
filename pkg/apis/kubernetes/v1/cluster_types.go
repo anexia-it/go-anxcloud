@@ -125,4 +125,8 @@ type Cluster struct {
 	// The Kubermatic backend which creates the cluster control plane.
 	BackendName string `json:"backend_name,omitempty"`
 	Backend     string `json:"backend,omitempty"`
+
+	// Storage server interface information.
+	StorageServerInterfaceAddress *common.PartialResource `json:"storage_server_interface_address,omitempty"`
+	StorageServerInterface        *common.PartialResource `json:"storage_server_interface,omitempty"`
 }
