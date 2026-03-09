@@ -21,35 +21,66 @@ const (
 	SyncSourceCluster SyncSource = "cluster"
 )
 
+type GSBase struct {
+	CustomerIdentifier string `json:"customer_identifier"`
+	ResellerIdentifier string `json:"reseller_identifier"`
+	Identifier         string `json:"identifier"`
+	Name               string `json:"name"`
+}
+
 // The Nodepool resource configures settings common for all specific backend Server resources linked to it.
 type Nodepool struct {
 	gs.HasState
+	GSBase
 
-	CustomerIdentifier         string `json:"customer_identifier"`
-	ResellerIdentifier         string `json:"reseller_identifier"`
 	CriticalOperationPassword  string `json:"critical_operation_password"`
 	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
-	Identifier                 string `json:"identifier"`
-	Name                       string `json:"name"`
 
-	Cluster         common.PartialResource `json:"cluster"`
-	Replicas        uint                   `json:"replicas"`
-	CPUs            uint                   `json:"cpus"`
-	MemoryBytes     uint64                 `json:"memory"`
-	DiskSizeBytes   uint64                 `json:"disk_size"`
-	OperatingSystem string                 `json:"operating_system"`
+	Cluster            common.PartialResource `json:"cluster"`
+	SyncSource         SyncSource             `json:"syncsource"`
+	Replicas           uint                   `json:"replicas"`
+	CPUs               uint                   `json:"cpus"`
+	CPUType            string                 `json:"cputype"`
+	MemoryBytes        uint64                 `json:"memory"`
+	DiskSizeBytes      uint64                 `json:"disk_size"`
+	OperatingSystem    string                 `json:"operating_system"`
+	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
+	AutoscalerMinNodes bool                   `json:"autoscaler_min_nodes"`
+	AutoscalerMaxNodes bool                   `json:"autoscaler_max_nodes"`
+
+	Disks    []NodepoolDisks `json:"disks"`
+	Networks []NodepoolDisks `json:"networks"`
+
+	CustomDNSEnabled bool   `json:"customdns_enabled"`
+	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
+	DNSv4Entry1      string `json:"dns_v4_1"`
+	DNSv4Entry2      string `json:"dns_v4_2"`
+
+	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
+	DNSv6Entry1     string `json:"dns_v6_1"`
+	DNSv6Entry2     string `json:"dns_v6_2"`
+
+	Taints      string `json:"taints"`
+	Labels      string `json:"labels"`
+	Annotations string `json:"annotations"`
+	SSHPubKeys  string `json:"sshpubkeys"`
 
 	AutomationRules []common.PartialResource `json:"automation_rules"`
-	SyncSource      SyncSource               `json:"syncsource"`
 }
 
-// NodePoolInfo holds the identifier and the name of a kubernetes nodepool.
-type NodePoolInfo struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
+type NodepoolDisks struct {
+	GSBase
+	SizeBytes       uint64 `json:"size_bytes"`
+	PerformanceType string `json:"performance_type"`
 }
 
-func (a *api) Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error) {
+type NodepoolNetwork struct {
+	GSBase
+	BandwidthLimit uint                   `json:"bandwidth_limit"`
+	VLAN           common.PartialResource `json:"vlan"`
+}
+
+func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResource, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
@@ -78,7 +109,7 @@ func (a *api) Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error) 
 
 	payload := struct {
 		Data struct {
-			Data []NodePoolInfo `json:"data"`
+			Data []common.PartialResource `json:"data"`
 		} `json:"data"`
 	}{}
 
