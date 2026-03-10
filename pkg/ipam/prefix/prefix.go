@@ -97,9 +97,7 @@ type Summary struct {
 }
 
 type listResponse struct {
-	Data struct {
-		Data []Summary `json:"data"`
-	}
+	Data []Summary `json:"data"`
 }
 
 func (a api) List(ctx context.Context, page, limit int, search string) ([]Summary, error) {
@@ -131,7 +129,7 @@ func (a api) List(ctx context.Context, page, limit int, search string) ([]Summar
 		return nil, fmt.Errorf("could not decode prefix list response: %w", err)
 	}
 
-	return responsePayload.Data.Data, nil
+	return responsePayload.Data, nil
 }
 
 func (a api) Get(ctx context.Context, id string) (Info, error) {

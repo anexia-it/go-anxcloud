@@ -1,6 +1,7 @@
 package loadbalancer
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -103,4 +104,107 @@ func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, erro
 	}
 
 	return payload, nil
+}
+
+func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(endpoint.Path, path)
+
+	buf := bytes.Buffer{}
+	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
+		return Loadbalancer{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.String(), &buf)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("error when creating a LBaaS Loadbalancer '%s': %w",
+			definition.Name, err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return Loadbalancer{}, fmt.Errorf("could not create LBaaS Loadbalancer '%s': %s",
+			definition.Name, response.Status)
+	}
+
+	var payload Loadbalancer
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not parse Loadbalancer creation response: %w", err)
+	}
+
+	return payload, nil
+}
+
+func (a api) Update(ctx context.Context, identifier string, definition Definition) (Loadbalancer, error) {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
+
+	buf := bytes.Buffer{}
+	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
+		return Loadbalancer{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &buf)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("error when updating a LBaaS Loadbalancer '%s': %w",
+			definition.Name, err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return Loadbalancer{}, fmt.Errorf("could not update LBaaS Loadbalancer '%s': %s",
+			definition.Name, response.Status)
+	}
+
+	var payload Loadbalancer
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return Loadbalancer{}, fmt.Errorf("could not parse Loadbalancer updating response: %w", err)
+	}
+
+	return payload, nil
+}
+
+func (a api) DeleteByID(ctx context.Context, identifier string) error {
+	endpoint, err := url.Parse(a.client.BaseURL())
+	if err != nil {
+		return fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, endpoint.String(), nil)
+	if err != nil {
+		return fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := a.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error when deleting a LBaaS Loadbalancer '%s': %w",
+			identifier, err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return fmt.Errorf("could not delete LBaaS Loadbalancer '%s': %s",
+			identifier, response.Status)
+	}
+
+	return nil
 }
