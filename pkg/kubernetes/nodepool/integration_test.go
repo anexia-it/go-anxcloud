@@ -14,7 +14,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/client"
 )
 
-var _ = Describe("nodepool client", func() {
+var _ = Describe("nodepool client", Ordered, func() {
 	var cli client.Client
 	var api API
 
@@ -63,14 +63,14 @@ var _ = Describe("nodepool client", func() {
 				AutoscalerEnabled:  true,
 				AutoscalerMinNodes: 2,
 				AutoscalerMaxNodes: 5,
-				Disks: []NodepoolDisks{
+				Disks: []NodepoolDisksDefinition{
 					{
 						Name:            "disk0",
 						SizeBytes:       22 * GibiByte,
 						PerformanceType: "ENT6",
 					},
 				},
-				Networks: []NodepoolNetwork{
+				Networks: []NodepoolNetworkDefinition{
 					{
 						Name:           "eth0",
 						BandwidthLimit: "1000",
@@ -87,6 +87,7 @@ var _ = Describe("nodepool client", func() {
 		It("updates the nodepool", func() {
 			nodepool, err := api.Update(context.TODO(), id, Definition{
 				Name:               "integration-test-nodepool-updated",
+				State:              StateNoGA,
 				Replicas:           5,
 				CPUs:               4,
 				MemoryBytes:        6 * GibiByte,
@@ -103,7 +104,8 @@ var _ = Describe("nodepool client", func() {
 			Expect(nodepool).NotTo(BeNil())
 		})
 
-		It("deletes the nodepool", func() {
+		AfterAll(func() {
+			// try to delete in all cases
 			err := api.DeleteByID(context.TODO(), id)
 			Expect(err).NotTo(HaveOccurred())
 		})
