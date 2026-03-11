@@ -22,13 +22,14 @@ const (
 )
 
 const (
-	OSFlatcar = "Flatcar Linux"
+	OSFlatcar = "Flatcar_Linux"
 	GibiByte  = 1024 * 1024 * 1024
 )
 
 var (
-	StateOK   = gs.State{ID: "0", Text: "OK", Type: gs.StateTypeOK}
-	StateNoGA = gs.State{ID: "1", Text: "OK", Type: gs.StateTypeOK}
+	StateOK    = gs.State{ID: "0", Text: "Deployed", Type: gs.StateTypeOK}
+	StateNoGA  = gs.State{ID: "1", Text: "noGA", Type: gs.StateTypeOK}
+	StateError = gs.State{ID: "2", Text: "Error", Type: gs.StateTypeError}
 )
 
 type CPUPerformanceType string
@@ -50,78 +51,72 @@ type Nodepool struct {
 	Identifier         string `json:"identifier"`
 	Name               string `json:"name"`
 
-	CriticalOperationPassword  string `json:"critical_operation_password"`
-	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
-
 	Cluster            common.PartialResource `json:"cluster"`
-	SyncSource         SyncSource             `json:"syncsource"`
+	SyncSource         IDTitleTuple           `json:"syncsource"`
 	Replicas           uint                   `json:"replicas"`
 	CPUs               uint                   `json:"cpus"`
-	CPUType            string                 `json:"cputype"`
+	CPUType            IDTitleTuple           `json:"cputype"`
 	MemoryBytes        uint64                 `json:"memory"`
-	OperatingSystem    string                 `json:"operating_system"`
+	OperatingSystem    IDTitleTuple           `json:"operating_system"`
 	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
-	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes,omitempty"`
-	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes,omitempty"`
+	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes"`
+	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes"`
 
 	Disks    []NodepoolDisks   `json:"disks"`
 	Networks []NodepoolNetwork `json:"networks"`
 
 	CustomDNSEnabled bool   `json:"customdns_enabled"`
 	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
-	DNSv4Entry1      string `json:"dns_v4_1,omitempty"`
-	DNSv4Entry2      string `json:"dns_v4_2,omitempty"`
+	DNSv4Entry1      string `json:"dns_v4_1"`
+	DNSv4Entry2      string `json:"dns_v4_2"`
 
 	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
-	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
-	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
+	DNSv6Entry1     string `json:"dns_v6_1"`
+	DNSv6Entry2     string `json:"dns_v6_2"`
 
-	Taints      string `json:"taints,omitempty"`
-	Labels      string `json:"labels,omitempty"`
-	Annotations string `json:"annotations,omitempty"`
-	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
+	Taints      string `json:"taints"`
+	Labels      string `json:"labels"`
+	Annotations string `json:"annotations"`
+	SSHPubKeys  string `json:"sshpubkeys"`
 
-	AutomationRules []common.PartialResource `json:"automation_rules,omitempty"`
+	AutomationRules []common.PartialResource `json:"automation_rules"`
 }
 
 // The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Definition struct {
-	State gs.State `json:"state"`
+	State gs.State `json:"state,omitempty"`
 
-	CustomerIdentifier string `json:"customer_identifier"`
-	ResellerIdentifier string `json:"reseller_identifier"`
-	Name               string `json:"name"`
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Name               string `json:"name,omitempty"`
 
-	CriticalOperationPassword  string `json:"critical_operation_password"`
-	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
-
-	ClusterID          string             `json:"cluster"`
-	SyncSource         SyncSource         `json:"syncsource"`
-	Replicas           uint               `json:"replicas"`
-	CPUs               uint               `json:"cpus"`
-	CPUType            CPUPerformanceType `json:"cputype"`
-	MemoryBytes        uint64             `json:"memory"`
-	OperatingSystem    string             `json:"operating_system"`
-	AutoscalerEnabled  bool               `json:"autoscaler_enabled"`
+	ClusterID          string             `json:"cluster,omitempty"`
+	SyncSource         SyncSource         `json:"syncsource,omitempty"`
+	Replicas           uint               `json:"replicas,omitempty"`
+	CPUs               uint               `json:"cpus,omitempty"`
+	CPUType            CPUPerformanceType `json:"cputype,omitempty"`
+	MemoryBytes        uint64             `json:"memory,omitempty"`
+	OperatingSystem    string             `json:"operating_system,omitempty"`
+	AutoscalerEnabled  bool               `json:"autoscaler_enabled,omitempty"`
 	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
 	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
 
-	Disks    []NodepoolDisks   `json:"disks"`
-	Networks []NodepoolNetwork `json:"networks"`
+	Disks    []NodepoolDisksDefinition   `json:"disks,omitempty"`
+	Networks []NodepoolNetworkDefinition `json:"networks,omitempty"`
 
-	CustomDNSEnabled bool   `json:"customdns_enabled"`
-	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
-	DNSv4Entry1      string `json:"dns_v4_1,omitempty"`
-	DNSv4Entry2      string `json:"dns_v4_2,omitempty"`
+	CustomDNSEnabled bool   `json:"customdns_enabled,omitempty"`
+	DNSOverrideIPv4  bool   `json:"dns_override_ipv4,omitempty"`
+	DNSv4Entry1      string `json:"dns_v4_1,omitempty,omitempty"`
+	DNSv4Entry2      string `json:"dns_v4_2,omitempty,omitempty"`
 
-	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
-	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
+	DNSOverrideIPv6 bool   `json:"dns_override_ipv6,omitempty"`
+	DNSv6Entry1     string `json:"dns_v6_1,omitempty,omitempty"`
 	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
 
-	Taints      string `json:"taints,omitempty"`
-	Labels      string `json:"labels,omitempty"`
-	Annotations string `json:"annotations,omitempty"`
-	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
+	Taints      string `json:"taints,omitempty,omitempty"`
+	Labels      string `json:"labels,omitempty,omitempty"`
+	Annotations string `json:"annotations,omitempty,omitempty"`
+	SSHPubKeys  string `json:"sshpubkeys,omitempty,omitempty"`
 }
 
 // NodepoolDisks represents the disks of a [Nodepool].
@@ -129,10 +124,21 @@ type NodepoolDisks struct {
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
 	Identifier         string `json:"identifier,omitempty"`
-	Name               string `json:"name"`
+	Name               string `json:"name,omitempty"`
 
-	SizeBytes       uint64 `json:"size_bytes"`
-	PerformanceType string `json:"performance_type"`
+	SizeBytes       uint64       `json:"size_bytes,omitempty"`
+	PerformanceType IDTitleTuple `json:"performance_type,omitempty"`
+}
+
+// NodepoolDisksDefinition represents the disks of a [Nodepool].
+type NodepoolDisksDefinition struct {
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Identifier         string `json:"identifier,omitempty"`
+	Name               string `json:"name,omitempty"`
+
+	SizeBytes       uint64 `json:"size_bytes,omitempty"`
+	PerformanceType string `json:"performance_type,omitempty"`
 }
 
 // NodepoolNetwork represents the networks of a [Nodepool].
@@ -140,10 +146,33 @@ type NodepoolNetwork struct {
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
 	Identifier         string `json:"identifier,omitempty"`
-	Name               string `json:"name"`
+	Name               string `json:"name,omitempty"`
 
-	BandwidthLimit string                 `json:"bandwidth_limit"`
-	VLAN           common.PartialResource `json:"vlan"`
+	BandwidthLimit IDTitleTuple           `json:"bandwidth_limit,omitempty"`
+	VLAN           common.PartialResource `json:"vlan,omitempty"`
+}
+
+// NodepoolNetworkDefinition represents the networks of a [Nodepool].
+type NodepoolNetworkDefinition struct {
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Identifier         string `json:"identifier,omitempty"`
+	Name               string `json:"name,omitempty"`
+
+	BandwidthLimit string                 `json:"bandwidth_limit,omitempty"`
+	VLAN           common.PartialResource `json:"vlan,omitempty"`
+}
+
+type IDTitleTuple struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+func NewIDTitleTuple(id, title string) IDTitleTuple {
+	return IDTitleTuple{
+		ID:    id,
+		Title: title,
+	}
 }
 
 func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResource, error) {
@@ -174,9 +203,7 @@ func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResourc
 	}
 
 	payload := struct {
-		Data struct {
-			Data []common.PartialResource `json:"data"`
-		} `json:"data"`
+		Data []common.PartialResource `json:"data"`
 	}{}
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
@@ -184,7 +211,7 @@ func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResourc
 		return nil, fmt.Errorf("could not parse kubernetes nodepool list response: %w", err)
 	}
 
-	return payload.Data.Data, nil
+	return payload.Data, nil
 }
 
 func (a *api) GetByID(ctx context.Context, identifier string) (Nodepool, error) {
@@ -274,7 +301,7 @@ func (a *api) Update(ctx context.Context, identifier string, definition Definiti
 		return Nodepool{}, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &requestBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, endpoint.String(), &requestBody)
 	if err != nil {
 		return Nodepool{}, fmt.Errorf("could not create request object: %w", err)
 	}
