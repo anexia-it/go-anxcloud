@@ -23,22 +23,18 @@ type StorageServerInterface struct {
 	Identifier         string `json:"identifier"`
 	Name               string `json:"name"`
 
+	Location  *common.PartialResource `json:"location"`
+	IpAddress *common.PartialResource `json:"ip_address"`
+
 	CriticalOperationPassword  string `json:"critical_operation_password"`
 	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
 
 	AutomationRules []common.PartialResource `json:"automation_rules,omitempty"`
 }
 
-// The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Definition struct {
-	State gs.State `json:"state"`
-
-	CustomerIdentifier string `json:"customer_identifier"`
-	ResellerIdentifier string `json:"reseller_identifier"`
-	Name               string `json:"name"`
-
-	CriticalOperationPassword  string `json:"critical_operation_password"`
-	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
+	Name      string `json:"name"`
+	IpAddress string `json:"ip_address"`
 }
 
 func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResource, error) {
