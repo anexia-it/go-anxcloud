@@ -130,6 +130,9 @@ func (a *api) Create(ctx context.Context, definition Definition) (StorageServerI
 		return StorageServerInterface{}, fmt.Errorf("could not create request object: %w", err)
 	}
 
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
 	response, err := a.client.Do(req)
 	if err != nil {
 		return StorageServerInterface{}, fmt.Errorf("error when creating storageserverinterface '%s': %w", definition.Name, err)
