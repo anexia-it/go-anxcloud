@@ -9,8 +9,6 @@ import (
 	utils "path"
 	"strconv"
 
-	"github.com/kyverno/kyverno-json/pkg/payload"
-
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 	"go.anx.io/go-anxcloud/pkg/utils/param"
