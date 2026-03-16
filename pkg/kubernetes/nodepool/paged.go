@@ -9,6 +9,8 @@ import (
 	utils "path"
 	"strconv"
 
+	"github.com/kyverno/kyverno-json/pkg/payload"
+
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 	"go.anx.io/go-anxcloud/pkg/utils/param"
@@ -74,17 +76,14 @@ func (a *api) GetPage(ctx context.Context, page, limit int, parameters ...param.
 		return nil, fmt.Errorf("could not get kubernetes nodepools %s", response.Status)
 	}
 
-	payload := struct {
-		Page NodepoolPage `json:"data"`
-	}{}
-
+	payload := NodepoolPage{}
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse kubernetes nodepool list response: %w", err)
 	}
 
-	payload.Page.pageOptions = parameters
-	return payload.Page, nil
+	payload.pageOptions = parameters
+	return payload, nil
 }
 
 func (a *api) NextPage(ctx context.Context, page pagination.Page) (pagination.Page, error) {
