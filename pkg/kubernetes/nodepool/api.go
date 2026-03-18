@@ -25,7 +25,7 @@ type api struct {
 }
 
 const (
-	pathFormat = "api/kubernetes%s/v2/node_pool2" // TODO change to original node_pool
+	pathFormat = "api/kubernetes%s/v2/node_pool" 
 )
 
 // NewAPI creates a new kubernetes nodepool API instance with the given client.
