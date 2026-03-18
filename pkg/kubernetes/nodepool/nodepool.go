@@ -46,6 +46,7 @@ const (
 type Nodepool struct {
 	gs.HasState
 
+	State gs.State `json:"state,omitempty"`
 	CustomerIdentifier string `json:"customer_identifier"`
 	ResellerIdentifier string `json:"reseller_identifier"`
 	Identifier         string `json:"identifier"`
@@ -55,7 +56,7 @@ type Nodepool struct {
 	SyncSource         IDTitleTuple           `json:"syncsource"`
 	Replicas           uint                   `json:"replicas"`
 	CPUs               uint                   `json:"cpus"`
-	CPUType            IDTitleTuple           `json:"cputype"`
+	CPUType            IDTitleTuple           `json:"cpu_performance_type"`
 	MemoryBytes        uint64                 `json:"memory"`
 	OperatingSystem    IDTitleTuple           `json:"operating_system"`
 	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
@@ -94,7 +95,7 @@ type Definition struct {
 	SyncSource         SyncSource         `json:"syncsource,omitempty"`
 	Replicas           uint               `json:"replicas,omitempty"`
 	CPUs               uint               `json:"cpus,omitempty"`
-	CPUType            CPUPerformanceType `json:"cputype,omitempty"`
+	CPUType            CPUPerformanceType `json:"cpu_performance_type,omitempty"`
 	MemoryBytes        uint64             `json:"memory,omitempty"`
 	OperatingSystem    string             `json:"operating_system,omitempty"`
 	AutoscalerEnabled  bool               `json:"autoscaler_enabled,omitempty"`
