@@ -63,7 +63,7 @@ type Nodepool struct {
 	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes"`
 	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes"`
 
-	Disks    []NodepoolDisks   `json:"disks"`
+	Disks    []NodepoolDisks   `json:"additional_disks"`
 	Networks []NodepoolNetwork `json:"networks"`
 
 	CustomDNSEnabled bool   `json:"customdns_enabled"`
@@ -102,7 +102,8 @@ type Definition struct {
 	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
 	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
 
-	Disks    []NodepoolDisksDefinition   `json:"disks,omitempty"`
+	Disks    []NodepoolDisksDefinition   `json:"additional_disks,omitempty"`
+
 	Networks []NodepoolNetworkDefinition `json:"networks,omitempty"`
 
 	CustomDNSEnabled bool   `json:"customdns_enabled,omitempty"`
