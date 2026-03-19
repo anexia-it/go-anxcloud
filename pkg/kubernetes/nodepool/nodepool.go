@@ -22,7 +22,7 @@ const (
 )
 
 const (
-	OSFlatcar = "Flatcar_Linux"
+	OSFlatcar = "Flatcar Linux"
 	GibiByte  = 1024 * 1024 * 1024
 )
 
