@@ -85,7 +85,7 @@ type Nodepool struct {
 
 // The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Definition struct {
-	State gs.State `json:"state,omitempty"`
+	//State gs.State `json:"state,omitempty"`
 
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
