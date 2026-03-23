@@ -66,7 +66,6 @@ type Nodepool struct {
 	Disks    []NodepoolDisks   `json:"additional_disks"`
 	Networks []NodepoolNetwork `json:"networks"`
 
-	CustomDNSEnabled bool   `json:"customdns_enabled"`
 	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
 	DNSv4Entry1      string `json:"dns_v4_1"`
 	DNSv4Entry2      string `json:"dns_v4_2"`
