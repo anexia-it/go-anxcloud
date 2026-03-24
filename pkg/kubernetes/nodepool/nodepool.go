@@ -105,7 +105,6 @@ type Definition struct {
 
 	Networks []NodepoolNetworkDefinition `json:"networks,omitempty"`
 
-	CustomDNSEnabled bool   `json:"customdns_enabled,omitempty"`
 	DNSOverrideIPv4  bool   `json:"dns_override_ipv4,omitempty"`
 	DNSv4Entry1      string `json:"dns_v4_1,omitempty,omitempty"`
 	DNSv4Entry2      string `json:"dns_v4_2,omitempty,omitempty"`
