@@ -23,7 +23,8 @@ const (
 
 const (
 	OSFlatcar = "Flatcar Linux"
-	GibiByte  = 1024 * 1024 * 1024
+	MebiByte  = 1024 * 1024
+	GibiByte  = MebiByte * 1024
 )
 
 var (
@@ -46,11 +47,11 @@ const (
 type Nodepool struct {
 	gs.HasState
 
-	State gs.State `json:"state,omitempty"`
-	CustomerIdentifier string `json:"customer_identifier"`
-	ResellerIdentifier string `json:"reseller_identifier"`
-	Identifier         string `json:"identifier"`
-	Name               string `json:"name"`
+	State              gs.State `json:"state,omitempty"`
+	CustomerIdentifier string   `json:"customer_identifier"`
+	ResellerIdentifier string   `json:"reseller_identifier"`
+	Identifier         string   `json:"identifier"`
+	Name               string   `json:"name"`
 
 	Cluster            common.PartialResource `json:"cluster"`
 	SyncSource         IDTitleTuple           `json:"syncsource"`
@@ -63,12 +64,14 @@ type Nodepool struct {
 	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes"`
 	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes"`
 
-	Disks    []NodepoolDisks   `json:"additional_disks"`
-	Networks []NodepoolNetwork `json:"networks"`
+	DiskSize            uint64            `json:"disk_size"`
+	DiskPerformanceType IDTitleTuple      `json:"disk_performance_type"`
+	AdditionalDisks     []NodepoolDisks   `json:"additional_disks"`
+	Networks            []NodepoolNetwork `json:"networks"`
 
-	DNSOverrideIPv4  bool   `json:"dns_override_ipv4"`
-	DNSv4Entry1      string `json:"dns_v4_1"`
-	DNSv4Entry2      string `json:"dns_v4_2"`
+	DNSOverrideIPv4 bool   `json:"dns_override_ipv4"`
+	DNSv4Entry1     string `json:"dns_v4_1"`
+	DNSv4Entry2     string `json:"dns_v4_2"`
 
 	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
 	DNSv6Entry1     string `json:"dns_v6_1"`
@@ -84,8 +87,6 @@ type Nodepool struct {
 
 // The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Definition struct {
-	//State gs.State `json:"state,omitempty"`
-
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
 	Name               string `json:"name,omitempty"`
@@ -101,13 +102,14 @@ type Definition struct {
 	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
 	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
 
-	Disks    []NodepoolDisksDefinition   `json:"additional_disks,omitempty"`
+	DiskSize            uint64                      `json:"disk_size"`
+	DiskPerformanceType IDTitleTuple                `json:"disk_performance_type"`
+	AdditionalDisks     []NodepoolDisksDefinition   `json:"additional_disks,omitempty"`
+	Networks            []NodepoolNetworkDefinition `json:"networks,omitempty"`
 
-	Networks []NodepoolNetworkDefinition `json:"networks,omitempty"`
-
-	DNSOverrideIPv4  bool   `json:"dns_override_ipv4,omitempty"`
-	DNSv4Entry1      string `json:"dns_v4_1,omitempty,omitempty"`
-	DNSv4Entry2      string `json:"dns_v4_2,omitempty,omitempty"`
+	DNSOverrideIPv4 bool   `json:"dns_override_ipv4,omitempty"`
+	DNSv4Entry1     string `json:"dns_v4_1,omitempty,omitempty"`
+	DNSv4Entry2     string `json:"dns_v4_2,omitempty,omitempty"`
 
 	DNSOverrideIPv6 bool   `json:"dns_override_ipv6,omitempty"`
 	DNSv6Entry1     string `json:"dns_v6_1,omitempty,omitempty"`
@@ -134,7 +136,6 @@ type NodepoolDisks struct {
 type NodepoolDisksDefinition struct {
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Identifier         string `json:"identifier,omitempty"`
 	Name               string `json:"name,omitempty"`
 
 	SizeBytes       uint64 `json:"size_bytes,omitempty"`
@@ -156,11 +157,10 @@ type NodepoolNetwork struct {
 type NodepoolNetworkDefinition struct {
 	CustomerIdentifier string `json:"customer_identifier,omitempty"`
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Identifier         string `json:"identifier,omitempty"`
 	Name               string `json:"name,omitempty"`
 
-	BandwidthLimit string                 `json:"bandwidth_limit,omitempty"`
-	VLAN           common.PartialResource `json:"vlan,omitempty"`
+	BandwidthLimit string `json:"bandwidth_limit,omitempty"`
+	VLANID         string `json:"vlan,omitempty"`
 }
 
 type IDTitleTuple struct {
