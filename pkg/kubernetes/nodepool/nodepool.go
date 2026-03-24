@@ -41,6 +41,26 @@ const (
 	CPUPerformanceTypeEnterprise      CPUPerformanceType = "enterprise"
 	CPUPerformanceTypePerformance     CPUPerformanceType = "performance"
 	CPUPerformanceTypePerformancePlus CPUPerformanceType = "performance-plus"
+
+	CPUPerformanceTypeDefault = CPUPerformanceTypePerformance
+)
+
+type DiskPerformanceType string
+
+const (
+	DiskPerformanceTypeSTD1 DiskPerformanceType = "STD1"
+	DiskPerformanceTypeSTD2 DiskPerformanceType = "STD2"
+	DiskPerformanceTypeSTD3 DiskPerformanceType = "STD3"
+	DiskPerformanceTypeSTD4 DiskPerformanceType = "STD4"
+	DiskPerformanceTypeSTD5 DiskPerformanceType = "STD5"
+	DiskPerformanceTypeENT1 DiskPerformanceType = "ENT1"
+	DiskPerformanceTypeENT2 DiskPerformanceType = "ENT2"
+	DiskPerformanceTypeENT3 DiskPerformanceType = "ENT3"
+	DiskPerformanceTypeENT4 DiskPerformanceType = "ENT4"
+	DiskPerformanceTypeENT5 DiskPerformanceType = "ENT5"
+	DiskPerformanceTypeENT6 DiskPerformanceType = "ENT6"
+
+	DiskPerformanceTypeDefault = DiskPerformanceTypeENT6
 )
 
 // The Nodepool resource represents the main resource to map to the MachineDeployment in the customer cluster.
@@ -103,7 +123,7 @@ type Definition struct {
 	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
 
 	DiskSize            uint64                      `json:"disk_size"`
-	DiskPerformanceType IDTitleTuple                `json:"disk_performance_type"`
+	DiskPerformanceType DiskPerformanceType         `json:"disk_performance_type"`
 	AdditionalDisks     []NodepoolDisksDefinition   `json:"additional_disks,omitempty"`
 	Networks            []NodepoolNetworkDefinition `json:"networks,omitempty"`
 
@@ -138,8 +158,8 @@ type NodepoolDisksDefinition struct {
 	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
 	Name               string `json:"name,omitempty"`
 
-	SizeBytes       uint64 `json:"size_bytes,omitempty"`
-	PerformanceType string `json:"performance_type,omitempty"`
+	SizeBytes       uint64              `json:"size_bytes,omitempty"`
+	PerformanceType DiskPerformanceType `json:"performance_type,omitempty"`
 }
 
 // NodepoolNetwork represents the networks of a [Nodepool].
