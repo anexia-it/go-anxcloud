@@ -15,27 +15,28 @@ const (
 
 // Info contains meta information of a VM.
 type Info struct {
-	Name               string     `json:"name"`
-	CustomName         string     `json:"custom_name"`
-	Identifier         string     `json:"identifier"`
-	GuestOS            string     `json:"guest_os"`
-	LocationID         string     `json:"location_identifier"`
-	LocationCode       string     `json:"location_code"`
-	LocationCountry    string     `json:"location_country"`
-	LocationName       string     `json:"location_name"`
-	TemplateID         string     `json:"template_id"`
-	TemplateType       string     `json:"template_type"`
-	Status             string     `json:"status"`
-	VersionTools       string     `json:"version_tools"`
-	GuestToolsStatus   string     `json:"guest_tools_status"`
-	RAM                int        `json:"ram"`
-	CPU                int        `json:"cpu"`
-	CPUClockRate       int        `json:"cpu_clock_rate"`
-	CPUPerformanceType string     `json:"cpu_performance_type"`
-	Cores              int        `json:"cores"`
-	Disks              int        `json:"disks"`
-	DiskInfo           []DiskInfo `json:"disk_info"`
-	Network            []Network  `json:"network"`
+	Name               string            `json:"name"`
+	CustomName         string            `json:"custom_name"`
+	Identifier         string            `json:"identifier"`
+	GuestOS            string            `json:"guest_os"`
+	LocationID         string            `json:"location_identifier"`
+	LocationCode       string            `json:"location_code"`
+	LocationCountry    string            `json:"location_country"`
+	LocationName       string            `json:"location_name"`
+	TemplateID         string            `json:"template_id"`
+	TemplateType       string            `json:"template_type"`
+	Status             string            `json:"status"`
+	VersionTools       string            `json:"version_tools"`
+	GuestToolsStatus   string            `json:"guest_tools_status"`
+	RAM                int               `json:"ram"`
+	CPU                int               `json:"cpu"`
+	CPUClockRate       int               `json:"cpu_clock_rate"`
+	CPUPerformanceType string            `json:"cpu_performance_type"`
+	Cores              int               `json:"cores"`
+	Disks              int               `json:"disks"`
+	DiskInfo           []DiskInfo        `json:"disk_info"`
+	Network            []Network         `json:"network"`
+	AvailabilityZone   *AvailabilityZone `json:"availability_zone"`
 }
 
 // DiskInfo contains meta information of attached disks to a VM.
@@ -59,6 +60,12 @@ type Network struct {
 	IPv4           []string `json:"ips_v4"`
 	IPv6           []string `json:"ips_v6"`
 	MACAddress     string   `json:"mac_address"`
+}
+
+// AvailabilityZone contains meta infos of assigned AZ, if present
+type AvailabilityZone struct {
+	Identifier string `json:"identifier"`
+	Name       string `json:"name"`
 }
 
 // Get returns additional information to a given VM identifier.
