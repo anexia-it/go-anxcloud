@@ -3,6 +3,7 @@ package provisioning
 
 import (
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/availabilityzones"
 	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/disktype"
 	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/ips"
 	"go.anx.io/go-anxcloud/pkg/vsphere/provisioning/location"
@@ -16,18 +17,20 @@ type API interface {
 	DiskType() disktype.API
 	IPs() ips.API
 	Location() location.API
+	AvailabilityZone() availabilityzones.API
 	Progress() progress.API
 	Templates() templates.API
 	VM() vm.API
 }
 
 type api struct {
-	diskType  disktype.API
-	ips       ips.API
-	location  location.API
-	progress  progress.API
-	templates templates.API
-	vm        vm.API
+	diskType         disktype.API
+	ips              ips.API
+	location         location.API
+	availabilityZone availabilityzones.API
+	progress         progress.API
+	templates        templates.API
+	vm               vm.API
 }
 
 func (a api) DiskType() disktype.API {
@@ -40,6 +43,10 @@ func (a api) IPs() ips.API {
 
 func (a api) Location() location.API {
 	return a.location
+}
+
+func (a api) AvailabilityZone() availabilityzones.API {
+	return a.availabilityZone
 }
 
 func (a api) Progress() progress.API {
@@ -60,6 +67,7 @@ func NewAPI(c client.Client) API {
 		disktype.NewAPI(c),
 		ips.NewAPI(c),
 		location.NewAPI(c),
+		availabilityzones.NewAPI(c),
 		progress.NewAPI(c),
 		templates.NewAPI(c),
 		vm.NewAPI(c),

@@ -1,5 +1,7 @@
 package vm
 
+import "fmt"
+
 // Definition states the configuration of a VM within the anxcloud.
 type Definition struct {
 	Location     string `json:"-"`
@@ -38,6 +40,10 @@ type Definition struct {
 	// Example: ("best-effort", "standard", "enterprise", "performance")
 	// Default: "standard".
 	CPUPerformanceType string `json:"cpu_performance_type,omitempty"`
+
+	// Availability zone identifier for VM placement
+	// Omit to let the system auto-select.
+	AvailabilityZone string `json:"availability_zone,omitempty"`
 
 	// Amount of CPU sockets Number of cores have to be a multiple of sockets, as they will be spread evenly across all sockets.
 	// Default: number of cores, i.e. one socket per CPU core.
@@ -140,19 +146,44 @@ type AdditionalDisk struct {
 
 // Change contains information about requested VM change request.
 type Change struct {
-	MemoryMBs          int       `json:"memory_mb,omitempty"`
-	CPUs               int       `json:"cpus,omitempty"`
-	CPUSockets         int       `json:"sockets,omitempty"`
-	CPUPerformanceType string    `json:"cpu_performance_type,omitempty"`
-	DeleteDiskIDs      []int     `json:"disk_to_delete,omitempty"`
-	AddDisks           []Disk    `json:"disk_to_add,omitempty"`
-	ChangeDisks        []Disk    `json:"disk_to_change,omitempty"`
-	AddNICs            []Network `json:"network_to_add,omitempty"`
-	BootDelaySecs      int       `json:"boot_delay,omitempty"`
-	EnterBIOSSetup     bool      `json:"enter_bios_setup,omitempty"`
-	Reboot             bool      `json:"force_restart_if_needed,omitempty"`
-	EnableDangerous    bool      `json:"critical_operation_confirmed,omitempty"`
+	MemoryMBs          int    `json:"memory_mb,omitempty"`
+	CPUs               int    `json:"cpus,omitempty"`
+	CPUSockets         int    `json:"sockets,omitempty"`
+	CPUPerformanceType string `json:"cpu_performance_type,omitempty"`
+
+	// Availability zone identifier for VM placement
+	// Omit to keep current AZ.
+	// Pass const 'NotSet' to remove VM from current AZ
+	AvailabilityZone AvailabilityZoneUpdate `json:"availability_zone,omitempty"`
+
+	DeleteDiskIDs   []int     `json:"disk_to_delete,omitempty"`
+	AddDisks        []Disk    `json:"disk_to_add,omitempty"`
+	ChangeDisks     []Disk    `json:"disk_to_change,omitempty"`
+	AddNICs         []Network `json:"network_to_add,omitempty"`
+	BootDelaySecs   int       `json:"boot_delay,omitempty"`
+	EnterBIOSSetup  bool      `json:"enter_bios_setup,omitempty"`
+	Reboot          bool      `json:"force_restart_if_needed,omitempty"`
+	EnableDangerous bool      `json:"critical_operation_confirmed,omitempty"`
 }
+
+// Custom type for AvailabiltyZone Update
+// In the Update call, the field availability_zone should not be passed
+// if there are no changes to the AZ, that's why it is declared with omitempty
+// however, when we want to remove a VM from an AZ, we need to pass
+// availability_zone: null
+type AvailabilityZoneUpdate string
+
+func (s AvailabilityZoneUpdate) MarshalJSON() (b []byte, err error) {
+	if s == AZNotSet {
+		b = []byte("null")
+	} else {
+		b = fmt.Appendf(nil, `"%s"`, s)
+	}
+
+	return
+}
+
+const AZNotSet AvailabilityZoneUpdate = "NotSet"
 
 // NewChange create a VM change request with default values.
 func NewChange() Change {
