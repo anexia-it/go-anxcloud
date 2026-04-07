@@ -14,3 +14,8 @@ type PartialResource struct {
 func (pr PartialResource) MarshalJSON() ([]byte, error) {
 	return json.Marshal(pr.Identifier)
 }
+
+type IDTitleTuple struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}

@@ -12,6 +12,8 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/disk"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/network"
 )
 
 type SyncSource string
@@ -45,24 +47,6 @@ const (
 	CPUPerformanceTypeDefault = CPUPerformanceTypePerformance
 )
 
-type DiskPerformanceType string
-
-const (
-	DiskPerformanceTypeSTD1 DiskPerformanceType = "STD1"
-	DiskPerformanceTypeSTD2 DiskPerformanceType = "STD2"
-	DiskPerformanceTypeSTD3 DiskPerformanceType = "STD3"
-	DiskPerformanceTypeSTD4 DiskPerformanceType = "STD4"
-	DiskPerformanceTypeSTD5 DiskPerformanceType = "STD5"
-	DiskPerformanceTypeENT1 DiskPerformanceType = "ENT1"
-	DiskPerformanceTypeENT2 DiskPerformanceType = "ENT2"
-	DiskPerformanceTypeENT3 DiskPerformanceType = "ENT3"
-	DiskPerformanceTypeENT4 DiskPerformanceType = "ENT4"
-	DiskPerformanceTypeENT5 DiskPerformanceType = "ENT5"
-	DiskPerformanceTypeENT6 DiskPerformanceType = "ENT6"
-
-	DiskPerformanceTypeDefault = DiskPerformanceTypeENT6
-)
-
 // The Nodepool resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Nodepool struct {
 	gs.HasState
@@ -74,20 +58,20 @@ type Nodepool struct {
 	Name               string   `json:"name"`
 
 	Cluster            common.PartialResource `json:"cluster"`
-	SyncSource         IDTitleTuple           `json:"syncsource"`
+	SyncSource         common.IDTitleTuple    `json:"syncsource"`
 	Replicas           uint                   `json:"replicas"`
 	CPUs               uint                   `json:"cpus"`
-	CPUType            IDTitleTuple           `json:"cpu_performance_type"`
+	CPUType            common.IDTitleTuple    `json:"cpu_performance_type"`
 	MemoryBytes        uint64                 `json:"memory"`
-	OperatingSystem    IDTitleTuple           `json:"operating_system"`
+	OperatingSystem    common.IDTitleTuple    `json:"operating_system"`
 	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
 	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes"`
 	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes"`
 
-	DiskSize            uint64            `json:"disk_size"`
-	DiskPerformanceType IDTitleTuple      `json:"disk_performance_type"`
-	AdditionalDisks     []NodepoolDisks   `json:"additional_disks"`
-	Networks            []NodepoolNetwork `json:"networks"`
+	DiskSize            uint64                    `json:"disk_size"`
+	DiskPerformanceType common.IDTitleTuple       `json:"disk_performance_type"`
+	AdditionalDisks     []disk.NodepoolDisks      `json:"additional_disks"`
+	Networks            []network.NodepoolNetwork `json:"networks"`
 
 	DNSOverrideIPv4 bool   `json:"dns_override_ipv4"`
 	DNSv4Entry1     string `json:"dns_v4_1"`
@@ -122,10 +106,10 @@ type Definition struct {
 	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
 	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
 
-	DiskSize            uint64                      `json:"disk_size"`
-	DiskPerformanceType DiskPerformanceType         `json:"disk_performance_type"`
-	AdditionalDisks     []NodepoolDisksDefinition   `json:"additional_disks,omitempty"`
-	Networks            []NodepoolNetworkDefinition `json:"networks,omitempty"`
+	DiskSize            uint64                              `json:"disk_size"`
+	DiskPerformanceType disk.DiskPerformanceType            `json:"disk_performance_type"`
+	AdditionalDisks     []disk.NodepoolDisksDefinition      `json:"additional_disks,omitempty"`
+	Networks            []network.NodepoolNetworkDefinition `json:"networks,omitempty"`
 
 	DNSOverrideIPv4 bool   `json:"dns_override_ipv4,omitempty"`
 	DNSv4Entry1     string `json:"dns_v4_1,omitempty,omitempty"`
@@ -141,55 +125,8 @@ type Definition struct {
 	SSHPubKeys  string `json:"sshpubkeys,omitempty,omitempty"`
 }
 
-// NodepoolDisks represents the disks of a [Nodepool].
-type NodepoolDisks struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Identifier         string `json:"identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
-	SizeBytes       uint64       `json:"size_bytes,omitempty"`
-	PerformanceType IDTitleTuple `json:"performance_type,omitempty"`
-}
-
-// NodepoolDisksDefinition represents the disks of a [Nodepool].
-type NodepoolDisksDefinition struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
-	SizeBytes       uint64              `json:"size_bytes,omitempty"`
-	PerformanceType DiskPerformanceType `json:"performance_type,omitempty"`
-}
-
-// NodepoolNetwork represents the networks of a [Nodepool].
-type NodepoolNetwork struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Identifier         string `json:"identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
-	BandwidthLimit IDTitleTuple           `json:"bandwidth_limit,omitempty"`
-	VLAN           common.PartialResource `json:"vlan,omitempty"`
-}
-
-// NodepoolNetworkDefinition represents the networks of a [Nodepool].
-type NodepoolNetworkDefinition struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
-	BandwidthLimit string `json:"bandwidth_limit,omitempty"`
-	VLANID         string `json:"vlan,omitempty"`
-}
-
-type IDTitleTuple struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-}
-
-func NewIDTitleTuple(id, title string) IDTitleTuple {
-	return IDTitleTuple{
+func NewIDTitleTuple(id, title string) common.IDTitleTuple {
+	return common.IDTitleTuple{
 		ID:    id,
 		Title: title,
 	}
