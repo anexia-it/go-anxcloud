@@ -12,6 +12,8 @@ import (
 	. "github.com/onsi/gomega"
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/disk"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/network"
 )
 
 var _ = Describe("nodepool client", Ordered, func() {
@@ -52,7 +54,6 @@ var _ = Describe("nodepool client", Ordered, func() {
 		It("creates a nodepool", func() {
 			nodepool, err := api.Create(context.TODO(), Definition{
 				Name:               "integration-test-nodepool",
-				State:              StateNoGA,
 				SyncSource:         SyncSourceEngine,
 				ClusterID:          "2831d70e35014768bb1f0100f3373c8f",
 				Replicas:           4,
@@ -63,18 +64,18 @@ var _ = Describe("nodepool client", Ordered, func() {
 				AutoscalerEnabled:  true,
 				AutoscalerMinNodes: 2,
 				AutoscalerMaxNodes: 5,
-				Disks: []NodepoolDisksDefinition{
+				AdditionalDisks: []disk.NodepoolDisksDefinition{
 					{
 						Name:            "disk0",
 						SizeBytes:       22 * GibiByte,
 						PerformanceType: "ENT6",
 					},
 				},
-				Networks: []NodepoolNetworkDefinition{
+				Networks: []network.NodepoolNetworkDefinition{
 					{
 						Name:           "eth0",
 						BandwidthLimit: "1000",
-						VLAN:           common.PartialResource{Identifier: "1b42fed9de904399889120871193cc0c"},
+						VLANID:         "1b42fed9de904399889120871193cc0c",
 					},
 				},
 			})
@@ -87,7 +88,6 @@ var _ = Describe("nodepool client", Ordered, func() {
 		It("updates the nodepool", func() {
 			nodepool, err := api.Update(context.TODO(), id, Definition{
 				Name:               "integration-test-nodepool-updated",
-				State:              StateNoGA,
 				Replicas:           5,
 				CPUs:               4,
 				MemoryBytes:        6 * GibiByte,
@@ -146,9 +146,7 @@ var _ = Describe("nodepool client", Ordered, func() {
 
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
-			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StateNoGA,
-			})
+			cCreated, err := api.Create(context.TODO(), Definition{})
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cCreated.Name).To(Equal("nodepoolname"))
@@ -179,9 +177,7 @@ var _ = Describe("nodepool client", Ordered, func() {
 
 			api := NewAPI(cli, common.ClientOpts{Environment: common.EnvironmentDev})
 
-			cCreated, err := api.Create(context.TODO(), Definition{
-				State: StateNoGA,
-			})
+			cCreated, err := api.Create(context.TODO(), Definition{})
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cCreated.Name).To(Equal("nodepoolname"))
