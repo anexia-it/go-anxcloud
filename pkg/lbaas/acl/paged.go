@@ -1,4 +1,4 @@
-package rule
+package acl
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
-type RulePage struct {
+type ACLPage struct {
 	Page        int                        `json:"page"`
 	TotalItems  int                        `json:"total_items"`
 	TotalPages  int                        `json:"total_pages"`
@@ -23,20 +23,24 @@ type RulePage struct {
 	pageOptions []param.Parameter
 }
 
-func (f RulePage) Options() []param.Parameter {
+func (f ACLPage) Options() []param.Parameter {
 	return f.pageOptions
 }
 
-func (f RulePage) Num() int {
+func (f ACLPage) Num() int {
 	return f.Page
 }
 
-func (f RulePage) Size() int {
+func (f ACLPage) Size() int {
 	return f.Limit
 }
 
-func (f RulePage) Total() int {
+func (f ACLPage) Total() int {
 	return f.TotalPages
+}
+
+func (f ACLPage) Content() interface{} {
+	return f.Data
 }
 
 func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.Parameter) (pagination.Page, error) {
@@ -49,9 +53,10 @@ func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.P
 	query := endpoint.Query()
 	query.Set("page", strconv.Itoa(page))
 	query.Set("limit", strconv.Itoa(limit))
-	for _, p := range parameters {
-		p(query)
+	for _, parameter := range parameters {
+		parameter(query)
 	}
+
 	endpoint.RawQuery = query.Encode()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
@@ -70,7 +75,7 @@ func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.P
 	}
 
 	payload := struct {
-		Page RulePage `json:"data"`
+		Page ACLPage `json:"data"`
 	}{}
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
@@ -84,8 +89,4 @@ func (a api) GetPage(ctx context.Context, page, limit int, parameters ...param.P
 
 func (a api) NextPage(ctx context.Context, page pagination.Page) (pagination.Page, error) {
 	return a.GetPage(ctx, page.Num()+1, page.Size(), page.Options()...)
-}
-
-func (f RulePage) Content() interface{} {
-	return f.Data
 }

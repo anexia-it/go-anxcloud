@@ -11,7 +11,7 @@ import (
 // API contains methods for load balancer frontend management.
 type API interface {
 	pagination.Pageable
-	Get(ctx context.Context, page, limit int) ([]FrontendInfo, error)
+	Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error)
 	GetByID(ctx context.Context, identifier string) (Frontend, error)
 	Create(ctx context.Context, definition Definition) (Frontend, error)
 	Update(ctx context.Context, identifier string, definition Definition) (Frontend, error)

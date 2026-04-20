@@ -151,7 +151,7 @@ func GenericCreate[R any, D any](ctx context.Context, definition D, client clien
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse load balancer %s creation response for '%s' : %w", name, err)
+		return nil, fmt.Errorf("could not parse load balancer %s creation response: %w", name, err)
 	}
 
 	return &payload, nil

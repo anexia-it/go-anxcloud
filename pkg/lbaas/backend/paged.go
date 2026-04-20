@@ -4,20 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go.anx.io/go-anxcloud/pkg/pagination"
-	"go.anx.io/go-anxcloud/pkg/utils/param"
 	"net/http"
 	"net/url"
 	utils "path"
 	"strconv"
+
+	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/pagination"
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
 type BackendPage struct {
-	Page        int           `json:"page"`
-	TotalItems  int           `json:"total_items"`
-	TotalPages  int           `json:"total_pages"`
-	Limit       int           `json:"limit"`
-	Data        []BackendInfo `json:"data"`
+	Page        int                        `json:"page"`
+	TotalItems  int                        `json:"total_items"`
+	TotalPages  int                        `json:"total_pages"`
+	Limit       int                        `json:"limit"`
+	Data        []genericResource.Identity `json:"data"`
 	pageOptions []param.Parameter
 }
 
