@@ -14,21 +14,21 @@ import (
 
 type API interface {
 	LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
-	Frontend() frontend.API
-	Backend() backend.API
-	Server() server.API
-	Bind() bind.API
-	ACL() acl.API
+	Frontend() genericResource.API[frontend.Frontend, frontend.Definition]
+	Backend() genericResource.API[backend.Backend, backend.Definition]
+	Server() genericResource.API[server.Server, server.Definition]
+	Bind() genericResource.API[bind.Bind, bind.Definition]
+	ACL() genericResource.API[acl.ACL, acl.Definition]
 	Rule() genericResource.API[rule.Rule, rule.Definition]
 }
 
 type api struct {
 	loadBalancer genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
-	frontend     frontend.API
-	backend      backend.API
-	server       server.API
-	bind         bind.API
-	acl          acl.API
+	frontend     genericResource.API[frontend.Frontend, frontend.Definition]
+	backend      genericResource.API[backend.Backend, backend.Definition]
+	server       genericResource.API[server.Server, server.Definition]
+	bind         genericResource.API[bind.Bind, bind.Definition]
+	acl          genericResource.API[acl.ACL, acl.Definition]
 	rule         genericResource.API[rule.Rule, rule.Definition]
 }
 
@@ -36,19 +36,19 @@ func (a api) Rule() genericResource.API[rule.Rule, rule.Definition] {
 	return a.rule
 }
 
-func (a api) ACL() acl.API {
+func (a api) ACL() genericResource.API[acl.ACL, acl.Definition] {
 	return a.acl
 }
 
-func (a api) Bind() bind.API {
+func (a api) Bind() genericResource.API[bind.Bind, bind.Definition] {
 	return a.bind
 }
 
-func (a api) Backend() backend.API {
+func (a api) Backend() genericResource.API[backend.Backend, backend.Definition] {
 	return a.backend
 }
 
-func (a api) Server() server.API {
+func (a api) Server() genericResource.API[server.Server, server.Definition] {
 	return a.server
 }
 
@@ -56,7 +56,7 @@ func (a api) LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadb
 	return a.loadBalancer
 }
 
-func (a api) Frontend() frontend.API {
+func (a api) Frontend() genericResource.API[frontend.Frontend, frontend.Definition] {
 	return a.frontend
 }
 

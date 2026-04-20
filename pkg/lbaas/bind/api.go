@@ -2,6 +2,7 @@ package bind
 
 import (
 	"context"
+	"go.anx.io/go-anxcloud/pkg/genericResource"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 
 	"go.anx.io/go-anxcloud/pkg/client"
@@ -22,6 +23,6 @@ type api struct {
 }
 
 // NewAPI creates a new bind API instance with the given client.
-func NewAPI(c client.Client) API {
+func NewAPI(c client.Client) genericResource.API[Bind, Definition] {
 	return &api{c}
 }

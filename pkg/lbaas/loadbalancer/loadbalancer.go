@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	// RuleInfo holds the name and identifier of a rule.
+	// RuleInfo holds the name and identifier of a object.
 	RuleInfo = v1.RuleInfo
 
 	// Loadbalancer holds the information of a load balancer instance.
@@ -32,30 +32,30 @@ func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identi
 
 func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, error) {
 	name := "Loadbalancer"
-	rule, err := genericResource.GenericGetByID[Loadbalancer](ctx, identifier, a.client, name, path)
+	object, err := genericResource.GenericGetByID[Loadbalancer](ctx, identifier, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
-	return *rule, err
+	return *object, err
 }
 
 func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, error) {
 	name := "Loadbalancer"
 
-	rule, err := genericResource.GenericCreate[Loadbalancer, Definition](ctx, definition, a.client, name, path)
+	object, err := genericResource.GenericCreate[Loadbalancer, Definition](ctx, definition, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
-	return *rule, err
+	return *object, err
 }
 
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (Loadbalancer, error) {
 	name := "Loadbalancer"
-	rule, err := genericResource.GenericUpdate[Loadbalancer, Definition](ctx, identifier, definition, a.client, name, path)
+	object, err := genericResource.GenericUpdate[Loadbalancer, Definition](ctx, identifier, definition, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
-	return *rule, err
+	return *object, err
 }
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
