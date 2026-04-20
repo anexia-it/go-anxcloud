@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/genericResource"
 )
 
 type (
@@ -31,7 +32,7 @@ const (
 	path = "api/LBaaS/v1/loadbalancer.json"
 )
 
-func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, error) {
+func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
@@ -60,7 +61,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]LoadBalancerInfo, erro
 
 	payload := struct {
 		Data struct {
-			Data []LoadBalancerInfo `json:"data"`
+			Data []genericResource.Identity `json:"data"`
 		} `json:"data"`
 	}{}
 

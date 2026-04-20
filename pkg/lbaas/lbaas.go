@@ -13,7 +13,7 @@ import (
 )
 
 type API interface {
-	LoadBalancer() loadbalancer.API
+	LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
 	Frontend() frontend.API
 	Backend() backend.API
 	Server() server.API
@@ -23,7 +23,7 @@ type API interface {
 }
 
 type api struct {
-	loadBalancer loadbalancer.API
+	loadBalancer genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
 	frontend     frontend.API
 	backend      backend.API
 	server       server.API
