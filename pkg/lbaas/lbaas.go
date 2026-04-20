@@ -2,6 +2,7 @@ package lbaas
 
 import (
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/genericResource"
 	"go.anx.io/go-anxcloud/pkg/lbaas/acl"
 	"go.anx.io/go-anxcloud/pkg/lbaas/backend"
 	"go.anx.io/go-anxcloud/pkg/lbaas/bind"
@@ -18,7 +19,7 @@ type API interface {
 	Server() server.API
 	Bind() bind.API
 	ACL() acl.API
-	Rule() rule.API
+	Rule() genericResource.API[rule.Rule, rule.Definition]
 }
 
 type api struct {
@@ -28,10 +29,10 @@ type api struct {
 	server       server.API
 	bind         bind.API
 	acl          acl.API
-	rule         rule.API
+	rule         genericResource.API[rule.Rule, rule.Definition]
 }
 
-func (a api) Rule() rule.API {
+func (a api) Rule() genericResource.API[rule.Rule, rule.Definition] {
 	return a.rule
 }
 

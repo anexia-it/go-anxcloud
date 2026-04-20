@@ -11,18 +11,14 @@ import (
 	"strconv"
 
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/genericResource"
 )
 
 const path = "/api/LBaaS/v1/rule.json"
 
-type RuleInfo struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
-}
-
 type Rule = v1.Rule
 
-func (a api) Get(ctx context.Context, page, limit int) ([]RuleInfo, error) {
+func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error) {
 
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
@@ -52,7 +48,7 @@ func (a api) Get(ctx context.Context, page, limit int) ([]RuleInfo, error) {
 
 	payload := struct {
 		Data struct {
-			Data []RuleInfo `json:"data"`
+			Data []genericResource.Identity `json:"data"`
 		} `json:"data"`
 	}{}
 
@@ -62,7 +58,6 @@ func (a api) Get(ctx context.Context, page, limit int) ([]RuleInfo, error) {
 	}
 
 	return payload.Data.Data, nil
-
 }
 
 func (a api) GetByID(ctx context.Context, identifier string) (Rule, error) {
