@@ -7,6 +7,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/lbaas/bind"
 	"go.anx.io/go-anxcloud/pkg/lbaas/frontend"
 	"go.anx.io/go-anxcloud/pkg/lbaas/loadbalancer"
+	"go.anx.io/go-anxcloud/pkg/lbaas/rule"
 	"go.anx.io/go-anxcloud/pkg/lbaas/server"
 )
 
@@ -17,6 +18,7 @@ type API interface {
 	Server() server.API
 	Bind() bind.API
 	ACL() acl.API
+	Rule() rule.API
 }
 
 type api struct {
@@ -26,6 +28,11 @@ type api struct {
 	server       server.API
 	bind         bind.API
 	acl          acl.API
+	rule         rule.API
+}
+
+func (a api) Rule() rule.API {
+	return a.rule
 }
 
 func (a api) ACL() acl.API {
@@ -62,5 +69,6 @@ func NewAPI(c client.Client) API {
 		server:       server.NewAPI(c),
 		bind:         bind.NewAPI(c),
 		acl:          acl.NewAPI(c),
+		rule:         rule.NewAPI(c),
 	}
 }
