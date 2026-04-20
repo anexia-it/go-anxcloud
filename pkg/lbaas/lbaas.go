@@ -52,7 +52,7 @@ func (a api) Server() server.API {
 	return a.server
 }
 
-func (a api) LoadBalancer() loadbalancer.API {
+func (a api) LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition] {
 	return a.loadBalancer
 }
 

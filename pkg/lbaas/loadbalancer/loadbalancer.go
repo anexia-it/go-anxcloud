@@ -1,14 +1,7 @@
 package loadbalancer
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
-	utils "path"
-	"strconv"
 
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 	"go.anx.io/go-anxcloud/pkg/genericResource"
@@ -33,179 +26,39 @@ const (
 )
 
 func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error) {
-	endpoint, err := url.Parse(a.client.BaseURL())
-	if err != nil {
-		return nil, fmt.Errorf("could not parse URL: %w", err)
-	}
-
-	endpoint.Path = utils.Join(endpoint.Path, path)
-	query := endpoint.Query()
-	query.Set("page", strconv.Itoa(page))
-	query.Set("limit", strconv.Itoa(limit))
-	endpoint.RawQuery = query.Encode()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
-	if err != nil {
-		return nil, fmt.Errorf("could not create request object: %w", err)
-	}
-
-	response, err := a.client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error when executing request: %w", err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return nil, fmt.Errorf("could not get load balancers %s", response.Status)
-	}
-
-	payload := struct {
-		Data struct {
-			Data []genericResource.Identity `json:"data"`
-		} `json:"data"`
-	}{}
-
-	err = json.NewDecoder(response.Body).Decode(&payload)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse load balancer list response: %w", err)
-	}
-
-	return payload.Data.Data, nil
+	name := "Loadbalancer"
+	return genericResource.GetPagedGeneric(ctx, page, limit, a.client, name, path)
 }
 
 func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, error) {
-	endpoint, err := url.Parse(a.client.BaseURL())
+	name := "Loadbalancer"
+	rule, err := genericResource.GenericGetByID[Loadbalancer](ctx, identifier, a.client, name, path)
 	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
+		return Loadbalancer{}, err
 	}
-
-	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not create request object: %w", err)
-	}
-
-	response, err := a.client.Do(req)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("error when executing request for '%s': %w", identifier, err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Loadbalancer{}, fmt.Errorf("could not execute get load balancer request for '%s': %s", identifier,
-			response.Status)
-	}
-
-	var payload Loadbalancer
-
-	err = json.NewDecoder(response.Body).Decode(&payload)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse load balancer response for '%s' : %w", identifier, err)
-	}
-
-	return payload, nil
+	return *rule, err
 }
 
 func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, error) {
-	endpoint, err := url.Parse(a.client.BaseURL())
+	name := "Loadbalancer"
+
+	rule, err := genericResource.GenericCreate[Loadbalancer, Definition](ctx, definition, a.client, name, path)
 	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
-	}
-
-	endpoint.Path = utils.Join(endpoint.Path, path)
-
-	buf := bytes.Buffer{}
-	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
 		return Loadbalancer{}, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint.String(), &buf)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not create request object: %w", err)
-	}
-
-	response, err := a.client.Do(req)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("error when creating a LBaaS Loadbalancer '%s': %w",
-			definition.Name, err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Loadbalancer{}, fmt.Errorf("could not create LBaaS Loadbalancer '%s': %s",
-			definition.Name, response.Status)
-	}
-
-	var payload Loadbalancer
-	err = json.NewDecoder(response.Body).Decode(&payload)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse Loadbalancer creation response: %w", err)
-	}
-
-	return payload, nil
+	return *rule, err
 }
 
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (Loadbalancer, error) {
-	endpoint, err := url.Parse(a.client.BaseURL())
+	name := "Loadbalancer"
+	rule, err := genericResource.GenericUpdate[Loadbalancer, Definition](ctx, identifier, definition, a.client, name, path)
 	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse URL: %w", err)
-	}
-
-	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
-
-	buf := bytes.Buffer{}
-	if err := json.NewEncoder(&buf).Encode(definition); err != nil {
 		return Loadbalancer{}, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &buf)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not create request object: %w", err)
-	}
-
-	response, err := a.client.Do(req)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("error when updating a LBaaS Loadbalancer '%s': %w",
-			definition.Name, err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return Loadbalancer{}, fmt.Errorf("could not update LBaaS Loadbalancer '%s': %s",
-			definition.Name, response.Status)
-	}
-
-	var payload Loadbalancer
-	err = json.NewDecoder(response.Body).Decode(&payload)
-	if err != nil {
-		return Loadbalancer{}, fmt.Errorf("could not parse Loadbalancer updating response: %w", err)
-	}
-
-	return payload, nil
+	return *rule, err
 }
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
-	endpoint, err := url.Parse(a.client.BaseURL())
-	if err != nil {
-		return fmt.Errorf("could not parse URL: %w", err)
-	}
-
-	endpoint.Path = utils.Join(endpoint.Path, path, identifier)
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, endpoint.String(), nil)
-	if err != nil {
-		return fmt.Errorf("could not create request object: %w", err)
-	}
-
-	response, err := a.client.Do(req)
-	if err != nil {
-		return fmt.Errorf("error when deleting a LBaaS Loadbalancer '%s': %w",
-			identifier, err)
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return fmt.Errorf("could not delete LBaaS Loadbalancer '%s': %s",
-			identifier, response.Status)
-	}
-
-	return nil
+	name := "Loadbalancer"
+	return genericResource.GenericDelete(ctx, identifier, a.client, name, path)
 }
