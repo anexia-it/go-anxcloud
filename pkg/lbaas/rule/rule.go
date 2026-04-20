@@ -10,8 +10,7 @@ import (
 	utils "path"
 	"strconv"
 
-	"go.anx.io/go-anxcloud/pkg/lbaas/backend"
-	"go.anx.io/go-anxcloud/pkg/lbaas/frontend"
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
 )
 
 const path = "/api/LBaaS/v1/rule.json"
@@ -21,25 +20,7 @@ type RuleInfo struct {
 	Name       string `json:"name"`
 }
 
-type Rule struct {
-	CustomerIdentifier string `json:"customer_identifier"`
-	ResellerIdentifier string `json:"reseller_identifier"`
-	Identifier         string `json:"identifier"`
-
-	Name             string                 `json:"name"`
-	RuleType         string                 `json:"rule_type"`
-	ParentType       string                 `json:"parent_type"`
-	Frontend         *frontend.FrontendInfo `json:"frontend"`
-	Backend          *backend.BackendInfo   `json:"backend"`
-	Index            int                    `json:"index"`
-	Condition        string                 `json:"condition"`
-	ConditionTest    string                 `json:"condition_test"`
-	Type             string                 `json:"type"`
-	Action           string                 `json:"action"`
-	RedirectionType  string                 `json:"redirection_type"`
-	RedirectionValue string                 `json:"redirection_value"`
-	RedirectionCode  string                 `json:"redirection_code"`
-}
+type Rule = v1.Rule
 
 func (a api) Get(ctx context.Context, page, limit int) ([]RuleInfo, error) {
 

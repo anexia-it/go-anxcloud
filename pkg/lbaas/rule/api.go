@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/pagination"
 )
 
 // API contains methods for load balancer backend management.
 type API interface {
+	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]RuleInfo, error)
 	GetByID(ctx context.Context, identifier string) (Rule, error)
 	Create(ctx context.Context, definition Definition) (Rule, error)
