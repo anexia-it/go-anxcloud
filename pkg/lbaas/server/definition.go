@@ -1,6 +1,11 @@
 package server
 
-import "go.anx.io/go-anxcloud/pkg/lbaas/common"
+import (
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/lbaas/common"
+)
+
+type Server = v1.Server
 
 // Definition describes how a server resource should look like
 type Definition struct {

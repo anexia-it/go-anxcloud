@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 	"go.anx.io/go-anxcloud/pkg/utils/test"
 
 	"go.anx.io/go-anxcloud/pkg/lbaas/common"
@@ -19,7 +20,7 @@ const loadbalancerIdentifier = "fc5d7390e9e4400a9efc73b4d8e0613a"
 
 var _ = Describe("lbaas/backend client", Label("old client", "slow"), func() {
 	var cli client.Client
-	var api API
+	var api genericresource.API[Backend, Definition]
 
 	BeforeEach(func() {
 		var err error

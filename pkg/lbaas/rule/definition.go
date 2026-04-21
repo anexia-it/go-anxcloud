@@ -1,6 +1,11 @@
 package rule
 
-import "go.anx.io/go-anxcloud/pkg/lbaas/common"
+import (
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/lbaas/common"
+)
+
+type Rule = v1.Rule
 
 // Definition describes the Rule object that should be created
 type Definition struct {
