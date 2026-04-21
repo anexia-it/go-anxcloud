@@ -4,7 +4,7 @@ import (
 	"context"
 
 	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 )
 
 type (
@@ -25,14 +25,14 @@ const (
 	path = "api/LBaaS/v1/loadbalancer.json"
 )
 
-func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error) {
+func (a api) Get(ctx context.Context, page, limit int) ([]genericresource.Identity, error) {
 	name := "Loadbalancer"
-	return genericResource.GetPagedGeneric(ctx, page, limit, a.client, name, path)
+	return genericresource.GetPagedGeneric(ctx, page, limit, a.client, name, path)
 }
 
 func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, error) {
 	name := "Loadbalancer"
-	object, err := genericResource.GenericGetByID[Loadbalancer](ctx, identifier, a.client, name, path)
+	object, err := genericresource.GenericGetByID[Loadbalancer](ctx, identifier, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
@@ -42,7 +42,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (Loadbalancer, erro
 func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, error) {
 	name := "Loadbalancer"
 
-	object, err := genericResource.GenericCreate[Loadbalancer, Definition](ctx, definition, a.client, name, path)
+	object, err := genericresource.GenericCreate[Loadbalancer, Definition](ctx, definition, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
@@ -51,7 +51,7 @@ func (a api) Create(ctx context.Context, definition Definition) (Loadbalancer, e
 
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (Loadbalancer, error) {
 	name := "Loadbalancer"
-	object, err := genericResource.GenericUpdate[Loadbalancer, Definition](ctx, identifier, definition, a.client, name, path)
+	object, err := genericresource.GenericUpdate[Loadbalancer, Definition](ctx, identifier, definition, a.client, name, path)
 	if err != nil {
 		return Loadbalancer{}, err
 	}
@@ -60,5 +60,5 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	name := "Loadbalancer"
-	return genericResource.GenericDelete(ctx, identifier, a.client, name, path)
+	return genericresource.GenericDelete(ctx, identifier, a.client, name, path)
 }

@@ -3,7 +3,7 @@ package acl
 import (
 	"context"
 
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 )
 
 const path = "/api/LBaaS/v1/ACL.json"
@@ -19,21 +19,21 @@ type ACL struct {
 	Identifier         string                    `json:"identifier"`
 	Name               string                    `json:"name"`
 	ParentType         string                    `json:"parent_type"`
-	Frontend           *genericResource.Identity `json:"frontend"`
-	Backend            *genericResource.Identity `json:"backend"`
+	Frontend           *genericresource.Identity `json:"frontend"`
+	Backend            *genericresource.Identity `json:"backend"`
 	Criterion          string                    `json:"criterion"`
 	Index              int                       `json:"index"`
 	Value              string                    `json:"value"`
 }
 
-func (a api) Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error) {
+func (a api) Get(ctx context.Context, page, limit int) ([]genericresource.Identity, error) {
 	name := "ACL"
-	return genericResource.GetPagedGeneric(ctx, page, limit, a.client, name, path)
+	return genericresource.GetPagedGeneric(ctx, page, limit, a.client, name, path)
 }
 
 func (a api) GetByID(ctx context.Context, identifier string) (ACL, error) {
 	name := "ACL"
-	object, err := genericResource.GenericGetByID[ACL](ctx, identifier, a.client, name, path)
+	object, err := genericresource.GenericGetByID[ACL](ctx, identifier, a.client, name, path)
 	if err != nil {
 		return ACL{}, err
 	}
@@ -43,7 +43,7 @@ func (a api) GetByID(ctx context.Context, identifier string) (ACL, error) {
 func (a api) Create(ctx context.Context, definition Definition) (ACL, error) {
 	name := "ACL"
 
-	object, err := genericResource.GenericCreate[ACL, Definition](ctx, definition, a.client, name, path)
+	object, err := genericresource.GenericCreate[ACL, Definition](ctx, definition, a.client, name, path)
 	if err != nil {
 		return ACL{}, err
 	}
@@ -52,7 +52,7 @@ func (a api) Create(ctx context.Context, definition Definition) (ACL, error) {
 
 func (a api) Update(ctx context.Context, identifier string, definition Definition) (ACL, error) {
 	name := "ACL"
-	object, err := genericResource.GenericUpdate[ACL, Definition](ctx, identifier, definition, a.client, name, path)
+	object, err := genericresource.GenericUpdate[ACL, Definition](ctx, identifier, definition, a.client, name, path)
 	if err != nil {
 		return ACL{}, err
 	}
@@ -61,5 +61,5 @@ func (a api) Update(ctx context.Context, identifier string, definition Definitio
 
 func (a api) DeleteByID(ctx context.Context, identifier string) error {
 	name := "ACL"
-	return genericResource.GenericDelete(ctx, identifier, a.client, name, path)
+	return genericresource.GenericDelete(ctx, identifier, a.client, name, path)
 }

@@ -9,7 +9,7 @@ import (
 	utils "path"
 	"strconv"
 
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
@@ -19,7 +19,7 @@ type BackendPage struct {
 	TotalItems  int                        `json:"total_items"`
 	TotalPages  int                        `json:"total_pages"`
 	Limit       int                        `json:"limit"`
-	Data        []genericResource.Identity `json:"data"`
+	Data        []genericresource.Identity `json:"data"`
 	pageOptions []param.Parameter
 }
 

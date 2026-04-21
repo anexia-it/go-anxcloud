@@ -1,4 +1,4 @@
-package genericResource
+package genericresource
 
 import (
 	"bytes"

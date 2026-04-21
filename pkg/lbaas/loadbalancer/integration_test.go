@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"go.anx.io/go-anxcloud/pkg/client"
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -17,7 +17,7 @@ const loadbalancerIdentifier = "fc5d7390e9e4400a9efc73b4d8e0613a"
 
 var _ = Describe("lbaas/loadbalancer client", Label("old client", "slow"), func() {
 	var cli client.Client
-	var api genericResource.API[Loadbalancer, Definition]
+	var api genericresource.API[Loadbalancer, Definition]
 
 	BeforeEach(func() {
 		var err error

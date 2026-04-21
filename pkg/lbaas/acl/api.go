@@ -3,7 +3,7 @@ package acl
 import (
 	"context"
 	"go.anx.io/go-anxcloud/pkg/client"
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 )
 
 // API contains methods for load balancer backend management.
@@ -20,6 +20,6 @@ type api struct {
 }
 
 // NewAPI creates a new load balancer backend API instance with the given client.
-func NewAPI(c client.Client) genericResource.API[ACL, Definition] {
+func NewAPI(c client.Client) genericresource.API[ACL, Definition] {
 	return &api{c}
 }

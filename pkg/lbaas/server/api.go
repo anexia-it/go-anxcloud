@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 
 	"go.anx.io/go-anxcloud/pkg/client"
@@ -12,7 +12,7 @@ import (
 // API contains methods for load balancer backend server management.
 type API interface {
 	pagination.Pageable
-	Get(ctx context.Context, page, limit int) ([]genericResource.Identity, error)
+	Get(ctx context.Context, page, limit int) ([]genericresource.Identity, error)
 	GetByID(ctx context.Context, identifier string) (Server, error)
 	Create(ctx context.Context, definition Definition) (Server, error)
 	Update(ctx context.Context, identifier string, definition Definition) (Server, error)
@@ -24,6 +24,6 @@ type api struct {
 }
 
 // NewAPI creates a new load balancer backend server API instance with the given client.
-func NewAPI(c client.Client) genericResource.API[Server, Definition] {
+func NewAPI(c client.Client) genericresource.API[Server, Definition] {
 	return &api{c}
 }

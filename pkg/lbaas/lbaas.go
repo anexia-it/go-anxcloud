@@ -2,7 +2,7 @@ package lbaas
 
 import (
 	"go.anx.io/go-anxcloud/pkg/client"
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 	"go.anx.io/go-anxcloud/pkg/lbaas/acl"
 	"go.anx.io/go-anxcloud/pkg/lbaas/backend"
 	"go.anx.io/go-anxcloud/pkg/lbaas/bind"
@@ -13,50 +13,50 @@ import (
 )
 
 type API interface {
-	LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
-	Frontend() genericResource.API[frontend.Frontend, frontend.Definition]
-	Backend() genericResource.API[backend.Backend, backend.Definition]
-	Server() genericResource.API[server.Server, server.Definition]
-	Bind() genericResource.API[bind.Bind, bind.Definition]
-	ACL() genericResource.API[acl.ACL, acl.Definition]
-	Rule() genericResource.API[rule.Rule, rule.Definition]
+	LoadBalancer() genericresource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
+	Frontend() genericresource.API[frontend.Frontend, frontend.Definition]
+	Backend() genericresource.API[backend.Backend, backend.Definition]
+	Server() genericresource.API[server.Server, server.Definition]
+	Bind() genericresource.API[bind.Bind, bind.Definition]
+	ACL() genericresource.API[acl.ACL, acl.Definition]
+	Rule() genericresource.API[rule.Rule, rule.Definition]
 }
 
 type api struct {
-	loadBalancer genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
-	frontend     genericResource.API[frontend.Frontend, frontend.Definition]
-	backend      genericResource.API[backend.Backend, backend.Definition]
-	server       genericResource.API[server.Server, server.Definition]
-	bind         genericResource.API[bind.Bind, bind.Definition]
-	acl          genericResource.API[acl.ACL, acl.Definition]
-	rule         genericResource.API[rule.Rule, rule.Definition]
+	loadBalancer genericresource.API[loadbalancer.Loadbalancer, loadbalancer.Definition]
+	frontend     genericresource.API[frontend.Frontend, frontend.Definition]
+	backend      genericresource.API[backend.Backend, backend.Definition]
+	server       genericresource.API[server.Server, server.Definition]
+	bind         genericresource.API[bind.Bind, bind.Definition]
+	acl          genericresource.API[acl.ACL, acl.Definition]
+	rule         genericresource.API[rule.Rule, rule.Definition]
 }
 
-func (a api) Rule() genericResource.API[rule.Rule, rule.Definition] {
+func (a api) Rule() genericresource.API[rule.Rule, rule.Definition] {
 	return a.rule
 }
 
-func (a api) ACL() genericResource.API[acl.ACL, acl.Definition] {
+func (a api) ACL() genericresource.API[acl.ACL, acl.Definition] {
 	return a.acl
 }
 
-func (a api) Bind() genericResource.API[bind.Bind, bind.Definition] {
+func (a api) Bind() genericresource.API[bind.Bind, bind.Definition] {
 	return a.bind
 }
 
-func (a api) Backend() genericResource.API[backend.Backend, backend.Definition] {
+func (a api) Backend() genericresource.API[backend.Backend, backend.Definition] {
 	return a.backend
 }
 
-func (a api) Server() genericResource.API[server.Server, server.Definition] {
+func (a api) Server() genericresource.API[server.Server, server.Definition] {
 	return a.server
 }
 
-func (a api) LoadBalancer() genericResource.API[loadbalancer.Loadbalancer, loadbalancer.Definition] {
+func (a api) LoadBalancer() genericresource.API[loadbalancer.Loadbalancer, loadbalancer.Definition] {
 	return a.loadBalancer
 }
 
-func (a api) Frontend() genericResource.API[frontend.Frontend, frontend.Definition] {
+func (a api) Frontend() genericresource.API[frontend.Frontend, frontend.Definition] {
 	return a.frontend
 }
 

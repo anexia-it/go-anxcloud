@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"go.anx.io/go-anxcloud/pkg/client"
-	"go.anx.io/go-anxcloud/pkg/genericResource"
+	"go.anx.io/go-anxcloud/pkg/genericresource"
 	"go.anx.io/go-anxcloud/pkg/pagination"
 )
 
@@ -23,6 +23,6 @@ type api struct {
 }
 
 // NewAPI creates a new load balancer API instance with the given client.
-func NewAPI(c client.Client) genericResource.API[Loadbalancer, Definition] {
+func NewAPI(c client.Client) genericresource.API[Loadbalancer, Definition] {
 	return &api{c}
 }
