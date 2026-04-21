@@ -14,11 +14,6 @@ import (
 	"go.anx.io/go-anxcloud/pkg/pagination"
 )
 
-type IGenericResource interface {
-	GetIdentifier() string
-	GetName() string
-}
-
 type API[R any, D any] interface {
 	pagination.Pageable
 	Get(ctx context.Context, page, limit int) ([]Identity, error)
@@ -30,7 +25,6 @@ type API[R any, D any] interface {
 }
 
 type Identity struct {
-	IGenericResource
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
 }

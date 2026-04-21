@@ -2,10 +2,17 @@ package pagination
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"go.anx.io/go-anxcloud/pkg/utils/param"
+	"net/http"
+	"net/url"
+	path2 "path"
 	"reflect"
+	"strconv"
+
+	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
 var (
@@ -91,4 +98,81 @@ func AsChan(ctx context.Context, pageable Pageable, opts ...param.Parameter) (ch
 		}, opts...)
 	}()
 	return consumer, cancel
+}
+
+func GetPage(ctx context.Context, page int, limit int, parameters []param.Parameter, client client.Client, path string) (Page, error) {
+	endpoint, err := url.Parse(client.BaseURL())
+	if err != nil {
+		return nil, fmt.Errorf("could not parse URL: %w", err)
+	}
+
+	endpoint.Path = path2.Join(endpoint.Path, path)
+	query := endpoint.Query()
+	query.Set("page", strconv.Itoa(page))
+	query.Set("limit", strconv.Itoa(limit))
+	for _, parameter := range parameters {
+		parameter(query)
+	}
+
+	endpoint.RawQuery = query.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request object: %w", err)
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error when executing request: %w", err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 500 && response.StatusCode < 600 {
+		return nil, fmt.Errorf("could not get load balancer frontends %s", response.Status)
+	}
+
+	payload := struct {
+		Page GenericPage `json:"data"`
+	}{}
+
+	err = json.NewDecoder(response.Body).Decode(&payload)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse load balancer frontend list response: %w", err)
+	}
+
+	payload.Page.PageOptions = parameters
+	return payload.Page, nil
+}
+
+type Identifiable interface {
+	GetIdentifier() string
+	GetName() string
+}
+type GenericPage struct {
+	Page        int            `json:"page"`
+	TotalItems  int            `json:"total_items"`
+	TotalPages  int            `json:"total_pages"`
+	Limit       int            `json:"limit"`
+	Data        []Identifiable `json:"data"`
+	PageOptions []param.Parameter
+}
+
+func (f GenericPage) Options() []param.Parameter {
+	return f.PageOptions
+}
+
+func (f GenericPage) Num() int {
+	return f.Page
+}
+
+func (f GenericPage) Size() int {
+	return f.Limit
+}
+
+func (f GenericPage) Total() int {
+	return f.TotalPages
+}
+
+func (f GenericPage) Content() interface{} {
+	return f.Data
 }
