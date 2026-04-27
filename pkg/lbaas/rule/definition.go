@@ -9,18 +9,18 @@ type Rule = v1.Rule
 
 // Definition describes the Rule object that should be created
 type Definition struct {
-	Name             string       `json:"name"`
-	State            common.State `json:"state"`
-	RuleType         string       `json:"rule_type"`
-	ParentType       string       `json:"parent_type"`
+	Name             string       `json:"name,omitempty"`
+	State            common.State `json:"state,omitempty"`
+	RuleType         string       `json:"rule_type,omitempty"`
+	ParentType       string       `json:"parent_type,omitempty"`
 	Frontend         *string      `json:"frontend,omitempty"`
 	Backend          *string      `json:"backend,omitempty"`
-	Index            int          `json:"index"`
-	Condition        string       `json:"condition"`
-	ConditionTest    string       `json:"condition_test"`
-	Type             string       `json:"type"`
-	Action           string       `json:"action"`
-	RedirectionType  string       `json:"redirection_type"`
-	RedirectionValue string       `json:"redirection_value"`
-	RedirectionCode  string       `json:"redirection_code"`
+	Index            int          `json:"index,omitempty"`
+	Condition        string       `json:"condition,omitempty"`
+	ConditionTest    string       `json:"condition_test,omitempty"`
+	Type             string       `json:"type,omitempty"`
+	Action           string       `json:"action,omitempty"`
+	RedirectionType  string       `json:"redirection_type,omitempty"`
+	RedirectionValue string       `json:"redirection_value,omitempty"`
+	RedirectionCode  string       `json:"redirection_code,omitempty"`
 }
