@@ -8,9 +8,10 @@ type Record struct {
 	Immutable  bool   `json:"immutable,omitempty"`
 	// Name of the DNS record.
 	// Use "@" to select the domain root. Creation of records with an empty Name field is not supported.
-	Name   string `json:"name"`
-	RData  string `json:"rdata"`
-	Region string `json:"region"`
-	TTL    int    `json:"ttl"`
-	Type   string `json:"type"`
+	Name    string  `json:"name"`
+	RData   string  `json:"rdata"`
+	Region  string  `json:"region"`
+	TTL     int     `json:"ttl"`
+	Comment *string `json:"comment,omitempty"`
+	Type    string  `json:"type"`
 }
