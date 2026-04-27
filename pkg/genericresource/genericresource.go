@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -23,6 +24,8 @@ type API[R any, D any] interface {
 	DeleteByID(ctx context.Context, identifier string) error
 	//GetPath() string
 }
+
+var ErrNotFound = errors.New("could not find resource")
 
 type Identity struct {
 	Identifier string `json:"identifier"`
@@ -64,6 +67,10 @@ func GetPagedGeneric(ctx context.Context, page int, limit int, client client.Cli
 		return nil, fmt.Errorf("could not get load balancer %s %s", name, response.Status)
 	}
 
+	if response.StatusCode == 404 {
+		return nil, ErrNotFound
+	}
+
 	payload := struct {
 		Data struct {
 			Data []Identity `json:"data"`
@@ -100,6 +107,10 @@ func GenericGetByID[R any](ctx context.Context, identifier string, client client
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not execute get load balancer %s request for '%s': %s", name, identifier,
 			response.Status)
+	}
+
+	if response.StatusCode == 404 {
+		return nil, ErrNotFound
 	}
 
 	var payload R
@@ -177,6 +188,10 @@ func GenericUpdate[R any, D any](ctx context.Context, identifier string, definit
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
 		return nil, fmt.Errorf("could not update load balancer %s: %s", name, response.Status)
+	}
+
+	if response.StatusCode == 404 {
+		return nil, ErrNotFound
 	}
 
 	var payload R
