@@ -112,17 +112,17 @@ type Definition struct {
 	Networks            []network.NodepoolNetworkDefinition `json:"networks,omitempty"`
 
 	DNSOverrideIPv4 bool   `json:"dns_override_ipv4,omitempty"`
-	DNSv4Entry1     string `json:"dns_v4_1,omitemptyy"`
-	DNSv4Entry2     string `json:"dns_v4_2,omitemptyy"`
+	DNSv4Entry1     string `json:"dns_v4_1,omitempty"`
+	DNSv4Entry2     string `json:"dns_v4_2,omitempty"`
 
 	DNSOverrideIPv6 bool   `json:"dns_override_ipv6,omitempty"`
-	DNSv6Entry1     string `json:"dns_v6_1,omitemptyy"`
+	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
 	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
 
-	Taints      string `json:"taints,omitemptyy"`
-	Labels      string `json:"labels,omitemptyy"`
-	Annotations string `json:"annotations,omitemptyy"`
-	SSHPubKeys  string `json:"sshpubkeys,omitemptyy"`
+	Taints      string `json:"taints,omitempty"`
+	Labels      string `json:"labels,omitempty"`
+	Annotations string `json:"annotations,omitempty"`
+	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
 }
 
 func NewIDTitleTuple(id, title string) common.IDTitleTuple {
