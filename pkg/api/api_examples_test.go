@@ -195,35 +195,6 @@ func ExampleAPI_listChannel() {
 	// Got backend named "test-backend-04" with mode ""
 }
 
-func ExampleAPI_update() {
-	// see example on NewAPI how to implement this function
-	apiClient := newExampleAPI()
-
-	b := lbaasv1.Backend{
-		Identifier: "bogus identifier 1",
-		Name:       "Updated backend",
-		Mode:       lbaasv1.HTTP,
-		// [...]
-	}
-
-	if err := apiClient.Update(context.TODO(), &b); err != nil {
-		fmt.Printf("Error updating backend: %v\n", err)
-	} else {
-		fmt.Printf("Successfully updated backend\n")
-
-		retrieved := lbaasv1.Backend{Identifier: "bogus identifier 1"}
-		if err := apiClient.Get(context.TODO(), &retrieved); err != nil {
-			fmt.Printf("Error verifying updated backend: %v\n", err)
-		} else {
-			fmt.Printf("Backend is now renamed to '%v' and has mode %v\n", retrieved.Name, retrieved.Mode)
-		}
-	}
-
-	// Output:
-	// Successfully updated backend
-	// Backend is now renamed to 'Updated backend' and has mode http
-}
-
 // creates a new API instance for using the examples as tests. Includes a mock server.
 func newExampleAPI() API {
 	server := lbaasTest.NewMockServer()
