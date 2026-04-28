@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * loadbalancer: add create, update, delete functions for lbaas
 * kubernetes: add backend and lbaas fields for kubernetes cluster
 * kubernetes: add storage server interface and address
+* kubernetes: add more nodepool fields
 
 <!--
 Please add your changelog entry under this comment in the correct category (Security, Fixed, Added, Changed, Deprecated, Removed - in this order).
