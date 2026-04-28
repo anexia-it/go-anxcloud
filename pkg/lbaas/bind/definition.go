@@ -1,7 +1,11 @@
 package bind
 
-import "go.anx.io/go-anxcloud/pkg/lbaas/common"
+import (
+	v1 "go.anx.io/go-anxcloud/pkg/apis/lbaas/v1"
+	"go.anx.io/go-anxcloud/pkg/lbaas/common"
+)
 
+type Bind = v1.Bind
 type Definition struct {
 	Name               string       `json:"name"`
 	State              common.State `json:"state"`
