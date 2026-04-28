@@ -248,6 +248,13 @@ func (c client) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	req.Header.Set("User-Agent", c.userAgent)
+
+	if req.Method == http.MethodGet {
+		req.Header.Set("Accept", "application/json")
+	} else {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
 	return c.handleRequest(req)
 }
 

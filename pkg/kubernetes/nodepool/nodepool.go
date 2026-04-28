@@ -12,36 +12,127 @@ import (
 
 	"go.anx.io/go-anxcloud/pkg/apis/common"
 	"go.anx.io/go-anxcloud/pkg/apis/common/gs"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/disk"
+	"go.anx.io/go-anxcloud/pkg/kubernetes/network"
 )
 
-// The Nodepool resource configures settings common for all specific backend Server resources linked to it.
+type SyncSource string
+
+const (
+	SyncSourceEngine  SyncSource = "engine"
+	SyncSourceCluster SyncSource = "cluster"
+)
+
+const (
+	OSFlatcar = "Flatcar Linux"
+	MebiByte  = 1024 * 1024
+	GibiByte  = MebiByte * 1024
+)
+
+var (
+	StateOK    = gs.State{ID: "0", Text: "Deployed", Type: gs.StateTypeOK}
+	StateNoGA  = gs.State{ID: "1", Text: "noGA", Type: gs.StateTypeOK}
+	StateError = gs.State{ID: "2", Text: "Error", Type: gs.StateTypeError}
+)
+
+type CPUPerformanceType string
+
+const (
+	CPUPerformanceTypeBestEffort      CPUPerformanceType = "best-effort"
+	CPUPerformanceTypeStandard        CPUPerformanceType = "standard"
+	CPUPerformanceTypeEnterprise      CPUPerformanceType = "enterprise"
+	CPUPerformanceTypePerformance     CPUPerformanceType = "performance"
+	CPUPerformanceTypePerformancePlus CPUPerformanceType = "performance-plus"
+
+	CPUPerformanceTypeDefault = CPUPerformanceTypePerformance
+)
+
+// The Nodepool resource represents the main resource to map to the MachineDeployment in the customer cluster.
 type Nodepool struct {
 	gs.HasState
 
-	CustomerIdentifier         string `json:"customer_identifier"`
-	ResellerIdentifier         string `json:"reseller_identifier"`
-	CriticalOperationPassword  string `json:"critical_operation_password"`
-	CriticalOperationConfirmed bool   `json:"critical_operation_confirmed"`
-	Identifier                 string `json:"identifier"`
-	Name                       string `json:"name"`
+	State              gs.State `json:"state,omitempty"`
+	CustomerIdentifier string   `json:"customer_identifier"`
+	ResellerIdentifier string   `json:"reseller_identifier"`
+	Identifier         string   `json:"identifier"`
+	Name               string   `json:"name"`
 
-	Cluster         common.PartialResource `json:"cluster"`
-	Replicas        uint                   `json:"replicas"`
-	CPUs            uint                   `json:"cpus"`
-	MemoryBytes     uint64                 `json:"memory"`
-	DiskSizeBytes   uint64                 `json:"disk_size"`
-	OperatingSystem string                 `json:"operating_system"`
+	Cluster            common.PartialResource `json:"cluster"`
+	SyncSource         common.IDTitleTuple    `json:"syncsource"`
+	Replicas           uint                   `json:"replicas"`
+	CPUs               uint                   `json:"cpus"`
+	CPUType            common.IDTitleTuple    `json:"cpu_performance_type"`
+	MemoryBytes        uint64                 `json:"memory"`
+	OperatingSystem    common.IDTitleTuple    `json:"operating_system"`
+	AutoscalerEnabled  bool                   `json:"autoscaler_enabled"`
+	AutoscalerMinNodes uint                   `json:"autoscaler_min_nodes"`
+	AutoscalerMaxNodes uint                   `json:"autoscaler_max_nodes"`
+
+	DiskSize            uint64                    `json:"disk_size"`
+	DiskPerformanceType common.IDTitleTuple       `json:"disk_performance_type"`
+	AdditionalDisks     []disk.NodepoolDisks      `json:"additional_disks"`
+	Networks            []network.NodepoolNetwork `json:"networks"`
+
+	DNSOverrideIPv4 bool   `json:"dns_override_ipv4"`
+	DNSv4Entry1     string `json:"dns_v4_1"`
+	DNSv4Entry2     string `json:"dns_v4_2"`
+
+	DNSOverrideIPv6 bool   `json:"dns_override_ipv6"`
+	DNSv6Entry1     string `json:"dns_v6_1"`
+	DNSv6Entry2     string `json:"dns_v6_2"`
+
+	Taints      string `json:"taints"`
+	Labels      string `json:"labels"`
+	Annotations string `json:"annotations"`
+	SSHPubKeys  string `json:"sshpubkeys"`
 
 	AutomationRules []common.PartialResource `json:"automation_rules"`
 }
 
-// NodePoolInfo holds the identifier and the name of a kubernetes nodepool.
-type NodePoolInfo struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
+// The Definition resource represents the main resource to map to the MachineDeployment in the customer cluster.
+type Definition struct {
+	CustomerIdentifier string `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
+	Name               string `json:"name,omitempty"`
+
+	ClusterID          string             `json:"cluster,omitempty"`
+	SyncSource         SyncSource         `json:"syncsource,omitempty"`
+	Replicas           uint               `json:"replicas,omitempty"`
+	CPUs               uint               `json:"cpus,omitempty"`
+	CPUType            CPUPerformanceType `json:"cpu_performance_type,omitempty"`
+	MemoryBytes        uint64             `json:"memory,omitempty"`
+	OperatingSystem    string             `json:"operating_system,omitempty"`
+	AutoscalerEnabled  bool               `json:"autoscaler_enabled,omitempty"`
+	AutoscalerMinNodes uint               `json:"autoscaler_min_nodes,omitempty"`
+	AutoscalerMaxNodes uint               `json:"autoscaler_max_nodes,omitempty"`
+
+	DiskSize            uint64                              `json:"disk_size"`
+	DiskPerformanceType disk.DiskPerformanceType            `json:"disk_performance_type"`
+	AdditionalDisks     []disk.NodepoolDisksDefinition      `json:"additional_disks,omitempty"`
+	Networks            []network.NodepoolNetworkDefinition `json:"networks,omitempty"`
+
+	DNSOverrideIPv4 bool   `json:"dns_override_ipv4,omitempty"`
+	DNSv4Entry1     string `json:"dns_v4_1,omitempty"`
+	DNSv4Entry2     string `json:"dns_v4_2,omitempty"`
+
+	DNSOverrideIPv6 bool   `json:"dns_override_ipv6,omitempty"`
+	DNSv6Entry1     string `json:"dns_v6_1,omitempty"`
+	DNSv6Entry2     string `json:"dns_v6_2,omitempty"`
+
+	Taints      string `json:"taints,omitempty"`
+	Labels      string `json:"labels,omitempty"`
+	Annotations string `json:"annotations,omitempty"`
+	SSHPubKeys  string `json:"sshpubkeys,omitempty"`
 }
 
-func (a *api) Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error) {
+func NewIDTitleTuple(id, title string) common.IDTitleTuple {
+	return common.IDTitleTuple{
+		ID:    id,
+		Title: title,
+	}
+}
+
+func (a *api) Get(ctx context.Context, page, limit int) ([]common.PartialResource, error) {
 	endpoint, err := url.Parse(a.client.BaseURL())
 	if err != nil {
 		return nil, fmt.Errorf("could not parse URL: %w", err)
@@ -69,9 +160,7 @@ func (a *api) Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error) 
 	}
 
 	payload := struct {
-		Data struct {
-			Data []NodePoolInfo `json:"data"`
-		} `json:"data"`
+		Data []common.PartialResource `json:"data"`
 	}{}
 
 	err = json.NewDecoder(response.Body).Decode(&payload)
@@ -79,7 +168,7 @@ func (a *api) Get(ctx context.Context, page, limit int) ([]NodePoolInfo, error) 
 		return nil, fmt.Errorf("could not parse kubernetes nodepool list response: %w", err)
 	}
 
-	return payload.Data.Data, nil
+	return payload.Data, nil
 }
 
 func (a *api) GetByID(ctx context.Context, identifier string) (Nodepool, error) {
@@ -169,7 +258,7 @@ func (a *api) Update(ctx context.Context, identifier string, definition Definiti
 		return Nodepool{}, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, endpoint.String(), &requestBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, endpoint.String(), &requestBody)
 	if err != nil {
 		return Nodepool{}, fmt.Errorf("could not create request object: %w", err)
 	}

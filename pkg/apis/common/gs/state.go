@@ -12,7 +12,7 @@ type State struct {
 	ID string `json:"id"`
 
 	// human readable status text
-	Text string `json:"text"`
+	Text string `json:"title"`
 
 	Type int `json:"type"`
 }

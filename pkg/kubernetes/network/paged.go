@@ -1,4 +1,4 @@
-package nodepool
+package network
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/utils/param"
 )
 
-type NodepoolPage struct {
+type NetworkPage struct {
 	Page        int                      `json:"page"`
 	TotalItems  int                      `json:"total_items"`
 	TotalPages  int                      `json:"total_pages"`
@@ -23,23 +23,23 @@ type NodepoolPage struct {
 	pageOptions []param.Parameter
 }
 
-func (f NodepoolPage) Options() []param.Parameter {
+func (f NetworkPage) Options() []param.Parameter {
 	return f.pageOptions
 }
 
-func (f NodepoolPage) Num() int {
+func (f NetworkPage) Num() int {
 	return f.Page
 }
 
-func (f NodepoolPage) Size() int {
+func (f NetworkPage) Size() int {
 	return f.Limit
 }
 
-func (f NodepoolPage) Total() int {
+func (f NetworkPage) Total() int {
 	return f.TotalPages
 }
 
-func (f NodepoolPage) Content() interface{} {
+func (f NetworkPage) Content() interface{} {
 	return f.Data
 }
 
@@ -71,13 +71,14 @@ func (a *api) GetPage(ctx context.Context, page, limit int, parameters ...param.
 	defer response.Body.Close()
 
 	if response.StatusCode >= 500 && response.StatusCode < 600 {
-		return nil, fmt.Errorf("could not get kubernetes nodepools %s", response.Status)
+		return nil, fmt.Errorf("could not get kubernetes nodepool network %s", response.Status)
 	}
 
-	payload := NodepoolPage{}
+	payload := NetworkPage{}
 	err = json.NewDecoder(response.Body).Decode(&payload)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse kubernetes nodepool list response: %w", err)
+		return nil, fmt.Errorf("could not parse kubernetes nodepool network list response: %w",
+			err)
 	}
 
 	payload.pageOptions = parameters

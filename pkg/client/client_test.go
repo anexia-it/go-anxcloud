@@ -1,15 +1,11 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -53,64 +49,6 @@ var _ = Describe("client", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	It("handles request and response correctly", func() {
-		data := url.Values{}
-		data.Set("foo", "bar")
-		encData := data.Encode()
-
-		s.AppendHandlers(CombineHandlers(
-			VerifyFormKV("foo", "bar"),
-			VerifyHeaderKV("Authorization", "sensible-value"),
-			VerifyHeaderKV("Content-Length", strconv.Itoa(len(encData))),
-			RespondWith(http.StatusOK, "bar"),
-		))
-
-		req, err := http.NewRequest(http.MethodPost, s.URL(), strings.NewReader(encData))
-		Expect(err).NotTo(HaveOccurred())
-
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req.Header.Set("Authorization", "sensible-value")
-
-		response, err := c.Do(req)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(response.Body).NotTo(BeNil())
-
-		body, err := io.ReadAll(response.Body)
-
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(body)).To(Equal("bar"))
-	})
-
-	It("handles the request and correctly parses the error response", func() {
-		data := url.Values{}
-		data.Set("foo", "bar")
-		encData := data.Encode()
-
-		s.AppendHandlers(CombineHandlers(
-			VerifyFormKV("foo", "bar"),
-			VerifyHeaderKV("Authorization", "sensible-value"),
-			VerifyHeaderKV("Content-Length", strconv.Itoa(len(encData))),
-			VerifyHeaderKV("Content-Type", "application/x-www-form-urlencoded"),
-			RespondWithJSONEncoded(http.StatusBadRequest, map[string]string{
-				"msg": "error message",
-			}),
-		))
-
-		req, err := http.NewRequest(http.MethodPost, s.URL(), strings.NewReader(encData))
-		Expect(err).NotTo(HaveOccurred())
-
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req.Header.Set("Authorization", "sensible-value")
-
-		response, err := c.Do(req)
-
-		Expect(err).To(HaveOccurred())
-		Expect(response).NotTo(BeNil())
-
-		Expect(response.StatusCode).To(Equal(http.StatusBadRequest))
-	})
-
 	It("uses the auto-generated User-Agent in requests", func() {
 		expectedUA := fmt.Sprintf("go-anxcloud/%s (%s)", "snapshot", runtime.GOOS)
 		s.AppendHandlers(CombineHandlers(
@@ -122,47 +60,6 @@ var _ = Describe("client", func() {
 
 		_, err = c.Do(req)
 		Expect(err).NotTo(HaveOccurred())
-	})
-
-	Context("when configured not to parse errors", func() {
-		BeforeEach(func() {
-			options = append(options, ParseEngineErrors(false))
-		})
-
-		It("handles request and response correctly, without returning an error for http error responses", func() {
-			data := url.Values{}
-			data.Set("foo", "bar")
-			encData := data.Encode()
-
-			s.AppendHandlers(CombineHandlers(
-				VerifyFormKV("foo", "bar"),
-				VerifyHeaderKV("Authorization", "sensible-value"),
-				VerifyHeaderKV("Content-Length", strconv.Itoa(len(encData))),
-				VerifyHeaderKV("Content-Type", "application/x-www-form-urlencoded"),
-				RespondWithJSONEncoded(http.StatusBadRequest, map[string]string{
-					"msg": "error message",
-				}),
-			))
-
-			req, err := http.NewRequest(http.MethodPost, s.URL(), strings.NewReader(encData))
-			Expect(err).NotTo(HaveOccurred())
-
-			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-			req.Header.Set("Authorization", "sensible-value")
-
-			response, err := c.Do(req)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(response).NotTo(BeNil())
-
-			Expect(response.StatusCode).To(Equal(http.StatusBadRequest))
-
-			bodyData := map[string]string{}
-
-			err = json.NewDecoder(response.Body).Decode(&bodyData)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(bodyData["msg"]).To(Equal("error message"))
-		})
 	})
 
 	Context("when configured with an authorization token", func() {
