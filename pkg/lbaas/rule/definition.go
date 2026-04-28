@@ -15,7 +15,7 @@ type Definition struct {
 	ParentType       string       `json:"parent_type,omitempty"`
 	Frontend         *string      `json:"frontend,omitempty"`
 	Backend          *string      `json:"backend,omitempty"`
-	Index            int          `json:"index,omitempty"`
+	Index            int          `json:"index"`
 	Condition        string       `json:"condition,omitempty"`
 	ConditionTest    string       `json:"condition_test,omitempty"`
 	Type             string       `json:"type,omitempty"`
