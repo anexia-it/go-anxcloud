@@ -148,12 +148,26 @@ type Identifiable interface {
 	GetIdentifier() string
 	GetName() string
 }
+
+type Identity struct {
+	Identifier string `json:"identifier"`
+	Name       string `json:"name"`
+}
+
+func (g Identity) GetIdentifier() string {
+	return g.Identifier
+}
+
+func (g Identity) GetName() string {
+	return g.Name
+}
+
 type GenericPage struct {
-	Page        int            `json:"page"`
-	TotalItems  int            `json:"total_items"`
-	TotalPages  int            `json:"total_pages"`
-	Limit       int            `json:"limit"`
-	Data        []Identifiable `json:"data"`
+	Page        int        `json:"page"`
+	TotalItems  int        `json:"total_items"`
+	TotalPages  int        `json:"total_pages"`
+	Limit       int        `json:"limit"`
+	Data        []Identity `json:"data"`
 	PageOptions []param.Parameter
 }
 
