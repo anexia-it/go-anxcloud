@@ -31,8 +31,7 @@ const (
 
 var (
 	StateOK    = gs.State{ID: "0", Text: "Deployed", Type: gs.StateTypeOK}
-	StateNoGA  = gs.State{ID: "1", Text: "noGA", Type: gs.StateTypeOK}
-	StateError = gs.State{ID: "2", Text: "Error", Type: gs.StateTypeError}
+	StateError = gs.State{ID: "1", Text: "Error", Type: gs.StateTypeError}
 )
 
 type CPUPerformanceType string
