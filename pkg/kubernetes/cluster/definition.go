@@ -28,8 +28,8 @@ type Definition struct {
 	Autoscaling              IntBoolean `json:"autoscaling"`
 	CNIPlugin                string     `json:"cni_plugin"`
 	APIServerAllowList       string     `json:"api_server_allow_list"`
-	MaintenanceWindowStart   string     `json:"maintenance_window_start"`
-	MaintenanceWindowLength  string     `json:"maintenance_window_length"`
+	MaintenanceWindowStart   string     `json:"maintenance_window_start_time"`
+	MaintenanceWindowLength  string     `json:"maintenance_window_duration"`
 	ManageInternalIPv4Prefix IntBoolean `json:"manage_internal_ipv4_prefix"`
 	InternalIPv4Prefix       string     `json:"internal_ipv4_prefix"`
 	NeedsServiceVMs          IntBoolean `json:"needs_service_vms"`
