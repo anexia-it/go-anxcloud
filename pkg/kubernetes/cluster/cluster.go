@@ -32,8 +32,8 @@ type Cluster struct {
 	APIServerAllowlist         string    `json:"apiserver_allowlist"`
 	Backend                    string    `json:"backend"`
 	BackendName                string    `json:"backend_name"`
-	MaintenanceWindowStart     string    `json:"maintenance_window_start"`
-	MaintenanceWindowLength    string    `json:"maintenance_window_length"`
+	MaintenanceWindowStart     string    `json:"maintenance_window_start_time"`
+	MaintenanceWindowLength    string    `json:"maintenance_window_duration"`
 	ManageInternalIPv4Prefix   bool      `json:"manage_internal_ipv4_prefix"`
 	InternalIpv4Prefix         Minimal   `json:"internal_ipv4_prefix"`
 	NeedsServiceVMs            bool      `json:"needs_service_vms"`
