@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/url"
-	"strconv"
 
 	"go.anx.io/go-anxcloud/pkg/api/types"
 	"go.anx.io/go-anxcloud/pkg/utils/pointer"
@@ -60,7 +59,7 @@ func (c *Cluster) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 
 		if op == types.OperationUpdate {
 			body.commonRequestBody = commonRequestBody{
-				State: strconv.Itoa(c.State.Type),
+				State: c.State.ID,
 			}
 		}
 
