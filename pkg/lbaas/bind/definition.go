@@ -7,11 +7,11 @@ import (
 
 type Bind = v1.Bind
 type Definition struct {
-	Name               string       `json:"name"`
-	State              common.State `json:"state"`
-	Frontend           string       `json:"frontend"`
-	Address            string       `json:"address"`
-	Port               int          `json:"port"`
-	SSL                bool         `json:"ssl"`
-	SSLCertificatePath string       `json:"ssl_certificate_path"`
+	Name               string       `json:"name,omitempty"`
+	State              common.State `json:"state,omitempty"`
+	Frontend           string       `json:"frontend,omitempty"`
+	Address            string       `json:"address,omitempty"`
+	Port               int          `json:"port,omitempty"`
+	SSL                bool         `json:"ssl,omitempty"`
+	SSLCertificatePath string       `json:"ssl_certificate_path,omitempty"`
 }

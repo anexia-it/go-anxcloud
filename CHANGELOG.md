@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* loadbalancer: only update fields that are set explicitly
 * kubernetes: fix state update logic, use ID instead of Type
 * api: add fields for LBaaS resources (#475, @davidkroell)
 * kubernetes: add support for updating the state of a cluster
