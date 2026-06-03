@@ -11,7 +11,7 @@ type (
 )
 
 type Definition struct {
-	Name      string       `json:"name"`
-	IpAddress string       `json:"ip_address"`
-	State     common.State `json:"state"`
+	Name      string       `json:"name,omitempty"`
+	IpAddress string       `json:"ip_address,omitempty"`
+	State     common.State `json:"state,omitempty"`
 }

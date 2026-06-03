@@ -6,16 +6,16 @@ import (
 )
 
 type ACL struct {
-	CustomerIdentifier string                    `json:"customer_identifier"`
-	ResellerIdentifier string                    `json:"reseller_identifier"`
-	Identifier         string                    `json:"identifier"`
-	Name               string                    `json:"name"`
-	ParentType         string                    `json:"parent_type"`
-	Frontend           *genericresource.Identity `json:"frontend"`
-	Backend            *genericresource.Identity `json:"backend"`
-	Criterion          string                    `json:"criterion"`
-	Index              int                       `json:"index"`
-	Value              string                    `json:"value"`
+	CustomerIdentifier string                    `json:"customer_identifier,omitempty"`
+	ResellerIdentifier string                    `json:"reseller_identifier,omitempty"`
+	Identifier         string                    `json:"identifier,omitempty"`
+	Name               string                    `json:"name,omitempty"`
+	ParentType         string                    `json:"parent_type,omitempty"`
+	Frontend           *genericresource.Identity `json:"frontend,omitempty"`
+	Backend            *genericresource.Identity `json:"backend,omitempty"`
+	Criterion          string                    `json:"criterion,omitempty"`
+	Index              int                       `json:"index,omitempty"`
+	Value              string                    `json:"value,omitempty"`
 }
 
 // Definition describes the ACL object that should be created

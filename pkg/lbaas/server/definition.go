@@ -9,12 +9,12 @@ type Server = v1.Server
 
 // Definition describes how a server resource should look like
 type Definition struct {
-	Name    string       `json:"name"`
-	State   common.State `json:"state"`
-	IP      string       `json:"ip"`
-	Port    int          `json:"port"`
-	Backend string       `json:"backend"`
-	Check   string       `json:"check"`
+	Name    string       `json:"name,omitempty"`
+	State   common.State `json:"state,omitempty"`
+	IP      string       `json:"ip,omitempty"`
+	Port    int          `json:"port,omitempty"`
+	Backend string       `json:"backend,omitempty"`
+	Check   string       `json:"check,omitempty"`
 }
 
 const (
