@@ -15,21 +15,16 @@ import (
 
 // NodepoolNetworkDefinition represents the networks of a [Nodepool].
 type NodepoolNetworkDefinition struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
+	Name           string `json:"name,omitempty"`
+	NodepoolID     string `json:"nodepool,omitempty"`
 	BandwidthLimit string `json:"bandwidth_limit,omitempty"`
 	VLANID         string `json:"vlan,omitempty"`
 }
 
 // NodepoolNetwork represents the networks of a [Nodepool].
 type NodepoolNetwork struct {
-	CustomerIdentifier string `json:"customer_identifier,omitempty"`
-	ResellerIdentifier string `json:"reseller_identifier,omitempty"`
-	Identifier         string `json:"identifier,omitempty"`
-	Name               string `json:"name,omitempty"`
-
+	Identifier     string                 `json:"identifier,omitempty"`
+	Name           string                 `json:"name,omitempty"`
 	BandwidthLimit common.IDTitleTuple    `json:"bandwidth_limit,omitempty"`
 	VLAN           common.PartialResource `json:"vlan,omitempty"`
 }
