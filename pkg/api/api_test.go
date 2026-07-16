@@ -241,20 +241,16 @@ var _ = Describe("using an API object", func() {
 		Expect(err).To(HaveOccurred())
 	})
 
-	It("barks when making a request while using a client with unparsable BaseURL", func() {
-		api, err := NewAPI(
+	It("barks when creating a client with an unparsable BaseURL", func() {
+		_, err := NewAPI(
 			WithLogger(logger),
 			WithClientOptions(
 				client.BaseURL("as.lfdna,smdnasd:::"), // a keysmash, added ::: to have it a really unparsable URL
 				client.IgnoreMissingToken(),
 			),
 		)
-		Expect(err).NotTo(HaveOccurred())
-
-		o := apiTestObject{"identifier"}
-		err = api.Create(context.TODO(), &o)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(ContainSubstring("error parsing client's BaseURL"))
+		Expect(err.Error()).To(ContainSubstring("invalid base URL"))
 	})
 
 	It("attaches the given logger to context", func() {

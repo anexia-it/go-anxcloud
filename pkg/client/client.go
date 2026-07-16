@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -140,13 +142,56 @@ func HTTPClient(c *http.Client) Option {
 	}
 }
 
+// ErrInvalidBaseURL is raised when the given base URL cannot be parsed into a valid, standardized URL.
+var ErrInvalidBaseURL = errors.New("invalid base URL")
+
 // BaseURL configures the base URL for the client to use. Defaults to the production engine, but changing this
 // can be useful for testing.
+//
+// The given baseURL is parsed and normalized: it must be an absolute URL with scheme ("http" or "https") and
+// host, any path, query or fragment given are dropped and any trailing slashes on the path are removed.
 func BaseURL(baseURL string) Option {
 	return func(o *clientOptions) error {
-		o.baseURL = baseURL
+		normalized, err := normalizeBaseURL(baseURL)
+		if err != nil {
+			return err
+		}
+
+		o.baseURL = normalized
 		return nil
 	}
+}
+
+// normalizeBaseURL parses the given raw URL and returns a standardized representation of it, containing only
+// scheme, host and path (without a trailing slash). It returns ErrInvalidBaseURL wrapped with more details if
+// the given raw URL is not a valid, absolute HTTP(S) URL.
+func normalizeBaseURL(rawURL string) (string, error) {
+	if rawURL == "" {
+		return "", fmt.Errorf("%w: empty URL", ErrInvalidBaseURL)
+	}
+
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("%w: %s", ErrInvalidBaseURL, err)
+	}
+
+	switch parsed.Scheme {
+	case "http", "https":
+	default:
+		return "", fmt.Errorf("%w: scheme must be http or https, got %q", ErrInvalidBaseURL, parsed.Scheme)
+	}
+
+	if parsed.Host == "" {
+		return "", fmt.Errorf("%w: missing host", ErrInvalidBaseURL)
+	}
+
+	normalized := url.URL{
+		Scheme: parsed.Scheme,
+		Host:   parsed.Host,
+		Path:   strings.TrimRight(parsed.Path, "/"),
+	}
+
+	return normalized.String(), nil
 }
 
 // ParseEngineErrors is an option to chose if the client is supposed to parse http error responses into go errors or not.
