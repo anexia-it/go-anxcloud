@@ -245,6 +245,40 @@ var _ = Describe("AuthFromEnv option", func() {
 	})
 })
 
+var _ = Describe("BaseURL option", func() {
+	DescribeTable("accepts and normalizes valid base URLs",
+		func(input, expected string) {
+			opts := clientOptions{}
+			err := BaseURL(input)(&opts)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(opts.baseURL).To(Equal(expected))
+		},
+		Entry("plain https URL", "https://engine.anexia-it.com", "https://engine.anexia-it.com"),
+		Entry("plain http URL", "http://localhost:8080", "http://localhost:8080"),
+		Entry("trailing slash gets removed", "https://engine.anexia-it.com/", "https://engine.anexia-it.com"),
+		Entry("multiple trailing slashes get removed", "https://engine.anexia-it.com///", "https://engine.anexia-it.com"),
+		Entry("path is kept, trailing slash removed", "https://example.com/foo/bar/", "https://example.com/foo/bar"),
+		Entry("query is dropped", "https://example.com/foo?bar=baz", "https://example.com/foo"),
+		Entry("fragment is dropped", "https://example.com/foo#bar", "https://example.com/foo"),
+	)
+
+	DescribeTable("rejects invalid base URLs",
+		func(input string) {
+			opts := clientOptions{}
+			err := BaseURL(input)(&opts)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(ErrInvalidBaseURL))
+		},
+		Entry("empty string", ""),
+		Entry("unparsable keysmash", "as.lfdna,smdnasd:::"),
+		Entry("missing scheme", "engine.anexia-it.com"),
+		Entry("unsupported scheme", "ftp://engine.anexia-it.com"),
+		Entry("missing host", "https://"),
+	)
+})
+
 func TestClientSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "client test suite")

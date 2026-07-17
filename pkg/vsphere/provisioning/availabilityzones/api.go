@@ -63,5 +63,5 @@ func (a api) List(ctx context.Context, locationID string) (
 		return nil, err
 	}
 
-	return nil, err
+	return zones, nil
 }
