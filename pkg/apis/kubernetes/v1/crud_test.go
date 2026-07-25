@@ -192,6 +192,29 @@ var _ = Describe("CRUD", Ordered, func() {
 
 		Context("Update operation", Ordered, func() {
 			It("can update existing cluster", func() {
+				const testAllowlist = "10.0.0.0/24"
+
+				if isIntegrationTest {
+					cluster := Cluster{Identifier: clusterIdentifier}
+					err := a.Get(context.TODO(), &cluster)
+					Expect(err).ToNot(HaveOccurred())
+
+					cluster.ApiServerAllowlist = testAllowlist
+
+					err = a.Update(context.TODO(), &cluster)
+					Expect(err).ToNot(HaveOccurred())
+
+					err = gs.AwaitCompletion(context.TODO(), a, &cluster)
+					Expect(err).ToNot(HaveOccurred())
+
+					updated := Cluster{Identifier: clusterIdentifier}
+					err = a.Get(context.TODO(), &updated)
+					Expect(err).ToNot(HaveOccurred())
+					Expect(updated.ApiServerAllowlist).To(Equal(testAllowlist))
+
+					return
+				}
+
 				testLocation := corev1.Location{
 					Identifier:  "anx04id",
 					Code:        "004",
@@ -202,21 +225,21 @@ var _ = Describe("CRUD", Ordered, func() {
 					Longitude:   pointer.String("2.2"),
 				}
 
-				clusterIdentifier = "test-identifier"
+				mockedIdentifier := "test-identifier"
 				cluster := Cluster{
-					Identifier: clusterIdentifier,
+					Identifier: mockedIdentifier,
 					Name:       "someClusterName",
 					Location:   testLocation,
 				}
 
 				srv.AppendHandlers(ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", clusterIdentifier)),
+					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/cluster.json/%s", mockedIdentifier)),
 					ghttp.VerifyJSONRepresenting(struct {
 						Identifier string `json:"identifier"`
 						Name       string `json:"name"`
 						Location   string `json:"location"`
 					}{
-						Identifier: clusterIdentifier,
+						Identifier: mockedIdentifier,
 						Name:       "someClusterName",
 						Location:   testLocation.Identifier,
 					}),
@@ -342,16 +365,22 @@ var _ = Describe("CRUD", Ordered, func() {
 		})
 
 		Context("Update operation", Ordered, func() {
+			BeforeEach(func() {
+				if isIntegrationTest {
+					Skip("node pool update not integration-tested yet")
+				}
+			})
+
 			It("can update existing node pool", func() {
-				nodePoolIdentifier = "test-identifier"
-				nodePool := NodePool{Identifier: nodePoolIdentifier}
+				mockedIdentifier := "test-identifier"
+				nodePool := NodePool{Identifier: mockedIdentifier}
 
 				srv.AppendHandlers(ghttp.CombineHandlers(
-					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/node_pool.json/%s", nodePoolIdentifier)),
+					ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/kubernetes/v1/node_pool.json/%s", mockedIdentifier)),
 					ghttp.VerifyJSONRepresenting(struct {
 						Identifier string `json:"identifier"`
 					}{
-						Identifier: nodePoolIdentifier,
+						Identifier: mockedIdentifier,
 					}),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, map[string]any{}),
 				))
