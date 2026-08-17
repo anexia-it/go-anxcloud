@@ -10,6 +10,7 @@ var (
 	DeploymentError = gs.State{ID: "2", Text: "DeploymentError", Type: gs.StateTypeError}
 	Deployed        = gs.State{ID: "3", Text: "Deployed", Type: gs.StateTypeOK}
 	NewlyCreated    = gs.State{ID: "4", Text: "NewlyCreated", Type: gs.StateTypePending}
+	Managed  			 = gs.State{ID: "6", Text: "Managed", Type: gs.StateTypeOK}
 )
 
 // Deprecated: use gs.State instead
