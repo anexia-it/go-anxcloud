@@ -52,5 +52,5 @@ func (a *ACL) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 			Backend:  a.Backend.Identifier,
 			Frontend: a.Frontend.Identifier,
 		}
-	})
+	}, a.State.ID)
 }

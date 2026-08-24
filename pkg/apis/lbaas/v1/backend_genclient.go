@@ -50,5 +50,5 @@ func (b *Backend) FilterAPIRequestBody(ctx context.Context) (interface{}, error)
 			Backend:      *b,
 			LoadBalancer: b.LoadBalancer.Identifier,
 		}
-	})
+	}, b.State.ID)
 }

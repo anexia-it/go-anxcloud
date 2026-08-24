@@ -46,5 +46,5 @@ func (b *Bind) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 			Bind:     *b,
 			Frontend: b.Frontend.Identifier,
 		}
-	})
+	}, b.State.ID)
 }

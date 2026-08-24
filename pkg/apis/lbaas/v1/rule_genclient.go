@@ -52,5 +52,5 @@ func (r *Rule) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 			Backend:  r.Backend.Identifier,
 			Frontend: r.Frontend.Identifier,
 		}
-	})
+	}, r.State.ID)
 }
