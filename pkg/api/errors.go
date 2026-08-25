@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
+
+// defaultRateLimitRetryAfter is used when a 429 response from the Engine doesn't carry a usable
+// Retry-After header (e.g. missing or not a valid non-negative number of seconds).
+const defaultRateLimitRetryAfter = 30 * time.Second
 
 var (
 	// ErrOperationNotSupported is returned when requesting an operation on a resource it does not support.
@@ -27,10 +32,9 @@ var (
 
 // RateLimitError occurs after a [http.TooManyRequests] status code got returned by the engine.
 type RateLimitError struct {
-	// RetryAfter contains the point in time at which the request can be retried again.
-	//
-	// Note: Right now, it's always set to be 30 minutes into the future, because we do not have a Retry-After header yet.
-	// This is tracked internally in ENGSUP-9027, after which this value will contain the correct value.
+	// RetryAfter contains the point in time at which the request can be retried again, derived from
+	// the Engine's Retry-After response header (seconds until the next request should succeed).
+	// Falls back to defaultRateLimitRetryAfter if that header is missing or unparseable.
 	RetryAfter time.Time
 }
 
@@ -163,8 +167,7 @@ func ErrorFromResponse(req *http.Request, res *http.Response) error {
 	case 404:
 		specificError = ErrNotFound
 	case 429:
-		// TODO: Set this to a concrete value extracted from the Retry-After header.
-		specificError = RateLimitError{RetryAfter: time.Now().Add(time.Minute * 30)}
+		specificError = RateLimitError{RetryAfter: time.Now().Add(retryAfterFromHeader(res.Header.Get("Retry-After")))}
 	}
 
 	// We check for higher than 300 because redirects should be handled already
@@ -173,6 +176,18 @@ func ErrorFromResponse(req *http.Request, res *http.Response) error {
 	}
 
 	return nil
+}
+
+// retryAfterFromHeader parses the Engine's Retry-After header value, which is the number of seconds
+// until the next request should succeed. Returns defaultRateLimitRetryAfter if the value is missing
+// or not a valid non-negative integer.
+func retryAfterFromHeader(value string) time.Duration {
+	seconds, err := strconv.Atoi(value)
+	if err != nil || seconds < 0 {
+		return defaultRateLimitRetryAfter
+	}
+
+	return time.Duration(seconds) * time.Second
 }
 
 // NewHTTPError creates a new HTTPError instance with the given values, which is mostly useful for mock-testing.
