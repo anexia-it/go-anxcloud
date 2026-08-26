@@ -23,5 +23,5 @@ func (lb *LoadBalancer) FilterAPIRequestBody(ctx context.Context) (interface{}, 
 		}{
 			LoadBalancer: *lb,
 		}
-	})
+	}, lb.State.State.ID)
 }

@@ -45,5 +45,5 @@ func (s *Server) FilterAPIRequestBody(ctx context.Context) (interface{}, error) 
 			Server:  *s,
 			Backend: s.Backend.Identifier,
 		}
-	})
+	}, s.State.ID)
 }
