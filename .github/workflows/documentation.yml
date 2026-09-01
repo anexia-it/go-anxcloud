@@ -12,7 +12,7 @@ jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: avto-dev/markdown-lint@v1
         with:
           config: '.markdownlint.yml'
@@ -28,7 +28,7 @@ jobs:
             name: "latest"
     name: "Spell check with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go.version }}

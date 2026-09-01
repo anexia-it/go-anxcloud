@@ -28,7 +28,7 @@ jobs:
             name: "latest"
     name: "Static checks with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go.version }}
@@ -55,7 +55,7 @@ jobs:
             name: "latest"
     name: "Unit tests with ${{ matrix.go.name }} Go"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go.version }}
@@ -79,7 +79,7 @@ jobs:
             name: target
     name: "Integration tests with ${{ matrix.go.name }} Go (trusted)"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go.version }}
@@ -96,7 +96,7 @@ jobs:
     needs: integration-tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
       - uses: paambaati/codeclimate-action@v9.0.0
         env:
