@@ -167,8 +167,9 @@ func ErrorFromResponse(req *http.Request, res *http.Response) error {
 		specificError = RateLimitError{RetryAfter: time.Now().Add(time.Minute * 30)}
 	}
 
-	// We check for higher than 300 because redirects should be handled already
-	if res.StatusCode > 300 || specificError != nil {
+	// Any status outside 2xx is an error. net/http follows most redirects itself, but not
+	// 300 Multiple Choices, and none of them when the caller disables redirect following.
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices || specificError != nil {
 		return newHTTPError(req, res, specificError, nil)
 	}
 

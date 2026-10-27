@@ -167,6 +167,33 @@ var _ = Describe("ErrorFromResponse function", func() {
 		})
 	})
 
+	DescribeTable("returns an HTTPError for every status outside 2xx",
+		func(code int) {
+			rec := httptest.NewRecorder()
+			rec.WriteHeader(code)
+
+			err := ErrorFromResponse(req, rec.Result())
+
+			var he HTTPError
+			Expect(errors.As(err, &he)).To(BeTrue())
+			Expect(he.StatusCode()).To(Equal(code))
+		},
+		Entry("300 Multiple Choices", 300),
+		Entry("301 Moved Permanently", 301),
+		Entry("302 Found", 302),
+		Entry("400 Bad Request", 400),
+	)
+
+	DescribeTable("returns no error for 2xx",
+		func(code int) {
+			rec := httptest.NewRecorder()
+			rec.WriteHeader(code)
+			Expect(ErrorFromResponse(req, rec.Result())).NotTo(HaveOccurred())
+		},
+		Entry("200 OK", 200),
+		Entry("204 No Content", 204),
+	)
+
 	Context("for status code 500", func() {
 		BeforeEach(func() {
 			statusCode = 500
