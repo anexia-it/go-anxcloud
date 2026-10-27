@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* clouddns/v1: find created or updated records with quoted TXT data or TTL 0 (#562, @ProbstenHias)
+
 ### Added
 
 * loadbalancer: only update fields that are set explicitly

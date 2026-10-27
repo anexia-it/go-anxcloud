@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
-	"go.anx.io/go-anxcloud/pkg/utils/object/compare"
 )
 
 var (
@@ -90,6 +90,7 @@ func (r *Record) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
 
 		// Engine changes RData sometimes
 		r.RData = responseRecord.RData
+		r.TTL = responseRecord.TTL
 
 		return nil
 	}
@@ -142,19 +143,32 @@ func (r *Record) findInZone(zone *Zone) (*Record, error) {
 		return nil, ErrModifyRevisionNotFound
 	}
 
-	changedR := *r
+	for i := range rev.Records {
+		responseRecord := &rev.Records[i]
+		if responseRecord.Name != r.Name || responseRecord.Type != r.Type {
+			continue
+		}
+		if r.Type == "TXT" && canonicalTXTData(responseRecord.RData) != canonicalTXTData(r.RData) {
+			continue
+		}
+		if r.Type != "TXT" && responseRecord.RData != r.RData {
+			continue
+		}
+		if r.TTL != 0 && responseRecord.TTL != r.TTL {
+			continue
+		}
 
-	if r.Type == "TXT" {
-		// Engine returns TXT RData enclosed in quotes
-		changedR.RData = fmt.Sprintf("%q", r.RData)
+		return responseRecord, nil
 	}
 
-	idx, err := compare.Search(changedR, rev.Records, "Name", "Type", "RData", "TTL")
+	return nil, ErrModifyRecordNotFound
+}
+
+func canonicalTXTData(data string) string {
+	unquoted, err := strconv.Unquote(data)
 	if err != nil {
-		return nil, fmt.Errorf("error searching record in response: %w", err)
-	} else if idx == -1 {
-		return nil, ErrModifyRecordNotFound
+		return data
 	}
 
-	return &rev.Records[idx], nil
+	return unquoted
 }

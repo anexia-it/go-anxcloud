@@ -288,6 +288,18 @@ func mock_create_record(zone string, record clouddnsv1.Record) {
 	))
 }
 
+func mock_create_record_response(zone string, record clouddnsv1.Record, responseRecord clouddnsv1.Record) {
+	if mock == nil {
+		return
+	}
+
+	mock.server.AppendHandlers(ghttp.CombineHandlers(
+		ghttp.VerifyRequest("POST", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", zone)),
+		ghttp.VerifyJSONRepresenting(record),
+		ghttp.RespondWithJSONEncoded(200, recordResponseZone(zone, responseRecord)),
+	))
+}
+
 func mock_update_record(zone string, recordIdentifier string, record clouddnsv1.Record) {
 	if mock == nil {
 		return
@@ -318,6 +330,33 @@ func mock_update_record(zone string, recordIdentifier string, record clouddnsv1.
 			}},
 		}),
 	))
+}
+
+func mock_update_record_response(zone string, recordIdentifier string, record clouddnsv1.Record, responseRecord clouddnsv1.Record) {
+	if mock == nil {
+		return
+	}
+
+	mock.server.AppendHandlers(ghttp.CombineHandlers(
+		ghttp.VerifyRequest("PUT", fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records/%s", zone, recordIdentifier)),
+		ghttp.VerifyJSONRepresenting(record),
+		ghttp.RespondWithJSONEncoded(200, recordResponseZone(zone, responseRecord)),
+	))
+}
+
+func recordResponseZone(zone string, record clouddnsv1.Record) clouddnsv1.Zone {
+	return clouddnsv1.Zone{
+		Name:            zone,
+		IsMaster:        true,
+		CurrentRevision: "random revision identifier",
+		Revisions: []clouddnsv1.Revision{{
+			Identifier: "random revision identifier",
+			Records:    []clouddnsv1.Record{record},
+			ModifiedAt: time.Now(),
+			Serial:     1,
+			State:      "active",
+		}},
+	}
 }
 
 func mock_delete_record(zone string, recordIdentifier string) {

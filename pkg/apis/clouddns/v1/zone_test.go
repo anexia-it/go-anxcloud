@@ -245,6 +245,48 @@ var _ = Describe("CloudDNS API client", Ordered, func() {
 			mock_expect_request_count(1)
 		})
 
+		It("should create a TXT record with quoted data", func() {
+			record := clouddnsv1.Record{
+				Name:     "quoted-create",
+				ZoneName: zoneName,
+				Type:     "TXT",
+				RData:    `"test record"`,
+				Region:   "default",
+				TTL:      300,
+			}
+			responseRecord := record
+			responseRecord.Identifier = "quoted-create-identifier"
+
+			mock_create_record_response(zoneName, record, responseRecord)
+
+			err := a.Create(context.Background(), &record)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(record.Identifier).To(Equal("quoted-create-identifier"))
+
+			mock_expect_request_count(1)
+		})
+
+		It("should create a record with the default TTL", func() {
+			record := clouddnsv1.Record{
+				Name:     "default-ttl",
+				ZoneName: zoneName,
+				Type:     "A",
+				RData:    "192.0.2.1",
+				Region:   "default",
+			}
+			responseRecord := record
+			responseRecord.TTL = 3600
+			responseRecord.Identifier = "default-ttl-identifier"
+
+			mock_create_record_response(zoneName, record, responseRecord)
+
+			err := a.Create(context.Background(), &record)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(record.TTL).To(Equal(3600))
+
+			mock_expect_request_count(1)
+		})
+
 		It("should return an error when trying to create record with empty name", func() {
 			record := clouddnsv1.Record{
 				Name:     "",
@@ -314,6 +356,27 @@ var _ = Describe("CloudDNS API client", Ordered, func() {
 
 				err := a.Update(ctx, &record)
 				Expect(err).NotTo(HaveOccurred())
+
+				mock_expect_request_count(1)
+			})
+
+			It("should update a TXT record with quoted data", func() {
+				record := clouddnsv1.Record{
+					Identifier: identifier,
+					Name:       "test2",
+					ZoneName:   zoneName,
+					Type:       "TXT",
+					RData:      `"test record"`,
+					Region:     "default",
+					TTL:        300,
+				}
+				responseRecord := record
+
+				mock_update_record_response(zoneName, identifier, record, responseRecord)
+
+				err := a.Update(context.Background(), &record)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(record.Identifier).To(Equal(identifier))
 
 				mock_expect_request_count(1)
 			})
