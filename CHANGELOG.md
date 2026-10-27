@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* client: keep the HTTP status on error responses with a non-JSON body, add ResponseError.StatusCode() (#566, @ProbstenHias)
+
 ### Added
 
 * loadbalancer: only update fields that are set explicitly
