@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* clouddns/v1: escape the record ZoneName in the request path and keep it on listed records (#563, @ProbstenHias)
+
 ### Added
 
 * loadbalancer: only update fields that are set explicitly
