@@ -96,7 +96,7 @@ type Definition struct {
 
 	ClusterID          string             `json:"cluster,omitempty"`
 	SyncSource         SyncSource         `json:"syncsource,omitempty"`
-	Replicas           uint               `json:"replicas,omitempty"`
+	Replicas           uint               `json:"replicas"`
 	CPUs               uint               `json:"cpus,omitempty"`
 	CPUType            CPUPerformanceType `json:"cpu_performance_type,omitempty"`
 	MemoryBytes        uint64             `json:"memory,omitempty"`
