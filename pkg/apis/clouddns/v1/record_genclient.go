@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 
 	"go.anx.io/go-anxcloud/pkg/api"
 	"go.anx.io/go-anxcloud/pkg/api/types"
@@ -28,6 +29,10 @@ var (
 	// ErrEmptyRecordNameNotSupported is returned for Create requests when the record has no name set.
 	// Instead "@" must be used to target the domain root.
 	ErrEmptyRecordNameNotSupported = errors.New("empty record name not supported - use \"@\" instead")
+
+	// ErrInvalidZoneName is returned when a Record's ZoneName contains a "/", which cannot be sent as a
+	// single path segment.
+	ErrInvalidZoneName = errors.New("zone name must not contain \"/\"")
 )
 
 func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
@@ -36,10 +41,13 @@ func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
 		return nil, err
 	}
 
-	u, err := url.ParseRequestURI(fmt.Sprintf("/api/clouddns/v1/zone.json/%s/records", r.ZoneName))
-	if err != nil {
-		return nil, err
+	if strings.Contains(r.ZoneName, "/") {
+		return nil, fmt.Errorf("%w: %q", ErrInvalidZoneName, r.ZoneName)
 	}
+
+	// Set as the decoded path so URL encoding escapes characters like "?" and "%" instead of
+	// reading them as URL syntax, and DecodeAPIResponse reads the same ZoneName back.
+	u := &url.URL{Path: "/api/clouddns/v1/zone.json/" + r.ZoneName + "/records"}
 
 	// There is no endpoint to get details of a single record
 	if op == types.OperationGet {
@@ -62,7 +70,7 @@ func (r *Record) EndpointURL(ctx context.Context) (*url.URL, error) {
 		}
 		u.RawQuery = query.Encode()
 	}
-	return u, err
+	return u, nil
 }
 
 func (r *Record) DecodeAPIResponse(ctx context.Context, data io.Reader) error {
