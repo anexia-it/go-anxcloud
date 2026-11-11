@@ -14,6 +14,7 @@ import (
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/kubernetes/disk"
 	"go.anx.io/go-anxcloud/pkg/kubernetes/network"
+	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 )
 
 var _ = Describe("nodepool client", Ordered, func() {
@@ -56,7 +57,7 @@ var _ = Describe("nodepool client", Ordered, func() {
 				Name:               "integration-test-nodepool",
 				SyncSource:         SyncSourceEngine,
 				ClusterID:          "2831d70e35014768bb1f0100f3373c8f",
-				Replicas:           4,
+				Replicas:           pointer.UInt(4),
 				CPUs:               3,
 				CPUType:            CPUPerformanceTypePerformance,
 				MemoryBytes:        5 * GibiByte,
@@ -88,7 +89,7 @@ var _ = Describe("nodepool client", Ordered, func() {
 		It("updates the nodepool", func() {
 			nodepool, err := api.Update(context.TODO(), id, Definition{
 				Name:               "integration-test-nodepool-updated",
-				Replicas:           5,
+				Replicas:           pointer.UInt(5),
 				CPUs:               4,
 				MemoryBytes:        6 * GibiByte,
 				OperatingSystem:    OSFlatcar,
