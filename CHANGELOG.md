@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+* vlan/v1: allow clearing the customer description on update (#565, @ProbstenHias)
+
 ### Added
 
 * loadbalancer: only update fields that are set explicitly
@@ -24,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * kubernetes: add backend and lbaas fields for kubernetes cluster
 * kubernetes: add storage server interface and address
 * kubernetes: add more nodepool fields
+
+### Changed
+
+* vlan, ipam/prefix: update definitions use pointer fields so empty values can be sent (#565, @ProbstenHias)
 
 <!--
 Please add your changelog entry under this comment in the correct category (Security, Fixed, Added, Changed, Deprecated, Removed - in this order).

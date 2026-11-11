@@ -62,5 +62,15 @@ func (v *VLAN) FilterAPIRequestBody(ctx context.Context) (interface{}, error) {
 		return data, nil
 	}
 
+	if op == apiTypes.OperationUpdate {
+		return struct {
+			*VLAN
+			DescriptionCustomer string `json:"description_customer"`
+		}{
+			VLAN:                v,
+			DescriptionCustomer: v.DescriptionCustomer,
+		}, nil
+	}
+
 	return v, nil
 }

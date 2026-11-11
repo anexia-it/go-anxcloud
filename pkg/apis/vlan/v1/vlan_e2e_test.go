@@ -120,6 +120,18 @@ var _ = Describe("VLAN E2E tests", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("clears the customer description", func() {
+			prepareUpdate("", true)
+
+			vlan := vlanv1.VLAN{
+				Identifier:          identifier,
+				DescriptionCustomer: "",
+				VMProvisioning:      true,
+			}
+			err := apiClient.Update(context.TODO(), &vlan)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("eventually shows VM provisioning as enabled", func() {
 			Eventually(func() error {
 				prepareGet(desc, true)

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
 	"reflect"
 	"testing"
@@ -125,6 +126,17 @@ var _ = Describe("VLAN Object", func() {
 			nil,
 		),
 	)
+
+	It("includes an empty customer description on update", func() {
+		ctx := types.ContextWithOperation(context.TODO(), types.OperationUpdate)
+
+		data, err := (&VLAN{}).FilterAPIRequestBody(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		body, err := json.Marshal(data)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(body)).To(MatchJSON(`{"description_customer":"","vm_provisioning":false}`))
+	})
 })
 
 func TestVLAN(t *testing.T) {

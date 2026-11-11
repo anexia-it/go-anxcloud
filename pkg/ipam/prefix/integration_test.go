@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 	"go.anx.io/go-anxcloud/pkg/client"
 	"go.anx.io/go-anxcloud/pkg/ipam/address"
+	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 )
 
 const (
@@ -120,7 +121,7 @@ var _ = Describe("ipam/prefix client", func() {
 			checkEmpty(&prefix, createEmpty)
 
 			It("updates the test prefix with changed data", func() {
-				p, err := api.Update(context.TODO(), prefix, Update{CustomerDescription: "something else"})
+				p, err := api.Update(context.TODO(), prefix, Update{CustomerDescription: pointer.String("something else")})
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(p.ID).To(Equal(prefix))

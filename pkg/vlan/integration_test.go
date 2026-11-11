@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.anx.io/go-anxcloud/pkg/client"
+	"go.anx.io/go-anxcloud/pkg/utils/pointer"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -101,8 +102,8 @@ var _ = Describe("vlan client", func() {
 
 		It("updates test VLAN with changed data", func() {
 			def := UpdateDefinition{
-				CustomerDescription: "go SDK integration test updated",
-				VMProvisioning:      true,
+				CustomerDescription: pointer.String("go SDK integration test updated"),
+				VMProvisioning:      pointer.Bool(true),
 			}
 
 			err := api.Update(context.TODO(), vlanID, def)

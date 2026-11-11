@@ -85,8 +85,8 @@ type Info struct {
 
 // Update contains fields to change on a prefix.
 type Update struct {
-	Name                string `json:"name,omitempty"`
-	CustomerDescription string `json:"description_customer,omitempty"`
+	Name                string  `json:"name,omitempty"`
+	CustomerDescription *string `json:"description_customer,omitempty"`
 }
 
 // Summary contains a abbreviated information set about a prefix.
