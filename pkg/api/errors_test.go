@@ -167,6 +167,27 @@ var _ = Describe("ErrorFromResponse function", func() {
 		})
 	})
 
+	Context("for status code 500", func() {
+		BeforeEach(func() {
+			statusCode = 500
+		})
+
+		It("returns a matching HTTPError as expected", func() {
+			err := ErrorFromResponse(req, res)
+			Expect(err).To(HaveOccurred())
+
+			var he HTTPError
+			ok := errors.As(err, &he)
+			Expect(ok).To(BeTrue())
+
+			Expect(he.StatusCode()).To(Equal(500))
+		})
+	})
+})
+
+var _ = Describe("ErrorFromResponse status ranges", func() {
+	req := httptest.NewRequest("GET", "/", nil)
+
 	DescribeTable("returns an HTTPError for every status outside 2xx",
 		func(code int) {
 			rec := httptest.NewRecorder()
@@ -193,23 +214,6 @@ var _ = Describe("ErrorFromResponse function", func() {
 		Entry("200 OK", 200),
 		Entry("204 No Content", 204),
 	)
-
-	Context("for status code 500", func() {
-		BeforeEach(func() {
-			statusCode = 500
-		})
-
-		It("returns a matching HTTPError as expected", func() {
-			err := ErrorFromResponse(req, res)
-			Expect(err).To(HaveOccurred())
-
-			var he HTTPError
-			ok := errors.As(err, &he)
-			Expect(ok).To(BeTrue())
-
-			Expect(he.StatusCode()).To(Equal(500))
-		})
-	})
 })
 
 var _ = Describe("EngineError", func() {
