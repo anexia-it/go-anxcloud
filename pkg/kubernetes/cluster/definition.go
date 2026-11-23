@@ -27,7 +27,7 @@ type Definition struct {
 	Version                  string     `json:"version"`
 	Autoscaling              IntBoolean `json:"autoscaling"`
 	CNIPlugin                string     `json:"cni_plugin"`
-	APIServerAllowList       string     `json:"api_server_allow_list"`
+	APIServerAllowList       string     `json:"apiserver_allowlist"`
 	MaintenanceWindowStart   string     `json:"maintenance_window_start_time"`
 	MaintenanceWindowLength  string     `json:"maintenance_window_duration"`
 	ManageInternalIPv4Prefix IntBoolean `json:"manage_internal_ipv4_prefix"`
